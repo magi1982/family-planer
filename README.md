@@ -7,6 +7,8 @@
 [![Security](https://github.com/magi1982/family-planer/actions/workflows/security.yml/badge.svg)](https://github.com/magi1982/family-planer/actions/workflows/security.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/magi1982/family-planer/blob/main/LICENSE)
 
+<a href="https://buymeacoffee.com/magibuilds"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="50"></a>
+
 Der Familienplaner fürs Wandtablet: **Ämtli** mit Punkten und echten Belohnungen, **Termine und Stundenplan**
 jeder Person auf einen Blick, **Ferien**, die Ämtli automatisch pausieren, **Ansagen** über Alexa sobald jemand
 heimkommt – und **Einkaufs- und To-do-Listen, die sich selbst sortieren**. Alles wird in der Oberfläche
@@ -452,6 +454,8 @@ data:
 Wenn der Family Planer euren Familienalltag etwas leichter macht, freue ich mich über einen
 [☕ Kaffee](https://www.buymeacoffee.com/magibuilds). Danke!
 
+<a href="https://buymeacoffee.com/magibuilds"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="50"></a>
+
 Fehler und Wünsche: [Issues](https://github.com/magi1982/family-planer/issues)
 
 ---
@@ -482,3 +486,5 @@ Fehler und Wünsche: [Issues](https://github.com/magi1982/family-planer/issues)
 **Install**: Home Assistant 2026.11+: *Settings → Marketplace* (or *Add from link* with this repository URL). 2026.3–2026.10: HACS custom repository. Then *Settings → Devices & services → Add integration → Family Planer* and configure everything under *Configure*.
 
 If you like it: [buy me a coffee ☕](https://www.buymeacoffee.com/magibuilds). License: MIT.
+
+<a href="https://buymeacoffee.com/magibuilds"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="50"></a>
