@@ -10,3 +10,6 @@ Jede neue Funktion ist erst fertig, wenn:
 4. **CHANGELOG.md** – Eintrag in der neuen Version; `manifest.json` und `const.py` haben dieselbe Versionsnummer.
 5. **Tests & Prüfungen** – `pytest`, hassfest, HACS-Prüfung und der Security-Workflow sind grün.
 6. **Sicherheit** – neue Eingaben werden serverseitig validiert (`validate.py`), Ausgaben im Frontend mit `esc()`.
+
+## Releases
+Releases are created automatically by `.github/workflows/release.yml`: when a new version in `manifest.json` reaches `main` and the *Validate* and *Security* workflows pass, the tag `vX.Y.Z` and the GitHub release are created. The release notes come from the matching `## X.Y.Z` section of `CHANGELOG.md`.

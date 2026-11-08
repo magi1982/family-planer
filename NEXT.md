@@ -50,4 +50,5 @@
 - [ ] Unit-Tests für die neue Logik; alle Tests grün
 - [ ] Frontend neu gebaut, englische Texte ergänzt, alle Designs geprüft
 - [ ] README: Funktionsbeschreibung und Tabelle „Alle Einstellungen“ ergänzt
-- [ ] CHANGELOG-Eintrag; Version in `const.py` und `manifest.json` erhöht
+- [ ] CHANGELOG-Eintrag (`## x.y.z – Datum`); Version in `const.py` und `manifest.json` erhöht
+- [ ] Release entsteht automatisch (`release.yml`), sobald Validate und Security grün sind – Text aus dem CHANGELOG

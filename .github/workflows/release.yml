@@ -1,0 +1,81 @@
+# Creates the GitHub release automatically when a new version lands on main.
+# Runs only after "Validate" succeeded and waits for "Security" to succeed for the same commit.
+# Version: custom_components/family_planer/manifest.json – notes: matching section of CHANGELOG.md.
+name: Release
+
+on:
+  workflow_run:
+    workflows: ["Validate"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Read version
+        id: v
+        run: |
+          VERSION=$(python3 -c "import json;print(json.load(open('custom_components/family_planer/manifest.json'))['version'])")
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "Invalid version: $VERSION"; exit 1; fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if gh release view "v$VERSION" >/dev/null 2>&1 || git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"; echo "v$VERSION already released – nothing to do."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Wait for security checks
+        if: steps.v.outputs.exists == 'false'
+        run: |
+          for i in $(seq 1 40); do
+            RESULT=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=$SHA&event=push" \
+              --jq '[.workflow_runs[] | select(.name=="Security")][0] | "\(.status) \(.conclusion)"')
+            echo "Security: $RESULT"
+            case "$RESULT" in
+              "completed success") exit 0 ;;
+              completed*) echo "Security checks failed – no release."; exit 1 ;;
+            esac
+            sleep 30
+          done
+          echo "Timed out waiting for security checks."; exit 1
+
+      - name: Release notes from CHANGELOG
+        if: steps.v.outputs.exists == 'false'
+        run: |
+          python3 - "${{ steps.v.outputs.version }}" <<'EOF'
+          import re, sys
+          v = sys.argv[1]
+          text = open("CHANGELOG.md", encoding="utf-8").read()
+          m = re.search(rf"^## {re.escape(v)}\b.*?$\n(.*?)(?=^## |\Z)", text, re.S | re.M)
+          body = (m.group(1).strip() if m else "Siehe CHANGELOG.md.")
+          body += ("\n\n---\n**Installation / Update:** Home Assistant → Marketplace → Family Planer."
+                   "\n\n☕ [Buy me a coffee](https://buymeacoffee.com/magibuilds)\n")
+          open("release_notes.md", "w", encoding="utf-8").write(body)
+          EOF
+          cat release_notes.md
+
+      - name: Create release
+        if: steps.v.outputs.exists == 'false'
+        run: |
+          gh release create "v${{ steps.v.outputs.version }}" \
+            --target "$SHA" \
+            --title "${{ steps.v.outputs.version }}" \
+            --notes-file release_notes.md \
+            --latest
