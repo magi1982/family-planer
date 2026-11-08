@@ -1,0 +1,605 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Family Planer",
+        "description": "Choose the modules you want to use. You can switch them on or off later under \"Configure\".",
+        "data": {
+          "title": "Name",
+          "modules": "Modules"
+        }
+      },
+      "week": {
+        "title": "Week plan",
+        "description": "Who lives in the household? Colour, calendar and picture can be set per person afterwards.",
+        "data": {
+          "persons": "Family members (comma separated)"
+        },
+        "data_description": {
+          "persons": "e.g. Anna, Ben, Mia, Laura, Tom"
+        }
+      },
+      "lists": {
+        "title": "Smart lists",
+        "description": "Set up a first list (optional). More lists can be added later.",
+        "data": {
+          "name": "List name",
+          "entity": "To-do list",
+          "max_categories": "Maximum number of categories"
+        },
+        "data_description": {
+          "name": "e.g. Groceries, Hardware store, To-dos",
+          "entity": "Any to-do list: Alexa, AnyList, Bring!, Todoist, Google Tasks, HA shopping list, …",
+          "max_categories": "5 to 20. Rarely used categories are folded into \"Other\" when the limit is reached."
+        }
+      }
+    },
+    "error": {
+      "no_persons": "Please enter at least one person.",
+      "duplicate_person": "This person already exists.",
+      "no_module": "Please choose at least one module."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Family Planer",
+        "menu_options": {
+          "modules": "Switch modules on/off",
+          "week": "Week plan",
+          "lists": "Smart lists",
+          "design": "Design & sidebar"
+        }
+      },
+      "modules": {
+        "title": "Modules",
+        "data": {
+          "modules": "Active modules"
+        }
+      },
+      "week": {
+        "title": "Week plan",
+        "menu_options": {
+          "person_add": "Add person",
+          "person_select": "Edit person",
+          "person_remove": "Remove person",
+          "week_settings": "Settings",
+          "rewards": "Points & rewards",
+          "announce": "Announcements on motion",
+          "school": "School & timetable",
+          "vacation": "Holidays & absence"
+        }
+      },
+      "week_settings": {
+        "title": "Week plan – settings",
+        "data": {
+          "rollover_time": "Day change at",
+          "match_names": "Assign events by names",
+          "show_owner": "Also show assigned events at the calendar owner",
+          "admin_only_edit": "Only admins may change the plan",
+          "reliability_days": "Calculate reliability over",
+          "school_gap": "Lunch at home from"
+        },
+        "data_description": {
+          "rollover_time": "Until this time the previous day's chores can still be ticked off; afterwards open ones count as missed and the new day starts.",
+          "match_names": "If a name or nickname is in the title (e.g. \"Anna swimming\"), the event is shown at that person instead of the calendar owner.",
+          "admin_only_edit": "Children can tick off chores and request rewards but cannot change the plan, people or categories.",
+          "show_owner": "An event \"Anna swimming\" in mum's calendar then shows at Anna and at mum.",
+          "reliability_days": "Number of days for each person's percentage (default 30).",
+          "school_gap": "From this many minutes between two lessons the school day is split into two blocks (leave/home per block). 0 = automatic: at least 45 minutes or twice the travel time plus 15 minutes."
+        }
+      },
+      "person_add": {
+        "title": "Add person",
+        "data": {
+          "name": "Name",
+          "color": "Colour",
+          "calendar": "Calendar",
+          "aliases": "Nicknames in events (comma separated)"
+        },
+        "data_description": {
+          "calendar": "Any calendar entity, e.g. Outlook (Remote Calendar), Google, CalDAV, iCloud",
+          "aliases": "e.g. Tommy for Tom – events with this name in the title are shown at this person"
+        }
+      },
+      "person_select": {
+        "title": "Edit person",
+        "data": {
+          "person": "Person"
+        }
+      },
+      "person_edit": {
+        "title": "{name}",
+        "data": {
+          "name": "Name",
+          "color": "Colour",
+          "calendar": "Calendar",
+          "aliases": "Nicknames in events (comma separated)"
+        },
+        "data_description": {
+          "calendar": "Any calendar entity, e.g. Outlook (Remote Calendar), Google, CalDAV, iCloud",
+          "aliases": "e.g. Tommy for Tom – events with this name in the title are shown at this person"
+        }
+      },
+      "person_remove": {
+        "title": "Remove person",
+        "description": "Removes the person including chore assignments and history.",
+        "data": {
+          "person": "Person"
+        }
+      },
+      "lists": {
+        "title": "Smart lists",
+        "menu_options": {
+          "list_add": "Add list",
+          "list_select": "Edit list",
+          "list_remove": "Remove list",
+          "lists_settings": "Settings"
+        }
+      },
+      "list_add": {
+        "title": "Add list",
+        "data": {
+          "name": "List name",
+          "entity": "To-do list",
+          "icon": "Icon",
+          "max_categories": "Maximum number of categories",
+          "auto": "Maintain categories automatically"
+        },
+        "data_description": {
+          "name": "e.g. Groceries, Hardware store, To-dos",
+          "entity": "Any to-do list: Alexa, AnyList, Bring!, Todoist, Google Tasks, HA shopping list, …",
+          "max_categories": "5 to 20. Rarely used categories are folded into \"Other\" when the limit is reached.",
+          "auto": "New items are sorted right away; once a day everything still under \"Other\" is reorganised."
+        }
+      },
+      "list_select": {
+        "title": "Edit list",
+        "data": {
+          "list": "List"
+        }
+      },
+      "list_edit": {
+        "title": "{name}",
+        "data": {
+          "name": "List name",
+          "entity": "To-do list",
+          "icon": "Icon",
+          "max_categories": "Maximum number of categories",
+          "auto": "Maintain categories automatically"
+        },
+        "data_description": {
+          "name": "e.g. Groceries, Hardware store, To-dos",
+          "entity": "Any to-do list: Alexa, AnyList, Bring!, Todoist, Google Tasks, HA shopping list, …",
+          "max_categories": "5 to 20. Rarely used categories are folded into \"Other\" when the limit is reached.",
+          "auto": "New items are sorted right away; once a day everything still under \"Other\" is reorganised."
+        }
+      },
+      "list_remove": {
+        "title": "Remove list",
+        "description": "The to-do list itself is kept; only categories and assignments are removed.",
+        "data": {
+          "list": "List"
+        }
+      },
+      "lists_settings": {
+        "title": "Smart lists – settings",
+        "data": {
+          "optimize_time": "Daily optimisation at",
+          "ai_task": "AI task (optional)",
+          "prune_days": "Replace unused category after"
+        },
+        "data_description": {
+          "optimize_time": "Re-sorts everything still under \"Other\" and tidies up unused categories.",
+          "ai_task": "With an AI task (e.g. OpenAI, Google, Ollama) unknown items are sorted sensibly too. Without AI the built-in knowledge list is used.",
+          "prune_days": "When the list is full, a category unused for this long makes room for a new one."
+        }
+      },
+      "design": {
+        "title": "Design",
+        "description": "How should Family Planer look? Cards in your own dashboards can override it with `theme:`.",
+        "data": {
+          "theme": "Design",
+          "panel": "Sidebar entry",
+          "panel_title": "Sidebar title",
+          "idle_seconds": "Return to the start view after"
+        },
+        "data_description": {
+          "panel": "Opens the complete planner without creating a dashboard – no YAML needed.",
+          "theme": "Colours and shapes of all views. \"Home Assistant\" follows your current HA theme.",
+          "panel_title": "Empty = name of the integration.",
+          "idle_seconds": "When another day or a person is tapped on the tablet, the view returns to today after this time without touch."
+        }
+      },
+      "rewards": {
+        "title": "Points & rewards",
+        "menu_options": {
+          "reward_add": "Add reward",
+          "reward_select": "Edit reward",
+          "reward_remove": "Remove reward",
+          "gamification": "Points, bonuses & parent PIN"
+        }
+      },
+      "reward_add": {
+        "title": "Add reward",
+        "data": {
+          "title": "Reward",
+          "icon": "Icon",
+          "cost": "Cost in points",
+          "approval": "Needs parent approval",
+          "persons": "Only for (empty = everyone)",
+          "per_week": "Max per week (0 = unlimited)"
+        },
+        "data_description": {
+          "title": "e.g. 30 minutes gaming, cinema, favourite dinner, $5 pocket money"
+        }
+      },
+      "reward_edit": {
+        "title": "{name}",
+        "data": {
+          "title": "Reward",
+          "icon": "Icon",
+          "cost": "Cost in points",
+          "approval": "Needs parent approval",
+          "persons": "Only for (empty = everyone)",
+          "per_week": "Max per week (0 = unlimited)"
+        },
+        "data_description": {
+          "title": "e.g. 30 minutes gaming, cinema, favourite dinner, $5 pocket money"
+        }
+      },
+      "reward_select": {
+        "title": "Edit reward",
+        "data": {
+          "reward": "Reward"
+        }
+      },
+      "reward_remove": {
+        "title": "Remove reward",
+        "data": {
+          "reward": "Reward"
+        }
+      },
+      "gamification": {
+        "title": "Points, bonuses & parent PIN",
+        "description": "Parent PIN set: {pin}. With the PIN rewards can be approved on the tablet too (admins need no PIN).",
+        "data": {
+          "default_points": "Points per chore (default or weight)",
+          "day_bonus": "Bonus for a fully completed day",
+          "streak_bonus": "Bonus for every 7-day streak",
+          "pin": "New parent PIN (4–8 digits)",
+          "remove_pin": "Remove parent PIN",
+          "reward_notify": "Also send requests to",
+          "mode": "How points are given",
+          "day_points": "Points for a full day (fair)"
+        },
+        "data_description": {
+          "default_points": "In \"per chore\" mode the points per chore, in \"fair\" mode the default weight. Can be changed per chore in the chore plan.",
+          "reward_notify": "e.g. the parents' phone app. A Home Assistant notification is always created.",
+          "pin": "After 5 wrong entries the PIN is locked for 5 minutes.",
+          "day_bonus": "Credited at the day change.",
+          "streak_bonus": "After 7, 14, 21 … days in a row with everything done.",
+          "mode": "Fair: whoever finishes all of their chores of the day gets the same points – whether 2 or 6 chores. Per chore: each chore earns its points, so more chores means more points.",
+          "day_points": "Split across the day's chores; each done chore immediately earns its share. The value in the chore plan acts as a weight (e.g. 20 counts twice as much as 10)."
+        }
+      },
+      "announce": {
+        "title": "Announcements on motion",
+        "description": "When motion is detected in the time window, e.g. Alexa announces who still has chores – or that everything is done.",
+        "data": {
+          "enabled": "Enable announcements",
+          "motion": "Motion sensors",
+          "notify": "Announce via (notify)",
+          "tts": "Text-to-speech (TTS)",
+          "media_players": "Speakers for TTS",
+          "start": "From",
+          "end": "Until",
+          "cooldown": "At most every",
+          "all_done": "Also announce when everything is done (once a day)",
+          "persons": "Only for (empty = everyone)",
+          "queue": "Queue for one-off messages",
+          "queue_start": "Messages not before",
+          "queue_end": "Messages not after",
+          "queue_rewards": "Announce approved rewards",
+          "queue_special": "Announce special chores (e.g. tyre change)",
+          "max_items": "Chores per person in the announcement",
+          "reward_hours": "Reward message valid for"
+        },
+        "data_description": {
+          "notify": "Alexa: the \"Announce\" or \"Speak\" notify entity of the Echo (Alexa Devices integration).",
+          "tts": "Alternatively: a TTS entity (e.g. Google Translate, Piper) together with speakers.",
+          "queue": "Messages like \"reward approved\" or your own from automations (e.g. \"laundry done\") wait for motion and are said once. Expired or completed messages are dropped.",
+          "start": "Chore reminders only in this time window.",
+          "cooldown": "Pause between two chore reminders, even if motion is detected several times.",
+          "persons": "Only these persons are named in the reminder.",
+          "queue_start": "Quiet hours: before this a message waits (if still valid).",
+          "queue_end": "Quiet hours: after this a message waits until the next morning (if still valid).",
+          "queue_rewards": "\"Anna, your reward 'Ice cream' was approved.\"",
+          "queue_special": "Once when the chore becomes due; dropped if it is already done.",
+          "max_items": "More are summarised as \"and 2 more\".",
+          "reward_hours": "0 = until the next day change."
+        }
+      },
+      "vacation": {
+        "title": "Holidays & absence",
+        "description": "If a person's calendar has an all-day event with one of these words (e.g. \"Ski holiday\", \"Vacation\"), their chores pause on those days – they count neither as done nor as missed. On the first calendar sync the words you use are detected automatically.",
+        "data": {
+          "enabled": "Pause chores during holidays",
+          "words": "Words for holidays (comma separated)",
+          "scope": "Holidays apply to",
+          "rescan": "Search the calendars for holiday words again",
+          "min_hours": "Whole day from",
+          "refresh_minutes": "Check calendars every"
+        },
+        "data_description": {
+          "words": "Word endings count too: \"Holiday\" finds \"Summerholiday\". Only all-day events or events of at least 20 hours pause chores.",
+          "min_hours": "An event with times only counts as a holiday if it lasts at least this many hours on that day (all-day events always count). Default 20.",
+          "refresh_minutes": "How often the calendars are checked for new holidays.",
+          "rescan": "Searches one year back and ahead and adds the words found.",
+          "scope": "Whole family: a holiday in any calendar pauses everyone."
+        }
+      },
+      "school": {
+        "title": "School & timetable",
+        "data": {
+          "person": "Person"
+        }
+      },
+      "school_edit": {
+        "title": "School – {name}",
+        "description": "Choose a calendar with the lessons (e.g. ICS from WebUntis or your school) or enter fixed times – up to two blocks per day, e.g. morning and afternoon if {name} comes home for lunch. The calendar shows \"leave\" and \"home\" per block. With a school calendar, blocks are split automatically when there is enough time to go home between two lessons.",
+        "data": {
+          "school_calendar": "School calendar / timetable (optional)",
+          "mon_start": "Monday block 1: start",
+          "mon_end": "Monday block 1: end",
+          "mon_start2": "Monday block 2: start (e.g. afternoon)",
+          "mon_end2": "Monday block 2: end",
+          "tue_start": "Tuesday block 1: start",
+          "tue_end": "Tuesday block 1: end",
+          "tue_start2": "Tuesday block 2: start (e.g. afternoon)",
+          "tue_end2": "Tuesday block 2: end",
+          "wed_start": "Wednesday block 1: start",
+          "wed_end": "Wednesday block 1: end",
+          "wed_start2": "Wednesday block 2: start (e.g. afternoon)",
+          "wed_end2": "Wednesday block 2: end",
+          "thu_start": "Thursday block 1: start",
+          "thu_end": "Thursday block 1: end",
+          "thu_start2": "Thursday block 2: start (e.g. afternoon)",
+          "thu_end2": "Thursday block 2: end",
+          "fri_start": "Friday block 1: start",
+          "fri_end": "Friday block 1: end",
+          "fri_start2": "Friday block 2: start (e.g. afternoon)",
+          "fri_end2": "Friday block 2: end",
+          "sat_start": "Saturday block 1: start",
+          "sat_end": "Saturday block 1: end",
+          "sat_start2": "Saturday block 2: start (e.g. afternoon)",
+          "sat_end2": "Saturday block 2: end",
+          "travel": "Include the way to school",
+          "travel_minutes": "Travel time to school / work"
+        },
+        "data_description": {
+          "school_calendar": "If a day has events in the school calendar they win; otherwise the fixed times are used."
+        }
+      }
+    },
+    "error": {
+      "no_persons": "Please enter a name.",
+      "duplicate_person": "This person already exists.",
+      "no_module": "Please choose at least one module.",
+      "bad_pin": "The PIN must have 4–8 digits.",
+      "no_motion": "Please choose at least one motion sensor.",
+      "no_target": "Please choose a notify entity or TTS with a speaker.",
+      "bad_times": "Please enter start and end (end after start)."
+    },
+    "abort": {
+      "unknown_person": "Person not found.",
+      "unknown_list": "List not found.",
+      "no_rewards": "There are no rewards yet."
+    }
+  },
+  "selector": {
+    "modules": {
+      "options": {
+        "week": "Week plan – chores, events and reliability",
+        "lists": "Smart lists – shopping and to-do lists that sort themselves"
+      }
+    },
+    "theme": {
+      "options": {
+        "loxone": "Loxone",
+        "ha": "Home Assistant (current HA theme)",
+        "apple": "Apple Home",
+        "google": "Google Home (Material You)",
+        "light": "Light & minimal",
+        "nord": "Nord"
+      }
+    },
+    "vacation_scope": {
+      "options": {
+        "owner": "the calendar's person or the persons named in the title",
+        "family": "the whole family"
+      }
+    },
+    "points_mode": {
+      "options": {
+        "fair": "Fair – a full day counts, not the number of chores",
+        "per_chore": "Per chore – more chores, more points"
+      }
+    }
+  },
+  "entity": {
+    "todo": {
+      "chores": {
+        "name": "Chores"
+      }
+    },
+    "sensor": {
+      "reliability": {
+        "name": "Reliability"
+      },
+      "points": {
+        "name": "Points",
+        "unit_of_measurement": "points"
+      }
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "Family Planer is not set up."
+    },
+    "unknown_item": {
+      "message": "This chore item does not exist (anymore)."
+    },
+    "unknown_person": {
+      "message": "This person does not exist."
+    }
+  },
+  "services": {
+    "rollover": {
+      "name": "Refresh day",
+      "description": "Books expired chores and creates today's chores (runs automatically at the configured time).",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional if there are several."
+        }
+      }
+    },
+    "set_item": {
+      "name": "Complete chore",
+      "description": "Marks a chore item as done or open.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional if there are several."
+        },
+        "item_id": {
+          "name": "Item-ID",
+          "description": "ID of today's chore item."
+        },
+        "done": {
+          "name": "Done",
+          "description": "Done or open again."
+        }
+      }
+    },
+    "optimize_lists": {
+      "name": "Optimise lists",
+      "description": "Re-sorts all smart lists now (like the daily optimisation).",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional if there are several."
+        },
+        "ai": {
+          "name": "Use AI",
+          "description": "Ask the configured AI task."
+        }
+      }
+    },
+    "import_legacy": {
+      "name": "Import prototype",
+      "description": "Imports plan, history and persons from the prototype to-do lists.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional if there are several."
+        },
+        "plan": {
+          "name": "Chore plan",
+          "description": "todo.amtli_plan"
+        },
+        "today": {
+          "name": "Chores today",
+          "description": "todo.amtli_heute"
+        },
+        "history": {
+          "name": "History",
+          "description": "todo.amtli_verlauf"
+        },
+        "settings": {
+          "name": "Settings",
+          "description": "todo.familienplaner_einstellungen"
+        }
+      }
+    },
+    "announce": {
+      "name": "Announce chores",
+      "description": "Announces right away who still has chores (ignores time window and cooldown).",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional if there are several."
+        }
+      }
+    },
+    "add_points": {
+      "name": "Give points",
+      "description": "Give bonus points or take points away.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional if there are several."
+        },
+        "person": {
+          "name": "Person",
+          "description": "Name or id of the person."
+        },
+        "points": {
+          "name": "Points",
+          "description": "Negative to take away."
+        },
+        "reason": {
+          "name": "Reason",
+          "description": "Shown in the history."
+        }
+      }
+    },
+    "queue_announcement": {
+      "name": "Queue announcement",
+      "description": "Message announced once at the next motion, e.g. \"The laundry is done, it's Nina's turn\".",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional if there are several."
+        },
+        "message": {
+          "name": "Text",
+          "description": "What to say."
+        },
+        "expires": {
+          "name": "Valid for",
+          "description": "The message is dropped afterwards."
+        },
+        "key": {
+          "name": "Key",
+          "description": "The same key replaces an earlier message; use it to clear."
+        },
+        "motion": {
+          "name": "Only at these motion sensors",
+          "description": "Empty = any configured motion sensor."
+        }
+      }
+    },
+    "clear_announcement": {
+      "name": "Clear queued announcement",
+      "description": "Removes a message, e.g. when the laundry is already hung up.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional if there are several."
+        },
+        "key": {
+          "name": "Key",
+          "description": "Key of the message."
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_entity": {
+      "title": "Family Planer: {entity} is missing",
+      "description": "The entity `{entity}` (used for {used_by}) no longer exists or is unavailable. Please choose another one under Settings → Devices & services → Family Planer → Configure."
+    }
+  }
+}

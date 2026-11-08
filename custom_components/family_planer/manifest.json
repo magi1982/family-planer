@@ -1,0 +1,29 @@
+{
+  "domain": "family_planer",
+  "name": "Family Planer",
+  "codeowners": [
+    "@magi1982"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "http",
+    "frontend",
+    "websocket_api",
+    "panel_custom",
+    "persistent_notification"
+  ],
+  "after_dependencies": [
+    "calendar",
+    "todo",
+    "ai_task",
+    "notify",
+    "tts",
+    "binary_sensor"
+  ],
+  "documentation": "https://github.com/magi1982/family-planer",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/magi1982/family-planer/issues",
+  "requirements": [],
+  "version": "0.5.2"
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 512" width="1240" height="512">
+  <image href="family-planer.svg" x="0" y="0" width="512" height="512"/>
+  <text x="580" y="250" font-family="-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-weight="800" font-size="118" fill="#1F2328">Family</text>
+  <text x="580" y="372" font-family="-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif" font-weight="300" font-size="118" fill="#1F2328">Planer</text>
+  <rect x="584" y="404" width="120" height="14" rx="7" fill="#69C350"/>
+</svg>

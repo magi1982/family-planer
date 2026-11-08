@@ -1,0 +1,605 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Family Planer",
+        "description": "Wähle die Module, die du nutzen willst. Weitere kannst du später jederzeit unter „Konfigurieren“ ein- oder ausschalten.",
+        "data": {
+          "title": "Name",
+          "modules": "Module"
+        }
+      },
+      "week": {
+        "title": "Wochenplan",
+        "description": "Wer lebt im Haushalt? Farbe, Kalender und Bild legst du danach pro Person fest.",
+        "data": {
+          "persons": "Familienmitglieder (mit Komma getrennt)"
+        },
+        "data_description": {
+          "persons": "z. B. Lea, Mia, Nina, Sarah, Tom"
+        }
+      },
+      "lists": {
+        "title": "Smarte Listen",
+        "description": "Erste Liste einrichten (optional). Weitere Listen kannst du später hinzufügen.",
+        "data": {
+          "name": "Name der Liste",
+          "entity": "To-do-Liste",
+          "max_categories": "Höchstens so viele Kategorien"
+        },
+        "data_description": {
+          "name": "z. B. Einkaufen Lebensmittel, Einkaufen Hornbach, Todos",
+          "entity": "Jede To-do-Liste: Alexa, AnyList, Bring!, Todoist, Google Tasks, HA-Einkaufsliste, …",
+          "max_categories": "5 bis 20. Wird es mehr, werden selten genutzte Kategorien unter „Sonstiges“ zusammengefasst."
+        }
+      }
+    },
+    "error": {
+      "no_persons": "Bitte mindestens eine Person angeben.",
+      "duplicate_person": "Diese Person gibt es schon.",
+      "no_module": "Bitte mindestens ein Modul wählen."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Family Planer",
+        "menu_options": {
+          "modules": "Module ein-/ausschalten",
+          "week": "Wochenplan",
+          "lists": "Smarte Listen",
+          "design": "Design & Seitenleiste"
+        }
+      },
+      "modules": {
+        "title": "Module",
+        "data": {
+          "modules": "Aktive Module"
+        }
+      },
+      "week": {
+        "title": "Wochenplan",
+        "menu_options": {
+          "person_add": "Person hinzufügen",
+          "person_select": "Person bearbeiten",
+          "person_remove": "Person entfernen",
+          "week_settings": "Einstellungen",
+          "rewards": "Punkte & Belohnungen",
+          "announce": "Ansagen bei Bewegung",
+          "school": "Schule & Stundenplan",
+          "vacation": "Ferien & Abwesenheit"
+        }
+      },
+      "week_settings": {
+        "title": "Wochenplan – Einstellungen",
+        "data": {
+          "rollover_time": "Tageswechsel um",
+          "match_names": "Termine anhand von Namen zuordnen",
+          "show_owner": "Zugeordnete Termine auch beim Kalenderbesitzer zeigen",
+          "admin_only_edit": "Plan nur durch Admins änderbar",
+          "reliability_days": "Zuverlässigkeit berechnen über",
+          "school_gap": "Heimweg über Mittag ab"
+        },
+        "data_description": {
+          "rollover_time": "Bis zu dieser Uhrzeit können Ämtli des Vortags noch abgehakt werden; danach zählen offene als „nicht gemacht“ und der neue Tag beginnt.",
+          "match_names": "Steht ein Name oder Spitzname im Titel (z. B. „Lea Turnen“), erscheint der Termin bei dieser Person statt beim Kalenderbesitzer.",
+          "admin_only_edit": "Kinder können Ämtli abhaken und Belohnungen anfragen, aber den Plan, Personen und Kategorien nicht ändern.",
+          "show_owner": "Ein Termin „Lea Turnen“ in Mamas Kalender erscheint dann bei Lea und bei Mama.",
+          "reliability_days": "Anzahl Tage für die Prozentzahl bei jeder Person (Standard 30).",
+          "school_gap": "Ab so vielen Minuten Pause zwischen zwei Lektionen wird der Schultag in zwei Blöcke geteilt (los/zuhause je Block). 0 = automatisch: mindestens 45 Minuten bzw. doppelter Schulweg plus 15 Minuten."
+        }
+      },
+      "person_add": {
+        "title": "Person hinzufügen",
+        "data": {
+          "name": "Name",
+          "color": "Farbe",
+          "calendar": "Kalender",
+          "aliases": "Spitznamen in Terminen (mit Komma getrennt)"
+        },
+        "data_description": {
+          "calendar": "Beliebige Kalender-Entität, z. B. Outlook (Remote Calendar), Google, CalDAV, iCloud",
+          "aliases": "z. B. Tommy für Tom – Termine mit diesem Namen im Titel erscheinen bei der Person"
+        }
+      },
+      "person_select": {
+        "title": "Person bearbeiten",
+        "data": {
+          "person": "Person"
+        }
+      },
+      "person_edit": {
+        "title": "{name}",
+        "data": {
+          "name": "Name",
+          "color": "Farbe",
+          "calendar": "Kalender",
+          "aliases": "Spitznamen in Terminen (mit Komma getrennt)"
+        },
+        "data_description": {
+          "calendar": "Beliebige Kalender-Entität, z. B. Outlook (Remote Calendar), Google, CalDAV, iCloud",
+          "aliases": "z. B. Tommy für Tom – Termine mit diesem Namen im Titel erscheinen bei der Person"
+        }
+      },
+      "person_remove": {
+        "title": "Person entfernen",
+        "description": "Entfernt die Person mit ihren Ämtli-Zuteilungen und ihrem Verlauf.",
+        "data": {
+          "person": "Person"
+        }
+      },
+      "lists": {
+        "title": "Smarte Listen",
+        "menu_options": {
+          "list_add": "Liste hinzufügen",
+          "list_select": "Liste bearbeiten",
+          "list_remove": "Liste entfernen",
+          "lists_settings": "Einstellungen"
+        }
+      },
+      "list_add": {
+        "title": "Liste hinzufügen",
+        "data": {
+          "name": "Name der Liste",
+          "entity": "To-do-Liste",
+          "icon": "Icon",
+          "max_categories": "Höchstens so viele Kategorien",
+          "auto": "Kategorien automatisch pflegen"
+        },
+        "data_description": {
+          "name": "z. B. Einkaufen Lebensmittel, Einkaufen Hornbach, Todos",
+          "entity": "Jede To-do-Liste: Alexa, AnyList, Bring!, Todoist, Google Tasks, HA-Einkaufsliste, …",
+          "max_categories": "5 bis 20. Wird es mehr, werden selten genutzte Kategorien unter „Sonstiges“ zusammengefasst.",
+          "auto": "Neue Einträge werden sofort einsortiert; täglich wird alles, was noch unter „Sonstiges“ liegt, neu geordnet."
+        }
+      },
+      "list_select": {
+        "title": "Liste bearbeiten",
+        "data": {
+          "list": "Liste"
+        }
+      },
+      "list_edit": {
+        "title": "{name}",
+        "data": {
+          "name": "Name der Liste",
+          "entity": "To-do-Liste",
+          "icon": "Icon",
+          "max_categories": "Höchstens so viele Kategorien",
+          "auto": "Kategorien automatisch pflegen"
+        },
+        "data_description": {
+          "name": "z. B. Einkaufen Lebensmittel, Einkaufen Hornbach, Todos",
+          "entity": "Jede To-do-Liste: Alexa, AnyList, Bring!, Todoist, Google Tasks, HA-Einkaufsliste, …",
+          "max_categories": "5 bis 20. Wird es mehr, werden selten genutzte Kategorien unter „Sonstiges“ zusammengefasst.",
+          "auto": "Neue Einträge werden sofort einsortiert; täglich wird alles, was noch unter „Sonstiges“ liegt, neu geordnet."
+        }
+      },
+      "list_remove": {
+        "title": "Liste entfernen",
+        "description": "Die To-do-Liste selbst bleibt erhalten, nur Kategorien und Zuordnungen werden gelöscht.",
+        "data": {
+          "list": "Liste"
+        }
+      },
+      "lists_settings": {
+        "title": "Smarte Listen – Einstellungen",
+        "data": {
+          "optimize_time": "Tägliche Optimierung um",
+          "ai_task": "KI-Aufgabe (optional)",
+          "prune_days": "Ungenutzte Kategorie ersetzen nach"
+        },
+        "data_description": {
+          "optimize_time": "Ordnet alles, was noch unter „Sonstiges“ liegt, neu und räumt ungenutzte Kategorien auf.",
+          "ai_task": "Mit einer KI-Aufgabe (z. B. OpenAI, Google, Ollama) werden auch unbekannte Dinge sinnvoll eingeordnet. Ohne KI wird die eingebaute Wissensliste verwendet.",
+          "prune_days": "Ist die Liste voll, macht eine Kategorie, die so lange nicht gebraucht wurde, Platz für eine neue."
+        }
+      },
+      "design": {
+        "title": "Design",
+        "description": "Wie soll der Family Planer aussehen? Die Karten in eigenen Dashboards können das Design mit `theme:` überschreiben.",
+        "data": {
+          "theme": "Design",
+          "panel": "Eintrag in der Seitenleiste",
+          "panel_title": "Titel in der Seitenleiste",
+          "idle_seconds": "Zurück zur Startansicht nach"
+        },
+        "data_description": {
+          "panel": "Öffnet den kompletten Planer ohne eigenes Dashboard – kein YAML nötig.",
+          "theme": "Farben und Formen aller Ansichten. „Home Assistant“ übernimmt dein aktuelles HA-Design.",
+          "panel_title": "Leer = Name der Integration.",
+          "idle_seconds": "Wird am Tablet ein anderer Tag oder eine Person angetippt, springt die Ansicht nach dieser Zeit ohne Berührung zurück zu heute."
+        }
+      },
+      "rewards": {
+        "title": "Punkte & Belohnungen",
+        "menu_options": {
+          "reward_add": "Belohnung hinzufügen",
+          "reward_select": "Belohnung bearbeiten",
+          "reward_remove": "Belohnung entfernen",
+          "gamification": "Punkte, Boni & Eltern-PIN"
+        }
+      },
+      "reward_add": {
+        "title": "Belohnung hinzufügen",
+        "data": {
+          "title": "Belohnung",
+          "icon": "Icon",
+          "cost": "Kosten in Punkten",
+          "approval": "Muss von Eltern freigegeben werden",
+          "persons": "Nur für (leer = alle)",
+          "per_week": "Höchstens pro Woche (0 = unbegrenzt)"
+        },
+        "data_description": {
+          "title": "z. B. 30 Minuten Gamen, Kino, Lieblingsessen, 5 Fr. Taschengeld"
+        }
+      },
+      "reward_edit": {
+        "title": "{name}",
+        "data": {
+          "title": "Belohnung",
+          "icon": "Icon",
+          "cost": "Kosten in Punkten",
+          "approval": "Muss von Eltern freigegeben werden",
+          "persons": "Nur für (leer = alle)",
+          "per_week": "Höchstens pro Woche (0 = unbegrenzt)"
+        },
+        "data_description": {
+          "title": "z. B. 30 Minuten Gamen, Kino, Lieblingsessen, 5 Fr. Taschengeld"
+        }
+      },
+      "reward_select": {
+        "title": "Belohnung bearbeiten",
+        "data": {
+          "reward": "Belohnung"
+        }
+      },
+      "reward_remove": {
+        "title": "Belohnung entfernen",
+        "data": {
+          "reward": "Belohnung"
+        }
+      },
+      "gamification": {
+        "title": "Punkte, Boni & Eltern-PIN",
+        "description": "Eltern-PIN gesetzt: {pin}. Mit der PIN können Belohnungen auch am Tablet freigegeben werden (Admins brauchen keine PIN).",
+        "data": {
+          "default_points": "Punkte pro Ämtli (Standard bzw. Gewicht)",
+          "day_bonus": "Bonus für einen ganz erledigten Tag",
+          "streak_bonus": "Bonus für jede 7-Tage-Serie",
+          "pin": "Neue Eltern-PIN (4–8 Ziffern)",
+          "remove_pin": "Eltern-PIN entfernen",
+          "reward_notify": "Anfragen zusätzlich melden an",
+          "mode": "Punkte verteilen",
+          "day_points": "Punkte für einen ganzen Tag (fair)"
+        },
+        "data_description": {
+          "default_points": "Im Modus „Pro Ämtli“ die Punkte je Ämtli, im Modus „Fair“ das Standard-Gewicht. Pro Ämtli im Ämtliplan änderbar.",
+          "reward_notify": "z. B. die Handy-App der Eltern. Eine Mitteilung in Home Assistant gibt es immer.",
+          "pin": "Nach 5 falschen Eingaben ist die PIN 5 Minuten gesperrt.",
+          "day_bonus": "Wird beim Tageswechsel gutgeschrieben.",
+          "streak_bonus": "Nach 7, 14, 21 … Tagen am Stück alles erledigt.",
+          "mode": "Fair: Wer alle seine Ämtli des Tages erledigt, bekommt gleich viele Punkte – egal ob 2 oder 6 Ämtli. Pro Ämtli: jedes Ämtli bringt seine Punkte, wer mehr Ämtli hat, kann mehr verdienen.",
+          "day_points": "Wird auf die Ämtli des Tages verteilt; jedes erledigte Ämtli bringt sofort seinen Anteil. Der Wert im Ämtliplan wirkt dabei als Gewicht (z. B. 20 = zählt doppelt so viel wie 10)."
+        }
+      },
+      "announce": {
+        "title": "Ansagen bei Bewegung",
+        "description": "Wird im Zeitfenster Bewegung erkannt, sagt z. B. Alexa an, wer noch Ämtli offen hat – oder dass alles erledigt ist.",
+        "data": {
+          "enabled": "Ansagen einschalten",
+          "motion": "Bewegungsmelder",
+          "notify": "Ansage über (Benachrichtigung)",
+          "tts": "Sprachausgabe (TTS)",
+          "media_players": "Lautsprecher für TTS",
+          "start": "Von",
+          "end": "Bis",
+          "cooldown": "Höchstens alle",
+          "all_done": "Auch ansagen, wenn alles erledigt ist (1× pro Tag)",
+          "persons": "Nur für (leer = alle)",
+          "queue": "Warteschlange für einmalige Meldungen",
+          "queue_start": "Meldungen frühestens ab",
+          "queue_end": "Meldungen spätestens bis",
+          "queue_rewards": "Freigegebene Belohnungen ansagen",
+          "queue_special": "Besondere Ämtli ansagen (z. B. Pneuwechsel)",
+          "max_items": "Ämtli pro Person in der Ansage",
+          "reward_hours": "Belohnungs-Meldung gültig für"
+        },
+        "data_description": {
+          "notify": "Alexa: die Benachrichtigungs-Entität „Ankündigen“ oder „Sprechen“ des Echo (Integration Alexa Devices).",
+          "tts": "Alternativ: TTS-Entität (z. B. Google Translate, Piper) zusammen mit Lautsprechern.",
+          "queue": "Meldungen wie „Belohnung freigegeben“ oder eigene aus Automationen (z. B. „Wäsche fertig“) warten, bis Bewegung erkannt wird, und werden einmal gesagt. Abgelaufene oder erledigte Meldungen werden gestrichen.",
+          "start": "Ämtli-Erinnerungen nur in diesem Zeitfenster.",
+          "cooldown": "Pause zwischen zwei Ämtli-Erinnerungen, auch wenn mehrmals Bewegung erkannt wird.",
+          "persons": "Nur diese Personen werden in der Erinnerung genannt.",
+          "queue_start": "Ruhezeit: Vorher wartet eine Meldung (falls noch gültig).",
+          "queue_end": "Ruhezeit: Danach wartet eine Meldung bis zum nächsten Morgen (falls noch gültig).",
+          "queue_rewards": "„Mia, deine Belohnung ‹Glace› wurde freigegeben.“",
+          "queue_special": "Einmal, sobald das Ämtli fällig wird; entfällt, wenn es schon erledigt ist.",
+          "max_items": "Weitere werden als „und 2 weitere“ zusammengefasst.",
+          "reward_hours": "0 = bis zum nächsten Tageswechsel."
+        }
+      },
+      "vacation": {
+        "title": "Ferien & Abwesenheit",
+        "description": "Steht im Kalender einer Person ein ganztägiger Termin mit einem dieser Wörter (z. B. „Skiferien“, „Urlaub“), werden ihre Ämtli an diesen Tagen pausiert – sie zählen weder als erledigt noch als verpasst. Beim ersten Kalender-Sync wird automatisch erkannt, wie ihr Ferien nennt.",
+        "data": {
+          "enabled": "Ämtli in den Ferien pausieren",
+          "words": "Wörter für Ferien (mit Komma getrennt)",
+          "scope": "Ferien gelten für",
+          "rescan": "Kalender neu nach Ferien-Wörtern durchsuchen",
+          "min_hours": "Ganzer Tag ab",
+          "refresh_minutes": "Kalender prüfen alle"
+        },
+        "data_description": {
+          "words": "Auch Wortteile am Ende zählen: „Ferien“ findet „Sommerferien“, aber nicht „Ferienplanung“. Nur ganztägige oder mindestens 20 Stunden lange Termine pausieren.",
+          "min_hours": "Ein Termin mit Uhrzeit zählt nur als Ferientag, wenn er an diesem Tag mindestens so viele Stunden dauert (ganztägige Termine zählen immer). Standard 20.",
+          "refresh_minutes": "Wie oft die Kalender auf neue Ferien geprüft werden.",
+          "rescan": "Sucht ein Jahr zurück und voraus und ergänzt gefundene Wörter.",
+          "scope": "Ganze Familie: ein Ferien-Termin in irgendeinem Kalender pausiert alle."
+        }
+      },
+      "school": {
+        "title": "Schule & Stundenplan",
+        "data": {
+          "person": "Person"
+        }
+      },
+      "school_edit": {
+        "title": "Schule – {name}",
+        "description": "Entweder einen Kalender mit den Lektionen wählen (z. B. ICS aus Schulnetz, WebUntis, LehrerOffice) oder feste Zeiten eintragen – pro Tag bis zu zwei Blöcke, z. B. Vormittag und Nachmittag, wenn {name} über Mittag nach Hause kommt. Im Kalender erscheint pro Block „los“ und „zuhause“. Bei einem Schulkalender wird automatisch getrennt, wenn zwischen zwei Lektionen genug Zeit für den Heimweg ist.",
+        "data": {
+          "school_calendar": "Schulkalender / Stundenplan (optional)",
+          "mon_start": "Montag Block 1: Beginn",
+          "mon_end": "Montag Block 1: Ende",
+          "mon_start2": "Montag Block 2: Beginn (z. B. Nachmittag)",
+          "mon_end2": "Montag Block 2: Ende",
+          "tue_start": "Dienstag Block 1: Beginn",
+          "tue_end": "Dienstag Block 1: Ende",
+          "tue_start2": "Dienstag Block 2: Beginn (z. B. Nachmittag)",
+          "tue_end2": "Dienstag Block 2: Ende",
+          "wed_start": "Mittwoch Block 1: Beginn",
+          "wed_end": "Mittwoch Block 1: Ende",
+          "wed_start2": "Mittwoch Block 2: Beginn (z. B. Nachmittag)",
+          "wed_end2": "Mittwoch Block 2: Ende",
+          "thu_start": "Donnerstag Block 1: Beginn",
+          "thu_end": "Donnerstag Block 1: Ende",
+          "thu_start2": "Donnerstag Block 2: Beginn (z. B. Nachmittag)",
+          "thu_end2": "Donnerstag Block 2: Ende",
+          "fri_start": "Freitag Block 1: Beginn",
+          "fri_end": "Freitag Block 1: Ende",
+          "fri_start2": "Freitag Block 2: Beginn (z. B. Nachmittag)",
+          "fri_end2": "Freitag Block 2: Ende",
+          "sat_start": "Samstag Block 1: Beginn",
+          "sat_end": "Samstag Block 1: Ende",
+          "sat_start2": "Samstag Block 2: Beginn (z. B. Nachmittag)",
+          "sat_end2": "Samstag Block 2: Ende",
+          "travel": "Schulweg berücksichtigen",
+          "travel_minutes": "Dauer Schul- bzw. Arbeitsweg"
+        },
+        "data_description": {
+          "school_calendar": "Hat ein Tag Termine im Schulkalender, gelten diese; sonst die festen Zeiten."
+        }
+      }
+    },
+    "error": {
+      "no_persons": "Bitte einen Namen angeben.",
+      "duplicate_person": "Diese Person gibt es schon.",
+      "no_module": "Bitte mindestens ein Modul wählen.",
+      "bad_pin": "Die PIN muss aus 4–8 Ziffern bestehen.",
+      "no_motion": "Bitte mindestens einen Bewegungsmelder wählen.",
+      "no_target": "Bitte eine Benachrichtigungs-Entität oder TTS mit Lautsprecher wählen.",
+      "bad_times": "Bitte Beginn und Ende angeben (Ende nach Beginn)."
+    },
+    "abort": {
+      "unknown_person": "Person nicht gefunden.",
+      "unknown_list": "Liste nicht gefunden.",
+      "no_rewards": "Es gibt noch keine Belohnungen."
+    }
+  },
+  "selector": {
+    "modules": {
+      "options": {
+        "week": "Wochenplan – Ämtli, Termine und Zuverlässigkeit",
+        "lists": "Smarte Listen – Einkaufs- und To-do-Listen, die sich selbst sortieren"
+      }
+    },
+    "theme": {
+      "options": {
+        "loxone": "Loxone",
+        "ha": "Home Assistant (aktuelles HA-Design)",
+        "apple": "Apple Home",
+        "google": "Google Home (Material You)",
+        "light": "Hell & minimal",
+        "nord": "Nord"
+      }
+    },
+    "vacation_scope": {
+      "options": {
+        "owner": "die Person des Kalenders bzw. die im Titel genannten Personen",
+        "family": "die ganze Familie"
+      }
+    },
+    "points_mode": {
+      "options": {
+        "fair": "Fair – ganzer Tag zählt, nicht die Anzahl Ämtli",
+        "per_chore": "Pro Ämtli – mehr Ämtli, mehr Punkte"
+      }
+    }
+  },
+  "entity": {
+    "todo": {
+      "chores": {
+        "name": "Ämtli"
+      }
+    },
+    "sensor": {
+      "reliability": {
+        "name": "Zuverlässigkeit"
+      },
+      "points": {
+        "name": "Punkte",
+        "unit_of_measurement": "Punkte"
+      }
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "Family Planer ist nicht eingerichtet."
+    },
+    "unknown_item": {
+      "message": "Dieses Ämtli gibt es nicht (mehr)."
+    },
+    "unknown_person": {
+      "message": "Diese Person gibt es nicht."
+    }
+  },
+  "services": {
+    "rollover": {
+      "name": "Tag aktualisieren",
+      "description": "Verbucht abgelaufene Ämtli und erzeugt die Ämtli für heute (läuft sonst automatisch zur eingestellten Uhrzeit).",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional, wenn es mehrere gibt."
+        }
+      }
+    },
+    "set_item": {
+      "name": "Ämtli abhaken",
+      "description": "Markiert ein Ämtli als erledigt oder offen.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional, wenn es mehrere gibt."
+        },
+        "item_id": {
+          "name": "Item-ID",
+          "description": "ID des Ämtli von heute."
+        },
+        "done": {
+          "name": "Erledigt",
+          "description": "Erledigt oder wieder offen."
+        }
+      }
+    },
+    "optimize_lists": {
+      "name": "Listen optimieren",
+      "description": "Sortiert alle Smarten Listen sofort neu (wie die tägliche Optimierung).",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional, wenn es mehrere gibt."
+        },
+        "ai": {
+          "name": "KI verwenden",
+          "description": "Die eingestellte KI-Aufgabe fragen."
+        }
+      }
+    },
+    "import_legacy": {
+      "name": "Prototyp importieren",
+      "description": "Übernimmt Plan, Verlauf und Personen aus den To-do-Listen des Prototyps.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional, wenn es mehrere gibt."
+        },
+        "plan": {
+          "name": "Ämtli-Plan",
+          "description": "todo.amtli_plan"
+        },
+        "today": {
+          "name": "Ämtli heute",
+          "description": "todo.amtli_heute"
+        },
+        "history": {
+          "name": "Verlauf",
+          "description": "todo.amtli_verlauf"
+        },
+        "settings": {
+          "name": "Einstellungen",
+          "description": "todo.familienplaner_einstellungen"
+        }
+      }
+    },
+    "announce": {
+      "name": "Ämtli ansagen",
+      "description": "Sagt sofort an, wer noch Ämtli offen hat (ohne Zeitfenster und Pause).",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional, wenn es mehrere gibt."
+        }
+      }
+    },
+    "add_points": {
+      "name": "Punkte vergeben",
+      "description": "Bonuspunkte geben oder Punkte abziehen.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional, wenn es mehrere gibt."
+        },
+        "person": {
+          "name": "Person",
+          "description": "Name oder ID der Person."
+        },
+        "points": {
+          "name": "Punkte",
+          "description": "Negativ zum Abziehen."
+        },
+        "reason": {
+          "name": "Grund",
+          "description": "Wird im Verlauf angezeigt."
+        }
+      }
+    },
+    "queue_announcement": {
+      "name": "Ansage vormerken",
+      "description": "Meldung, die bei der nächsten Bewegung angesagt wird (einmal), z. B. „Die Wäsche ist fertig, Nina ist dran“.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional, wenn es mehrere gibt."
+        },
+        "message": {
+          "name": "Text",
+          "description": "Was gesagt werden soll."
+        },
+        "expires": {
+          "name": "Gültig für",
+          "description": "Danach wird die Meldung gestrichen."
+        },
+        "key": {
+          "name": "Schlüssel",
+          "description": "Gleicher Schlüssel ersetzt eine frühere Meldung; zum Löschen verwenden."
+        },
+        "motion": {
+          "name": "Nur bei diesen Bewegungsmeldern",
+          "description": "Leer = bei jedem eingestellten Bewegungsmelder."
+        }
+      }
+    },
+    "clear_announcement": {
+      "name": "Vorgemerkte Ansage löschen",
+      "description": "Löscht eine Meldung, z. B. wenn die Wäsche schon aufgehängt ist.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional, wenn es mehrere gibt."
+        },
+        "key": {
+          "name": "Schlüssel",
+          "description": "Schlüssel der Meldung."
+        }
+      }
+    }
+  },
+  "issues": {
+    "missing_entity": {
+      "title": "Family Planer: {entity} fehlt",
+      "description": "Die Entität `{entity}` (verwendet für {used_by}) existiert nicht mehr oder ist nicht verfügbar. Bitte unter Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren eine andere wählen."
+    }
+  }
+}

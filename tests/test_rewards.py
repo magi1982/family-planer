@@ -1,0 +1,133 @@
+"""Tests for points, levels, rewards, PIN and input validation."""
+from datetime import date, datetime
+import importlib.util
+import pathlib
+import sys
+
+import pytest
+
+_base = pathlib.Path(__file__).parents[1] / "custom_components/family_planer"
+
+
+def _load(name, file):
+    spec = importlib.util.spec_from_file_location(name, _base / file)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+R = _load("fp_rewards", "rewards.py")
+V = _load("fp_validate", "validate.py")
+NOW = datetime(2026, 11, 6, 18, 0)
+TS = NOW.isoformat()
+
+
+def data():
+    return {"persons": {"lea": {}, "mia": {}}, "ledger": [], "requests": {}, "history": {},
+            "rewards": {"game": {"title": "30 Min Gamen", "icon": "mdi:controller", "cost": 50, "approval": True,
+                                 "persons": [], "per_week": 2},
+                        "ice": {"title": "Glace", "icon": "mdi:ice-cream", "cost": 20, "approval": False,
+                                "persons": ["mia"], "per_week": 0}}}
+
+
+def test_chore_points_are_idempotent_and_reversible():
+    d = data()
+    item = {"person_id": "lea", "title": "Tisch decken", "done": True}
+    R.chore_done(d, "i1", item, 10, TS)
+    R.chore_done(d, "i1", item, 10, TS)
+    assert R.balance(d["ledger"], "lea") == 10
+    item["done"] = False
+    R.chore_done(d, "i1", item, 10, TS)
+    assert R.balance(d["ledger"], "lea") == 0
+
+
+def test_levels():
+    assert R.level(0, "de")["name"] == "Starter"
+    lv = R.level(300, "en")
+    assert lv["level"] == 3 and lv["next"] == 500 and lv["progress"] == 20
+    assert R.level(99999, "de")["next"] is None
+
+
+def test_redeem_with_approval_reserves_points():
+    d = data()
+    R.adjust(d, "lea", 120, "Start", TS)
+    req = R.redeem(d, "lea", "game", NOW)
+    assert req["status"] == "pending"
+    assert R.available(d, "lea") == 70 and R.balance(d["ledger"], "lea") == 120
+    R.decide(d, req["id"], True, NOW)
+    assert R.balance(d["ledger"], "lea") == 70
+    assert R.lifetime(d["ledger"], "lea") == 120  # spending never lowers the level
+
+
+def test_denied_request_frees_points_and_limits():
+    d = data()
+    R.adjust(d, "lea", 200, "", TS)
+    q = R.redeem(d, "lea", "game", NOW)
+    R.decide(d, q["id"], False, NOW)
+    assert R.available(d, "lea") == 200
+    R.redeem(d, "lea", "game", NOW)
+    R.redeem(d, "lea", "game", NOW)
+    with pytest.raises(R.RewardError, match="weekly_limit"):
+        R.redeem(d, "lea", "game", NOW)
+
+
+def test_reward_rules():
+    d = data()
+    with pytest.raises(R.RewardError, match="not_allowed"):
+        R.redeem(d, "lea", "ice", NOW)
+    with pytest.raises(R.RewardError, match="not_enough_points"):
+        R.redeem(d, "mia", "ice", NOW)
+    R.adjust(d, "mia", 20, "", TS)
+    assert R.redeem(d, "mia", "ice", NOW)["status"] == "approved"  # no approval needed
+    assert R.balance(d["ledger"], "mia") == 0
+
+
+def test_day_and_streak_bonus():
+    d = data()
+    d["history"]["2026-11-05"] = {"lea": {"done": 3, "total": 3, "missed": []},
+                                  "mia": {"done": 1, "total": 2, "missed": ["x"]}}
+    s = {"day_bonus": 5, "streak_bonus": 20}
+    R.day_bonuses(d, date(2026, 11, 5), {"lea": 7}, s, TS)
+    R.day_bonuses(d, date(2026, 11, 5), {"lea": 7}, s, TS)
+    assert R.balance(d["ledger"], "lea") == 25 and R.balance(d["ledger"], "mia") == 0
+
+
+def test_trim_keeps_balance_and_lifetime():
+    d = data()
+    R.adjust(d, "lea", 100, "", "2025-01-01T00:00:00")
+    d["ledger"].append({"id": "x", "pid": "lea", "pts": -40, "kind": "reward", "ref": "r", "text": "",
+                        "ts": "2025-01-02T00:00:00"})
+    R.adjust(d, "lea", 5, "", TS)
+    R.trim(d, 365, date(2026, 11, 6))
+    assert R.balance(d["ledger"], "lea") == 65 and R.lifetime(d["ledger"], "lea") == 105
+
+
+def test_pin():
+    h = R.hash_pin("4711")
+    assert R.check_pin(h, "4711") and not R.check_pin(h, "0000") and not R.check_pin(None, "4711")
+    assert not R.check_pin("garbage", "4711")
+
+
+def test_validation():
+    assert V.color("#AbCdEf", "#000000") == "#AbCdEf"
+    assert V.color("red;background:url(x)", "#000000") == "#000000"
+    assert V.image("av:k.long.blond.hell.0") and V.image("svg:frau")
+    assert V.image("img:/family_planer_files/avatars/lea_" + "a" * 24 + ".jpg")
+    assert V.image("img:https://evil.example/x.png") == ""
+    assert V.image("img:/family_planer_files/avatars/../../secrets.yaml") == ""
+    assert V.icon("mdi:cart-outline", "x") == "mdi:cart-outline" and V.icon('mdi:x" onload="', "d") == "d"
+    assert V.text("A\u0000B‮ C  ", 10) == "A B C"
+    assert V.entity("calendar.tom", ("calendar",)) and V.entity("todo.x", ("calendar",)) is None
+    assert V.hhmm("03:30:00", "00:00") == "03:30" and V.hhmm("25:00", "00:00") == "00:00"
+    assert V.aliases(["Tommy", "tommy", " ", "x" * 50]) == ["Tommy", "x" * 40]
+
+
+S = _load("fp_speech", "speech.py")
+
+
+def test_speech():
+    msg = S.open_chores_message([("Lea", ["Tisch decken", "Abfall", "WC", "Zimmer"]), ("Mia", ["Ratten"])], "de")
+    assert msg == "Hallo! Noch offen: Lea: Tisch decken, Abfall, WC und 1 weitere. Mia: Ratten."
+    assert S.open_chores_message([("A", [])], "en") == ""
+    assert "All chores" in S.all_done_message(["A"], "en")

@@ -1,0 +1,43 @@
+{
+  "entity": {
+    "todo": {
+      "chores": {
+        "default": "mdi:broom"
+      }
+    },
+    "sensor": {
+      "reliability": {
+        "default": "mdi:medal-outline"
+      },
+      "points": {
+        "default": "mdi:star-circle-outline"
+      }
+    }
+  },
+  "services": {
+    "rollover": {
+      "service": "mdi:calendar-refresh"
+    },
+    "set_item": {
+      "service": "mdi:check-circle-outline"
+    },
+    "import_legacy": {
+      "service": "mdi:database-import"
+    },
+    "optimize_lists": {
+      "service": "mdi:auto-fix"
+    },
+    "announce": {
+      "service": "mdi:account-voice"
+    },
+    "add_points": {
+      "service": "mdi:star-plus-outline"
+    },
+    "queue_announcement": {
+      "service": "mdi:message-badge-outline"
+    },
+    "clear_announcement": {
+      "service": "mdi:message-off-outline"
+    }
+  }
+}

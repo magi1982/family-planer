@@ -1,0 +1,115 @@
+rollover:
+  fields:
+    entry_id:
+      selector:
+        config_entry:
+          integration: family_planer
+set_item:
+  fields:
+    entry_id:
+      selector:
+        config_entry:
+          integration: family_planer
+    item_id:
+      required: true
+      selector:
+        text:
+    done:
+      default: true
+      selector:
+        boolean:
+optimize_lists:
+  fields:
+    entry_id:
+      selector:
+        config_entry:
+          integration: family_planer
+    ai:
+      default: true
+      selector:
+        boolean:
+import_legacy:
+  fields:
+    entry_id:
+      selector:
+        config_entry:
+          integration: family_planer
+    plan:
+      selector:
+        entity:
+          domain: todo
+    today:
+      selector:
+        entity:
+          domain: todo
+    history:
+      selector:
+        entity:
+          domain: todo
+    settings:
+      selector:
+        entity:
+          domain: todo
+announce:
+  fields:
+    entry_id:
+      selector:
+        config_entry:
+          integration: family_planer
+add_points:
+  fields:
+    entry_id:
+      selector:
+        config_entry:
+          integration: family_planer
+    person:
+      required: true
+      selector:
+        text:
+    points:
+      required: true
+      selector:
+        number:
+          min: -10000
+          max: 10000
+          mode: box
+    reason:
+      selector:
+        text:
+queue_announcement:
+  fields:
+    entry_id:
+      selector:
+        config_entry:
+          integration: family_planer
+    message:
+      required: true
+      selector:
+        text:
+          multiline: true
+    expires:
+      default: 240
+      selector:
+        number:
+          min: 1
+          max: 10080
+          unit_of_measurement: min
+          mode: box
+    key:
+      selector:
+        text:
+    motion:
+      selector:
+        entity:
+          domain: binary_sensor
+          multiple: true
+clear_announcement:
+  fields:
+    entry_id:
+      selector:
+        config_entry:
+          integration: family_planer
+    key:
+      required: true
+      selector:
+        text:
