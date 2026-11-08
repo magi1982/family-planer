@@ -1,6 +1,18 @@
 {
   "domain": "family_planer",
   "name": "Family Planer",
+  "after_dependencies": [
+    "calendar",
+    "todo",
+    "ai_task",
+    "notify",
+    "tts",
+    "binary_sensor"
+  ],
+  "categories": [
+    "productivity_information.calendars_todos",
+    "productivity_information.shopping_groceries"
+  ],
   "codeowners": [
     "@magi1982"
   ],
@@ -11,14 +23,6 @@
     "websocket_api",
     "panel_custom",
     "persistent_notification"
-  ],
-  "after_dependencies": [
-    "calendar",
-    "todo",
-    "ai_task",
-    "notify",
-    "tts",
-    "binary_sensor"
   ],
   "documentation": "https://github.com/magi1982/family-planer",
   "integration_type": "service",
