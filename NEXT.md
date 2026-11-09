@@ -49,7 +49,7 @@
 ### Qualität und Doku
 - [ ] Unit-Tests für die neue Logik; alle Tests grün
 - [ ] Frontend neu gebaut, englische Texte ergänzt, alle Designs geprüft
-- [ ] README: Funktionsbeschreibung und Tabelle „Alle Einstellungen“ ergänzt
+- [ ] README.md (Englisch) und README.de.md (Deutsch): Funktionsbeschreibung und Tabelle „Alle Einstellungen“ in beiden ergänzt
 - [ ] CHANGELOG-Eintrag auf Englisch (`## x.y.z – Datum`); Version in `const.py` und `manifest.json` erhöht
 - [ ] **Vor dem Release fragen** – erst nach Freigabe Version erhöhen und hochladen
 - [ ] Release entsteht automatisch (`release.yml`), sobald Validate und Security grün sind – Text aus dem CHANGELOG

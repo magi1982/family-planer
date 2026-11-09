@@ -1,402 +1,403 @@
 ![Family Planer](https://raw.githubusercontent.com/magi1982/family-planer/main/custom_components/family_planer/brand/logo@2x.png)
 
-# Family Planer für Home Assistant
+# Family Planer for Home Assistant
 
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-unterst%C3%BCtzen-FFDD00?logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/magibuilds)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-support-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/magibuilds)
 [![Validate](https://github.com/magi1982/family-planer/actions/workflows/validate.yml/badge.svg)](https://github.com/magi1982/family-planer/actions/workflows/validate.yml)
 [![Security](https://github.com/magi1982/family-planer/actions/workflows/security.yml/badge.svg)](https://github.com/magi1982/family-planer/actions/workflows/security.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/magi1982/family-planer/blob/main/LICENSE)
 
 <a href="https://buymeacoffee.com/magibuilds"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="50"></a>
 
-Der Familienplaner fürs Wandtablet: **Ämtli** mit Punkten und echten Belohnungen, **Termine und Stundenplan**
-jeder Person auf einen Blick, **Ferien**, die Ämtli automatisch pausieren, **Ansagen** über Alexa sobald jemand
-heimkommt – und **Einkaufs- und To-do-Listen, die sich selbst sortieren**. Alles wird in der Oberfläche
-eingerichtet, **kein YAML**.
+The family planner for your wall tablet: **chores** with points and real rewards, everyone's **events and school
+timetable** at a glance, **holidays** that pause chores automatically, **spoken reminders** as soon as someone comes
+home – and **shopping and to-do lists that sort themselves**. Everything is set up in the UI, **no YAML**.
 
-*[English version below](#english)*
+🇬🇧 **English** · 🇩🇪 [Deutsch](README.de.md)
 
-![Wochenansicht](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/week.png)
+![Week view](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/week.png)
+
+> The screenshots show the German interface. With Home Assistant set to English, everything appears in English.
 
 ---
 
-## Inhalt
+## Contents
 
-- [Überblick](#überblick)
-- [Modul Wochenplan](#modul-wochenplan)
-  - [Ämtli nach Wochentag](#ämtli-nach-wochentag)
-  - [Besondere Ämtli nach Datum](#besondere-ämtli-nach-datum)
-  - [Tageswechsel zur gewünschten Uhrzeit](#tageswechsel-zur-gewünschten-uhrzeit)
-  - [Termine bei der richtigen Person](#termine-bei-der-richtigen-person)
-  - [Schule & Stundenplan](#schule--stundenplan)
-  - [Ferien pausieren Ämtli](#ferien-pausieren-ämtli)
-  - [Zuverlässigkeit, Punkte, Level & Auszeichnungen](#zuverlässigkeit-punkte-level--auszeichnungen)
-  - [Echte Belohnungen](#echte-belohnungen)
-  - [Ansagen bei Bewegung](#ansagen-bei-bewegung)
-  - [Bilder: Avatare oder eigenes Foto](#bilder-avatare-oder-eigenes-foto)
-- [Modul Smarte Listen](#modul-smarte-listen)
+- [Overview](#overview)
+- [Week plan module](#week-plan-module)
+  - [Chores by weekday](#chores-by-weekday)
+  - [Special chores by date](#special-chores-by-date)
+  - [Day change at a time you choose](#day-change-at-a-time-you-choose)
+  - [Events at the right person](#events-at-the-right-person)
+  - [School & timetable](#school--timetable)
+  - [Holidays pause chores](#holidays-pause-chores)
+  - [Reliability, points, levels & awards](#reliability-points-levels--awards)
+  - [Real rewards](#real-rewards)
+  - [Announcements on motion](#announcements-on-motion)
+  - [Pictures: avatars or your own photo](#pictures-avatars-or-your-own-photo)
+- [Smart lists module](#smart-lists-module)
 - [Designs](#designs)
 - [Installation](#installation)
-- [Einrichtung](#einrichtung)
-- [Ansichten & Bedienung](#ansichten--bedienung)
-- [Entitäten](#entitäten)
-- [Dienste (Aktionen)](#dienste-aktionen)
-- [Eigene Dashboards](#eigene-dashboards)
-- [Sicherheit & Datenschutz](#sicherheit--datenschutz)
-- [Umstieg vom Prototyp](#umstieg-vom-prototyp)
-- [Entfernen](#entfernen)
-- [Unterstützen](#unterstützen)
+- [Setup](#setup)
+- [Views & usage](#views--usage)
+- [Entities](#entities)
+- [Services (actions)](#services-actions)
+- [Custom dashboards](#custom-dashboards)
+- [Security & privacy](#security--privacy)
+- [Migrating from the prototype](#migrating-from-the-prototype)
+- [Removal](#removal)
+- [Support](#support)
 
 ---
 
-## Überblick
+## Overview
 
 | | |
 |---|---|
-| **Module** | *Wochenplan* (Ämtli, Termine, Schule, Ferien, Punkte, Belohnungen, Ansagen) und *Smarte Listen* – einzeln ein- und ausschaltbar, weitere Module folgen |
-| **Bedienung** | Eigener Eintrag in der Seitenleiste mit Navigation *Planer · Listen · Ämtliplan · Belohnungen*; optional als Karten in eigenen Dashboards |
-| **Einrichtung** | Komplett über *Einstellungen → Geräte & Dienste*, kein YAML |
-| **Sprachen** | Deutsch und Englisch (Einstellungen und Oberfläche, folgt der HA-Sprache) |
-| **Designs** | Home Assistant, Loxone, Apple Home, Google Home, Hell, Nord |
-| **Abhängigkeiten** | Keine. Kalender, Listen, Lautsprecher und KI sind optional – es funktioniert jede passende Entität |
-| **Voraussetzung** | Home Assistant 2026.3 oder neuer |
+| **Modules** | *Week plan* (chores, events, school, holidays, points, rewards, announcements) and *Smart lists* – each can be switched on or off, more modules to come |
+| **Usage** | Own sidebar entry with navigation *Planner · Lists · Chore plan · Rewards*; optionally as cards in your own dashboards |
+| **Setup** | Entirely via *Settings → Devices & services*, no YAML |
+| **Languages** | English and German (settings and interface, follows the Home Assistant language) |
+| **Designs** | Home Assistant, Loxone, Apple Home, Google Home, Light, Nord |
+| **Dependencies** | None. Calendars, lists, speakers and AI are optional – any matching entity works |
+| **Requirement** | Home Assistant 2026.3 or newer |
 
 ---
 
-## Modul Wochenplan
+## Week plan module
 
-### Ämtli nach Wochentag
+### Chores by weekday
 
-![Ämtliplan](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/chore-plan.png)
+![Chore plan](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/chore-plan.png)
 
-- Pro Ämtli **mehrere Personen**, pro Person **eigene Wochentage** (z. B. Tisch decken: Lea Mo + Sa, Mia Di + So).
-- **Rhythmus** pro Tag: jede Woche oder alle 2, 3, 4 … Wochen mit wählbarer Startwoche.
-- **Zeit zum Erledigen**: „nur am Mittwoch“ oder „Mittwoch bis Samstag“. Erst nach Ablauf der Frist zählt ein Ämtli als „nicht gemacht“.
-- **Punkte pro Ämtli** einstellbar (sonst gilt der Standardwert).
-- **Wochenübersicht**: wie viele Ämtli jede Person pro Wochentag hat – so bleibt es fair.
-- Änderungen gelten **sofort**; die Vergangenheit bleibt, wie sie war.
+- **Several persons** per chore, **own weekdays** per person (e.g. set the table: Lea Mon + Sat, Mia Tue + Sun).
+- **Rhythm** per day: every week or every 2, 3, 4 … weeks with a selectable start week.
+- **Time to complete**: "Wednesday only" or "Wednesday to Saturday". A chore only counts as "not done" once its deadline has passed.
+- **Points per chore** can be set (otherwise the default applies).
+- **Week overview**: how many chores each person has per weekday – keeps things fair.
+- Changes apply **immediately**; the past stays as it was.
 
-### Besondere Ämtli nach Datum
+### Special chores by date
 
-![Besondere Ämtli](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/special-chores.png)
+![Special chores](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/special-chores.png)
 
-Für alles, was nicht wöchentlich ist:
+For everything that isn't weekly:
 
-| Art | Beispiel |
+| Type | Example |
 |---|---|
-| **Intervall** | alle 6 Monate ab 15.03. – Luftfilter reinigen; alle 2 Wochen – Bettwäsche wechseln |
-| **Monatlich** | am 1. jedes Monats; am letzten Tag; am 1. Samstag alle 3 Monate – Rauchmelder testen |
-| **Jährlich** | 15.04. und 15.10. – Pneuwechsel |
-| **Einmalig** | 21.11.2026 – Keller aufräumen |
+| **Interval** | every 6 months from 15 March – clean the air filter; every 2 weeks – change the bed linen |
+| **Monthly** | on the 1st of every month; on the last day; on the 1st Saturday every 3 months – test the smoke detectors |
+| **Yearly** | 15 April and 15 October – change tyres |
+| **Once** | 21 November 2026 – tidy up the cellar |
 
-- Mehrere Personen, wahlweise **abwechselnd** – ist jemand in den Ferien, übernimmt die nächste Person.
-- Bis zu **60 Tage** Zeit zum Erledigen, eigene Punkte.
-- Die Liste zeigt die **nächsten drei Termine** mit der zuständigen Person.
+- Several persons, optionally **taking turns** – if someone is on holiday, the next person takes over.
+- Up to **60 days** to complete, own points.
+- The list shows the **next three dates** with the responsible person.
 
-### Tageswechsel zur gewünschten Uhrzeit
+### Day change at a time you choose
 
-Standard ist Mitternacht. Stellst du z. B. **03:00** ein, können die Ämtli des Vortags bis 3 Uhr nachts noch
-abgehakt werden; danach zählen offene als „nicht gemacht“ und der neue Tag beginnt. Nach einem Neustart wartet der
-Tageswechsel, bis die Kalender geladen sind – so wird niemand in den Ferien versehentlich als „nicht gemacht“ gezählt.
+The default is midnight. If you set e.g. **03:00**, the previous day's chores can still be ticked off until 3 am;
+after that, open ones count as "not done" and the new day starts. After a restart, the day change waits until the
+calendars have loaded – so nobody on holiday is accidentally counted as "not done".
 
-### Termine bei der richtigen Person
+### Events at the right person
 
-- Pro Person ein **Kalender** – jede `calendar.*`-Entität: Outlook/Microsoft 365 über *Remote Calendar* (ICS), Google, CalDAV, iCloud, Local Calendar …
-- **Farbe des Kalenders = Farbe der Person**; jeder Termin trägt ein kleines Kalender-Abzeichen, damit man sieht, woher er stammt.
-- **Zuordnung über Namen und Spitznamen** (abschaltbar): „Lea Turnen“ im Kalender von Mama erscheint bei Lea, „Tommy in Rust“ bei Tom.
-- Optional: zugeordnete Termine **zusätzlich beim Kalenderbesitzer** anzeigen.
-- Termine einzeilig: Titel, Zeit von–bis, Dauer, Kalender. Button zum **sofortigen Synchronisieren**.
+- One **calendar** per person – any `calendar.*` entity: Outlook/Microsoft 365 via *Remote Calendar* (ICS), Google, CalDAV, iCloud, Local Calendar …
+- **Calendar colour = person colour**; every event carries a small calendar badge so you can see where it comes from.
+- **Assignment by names and nicknames** (can be switched off): "Lea gymnastics" in mum's calendar appears at Lea, "Tommy in Rust" at Tom.
+- Optional: show assigned events **also at the calendar owner**.
+- Events on one line: title, time from–to, duration, calendar. Button to **sync immediately**.
 
-### Schule & Stundenplan
+### School & timetable
 
-![Stundenplan](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/timetable.png)
+![Timetable](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/timetable.png)
 
-Pro Kind (oder Person, z. B. Studium/Arbeit):
+Per child (or person, e.g. university/work):
 
-- **Schulkalender** mit den Lektionen (z. B. ICS aus WebUntis, Schulnetz, LehrerOffice) **oder feste Zeiten** pro Wochentag – bis zu **zwei Blöcke pro Tag** (Vormittag und Nachmittag, wenn das Kind über Mittag heimkommt).
-- Optional der **Schul-/Arbeitsweg** in Minuten.
-- **Ansicht „Alles“**: pro Block eine Zeile, z. B. `🎒 los 07:35 · zuhause 12:00 · 07:50–11:45` und `🎒 los 13:15 · zuhause 15:25 · 13:30–15:10`. Beim Schulkalender werden Blöcke automatisch getrennt, wenn zwischen zwei Lektionen genug Zeit für den Heimweg ist.
-- **Ansicht „Stundenplan“**: nur Personen mit Stundenplan, jede Lektion mit Zeit und Ort (z. B. „Mathematik · Zimmer 12“).
-- **Ansicht „Termine“** bleibt frei von Schule; **„Ämtli“** zeigt nur Ämtli.
-- An Ferientagen wird keine Schule angezeigt.
+- **School calendar** with the lessons (e.g. ICS from WebUntis or other school systems) **or fixed times** per weekday – up to **two blocks per day** (morning and afternoon, when the child comes home for lunch).
+- Optional **travel time** to school/work in minutes.
+- **"All" view**: one line per block, e.g. `🎒 leave 07:35 · home 12:00 · 07:50–11:45` and `🎒 leave 13:15 · home 15:25 · 13:30–15:10`. With a school calendar, blocks are split automatically when there is enough time between two lessons to go home.
+- **"Timetable" view**: only persons with a timetable, every lesson with time and room (e.g. "Maths · Room 12").
+- The **"Events"** view stays free of school; **"Chores"** shows chores only.
+- No school is shown on holidays.
 
-### Ferien pausieren Ämtli
+### Holidays pause chores
 
-- Ein **ganztägiger** (oder mindestens 20 Stunden langer) Termin mit einem **Ferien-Wort** im Kalender einer Person pausiert ihre Ämtli – sie zählen **weder als erledigt noch als verpasst**, Zuverlässigkeit und Serie bleiben unberührt.
-- Wortenden zählen: „Ferien“ findet „Skiferien“ und „Sommerferien“, aber nicht „Ferienplanung“.
-- **Automatische Erkennung**: Beim ersten Sync eines Kalenders wird ein Jahr zurück und voraus gesucht, wie ihr Ferien nennt (z. B. *Ferien, Urlaub, OOO*). Die Wörter landen im Einstellungsfeld (änderbar) und du bekommst eine Mitteilung.
-- Gilt wahlweise für die **Person des Kalenders bzw. die im Titel genannten Personen** oder für die **ganze Familie**.
-- Wird ein Ferien-Termin während des Tages eingetragen, verschwinden offene Ämtli sofort (Kalender werden alle 30 Minuten gelesen).
-- Im Planer erscheint 🌴 *Ferien*. Schulferien im Schulkalender pausieren bewusst **nicht** (wer daheim ist, macht Ämtli).
+- An **all-day** (or at least 20-hour) event with a **holiday word** in a person's calendar pauses their chores – they count **neither as done nor as missed**; reliability and streak are not affected.
+- Word endings count: "holiday" finds "ski holiday" and "summer holiday" – in German "Ferien" finds "Skiferien" but not "Ferienplanung".
+- **Automatic detection**: on the first sync of a calendar, one year back and ahead is searched for how you name holidays (e.g. *Vacation, Holiday, OOO*). The words end up in the settings field (editable) and you get a notification.
+- Applies either to the **calendar's person or the persons named in the title**, or to the **whole family**.
+- If a holiday event is added during the day, open chores disappear immediately (calendars are read every 30 minutes).
+- The planner shows 🌴 *Holiday*. School holidays in the school calendar deliberately do **not** pause chores (whoever is at home does chores).
 
-### Zuverlässigkeit, Punkte, Level & Auszeichnungen
+### Reliability, points, levels & awards
 
-![Belohnungen](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/rewards.png)
+![Rewards](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/rewards.png)
 
-- **Zuverlässigkeit** in Prozent (30 Tage), farbiges Band pro Person; Neue starten mit 100 % (*Startbonus*).
-- **Faire Punkte** (Standard): Wer **alle** Ämtli des Tages erledigt, bekommt gleich viele Punkte (Standard 30) – egal ob 2 oder 6 Ämtli. Jedes erledigte Ämtli bringt sofort seinen Anteil; 3 von 6 erledigt = 50 % = 15 Punkte. Die Punkte im Ämtliplan wirken als Gewicht (ein schweres Ämtli mit 20 zählt doppelt so viel wie eines mit 10). Alternativ Modus *Pro Ämtli*: mehr Ämtli, mehr Punkte.
-- **Punkte**: zusätzlich **Tagesbonus** für einen ganz erledigten Tag, **Serienbonus** für jede 7-Tage-Serie. Wird ein Ämtli wieder geöffnet, werden die Punkte zurückgebucht.
-- **10 Level** von *Starter* über *Profi* und *Held* bis *Grossmeister* – mit Fortschrittsbalken. Eingelöste Punkte senken das Level nie.
-- **Auszeichnungen**: 👑 Krone der Woche, 🏆 Pokal des Monats, 🐝 Fleissbiene, ⭐ Perfekte Woche, 🔥 Serie, 🚀 Startbonus – antippen zeigt, warum.
-- **Verlauf** pro Person: Ämtli, Boni, Belohnungen.
+- **Reliability** in percent (30 days), coloured band per person; newcomers start at 100 % (*starter bonus*).
+- **Fair points** (default): whoever finishes **all** of their chores of the day gets the same number of points (default 30) – whether they have 2 or 6 chores. Every finished chore immediately earns its share; 3 of 6 done = 50 % = 15 points. The points in the chore plan act as weights (a heavy chore with 20 counts twice as much as one with 10). Alternatively *per chore* mode: more chores, more points.
+- **Bonuses**: additionally a **day bonus** for a fully completed day and a **streak bonus** for every 7-day streak. If a chore is reopened, its points are booked back.
+- **10 levels** from *Starter* via *Pro* and *Hero* to *Grandmaster* – with progress bar. Redeemed points never lower the level.
+- **Awards**: 👑 crown of the week, 🏆 trophy of the month, 🐝 busy bee, ⭐ perfect week, 🔥 streak, 🚀 starter bonus – tap to see why.
+- **History** per person: chores, bonuses, rewards.
 
-### Echte Belohnungen
+### Real rewards
 
-- Eltern legen Belohnungen an: z. B. *Glace = 30 Punkte*, *30 Min Gamen = 50*, *5 Fr. Taschengeld = 250*, *Kino = 400*.
-- Pro Belohnung: Icon, Kosten, **Freigabe nötig** ja/nein, **nur für** bestimmte Personen, **höchstens x-mal pro Woche**.
-- Kinder lösen am Tablet ein; Punkte werden reserviert, bis die Eltern entscheiden.
-- Eltern geben frei als **Admin** oder am Tablet mit **Eltern-PIN** (4–8 Ziffern). Mitteilung in Home Assistant und optional aufs Handy.
-- **Punkte geben**: Bonus (oder Abzug) mit Grund, z. B. „Zimmer super aufgeräumt +25“.
+- Parents create rewards: e.g. *ice cream = 30 points*, *30 min gaming = 50*, *5 CHF pocket money = 250*, *cinema = 400*.
+- Per reward: icon, cost, **approval required** yes/no, **only for** certain persons, **at most x times per week**.
+- Children redeem on the tablet; points are reserved until the parents decide.
+- Parents approve as **admin** or on the tablet with a **parent PIN** (4–8 digits). Notification in Home Assistant and optionally on the phone.
+- **Give points**: bonus (or deduction) with a reason, e.g. "Room tidied up perfectly +25".
 
-### Ansagen bei Bewegung
+### Announcements on motion
 
-- **Bewegungsmelder** wählen (Bewegung, Präsenz, Anwesenheit) und eine **Ansage** über
-  - Alexa: Benachrichtigungs-Entität *Ankündigen* oder *Sprechen* (Integration *Alexa Devices*), oder
-  - eine **TTS-Entität** (z. B. Google Translate, Piper) mit Lautsprechern.
-- **Zeitfenster** (z. B. 15–20 Uhr) und **Pause** zwischen Ansagen.
-- Ansage, wer noch was offen hat: *„Hallo! Noch offen: Lea: Tisch decken und Abfall leeren. Mia: Ratten füttern.“*
-- Optional einmal pro Tag: *„Super gemacht! Alle Ämtli für heute sind erledigt.“*
-- Die Ansage wird bei jeder Bewegung **frisch** erstellt – es wird nichts Veraltetes gespeichert.
-- Testen per Dienst `family_planer.announce`.
+- Choose **motion sensors** (motion, presence, occupancy) and an **announcement** via
+  - Alexa: notify entity *Announce* or *Speak* (*Alexa Devices* integration), or
+  - a **TTS entity** (e.g. Google Translate, Piper) with speakers.
+- **Time window** (e.g. 15:00–20:00) and **pause** between announcements.
+- Announces who still has something open: *"Hello! Still open: Lea: set the table and empty the bin. Mia: feed the rats."*
+- Optionally once a day: *"Well done! All chores for today are finished."*
+- The announcement is built **fresh** on every motion – nothing outdated is stored.
+- Test with the `family_planer.announce` service.
 
-**Warteschlange für einmalige Meldungen** – Meldungen, die nur einmal passieren, warten bis zur nächsten Bewegung
-(innerhalb der eingestellten Ruhezeiten, z. B. 07–21 Uhr) und werden dann einmal gesagt, zusammen mit der Ämtli-Erinnerung:
-- *„Mia, deine Belohnung ‹30 Min Gamen› wurde freigegeben. Viel Spass!“* – gültig bis zum Tageswechsel.
-- *„Tom, in den nächsten 21 Tagen ist ‹Pneuwechsel› dran.“* – für besondere Ämtli; wird gestrichen, sobald das Ämtli erledigt ist.
-- Eigene Meldungen aus Automationen mit `family_planer.queue_announcement` (Text, Gültigkeit, optional nur bestimmte Bewegungsmelder, Schlüssel zum Ersetzen/Löschen) und `family_planer.clear_announcement`.
+**Queue for one-off messages** – messages that only happen once wait for the next motion (within the configured quiet
+hours, e.g. 07:00–21:00) and are then spoken once, together with the chore reminder:
+- *"Mia, your reward '30 min gaming' has been approved. Have fun!"* – valid until the day change.
+- *"Tom, 'Tyre change' is due within the next 21 days."* – for special chores; dropped as soon as the chore is done.
+- Your own messages from automations with `family_planer.queue_announcement` (text, validity, optionally only certain motion sensors, key for replacing/deleting) and `family_planer.clear_announcement`.
 
 ```yaml
-# Waschmaschine fertig -> Ansage, sobald jemand vorbeikommt (max. 3 Stunden)
+# Washing machine finished -> announce as soon as someone walks by (max. 3 hours)
 action: family_planer.queue_announcement
 data:
-  message: Die Wäsche ist fertig, Nina ist dran mit Aufhängen.
+  message: The laundry is done, Nina's turn to hang it up.
   expires: 180
-  key: waesche
-  motion: [binary_sensor.gang_bewegung, binary_sensor.kueche_bewegung]
+  key: laundry
+  motion: [binary_sensor.hallway_motion, binary_sensor.kitchen_motion]
 ```
 
-### Bilder: Avatare oder eigenes Foto
+### Pictures: avatars or your own photo
 
-![Bildauswahl](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/avatars.png)
+![Picture selection](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/avatars.png)
 
-- Viele **bunte, gezeichnete Avatare**: Mädchen, Jungen, Frauen, Männer, Grosseltern, Verkleidete (Held, Astronaut, Pirat, Zauberer, Krone, Katze …).
-- **Eigenes Foto hochladen**: wird im Browser quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.
-- Farbe pro Person und Spitznamen direkt im Ämtliplan änderbar.
+- Many **colourful, illustrated avatars**: girls, boys, women, men, grandparents, dressed up (hero, astronaut, pirate, wizard, crown, cat …).
+- **Upload your own photo**: cropped to a square in the browser and stored only in your Home Assistant.
+- Colour per person and nicknames can be changed directly in the chore plan.
 
 ---
 
-## Modul Smarte Listen
+## Smart lists module
 
-![Listen](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/lists.png)
+![Lists](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/lists.png)
 
-- **Beliebig viele Listen**, jede auf einer beliebigen To-do-Entität: Alexa, AnyList, Bring!, Todoist, Google Tasks, HA-Einkaufsliste … z. B. *Einkaufen Lebensmittel*, *Einkaufen Hornbach*, *Todos*.
-- **Kategorien pro Liste, die sich selbst pflegen**:
-  - neue Einträge werden **sofort** einsortiert – über eine eingebaute Wissensliste (Deutsch/Englisch, Lebensmittel, Drogerie, Haushalt, Tierbedarf, Werkzeug, Schrauben, Farbe, Garten, Elektro, Sanitär, Büro …),
-  - **täglich** zur eingestellten Uhrzeit wird alles, was noch unter *Sonstiges* liegt, neu geordnet – optional mit einer **KI-Aufgabe** (OpenAI, Google, Ollama …),
-  - **nie mehr als 5–20 Kategorien** (pro Liste wählbar); selten genutzte werden unter *Sonstiges* zusammengefasst.
-- Eintrag **einmal verschieben – die Liste merkt es sich**.
-- Kategorien auf der Karte **umbenennen, sortieren, hinzufügen, löschen**.
-- Hinzufügen-Feld, abhaken, erledigte ein-/ausblenden und löschen. Mengenangaben („2x Milch“, „Mehl 1 kg“) werden beim Einordnen ignoriert.
+- **Any number of lists**, each on any to-do entity: Alexa, AnyList, Bring!, Todoist, Google Tasks, HA shopping list … e.g. *Groceries*, *DIY store*, *To-dos*.
+- **Self-maintaining categories per list**:
+  - new items are sorted **immediately** – using a built-in knowledge list (English/German: groceries, drugstore, household, pet supplies, tools, screws, paint, garden, electrical, plumbing, office …),
+  - **daily** at the configured time, everything still under *Other* is reorganised – optionally with an **AI task** (OpenAI, Google, Ollama …),
+  - **never more than 5–20 categories** (selectable per list); rarely used ones are merged into *Other*.
+- **Move an item once – the list remembers it**.
+- **Rename, sort, add and delete** categories on the card.
+- Add field, tick off, show/hide and delete completed items. Quantities ("2x milk", "flour 1 kg") are ignored when sorting.
 
 ---
 
 ## Designs
 
-| Home Assistant | Loxone | Apple Home | Google Home | Hell | Nord |
+| Home Assistant | Loxone | Apple Home | Google Home | Light | Nord |
 |---|---|---|---|---|---|
-| übernimmt dein HA-Design (Farben, Rundungen) | dunkel, Grün | schwarz, Orange | Material You | weiss, Blau | Nord-Farben |
+| uses your HA theme (colours, corner radius) | dark, green | black, orange | Material You | white, blue | Nord colours |
 
-![Design Hell](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/theme-light.png)
+![Light design](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/theme-light.png)
 
-Einstellbar unter *Konfigurieren → Design & Seitenleiste*; Karten in eigenen Dashboards können es mit `theme:` überschreiben.
+Set under *Configure → Design & sidebar*; cards in your own dashboards can override it with `theme:`.
 
 ---
 
 ## Installation
 
-**Home Assistant 2026.11 und neuer (Marketplace):**
-*Einstellungen → Marketplace* → „Family Planer“ suchen → installieren.
-Solange die Integration noch nicht im Katalog ist: *Marketplace → Über Link hinzufügen* → `https://github.com/magi1982/family-planer`.
+**Home Assistant 2026.11 and newer (Marketplace):**
+*Settings → Marketplace* → search for "Family Planer" → install.
+As long as the integration is not yet in the catalogue: *Marketplace → Add from link* → `https://github.com/magi1982/family-planer`.
 
 **Home Assistant 2026.3 – 2026.10 (HACS):**
-HACS → ⋮ → *Benutzerdefinierte Repositories* → URL oben, Typ *Integration* → installieren → Home Assistant neu starten.
+HACS → ⋮ → *Custom repositories* → URL above, type *Integration* → install → restart Home Assistant.
 
-Danach: *Einstellungen → Geräte & Dienste → Integration hinzufügen → Family Planer*.
-
----
-
-## Einrichtung
-
-Beim Hinzufügen: **Name**, **Module**, **Familienmitglieder** (mit Komma getrennt) und optional die **erste Liste**.
-Alles Weitere unter *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren*. Jedes Feld hat dort eine
-Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bearbeitet (auch am Tablet).
-
-### Alle Einstellungen
-
-**Module ein-/ausschalten**
-
-| Einstellung | Standard | Bedeutung |
-|---|---|---|
-| Aktive Module | beide | *Wochenplan* und *Smarte Listen* einzeln ein-/ausschalten |
-
-**Design & Seitenleiste**
-
-| Einstellung | Standard | Bedeutung |
-|---|---|---|
-| Design | Loxone | Home Assistant, Loxone, Apple Home, Google Home, Hell, Nord |
-| Eintrag in der Seitenleiste | ein | Öffnet den kompletten Planer ohne eigenes Dashboard |
-| Titel in der Seitenleiste | Name | Text in der Seitenleiste |
-| Zurück zur Startansicht nach | 45 s | Angetippter Tag / Person springt danach zurück zu heute |
-
-**Wochenplan → Person hinzufügen / bearbeiten / entfernen**
-
-| Einstellung | Bedeutung |
-|---|---|
-| Name, Farbe | Farbe gilt auch für den Kalender der Person |
-| Kalender | beliebige `calendar.*`-Entität |
-| Spitznamen | Termine mit diesem Namen im Titel erscheinen bei der Person |
-
-**Wochenplan → Schule & Stundenplan** (pro Person)
-
-| Einstellung | Bedeutung |
-|---|---|
-| Schulkalender | Kalender mit den Lektionen (hat Vorrang vor festen Zeiten) |
-| Mo–Sa Block 1 / Block 2 | feste Zeiten, zweiter Block z. B. für den Nachmittag |
-| Schulweg berücksichtigen, Dauer | zeigt „los“ und „zuhause“ je Block |
-
-**Wochenplan → Ferien & Abwesenheit**
-
-| Einstellung | Standard | Bedeutung |
-|---|---|---|
-| Ämtli in den Ferien pausieren | ein | Ferien-Tage zählen weder als erledigt noch als verpasst |
-| Wörter für Ferien | automatisch erkannt | z. B. *Ferien, Urlaub, OOO*; Wortenden zählen („Skiferien“) |
-| Ferien gelten für | Person / Genannte | oder ganze Familie |
-| Ganzer Tag ab | 20 h | Mindestdauer eines Termins mit Uhrzeit, um als Ferientag zu zählen |
-| Kalender prüfen alle | 30 min | Wie oft auf neue Ferien geprüft wird |
-| Neu durchsuchen | – | Kalender erneut nach Ferien-Wörtern durchsuchen |
-
-**Wochenplan → Punkte & Belohnungen**
-
-| Einstellung | Standard | Bedeutung |
-|---|---|---|
-| Belohnung: Titel, Icon, Kosten | – | z. B. *30 Min Gamen*, 50 Punkte |
-| Freigabe nötig / Nur für / Max. pro Woche | ja / alle / unbegrenzt | Regeln pro Belohnung |
-| Punkte verteilen | Fair | *Fair*: ein ganzer Tag zählt, nicht die Anzahl Ämtli · *Pro Ämtli*: jedes Ämtli bringt seine Punkte |
-| Punkte für einen ganzen Tag (fair) | 30 | Wird auf die Ämtli des Tages verteilt, jedes erledigte bringt sofort seinen Anteil |
-| Punkte pro Ämtli | 10 | Modus *Pro Ämtli*: Punkte je Ämtli · Modus *Fair*: Standard-Gewicht; pro Ämtli im Ämtliplan änderbar |
-| Tagesbonus | 5 | ganz erledigter Tag |
-| Serienbonus | 20 | jede 7-Tage-Serie |
-| Eltern-PIN | – | 4–8 Ziffern, für Freigaben am Tablet; Sperre nach 5 Fehlversuchen |
-| Anfragen melden an | – | zusätzliche Benachrichtigung (z. B. Handy-App) |
-
-**Wochenplan → Ansagen bei Bewegung**
-
-| Einstellung | Standard | Bedeutung |
-|---|---|---|
-| Ansagen einschalten | aus | |
-| Bewegungsmelder | – | Bewegung, Präsenz, Anwesenheit |
-| Ansage über / TTS + Lautsprecher | – | Alexa-Benachrichtigung („Ankündigen“/„Sprechen“) oder TTS |
-| Von / Bis | 15:00 / 20:00 | Zeitfenster für Ämtli-Erinnerungen |
-| Höchstens alle | 60 min | Pause zwischen Erinnerungen |
-| Auch ansagen, wenn alles erledigt ist | ein | einmal pro Tag |
-| Nur für | alle | Personen in der Erinnerung |
-| Ämtli pro Person in der Ansage | 3 | weitere als „und 2 weitere“ |
-| Warteschlange für einmalige Meldungen | ein | Meldungen warten auf Bewegung |
-| Meldungen frühestens ab / spätestens bis | 07:00 / 21:00 | Ruhezeiten der Warteschlange |
-| Freigegebene Belohnungen ansagen | ein | |
-| Belohnungs-Meldung gültig für | 0 = bis Tageswechsel | Stunden |
-| Besondere Ämtli ansagen | ein | entfällt, wenn erledigt |
-
-**Wochenplan → Einstellungen**
-
-| Einstellung | Standard | Bedeutung |
-|---|---|---|
-| Tageswechsel um | 00:00 | bis dahin können Ämtli des Vortags abgehakt werden |
-| Termine anhand von Namen zuordnen | ein | „Lea Turnen“ erscheint bei Lea |
-| Auch beim Kalenderbesitzer zeigen | aus | |
-| Plan nur durch Admins änderbar | aus | Kinder können abhaken und Belohnungen anfragen |
-| Zuverlässigkeit berechnen über | 30 Tage | |
-| Heimweg über Mittag ab | 0 = automatisch | Pause in Minuten, ab der der Schultag in Blöcke geteilt wird |
-
-**Smarte Listen → Liste hinzufügen / bearbeiten / entfernen**
-
-| Einstellung | Standard | Bedeutung |
-|---|---|---|
-| Name, To-do-Liste, Icon | – | jede `todo.*`-Entität |
-| Höchstens so viele Kategorien | 10 | 5–20 |
-| Kategorien automatisch pflegen | ein | sofort einsortieren und täglich optimieren |
-
-**Smarte Listen → Einstellungen**
-
-| Einstellung | Standard | Bedeutung |
-|---|---|---|
-| Tägliche Optimierung um | 03:00 | |
-| KI-Aufgabe | – | optional, ordnet auch Unbekanntes ein |
-| Ungenutzte Kategorie ersetzen nach | 30 Tage | macht Platz, wenn die Liste voll ist |
+Then: *Settings → Devices & services → Add integration → Family Planer*.
 
 ---
 
-## Ansichten & Bedienung
+## Setup
 
-Die Navigation ist auf allen Seiten oben in der Mitte an derselben Stelle.
+When adding: **name**, **modules**, **family members** (comma separated) and optionally the **first list**.
+Everything else under *Settings → Devices & services → Family Planer → Configure*. Every field there has a
+description. The chores themselves are edited directly in the **Chore plan** view (also on the tablet).
 
-**Planer** – die Woche im Querformat, optimiert fürs Tablet:
-- Heute gross, die nächsten zwei Tage und das Wochenende mittel, Vergangenheit und spätere Tage schmal (vergangene Tage nur farbig mit Anzahl).
-- Tag antippen zeigt ihn gross; Pfeile für andere Wochen, „Heute“ springt zurück.
-- Filter **Alles · Ämtli · Termine · Stundenplan**.
-- Ämtli direkt antippen zum Abhaken; Fristen („bis Sa“, „heute fällig“) sichtbar.
-- Person antippen: Zuverlässigkeit, Serie, Auszeichnungen und wie man sie bekommt.
+### All settings
 
-**Listen** – Tabs pro Liste, Hinzufügen-Feld, Kategorien als Kacheln, *Kategorien* und *Optimieren*.
+**Switch modules on/off**
 
-**Ämtliplan** – Personen mit Bild & Farbe, Wochenübersicht, Ämtli nach Wochentag, darunter **Besondere Ämtli**.
+| Setting | Default | Meaning |
+|---|---|---|
+| Active modules | both | switch *Week plan* and *Smart lists* on or off individually |
 
-**Belohnungen** – Punkte, Level, offene Freigaben, Belohnungen pro Person, Verlauf, *Punkte geben*.
+**Design & sidebar**
+
+| Setting | Default | Meaning |
+|---|---|---|
+| Design | Loxone | Home Assistant, Loxone, Apple Home, Google Home, Light, Nord |
+| Sidebar entry | on | opens the complete planner without a dashboard of your own |
+| Sidebar title | name | text in the sidebar |
+| Return to the start view after | 45 s | a tapped day / person jumps back to today afterwards |
+
+**Week plan → Add / edit / remove person**
+
+| Setting | Meaning |
+|---|---|
+| Name, colour | the colour is also used for the person's calendar |
+| Calendar | any `calendar.*` entity |
+| Nicknames in events | events with this name in the title appear at the person |
+
+**Week plan → School & timetable** (per person)
+
+| Setting | Meaning |
+|---|---|
+| School calendar / timetable | calendar with the lessons (takes priority over fixed times) |
+| Mon–Sat block 1 / block 2 | fixed times, second block e.g. for the afternoon |
+| Consider travel time, duration | shows "leave" and "home" per block |
+
+**Week plan → Holidays & absence**
+
+| Setting | Default | Meaning |
+|---|---|---|
+| Pause chores during holidays | on | holiday days count neither as done nor as missed |
+| Words for holidays | detected automatically | e.g. *Vacation, Holiday, OOO*; word endings count ("ski holiday") |
+| Holidays apply to | person / persons named | or the whole family |
+| Whole day from | 20 h | minimum duration of a timed event to count as a holiday |
+| Check calendars every | 30 min | how often new holidays are checked |
+| Search again | – | search the calendars for holiday words again |
+
+**Week plan → Points & rewards**
+
+| Setting | Default | Meaning |
+|---|---|---|
+| Reward: title, icon, cost | – | e.g. *30 min gaming*, 50 points |
+| Needs parent approval / Only for / Max per week | yes / everyone / unlimited | rules per reward |
+| How points are given | Fair | *Fair*: a full day counts, not the number of chores · *Per chore*: each chore earns its points |
+| Points for a full day (fair) | 30 | split across the day's chores, each finished chore earns its share immediately |
+| Points per chore | 10 | *Per chore* mode: points per chore · *Fair* mode: default weight; can be changed per chore in the chore plan |
+| Bonus for a fully completed day | 5 | |
+| Bonus for every 7-day streak | 20 | |
+| Parent PIN | – | 4–8 digits, for approvals on the tablet; locked after 5 wrong attempts |
+| Also send requests to | – | additional notification (e.g. mobile app) |
+
+**Week plan → Announcements on motion**
+
+| Setting | Default | Meaning |
+|---|---|---|
+| Enable announcements | off | |
+| Motion sensors | – | motion, presence, occupancy |
+| Announce via (notify) / TTS + speakers | – | Alexa notify entity ("Announce"/"Speak") or TTS |
+| From / Until | 15:00 / 20:00 | time window for chore reminders |
+| At most every | 60 min | pause between reminders |
+| Also announce when everything is done | on | once a day |
+| Only for | everyone | persons included in the reminder |
+| Chores per person in the announcement | 3 | further ones as "and 2 more" |
+| Queue for one-off messages | on | messages wait for motion |
+| Messages not before / not after | 07:00 / 21:00 | quiet hours of the queue |
+| Announce approved rewards | on | |
+| Reward message valid for | 0 = until day change | hours |
+| Announce special chores | on | dropped once done |
+
+**Week plan → Settings**
+
+| Setting | Default | Meaning |
+|---|---|---|
+| Day change at | 00:00 | until then, the previous day's chores can be ticked off |
+| Assign events by names | on | "Lea gymnastics" appears at Lea |
+| Also show assigned events at the calendar owner | off | |
+| Only admins may change the plan | off | children can still tick off chores and request rewards |
+| Calculate reliability over | 30 days | |
+| Lunch at home from | 0 = automatic | break in minutes from which the school day is split into blocks |
+
+**Smart lists → Add / edit / remove list**
+
+| Setting | Default | Meaning |
+|---|---|---|
+| List name, to-do list, icon | – | any `todo.*` entity |
+| Maximum number of categories | 10 | 5–20 |
+| Maintain categories automatically | on | sort immediately and optimise daily |
+
+**Smart lists → Settings**
+
+| Setting | Default | Meaning |
+|---|---|---|
+| Daily optimisation at | 03:00 | |
+| AI task (optional) | – | also sorts unknown items |
+| Replace unused category after | 30 days | makes room when the list is full |
 
 ---
 
-## Entitäten
+## Views & usage
 
-Pro Person (Gerät „Familienmitglied“):
+The navigation is in the same place at the top centre on every page.
 
-| Entität | Inhalt |
-|---|---|
-| `todo.<person>_amtli` | Heutige Ämtli – abhaken auch per App, Sprachassistent oder Automation |
-| `sensor.<person>_zuverlassigkeit` | Zuverlässigkeit in %, Attribute: offen/erledigt heute, Serie, Woche/Monat, Auszeichnungen |
-| `sensor.<person>_punkte` | Punktestand, Attribute: verfügbar, gesamt verdient, Level, Level-Name, nächstes Level |
+**Planner** – the week in landscape format, optimised for tablets:
+- Today large, the next two days and the weekend medium, past and later days narrow (past days only coloured with a count).
+- Tap a day to show it large; arrows for other weeks, "Today" jumps back.
+- Filters **All · Chores · Events · Timetable**.
+- Tap chores directly to tick them off; deadlines ("until Sat", "due today") are visible.
+- Tap a person: reliability, streak, awards and how to earn them.
 
-Die Entitäten-IDs richten sich nach der HA-Sprache und dem Personennamen.
+**Lists** – tabs per list, add field, categories as tiles, *Categories* and *Optimise*.
+
+**Chore plan** – persons with picture & colour, week overview, chores by weekday, **special chores** below.
+
+**Rewards** – points, levels, pending approvals, rewards per person, history, *Give points*.
 
 ---
 
-## Dienste (Aktionen)
+## Entities
 
-| Dienst | Zweck |
+Per person (device "Family member"):
+
+| Entity | Content |
 |---|---|
-| `family_planer.rollover` | Tag sofort neu berechnen |
-| `family_planer.set_item` | Ämtli per ID abhaken oder öffnen |
-| `family_planer.add_points` | Punkte geben oder abziehen (Person, Punkte, Grund) |
-| `family_planer.announce` | Ansage sofort auslösen (ohne Zeitfenster/Pause), gibt den Text zurück |
-| `family_planer.queue_announcement` | Einmalige Meldung für die nächste Bewegung vormerken |
-| `family_planer.clear_announcement` | Vorgemerkte Meldung per Schlüssel löschen |
-| `family_planer.optimize_lists` | Alle Smarten Listen jetzt neu sortieren (optional mit KI) |
-| `family_planer.import_legacy` | Daten aus dem To-do-Listen-Prototyp übernehmen |
+| `todo.<person>_chores` | today's chores – tick off via app, voice assistant or automation |
+| `sensor.<person>_reliability` | reliability in %, attributes: open/done today, streak, week/month, awards |
+| `sensor.<person>_points` | points balance, attributes: available, lifetime earned, level, level name, next level |
 
-Beispiel-Automation: Bonuspunkte, wenn die Waschmaschine ausgeräumt wurde.
+The entity IDs follow the Home Assistant language and the person's name (German: `todo.<person>_amtli`, `sensor.<person>_zuverlassigkeit`, `sensor.<person>_punkte`).
+
+---
+
+## Services (actions)
+
+| Service | Purpose |
+|---|---|
+| `family_planer.rollover` | recalculate the day immediately |
+| `family_planer.set_item` | tick off or reopen a chore by ID |
+| `family_planer.add_points` | give or deduct points (person, points, reason) |
+| `family_planer.announce` | trigger an announcement immediately (ignores time window/pause), returns the text |
+| `family_planer.queue_announcement` | queue a one-off message for the next motion |
+| `family_planer.clear_announcement` | delete a queued message by key |
+| `family_planer.optimize_lists` | re-sort all smart lists now (optionally with AI) |
+| `family_planer.import_legacy` | import data from the to-do list prototype |
+
+Example automation: bonus points when the washing machine has been emptied.
 
 ```yaml
 action: family_planer.add_points
 data:
   person: Mia
   points: 15
-  reason: Wäsche aufgehängt
+  reason: Hung up the laundry
 ```
 
 ---
 
-## Eigene Dashboards
+## Custom dashboards
 
-Nicht nötig – aber möglich. Die Karten werden automatisch geladen.
+Not necessary – but possible. The cards are loaded automatically.
 
 ```yaml
 type: vertical-stack
@@ -406,29 +407,29 @@ cards:
   - type: custom:family-planer-card
     view: week        # week | plan | lists | rewards
     theme: apple      # optional
-    language: de      # optional, sonst HA-Sprache
+    language: en      # optional, otherwise the HA language
 ```
 
-Für ein Vollbild-Tablet empfiehlt sich eine Panel-Ansicht pro Seite (Pfade wie oben) und z. B. *Kiosk Mode*.
+For a full-screen tablet, a panel view per page (paths as above) and e.g. *Kiosk Mode* are recommended.
 
 ---
 
-## Sicherheit & Datenschutz
+## Security & privacy
 
-- Alles bleibt **lokal** in deinem Home Assistant; keine Cloud, kein Tracking. Externe Dienste nur, wenn du sie selbst wählst (Kalender, Listen, KI).
-- Eingaben werden serverseitig geprüft (Farben, Bilder, Icons, Texte, Längen), Ausgaben im Browser maskiert.
-- Eltern-PIN mit PBKDF2 gespeichert, Sperre nach 5 Fehlversuchen; optional dürfen nur Admins den Plan ändern.
-- Fotos haben lange Zufallsnamen; Diagnose-Downloads enthalten keine Namen, Fotos oder Listeninhalte.
-- Bei jedem Commit: **CodeQL**, **Bandit**, ESLint-Sicherheitsregeln, hassfest, HACS-Prüfung, Tests.
+- Everything stays **local** in your Home Assistant; no cloud, no tracking. External services only if you choose them yourself (calendars, lists, AI).
+- Input is validated on the server (colours, images, icons, texts, lengths), output is escaped in the browser.
+- Parent PIN stored with PBKDF2, locked after 5 wrong attempts; optionally only admins may change the plan.
+- Photos get long random file names; diagnostics downloads contain no names, photos or list contents.
+- On every commit: **CodeQL**, **Bandit**, ESLint security rules, hassfest, HACS validation, tests.
 
 Details: [SECURITY.md](https://github.com/magi1982/family-planer/blob/main/SECURITY.md)
 
 ---
 
-## Umstieg vom Prototyp
+## Migrating from the prototype
 
-Wer den Familienplaner vorher mit To-do-Listen (`todo.amtli_plan`, `todo.amtli_heute`, `todo.amtli_verlauf`,
-`todo.familienplaner_einstellungen`) betrieben hat, übernimmt alles mit:
+If you previously ran the family planner with to-do lists (`todo.amtli_plan`, `todo.amtli_heute`, `todo.amtli_verlauf`,
+`todo.familienplaner_einstellungen`), take everything over with:
 
 ```yaml
 action: family_planer.import_legacy
@@ -441,50 +442,19 @@ data:
 
 ---
 
-## Entfernen
+## Removal
 
-1. *Einstellungen → Geräte & Dienste → Family Planer → Löschen*.
-2. Im Marketplace bzw. in HACS deinstallieren und Home Assistant neu starten.
-3. Hochgeladene Fotos liegen in `config/family_planer/` und können gelöscht werden.
-
----
-
-## Unterstützen
-
-Wenn der Family Planer euren Familienalltag etwas leichter macht, freue ich mich über einen
-[☕ Kaffee](https://www.buymeacoffee.com/magibuilds). Danke!
-
-<a href="https://buymeacoffee.com/magibuilds"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="50"></a>
-
-Fehler und Wünsche: [Issues](https://github.com/magi1982/family-planer/issues)
+1. *Settings → Devices & services → Family Planer → Delete*.
+2. Uninstall in the Marketplace or HACS and restart Home Assistant.
+3. Uploaded photos are stored in `config/family_planer/` and can be deleted.
 
 ---
 
-<a name="english"></a>
-## English
+## Support
 
-**Family Planer** is a family organiser for your wall tablet, set up entirely in the UI (no YAML), in German and English.
-
-**Week plan module**
-- Chores per person and weekday, "every n weeks", time windows ("Wed to Sat"), points per chore, fair week overview.
-- **Special chores by date**: every n days/weeks/months/years, monthly (day or "1st Saturday"), yearly dates, one-off; several people taking turns; up to 60 days to do it.
-- **Day change at a time you choose** (e.g. 03:00).
-- **Calendars per person** (any `calendar.*`), calendar colour = person colour, events assigned by names/nicknames in the title (optional).
-- **School & timetable** per child: school calendar or fixed times with up to two blocks per day plus travel time. *All* shows "leave · home" per block, *Timetable* shows every lesson with room.
-- **Holidays pause chores**: all-day events with holiday words ("Ski holiday", "Vacation" – detected automatically on the first sync) pause chores; they count neither as done nor missed.
-- **Gamification**: reliability, **fair points** (a fully completed day is worth the same for every child, however many chores they have; chore points act as weights – or classic points per chore), day and streak bonuses, 10 levels, crown/trophy/busy bee/perfect week/streak awards.
-- **Real rewards** (e.g. 30 min gaming = 50 points) with approval by an admin or parent PIN, "only for", weekly limits, notifications.
-- **Spoken reminders** when motion is detected (Alexa notify entity or TTS + speakers), time window, cooldown, "all done" message, and a **queue** for one-off messages (approved rewards, special chores, your own via `queue_announcement`) that wait for the next motion and expire.
-- Colourful avatars or **own photo**.
-
-**Smart lists module**
-- Any number of lists on any to-do entity (Alexa, AnyList, Bring!, Todoist …).
-- Self-maintaining categories per list: instant sorting via a built-in knowledge list, daily optimisation (optionally with an AI task), never more than 5–20 categories, learns when you move an item.
-
-**More**: sidebar panel, six designs (Home Assistant, Loxone, Apple Home, Google Home, Light, Nord), entities per person (chores to-do list, reliability and points sensors), services `rollover`, `set_item`, `add_points`, `announce`, `queue_announcement`, `clear_announcement`, `optimize_lists`, `import_legacy`, diagnostics, repair issues, security scanning on every commit.
-
-**Install**: Home Assistant 2026.11+: *Settings → Marketplace* (or *Add from link* with this repository URL). 2026.3–2026.10: HACS custom repository. Then *Settings → Devices & services → Add integration → Family Planer* and configure everything under *Configure*.
-
-If you like it: [buy me a coffee ☕](https://www.buymeacoffee.com/magibuilds). License: MIT.
+If Family Planer makes your family life a little easier, I'd be happy about a
+[☕ coffee](https://buymeacoffee.com/magibuilds). Thank you!
 
 <a href="https://buymeacoffee.com/magibuilds"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="50"></a>
+
+Bugs and feature requests: [Issues](https://github.com/magi1982/family-planer/issues) · License: MIT
