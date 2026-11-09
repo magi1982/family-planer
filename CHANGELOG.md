@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.3 – 2026-11-09
+
+### Wartung
+- Releases entstehen jetzt automatisch, sobald alle Prüfungen (Tests, hassfest, HACS, Sicherheit) grün sind.
+- Manifest um die neuen Home-Assistant-Kategorien ergänzt (*Kalender & To-dos*, *Einkaufen*).
+- Buy-Me-a-Coffee-Knopf in der Beschreibung.
+- Keine Änderungen an den Funktionen – Update ist optional.
+
 ## 0.5.2 – 2026-11-08
 
 ### Neu
