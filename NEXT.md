@@ -1,7 +1,7 @@
 # Ideen für die nächste Version (0.6.0)
 
 > Arbeitsweise: Ideen werden hier gesammelt. Code wird erst geschrieben, wenn der Maintainer „mach es“ sagt.
-> Jedes Update durchläuft die Release-Checkliste unten.
+> Jedes Update durchläuft die Release-Checkliste unten. **Vor jedem Release wird gefragt**; Release Notes und CHANGELOG sind auf Englisch.
 
 ## Ideen
 
@@ -50,5 +50,6 @@
 - [ ] Unit-Tests für die neue Logik; alle Tests grün
 - [ ] Frontend neu gebaut, englische Texte ergänzt, alle Designs geprüft
 - [ ] README: Funktionsbeschreibung und Tabelle „Alle Einstellungen“ ergänzt
-- [ ] CHANGELOG-Eintrag (`## x.y.z – Datum`); Version in `const.py` und `manifest.json` erhöht
+- [ ] CHANGELOG-Eintrag auf Englisch (`## x.y.z – Datum`); Version in `const.py` und `manifest.json` erhöht
+- [ ] **Vor dem Release fragen** – erst nach Freigabe Version erhöhen und hochladen
 - [ ] Release entsteht automatisch (`release.yml`), sobald Validate und Security grün sind – Text aus dem CHANGELOG
