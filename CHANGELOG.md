@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0 – 2026-11-10
+
+### New
+- **Design picker in the navigation**: a colour swatch at the top right shows the current design; tapping it opens a picker with a mini preview of every design (Home Assistant, Loxone, Apple Home, Google Home, Light, Nord). One tap switches for every device.
+- New setting *Changing the design needs the parent PIN* (default off). The design field moved from the settings page to the picker; the Home Assistant options keep it.
+- Navigation card option `theme_picker: false` hides the picker.
+
+### Security
+- New websocket command `family_planer/theme/set`: whitelisted design names only, respects *Only admins may change the plan* and, if enabled, the parent-PIN token.
+
 ## 0.7.0 – 2026-11-10
 
 ### New

@@ -89,3 +89,11 @@ def test_reward_value_and_currency():
     assert patch["reward_value"] == 20 and patch["currency"] == "CHF"
     patch, _ = S.points({"reward_value": -3}, game, "fair", [])
     assert patch["reward_value"] == 0
+
+
+def test_theme_pin_and_theme_kept():
+    cur = {"theme": "apple", "modules": {"week": True, "lists": True}, "panel": {}}
+    patch, _ = S.general({"theme_pin": True}, cur)
+    assert patch["theme_pin"] is True and patch["theme"] == "apple"  # saving the page keeps the picked design
+    patch, _ = S.general({"theme": "evil"}, cur)
+    assert patch["theme"] == "apple" and patch["theme_pin"] is False

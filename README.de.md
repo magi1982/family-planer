@@ -243,7 +243,12 @@ data:
 
 ![Design Hell](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/theme-light.png)
 
-Einstellbar unter *Konfigurieren → Design, Sprache & Seitenleiste*; Karten in eigenen Dashboards können es mit `theme:` überschreiben.
+**Design wechseln wie in einer App**: oben rechts in der Navigation zeigt eine kleine Farbprobe das aktuelle Design. Antippen öffnet die Auswahl mit einer **Mini-Vorschau** jedes Designs, ein Tipp wechselt sofort, für alle Geräte.
+
+![Design-Auswahl](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/design-picker.png)
+
+- Optional **nur mit Eltern-PIN** (*Einstellungen → Allgemein → Design-Wechsel nur mit Eltern-PIN*), damit Kinder das Aussehen nicht ändern.
+- Weiterhin auch unter *Konfigurieren → Design, Sprache & Seitenleiste*. Karten in eigenen Dashboards können es mit `theme:` überschreiben. `theme_picker: false` an der Navigationskarte blendet die Auswahl aus.
 
 ---
 

@@ -213,7 +213,8 @@
           "idle_seconds": "Zurück zur Startansicht nach",
           "language": "Sprache des Family Planers",
           "fullscreen_dblclick": "Vollbild per Doppeltippen",
-          "fullscreen_auto": "Beim Öffnen automatisch Vollbild"
+          "fullscreen_auto": "Beim Öffnen automatisch Vollbild",
+          "theme_pin": "Design-Wechsel nur mit Eltern-PIN"
         },
         "data_description": {
           "panel": "Öffnet den kompletten Planer ohne eigenes Dashboard – kein YAML nötig.",
@@ -222,7 +223,8 @@
           "idle_seconds": "Wird am Tablet ein anderer Tag oder eine Person angetippt, springt die Ansicht nach dieser Zeit ohne Berührung zurück zu heute.",
           "language": "Automatisch: wie im Profil bzw. Home Assistant eingestellt. Deutsch oder Englisch: gilt fest für Planer, Tablet-Ansichten, Ansagen, Benachrichtigungen und Level-Namen – unabhängig von der Sprache von Home Assistant. Diese Einstellungsseiten folgen weiterhin der Sprache deines Profils.",
           "fullscreen_dblclick": "Doppeltippen auf eine freie Stelle des Planers blendet Kopfzeile und Seitenleiste von Home Assistant aus (bzw. echtes Vollbild, wo der Browser es erlaubt). Nochmals doppeltippen beendet es. Ämtli, Knöpfe und Eingabefelder lösen es nicht aus.",
-          "fullscreen_auto": "Ideal für ein Wandtablet: der Planer startet ohne Kopfzeile und Seitenleiste."
+          "fullscreen_auto": "Ideal für ein Wandtablet: der Planer startet ohne Kopfzeile und Seitenleiste.",
+          "theme_pin": "Die Design-Auswahl oben rechts in der Navigation fragt dann nach der Eltern-PIN – so können Kinder das Aussehen nicht ändern."
         }
       },
       "rewards": {

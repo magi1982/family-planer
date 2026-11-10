@@ -244,7 +244,12 @@ data:
 
 ![Light design](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/theme-light.png)
 
-Set under *Configure → Design, language & sidebar*; cards in your own dashboards can override it with `theme:`.
+**Switch the design like in an app**: a small colour swatch at the top right of the navigation shows the current design. Tapping it opens a picker with a **mini preview** of every design; one tap switches at once, on every device.
+
+![Design picker](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/design-picker.png)
+
+- Optionally **parent PIN only** (*Settings → General → Changing the design needs the parent PIN*), so children cannot change the look.
+- Still available under *Configure → Design, language & sidebar*. Cards in your own dashboards can override it with `theme:`. `theme_picker: false` on the navigation card hides the picker.
 
 ---
 

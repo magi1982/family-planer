@@ -71,7 +71,11 @@
 - To-dos im Planer über einen Knopf oben rechts in eigenem Fenster
 - Fehler: Belohnungen ohne Auswahl für alle, mit Auswahl nur für die Person
 
-## Ideen für 0.8.0
+## Umgesetzt in 0.8.0
+
+- Design-Auswahl oben rechts in der Navigation mit Mini-Vorschau, optional nur mit Eltern-PIN
+
+## Ideen für die nächste Version
 
 ### 5. „+ Hinzufügen“-Knopf oben rechts im Ämtliplan
 **Status:** Idee – noch nicht umgesetzt

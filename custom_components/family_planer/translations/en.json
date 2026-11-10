@@ -213,7 +213,8 @@
           "idle_seconds": "Return to the start view after",
           "language": "Family Planer language",
           "fullscreen_dblclick": "Fullscreen on double tap",
-          "fullscreen_auto": "Fullscreen automatically when opened"
+          "fullscreen_auto": "Fullscreen automatically when opened",
+          "theme_pin": "Changing the design needs the parent PIN"
         },
         "data_description": {
           "panel": "Opens the complete planner without creating a dashboard – no YAML needed.",
@@ -222,7 +223,8 @@
           "idle_seconds": "When another day or a person is tapped on the tablet, the view returns to today after this time without touch.",
           "language": "Automatic: as set in your profile or Home Assistant. German or English: fixed for the planner, tablet views, announcements, notifications and level names – independent of the Home Assistant language. These settings pages keep following your profile language.",
           "fullscreen_dblclick": "Double-tapping an empty spot of the planner hides the Home Assistant header and sidebar (or real fullscreen where the browser allows it). Double-tap again to leave. Chores, buttons and input fields do not trigger it.",
-          "fullscreen_auto": "Ideal for a wall tablet: the planner starts without header and sidebar."
+          "fullscreen_auto": "Ideal for a wall tablet: the planner starts without header and sidebar.",
+          "theme_pin": "The design picker at the top right of the navigation then asks for the parent PIN, so children cannot change the look."
         }
       },
       "rewards": {

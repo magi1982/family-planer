@@ -10,6 +10,8 @@ import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant, callback
 
+from .settings_spec import THEMES
+
 RULE = vol.Schema({
     vol.Optional("every", default=1): vol.All(vol.Coerce(int), vol.Range(min=1, max=8)),
     vol.Optional("offset", default=0): vol.All(vol.Coerce(int), vol.Range(min=0, max=7)),
@@ -98,7 +100,7 @@ def async_register_websocket(hass: HomeAssistant) -> None:
                     ws_redeem, ws_decide, ws_adjust, ws_announce_test,
                     ws_pin_unlock, ws_pin_change, ws_settings_get, ws_settings_save, ws_person_save, ws_person_remove,
                     ws_list_save, ws_list_remove, ws_reward_save, ws_reward_remove,
-                    ws_todo_save, ws_todo_set, ws_todo_delete):
+                    ws_todo_save, ws_todo_set, ws_todo_delete, ws_theme_set):
         websocket_api.async_register_command(hass, handler)
 
 
@@ -620,6 +622,24 @@ async def ws_reward_remove(hass: HomeAssistant, connection: websocket_api.Active
 
 
 # ---------------------------------------------------------------------- to-dos without a date
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/theme/set", vol.Optional("entry_id"): str,
+                                  vol.Required("theme"): vol.In(list(THEMES)),
+                                  vol.Optional("token"): TOKEN})
+@websocket_api.async_response
+async def ws_theme_set(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    """Quick design switch from the navigation bar; optionally protected by the parent PIN (setting)."""
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    if not _may_edit(connection, msg, planner):
+        return
+    if planner.settings.get("theme_pin") and not _unlocked(connection, msg, planner):
+        return
+    await planner.async_update_settings({"theme": msg["theme"]})
+    connection.send_result(msg["id"])
+
+
 @websocket_api.websocket_command({vol.Required("type"): "family_planer/todo/save", vol.Optional("entry_id"): str,
                                   vol.Optional("todo_id"): ID, vol.Required("person_id"): ID,
                                   vol.Required("title"): vol.All(str, vol.Length(max=200)),

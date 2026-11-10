@@ -160,6 +160,21 @@
     light: { bg0: '#f2f3f5', bg1: '#ffffff', bg2: '#f6f7f9', bg3: '#eef0f3', bg4: '#e4e7eb', line: '#dfe3e8', text: '#1f2328', text2: '#57606a', text3: '#8c959f', accent: '#1f7aec', 'on-accent': '#ffffff', radius: '16px', font: SYS },
     nord: { bg0: '#242933', bg1: '#2e3440', bg2: '#343b48', bg3: '#3b4252', bg4: '#434c5e', line: '#4c566a', text: '#eceff4', text2: '#d8dee9', text3: '#9aa3b5', accent: '#88c0d0', 'on-accent': '#2e3440', radius: '16px', font: SYS },
   };
+  const THEME_NAMES = { ha: { de: 'Home Assistant', en: 'Home Assistant' }, loxone: { de: 'Loxone', en: 'Loxone' }, apple: { de: 'Apple Home', en: 'Apple Home' },
+    google: { de: 'Google Home', en: 'Google Home' }, light: { de: 'Hell', en: 'Light' }, nord: { de: 'Nord', en: 'Nord' } };
+  // miniature of the planner in a design: top bar, a person column and a few chore tiles (one ticked off)
+  const themeMini = (name) => {
+    const t = THEMES[name]; const r = `calc(${t.radius} / 3)`;
+    const tile = (on) => `<i style="display:block;height:9px;border-radius:3px;background:${on ? t.accent : t.bg4};border:1px solid ${t.line}"></i>`;
+    return `<span class="mini" style="background:${t.bg0};border-radius:${r}">
+      <span style="display:flex;gap:4px;align-items:center;background:${t.bg1};border:1px solid ${t.line};border-radius:5px;padding:3px 5px">
+        <b style="width:18px;height:4px;border-radius:2px;background:${t.text3}"></b><b style="margin-left:auto;width:14px;height:6px;border-radius:3px;background:${t.accent}"></b><b style="width:14px;height:6px;border-radius:3px;background:${t.bg3}"></b></span>
+      <span style="display:grid;grid-template-columns:14px 1fr 1fr;gap:4px;margin-top:4px;background:${t.bg1};border:1px solid ${t.line};border-radius:5px;padding:4px">
+        <b style="width:12px;height:12px;border-radius:50%;background:${t.accent};opacity:.85"></b>${tile(true)}${tile(false)}
+        <b style="width:12px;height:12px;border-radius:50%;background:${t.text2};opacity:.6"></b>${tile(false)}${tile(true)}</span></span>`;
+  };
+  const themeSwatch = (name) => { const t = THEMES[name];
+    return `<span class="sw" style="background:${t.bg1};border-color:${t.line}"><i style="background:${t.accent}"></i><i style="background:${t.bg4}"></i><i style="background:${t.text2}"></i></span>`; };
   const applyTheme = (el, name) => {
     const t = THEMES[name] || THEMES.loxone;
     Object.entries(t).forEach(([k, v]) => el.style.setProperty(`--fp-${k}`, v));
@@ -270,8 +285,13 @@
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.addEventListener('click', (e) => {
           if (e.target.closest('[data-menu]')) { this.dispatchEvent(new Event('hass-toggle-menu', { bubbles: true, composed: true })); return; }
-          const b = e.target.closest('[data-go]'); if (b && window.FPX) window.FPX.fpNavigate(b.dataset.go);
+          const b = e.target.closest('[data-go]'); if (b && window.FPX) { window.FPX.fpNavigate(b.dataset.go); return; }
+          if (e.target.closest('[data-themes]')) { this._open = !this._open; this._render(); return; }
+          const th = e.target.closest('[data-theme]'); if (th) this._setTheme(th.dataset.theme);
         });
+        // a tap outside the design picker closes it
+        this._outside = (e) => { if (this.isConnected && this._open && !e.composedPath().includes(this)) { this._open = false; this._render(); } };
+        window.addEventListener('pointerdown', this._outside, true);
         window.addEventListener('location-changed', () => this._render());
       }
       this._render();
@@ -280,6 +300,17 @@
     disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } }
     getCardSize() { return 1; }
     getGridOptions() { return { columns: 'full', rows: 1 }; }
+    async _setTheme(name) {
+      const s = this._store && this._store.snap; if (!s || !THEMES[name]) return;
+      this._open = false;
+      if (name === s.theme) { this._render(); return; }
+      const lang = LANG(this._hass, this._cfg, this._store);
+      try {
+        if (s.settings && s.settings.theme_pin && window.FPPIN) await window.FPPIN.call(this._store, 'family_planer/theme/set', { theme: name }, { lang, host: this });
+        else await this._store.ws('family_planer/theme/set', { theme: name });
+      } catch (e) { this._err = lang === 'en' ? 'Design could not be changed.' : 'Design konnte nicht geändert werden.'; clearTimeout(this._et); this._et = setTimeout(() => { this._err = ''; this._render(); }, 3500); }
+      this._render();
+    }
     _render() {
       if (!this.shadowRoot || !this._cfg) return;
       const s = this._store && this._store.snap; const lang = LANG(this._hass, this._cfg, this._store);
@@ -298,7 +329,26 @@
         button.on{background:color-mix(in srgb,var(--fp-accent) 16%,transparent);border-color:color-mix(in srgb,var(--fp-accent) 60%,transparent);color:var(--fp-accent);font-weight:600}
         button.menu{padding:0 10px}
         button ha-icon{--mdc-icon-size:20px}
-      </style><div class="bar"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}${title.replace(/[<>&"']/g, '')}</span><div class="mid">${btns.map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}" data-go="${this._paths[k]}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon>${NAV[lang][k]}</button>`).join('')}</div><span></span></div>`;
+        .rt{display:flex;justify-content:flex-end;position:relative}
+        button.thb{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
+        .pop{position:absolute;right:0;top:48px;z-index:30;width:min(560px,90vw);background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);box-shadow:0 12px 32px rgba(0,0,0,.45);padding:12px}
+        .ph{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:0 2px 10px;display:flex;align-items:center;gap:6px}
+        .tg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+        .tg button{height:auto;flex-direction:column;align-items:stretch;padding:8px;gap:6px;border-radius:12px;font-size:13px;color:var(--fp-text)}
+        .tg button.on{border-width:2px}
+        .tn{display:flex;align-items:center;justify-content:center;gap:4px}
+        .mini{display:block;padding:5px;box-sizing:border-box}.mini b{display:block}
+        .err{position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;white-space:nowrap}
+      </style><div class="bar"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}${title.replace(/[<>&"']/g, '')}</span><div class="mid">${btns.map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}" data-go="${this._paths[k]}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon>${NAV[lang][k]}</button>`).join('')}</div>${this._picker(s, lang)}</div>`;
+    }
+    _picker(s, lang) {
+      if (!s || this._cfg.theme_picker === false) return '<span></span>';
+      const cur = THEMES[s.theme] ? s.theme : 'loxone'; const nm = (k) => THEME_NAMES[k][lang === 'en' ? 'en' : 'de'];
+      const pin = s.settings && s.settings.theme_pin;
+      return `<span class="rt"><button class="thb${this._open ? ' on' : ''}" data-themes title="Design" aria-expanded="${this._open ? 'true' : 'false'}">${themeSwatch(cur)}<ha-icon icon="mdi:palette-outline"></ha-icon></button>
+        ${this._open ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:palette-outline"></ha-icon>${lang === 'en' ? 'Design' : 'Design'}${pin ? ' · <ha-icon icon="mdi:lock-outline"></ha-icon>' : ''}</div><div class="tg">${Object.keys(THEMES).map((k) =>
+          `<button class="${k === cur ? 'on' : ''}" data-theme="${k}">${themeMini(k)}<span class="tn">${k === cur ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${nm(k)}</span></button>`).join('')}</div></div>` : ''}
+        ${this._err ? `<div class="err">${this._err}</div>` : ''}</span>`;
     }
   }
   if (!customElements.get('family-planer-nav-card')) customElements.define('family-planer-nav-card', FamilyPlanerNavCard);

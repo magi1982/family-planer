@@ -42,6 +42,7 @@ def general(data: dict, cur: dict) -> tuple[dict, set[str]]:
         "idle_seconds": validate.integer(data.get("idle_seconds", cur.get("idle_seconds")), 10, 600, 45),
         "fullscreen_dblclick": _bool(data, "fullscreen_dblclick", cur.get("fullscreen_dblclick", True)),
         "fullscreen_auto": _bool(data, "fullscreen_auto", cur.get("fullscreen_auto", False)),
+        "theme_pin": _bool(data, "theme_pin", cur.get("theme_pin", False)),
         "rollover_time": validate.hhmm(data.get("rollover_time"), cur.get("rollover_time") or "00:00"),
         "match_names": _bool(data, "match_names", cur.get("match_names", True)),
         "show_owner": _bool(data, "show_owner", cur.get("show_owner", False)),

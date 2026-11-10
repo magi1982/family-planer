@@ -204,6 +204,7 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
                 "language": user_input.get("language") if user_input.get("language") in LANGUAGES else "auto",
                 "fullscreen_dblclick": bool(user_input.get("fullscreen_dblclick", True)),
                 "fullscreen_auto": bool(user_input.get("fullscreen_auto", False)),
+                "theme_pin": bool(user_input.get("theme_pin", False)),
             })
             return self._done(reload=True)
         schema = vol.Schema({
@@ -216,6 +217,7 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
             vol.Required("idle_seconds", default=validate.integer(st.get("idle_seconds"), 10, 600, 45)): num(10, 600, "s"),
             vol.Required("fullscreen_dblclick", default=bool(st.get("fullscreen_dblclick", True))): bool,
             vol.Required("fullscreen_auto", default=bool(st.get("fullscreen_auto", False))): bool,
+            vol.Required("theme_pin", default=bool(st.get("theme_pin", False))): bool,
         })
         return self.async_show_form(step_id="design", data_schema=schema)
 
