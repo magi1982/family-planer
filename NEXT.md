@@ -82,6 +82,8 @@
 
 ## Ideen für die nächste Version
 
+> **10.11., 23:56: Michael: „Alles in eins und bitte jetzt machen“** – Ideen 5–18 kommen gemeinsam in **0.9.0**.
+
 ### 5. „+ Hinzufügen“-Knopf oben rechts im Ämtliplan
 **Status:** Idee – noch nicht umgesetzt
 
@@ -246,6 +248,7 @@
 - **Belohnungen-Seite neu**:
   - Oben die **noch nicht vergebenen Pokale** – antippen zeigt, **wie man ihn gewinnt** und wer am nächsten dran ist.
   - Darunter die **Personen als Karten wie im Planer** (Bild, Prozent, Auszeichnungen); antippen öffnet die **Personendetails wie im Planer** plus Punkte, Verlauf, Belohnungen der Person und Prognosen.
+  - **Jede Personen-Kachel** hat einen Knopf **„+ Belohnung“** (legt eine Belohnung direkt für diese Person an, Eltern-PIN) und zeigt die **laufenden Belohnungen**: offene/freigegebene Anfragen und die Belohnungen, auf die sie gerade spart – mit Fortschritt und Prognose (ergänzt 10.11.).
 
 ### 16. Navigation & Einstellungen neu ordnen
 **Status:** Idee – noch nicht umgesetzt
