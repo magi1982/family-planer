@@ -252,7 +252,7 @@
   - **Ämtli** (bisheriger Ämtliplan + „+ Besonderes Ämtli“, „+ To-do“)
   - **Punkte & Belohnungen**, **To-dos**, **Listen**, **Ferien**, **Ansagen**
   - **Status / Synchronisierung**: läuft der Kalender-Sync, Einkaufsliste, Ansagen? Zeitpunkt der **letzten erfolgreichen** Synchronisierung je Quelle, letzter Fehler, Knopf „jetzt synchronisieren“.
-- **PIN-Regel**: **Ohne PIN** darf man nur **sein Bild** ändern (Avatar-Baukasten). **Alles andere** braucht die Eltern-PIN (auch Ämtli abhaken bleibt natürlich frei).
+- **PIN-Regel**: **Ohne PIN** darf man nur **sein Bild** ändern – also alles im Avatar-Baukasten: Figur, Frisur, Haarfarbe, **Hautfarbe/Hautton**, **Accessoires** und Verkleidungen. **Alles andere** (Name, Farbe, Kalender, Reihenfolge, Ämtli, Punkte, Einstellungen …) braucht die Eltern-PIN. Ämtli abhaken bleibt natürlich frei.
 - **Alle Einstellungen überprüfen**: doppelte/veraltete Felder entfernen (z. B. Design-Feld, Startbonus, alte To-do-Punkte), Texte und Standardwerte an die neuen Funktionen anpassen, HA-Optionsdialog angleichen.
 
 ### 17. Avatar-Baukasten
