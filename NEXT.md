@@ -199,13 +199,26 @@
 - **Datum und Uhrzeit** wandern in die **oberste Leiste** (Navigation) – anstelle von „FAMILY PLANER“ (Name optional per Einstellung).
 - Mehr Platz für den Plan, vor allem auf dem Tablet quer.
 
-### 12. Designs überarbeiten + Regenbogen + Stil-Optionen
+### 12. Neue Designs + Stil-Optionen
 **Status:** Idee – noch nicht umgesetzt
 
-- Bestehende Designs **cooler**: feinere Verläufe, bessere Kontraste, schönere Medaillen/Ringe, einheitliche Rundungen.
-- Neues Design **„Regenbogen“**: dunkler Grund, Akzente als Regenbogen-Verlauf (Navigation, aktive Knöpfe, Fortschritt), Personen behalten ihre Farbe.
-- Neue **Stil-Option** pro Design (in der Design-Auswahl als zweite Zeile): **Standard · Transparent · Glas** (wie bei Apple: durchscheinend mit Unschärfe `backdrop-filter`, feiner heller Rand). Fallback ohne Unschärfe, wenn der Browser es nicht kann.
-- Mini-Vorschau zeigt Design **und** Stil.
+**Entschieden (10.11.):** Die bisherigen Designs (Loxone, Apple Home, Google Home, Nord) werden ersetzt durch:
+
+| Design | Beschreibung |
+|---|---|
+| **Standard** | entspricht **Home Assistant** – übernimmt Farben und Hell/Dunkel des HA-Themes (Standard für neue Installationen) |
+| **Hell** | heller, ruhiger Hintergrund, kräftige Akzente, gut lesbar bei Tageslicht |
+| **Dunkel** | Dark Mode – tiefes Grau/Schwarz, gedämpfte Flächen, ideal fürs Tablet in der Küche am Abend |
+| **Regenbogen** | dunkler Grund, Akzente als Regenbogen-Verlauf (Navigation, aktive Knöpfe, Fortschritt, Konfetti), Personen behalten ihre Farbe |
+| **Weltall** (Vorschlag „etwas Cooles“) | tiefblau-violetter Nachthimmel mit dezenten Sternen, leuchtende Akzente – Kinder-tauglich, aber nicht kitschig |
+
+- **Stil-Optionen bleiben** für jedes Design: **Standard · Transparent · Glas** (wie bei Apple: durchscheinend mit Unschärfe `backdrop-filter`, feiner heller Rand; Fallback ohne Unschärfe).
+- Design-Auswahl oben rechts: erste Zeile Designs (Mini-Vorschau), zweite Zeile Stil.
+- **Umstellung bestehender Installationen**: Home Assistant → Standard, Hell → Hell, Loxone/Apple/Google/Nord → Dunkel (Akzentfarbe bleibt, wo möglich). Karten-Option `theme:` akzeptiert alte Namen weiter.
+- Medaillen, Ringe und Rundungen in allen Designs einheitlich und „cooler“ (siehe Idee 8).
+
+**Offene Fragen:**
+- „Weltall“ als fünftes Design okay – oder lieber z. B. **Neon** (schwarz mit leuchtenden Neonfarben) oder **Natur** (Holz/Grün)?
 
 ### 13. Personen sortieren (Kinder oben, Eltern unten)
 **Status:** Idee – noch nicht umgesetzt
