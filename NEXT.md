@@ -171,7 +171,13 @@
 |---|---|---|---|
 | 🐝 Fleissbiene, 🦸 Wochenend-Held, 🌅 Frühaufsteher | 👑 Krone, ⭐ Perfekte Woche, 📈 Aufsteiger, 🏅 Meilenstein 100 | 🏆 Pokal des Monats, 🏅 Meilenstein 500, 🤝 Teamwork (pro Tag Klein) | 💎 Diamant-Serie, 🏅 Meilenstein 1000 |
 
-- Punkte gibt es **einmal beim Gewinnen** (nicht jeden Tag, solange man ihn hält); wandert ein Pokal weiter, bleiben die Punkte.
+- Punkte gibt es **einmal pro Gewinn** (nicht jeden Tag, solange man ihn hält); wandert ein Pokal weiter, bleiben die Punkte. Gewinnt man ihn später **wieder**, gibt es wieder Punkte und Konfetti. ✅ *Punkte-Tabelle am 10.11. bestätigt.*
+- **Nicht zu viel** (entschieden 10.11.): Es soll **nicht jeden Tag mehrere Pokale pro Kind** geben. Darum:
+  - **Wochen-Auszeichnungen** (👑 Krone, 🐝 Fleissbiene, ⭐ Perfekte Woche, 🦸 Wochenend-Held, 📈 Aufsteiger, 🌅 Frühaufsteher) werden **einmal pro Woche** vergeben (Montag früh für die Vorwoche) und gelten dann die ganze Woche – kein tägliches Hin und Her.
+  - 🏆 **Pokal des Monats** einmal pro Monat (am 1.).
+  - 💎 Diamant-Serie, 🏅 Meilenstein und 🤝 Teamwork beim Erreichen (selten).
+  - Pro Person **höchstens 1 grosser Konfettiregen pro Tag**; weitere Gewinne am selben Tag nur als kurzer Banner.
+  - 🔥 Serie bleibt die einzige täglich wechselnde Anzeige (ohne Konfetti und ohne Punkte).
 - Einstellung: Punkte pro Auszeichnung anpassbar bzw. ausschaltbar.
 
 ### 9. Handy im Hochformat (gefunden am iPhone-Screenshot)
@@ -184,7 +190,7 @@
 ### 10. Konfetti 🎉
 **Status:** Idee – noch nicht umgesetzt
 
-- Hat ein Kind **alle Ämtli des Tages** erledigt: **kleiner Konfettiregen** über den ganzen Bildschirm mit dem **Namen** („Super, Lea! 🎉“), in der Farbe der Person.
+- Hat eine Person **alle Ämtli des Tages** erledigt: **kleiner Konfettiregen** über den ganzen Bildschirm mit dem **Namen** („Super, Lea! 🎉“), in der Farbe der Person. ✅ *Für alle Personen, auch Eltern (10.11.).*
 - Neuer **Pokal** gewonnen: Konfetti **in der Farbe des Pokals** (Krone gold, Diamant türkis/weiss, Bronze kupfer …), **mittel oder gross je nach Schwierigkeit**:
   - mittel: 👑 Krone, ⭐ Perfekte Woche, 📈 Aufsteiger, 🦸 Wochenend-Held, 🏅 Meilenstein 100
   - gross: 🏆 Pokal des Monats, 💎 Diamant-Serie, 🏅 Meilenstein 500/1000, 🤝 Familien-Teamwork
@@ -210,15 +216,14 @@
 | **Hell** | heller, ruhiger Hintergrund, kräftige Akzente, gut lesbar bei Tageslicht |
 | **Dunkel** | Dark Mode – tiefes Grau/Schwarz, gedämpfte Flächen, ideal fürs Tablet in der Küche am Abend |
 | **Regenbogen** | dunkler Grund, Akzente als Regenbogen-Verlauf (Navigation, aktive Knöpfe, Fortschritt, Konfetti), Personen behalten ihre Farbe |
-| **Weltall** (Vorschlag „etwas Cooles“) | tiefblau-violetter Nachthimmel mit dezenten Sternen, leuchtende Akzente – Kinder-tauglich, aber nicht kitschig |
+| **Weltall** | tiefblau-violetter Nachthimmel mit dezenten Sternen, leuchtende Akzente – Kinder-tauglich, aber nicht kitschig |
 
 - **Stil-Optionen bleiben** für jedes Design: **Standard · Transparent · Glas** (wie bei Apple: durchscheinend mit Unschärfe `backdrop-filter`, feiner heller Rand; Fallback ohne Unschärfe).
 - Design-Auswahl oben rechts: erste Zeile Designs (Mini-Vorschau), zweite Zeile Stil.
 - **Umstellung bestehender Installationen**: Home Assistant → Standard, Hell → Hell, Loxone/Apple/Google/Nord → Dunkel (Akzentfarbe bleibt, wo möglich). Karten-Option `theme:` akzeptiert alte Namen weiter.
 - Medaillen, Ringe und Rundungen in allen Designs einheitlich und „cooler“ (siehe Idee 8).
 
-**Offene Fragen:**
-- „Weltall“ als fünftes Design okay – oder lieber z. B. **Neon** (schwarz mit leuchtenden Neonfarben) oder **Natur** (Holz/Grün)?
+✅ *„Weltall“ als fünftes Design bestätigt (10.11.).*
 
 ### 13. Personen sortieren (Kinder oben, Eltern unten)
 **Status:** Idee – noch nicht umgesetzt
@@ -265,7 +270,7 @@
   - **Accessoires** (mehrere kombinierbar): Kopfhörer, Hut, Cap, Mütze, Brille, Sonnenbrille, Schleife, Haarreif, Krone, Ohrringe, Bart, Sommersprossen
   - **Verkleidungen**: Astronaut, Pirat, Prinzessin, Ritter, Zauberer, Einhorn-Haarreif, Tier-Mützen und **eigene Superhelden-Kostüme** (Umhang, Maske, Emblem in Wunschfarbe)
 - **Jede Kombination muss gut aussehen**: feste Ebenen-Reihenfolge, Accessoires passen sich der Frisur an (z. B. Hut verdeckt hohe Frisuren sauber), unpassende Kombinationen werden ausgegraut statt kaputt gezeichnet; automatischer Test, der alle Kombinationen zeichnet und auf Überlappungsfehler prüft.
-- Ohne PIN änderbar (siehe Idee 16); bestehende Bilder bleiben gültig.
+- Ohne PIN änderbar (siehe Idee 16) – auch die Bilder anderer Personen, das ist ausdrücklich okay (10.11.); bestehende Bilder bleiben gültig.
 - **Hinweis:** Echte Marvel- oder andere Marken-Helden (Spider-Man, Iron Man …) kann ich nicht nachzeichnen – sie sind geschützt, und das Repo ist öffentlich. Stattdessen eigene Helden-Kostüme, die man frei einfärben kann.
 
 ### 18. Planer allgemein besser (Vorschläge von Claude – bitte bestätigen)
