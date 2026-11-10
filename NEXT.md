@@ -1,9 +1,9 @@
-# Ideen für die nächste Version (0.6.0)
+# Ideen für die nächsten Versionen
 
 > Arbeitsweise: Ideen werden hier gesammelt. Code wird erst geschrieben, wenn der Maintainer „mach es“ sagt.
 > Jedes Update durchläuft die Release-Checkliste unten. **Vor jedem Release wird gefragt**; Release Notes und CHANGELOG sind auf Englisch.
 
-## Ideen
+## Umgesetzt in 0.6.0
 
 ### 1. To-dos im Ämtliplan (ohne Ablaufdatum)
 **Status:** ✅ umgesetzt in 0.6.0
@@ -61,6 +61,31 @@
 **Mögliche Einstellungen:**
 - Vollbild per Doppelklick ein/aus (Standard: ein)
 - Beim Öffnen automatisch Vollbild (Standard: aus)
+
+## Ideen für 0.7.0
+
+### 5. „+ Hinzufügen“-Knopf oben rechts im Ämtliplan
+**Status:** Idee – noch nicht umgesetzt
+
+- Im **Ämtliplan** oben rechts ein gut sichtbarer Knopf **„+ Hinzufügen“** (auf dem Tablet gross genug zum Tippen).
+- Ein Tipp öffnet eine kleine Auswahl:
+  - **Besonderes Ämtli** – mit Datum, Wiederholung (Intervall, monatlich, jährlich, einmalig) und Frist, z. B. *Luftfilter reinigen alle 6 Monate* oder *Pneuwechsel am 15. März*
+  - **To-do** – ohne Datum, bleibt bis erledigt
+- Danach direkt das passende Formular (Titel, Person(en), Punkte, Icon) – ohne zuerst nach unten zu den bestehenden Abschnitten scrollen zu müssen.
+- Gleicher Knopf auf Deutsch und Englisch; optisch wie die übrigen Knöpfe im gewählten Design.
+
+**Mögliche Einstellungen** (bei der Umsetzung prüfen, jeweils mit Beschreibung DE/EN):
+- Wer über den Knopf hinzufügen darf: alle, nur Eltern (Eltern-PIN) oder nur Admins
+- Knopf auch in der Wochenansicht (Planer) anzeigen: ja/nein
+
+**Offene Fragen:**
+- Soll der Knopf auch für normale (wiederkehrende) Ämtli gelten oder nur für besondere Ämtli und To-dos?
+
+### 6. Kleinere Verbesserungen aus der ersten Installation
+**Status:** Idee – noch nicht umgesetzt
+
+- **Fehlende Dashboard-Seite melden:** Zeigt die Navigationsleiste auf eine Seite, die es im Dashboard nicht gibt (z. B. `einstellungen`), springt Home Assistant still auf die erste Seite. Besser: Knopf ausblenden oder einen Hinweis zeigen, welche Ansicht/`paths` fehlt.
+- **Zweiten Planer bewusst anlegen:** Wird die Integration ein zweites Mal hinzugefügt, entstehen alle Entitäten doppelt (`_2`). Beim Einrichten fragen „Es gibt schon einen Planer – wirklich einen zweiten anlegen?“.
 
 ---
 
