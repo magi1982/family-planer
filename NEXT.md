@@ -100,10 +100,10 @@
 - **Fehlende Dashboard-Seite melden:** Zeigt die Navigationsleiste auf eine Seite, die es im Dashboard nicht gibt (z. B. `einstellungen`), springt Home Assistant still auf die erste Seite. Besser: Knopf ausblenden oder einen Hinweis zeigen, welche Ansicht/`paths` fehlt.
 - **Zweiten Planer bewusst anlegen:** Wird die Integration ein zweites Mal hinzugefügt, entstehen alle Entitäten doppelt (`_2`). Beim Einrichten fragen „Es gibt schon einen Planer – wirklich einen zweiten anlegen?“.
 
-### 7. Goldener Rahmen statt kleiner Krone („Krone der Woche“)
+### 7. Platin-, Gold-, Silber- und Bronzerahmen statt kleiner Krone
 **Status:** Idee – noch nicht umgesetzt
 
-- Wer die **Krone der Woche** hat, bekommt statt der kleinen Krone auf dem Kopf der Figur einen **goldenen, coolen Rahmen** um das runde Personenbild.
+- Statt der kleinen Krone auf dem Kopf der Figur bekommt das runde Personenbild einen **edlen, coolen Rahmen** (Platin, Gold, Silber oder Bronze), je nach Auszeichnung.
 - Rahmen z. B. als goldener Verlauf (hell → dunkel) mit leichtem Glanz bzw. sanftem Schimmer; dezent animiert, ohne vom Planer abzulenken.
 - Gilt überall, wo das runde Bild erscheint: Planer (Personenspalte), Personendetails, Belohnungen.
 - Optisch passend zu jedem Design (Loxone, Apple, Google, Hell, Nord, Home Assistant), auch im hellen Design gut sichtbar.
@@ -112,8 +112,21 @@
 - Rahmen animiert (Schimmer) ein/aus – Standard: ein; auf Geräten mit „Bewegung reduzieren“ automatisch aus
 - Krone zusätzlich anzeigen: ja/nein (Standard: nein)
 
+**Entschieden:** Vier Rahmen – **Platin, Gold, Silber, Bronze** – je für eine Auszeichnung. Vorschlag für die Zuordnung (nach Schwierigkeit):
+
+| Rahmen | Auszeichnung | Warum |
+|---|---|---|
+| **Platin** | 🏆 Pokal des Monats | beste Quote über 30 Tage – am schwersten |
+| **Gold** | 👑 Krone der Woche | beste Quote der letzten 7 Tage |
+| **Silber** | ⭐ Perfekte Woche | 7 Tage alle Ämtli erledigt |
+| **Bronze** | 🐝 Fleissbiene | meiste erledigte Ämtli der Woche |
+
+- Hat jemand mehrere Auszeichnungen, zeigt das Bild den **wertvollsten Rahmen**; die übrigen bleiben als kleine Abzeichen neben der Prozentzahl.
+- Platin bekommt einen kühlen, weiss-bläulichen Schimmer, Gold warm-gelb, Silber hellgrau, Bronze kupferfarben.
+- Antippen der Person zeigt wie bisher, warum sie den Rahmen hat.
+
 **Offene Fragen:**
-- Sollen auch **Pokal des Monats** (z. B. Silber-/Bronzerahmen) oder **Perfekte Woche** einen eigenen Rahmen bekommen?
+- Passt die Zuordnung oben so?
 
 ---
 
