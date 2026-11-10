@@ -331,6 +331,7 @@ class LoxWochenplanerCard extends FpBase {
     const md = e.target.closest('[data-mode]');
     if (md) { this._mode = md.dataset.mode; try { localStorage.setItem('fp_mode', this._mode); } catch (er) { /* ignorieren */ } this._render(); return; }
     if (e.target.closest('[data-sync]')) { this._syncCal(); return; }
+    if (e.target.closest('[data-todos]')) { this.dispatchEvent(new CustomEvent('fp-open-todos', { bubbles: true, composed: true })); return; }
     const fc = e.target.closest('[data-focus]');
     if (fc) {
       const v = fc.dataset.focus; this._focus = v === ymd(fpDay()) ? null : v;
@@ -359,13 +360,16 @@ class LoxWochenplanerCard extends FpBase {
     const alle = (this._data.heute || []).map((i) => ({ ...i, m: parseDesc(i.description) }));
     const heute = alle.filter((i) => (i.m.d || '') <= tStr && (i.m.e || i.m.d || '') >= tStr);
     const focus = (this._focus && days.some((d) => ymd(d) === this._focus)) ? this._focus : (days.some((d) => ymd(d) === tStr) ? tStr : null);
-    // Spaltenbreiten: xl = heute/angetippt, m = nächste 2 Tage + Wochenende, s = Vergangenheit und später
-    const T = {}; const curWeek = days.some((d) => ymd(d) === tStr);
+    // Spaltenbreiten: xl = heute/angetippt, m = morgen (und heute, wenn ein anderer Tag angetippt ist), s = alle anderen Tage.
+    // In den Ansichten Ämtli/Termine bleiben die nächsten 2 Tage und das Wochenende mittel.
+    const T = {}; const curWeek = days.some((d) => ymd(d) === tStr); const allMode = (this._mode || 'alle') === 'alle';
     days.forEach((d) => {
       const s = ymd(d); const diff = Math.round((startOfDay(d) - today) / 86400000); const we = isoWd(d) >= 6;
-      T[s] = s === focus ? 'xl' : !curWeek ? 'm' : (s === tStr || we || (diff > 0 && diff <= 2)) ? 'm' : 's';
+      T[s] = s === focus ? 'xl' : !curWeek ? 'm' : allMode ? ((s === tStr || diff === 1) ? 'm' : 's')
+        : (s === tStr || we || (diff > 0 && diff <= 2)) ? 'm' : 's';
     });
-    const cols = days.map((d) => (T[ymd(d)] === 's' ? (startOfDay(d) < today ? 'minmax(0,0.4fr)' : 'minmax(0,0.6fr)') : ({ xl: 'minmax(0,3.6fr)', m: 'minmax(0,1.15fr)' })[T[ymd(d)]])).join(' ');
+    const cols = days.map((d) => (T[ymd(d)] === 's' ? (allMode && curWeek ? 'minmax(0,0.42fr)' : startOfDay(d) < today ? 'minmax(0,0.4fr)' : 'minmax(0,0.6fr)')
+      : ({ xl: allMode && curWeek ? 'minmax(0,4.6fr)' : 'minmax(0,3.6fr)', m: allMode && curWeek ? 'minmax(0,1.5fr)' : 'minmax(0,1.15fr)' })[T[ymd(d)]])).join(' ');
     const we = days[6];
 
     const legCals = cals.filter((c) => !c.schule);
@@ -420,7 +424,10 @@ class LoxWochenplanerCard extends FpBase {
           const lb = blocks[blocks.length - 1];
           if (lb && (e.s - lb.e) / 60000 < gapMin) { if (e.e > lb.e) lb.e = e.e; } else blocks.push({ s: e.s, e: e.e });
         });
-        const blockEvs = blocks.map((bk) => ({ title: wg ? `🎒 los ${hm(new Date(bk.s - wg * 60000))} · zuhause ${hm(new Date(+bk.e + wg * 60000))}` : '🎒 Schule',
+        // a school block shows up only from X min before leaving until X min after being home (setting, 0 = always)
+        const win = Number(this._cfg.schulfenster) || 0;
+        const blockEvs = blocks.filter((bk) => !win || (now >= new Date(bk.s - (wg + win) * 60000) && now <= new Date(+bk.e + (wg + win) * 60000)))
+          .map((bk) => ({ title: wg ? `🎒 los ${hm(new Date(bk.s - wg * 60000))} · zuhause ${hm(new Date(+bk.e + wg * 60000))}` : '🎒 Schule',
           s: new Date(bk.s), e: new Date(bk.e), allDay: false, c: schoolC }));
         const rest = pevAll.filter((e) => !e.c.schule);
         const mode0 = this._mode || 'alle';
@@ -442,10 +449,10 @@ class LoxWochenplanerCard extends FpBase {
           return `<div class="c ${ds < tStr ? 'p' : ds === tStr ? 't' : 'f'} vac${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}"><div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon>${T[ds] === 's' ? '' : '<span>Ferien</span>'}</div></div>`;
         }
         if (ds === tStr && ds !== focus) {
-          return mine.length ? `<div class="c t" data-focus="${ds}"><div class="fc"><b>${tDone}/${mine.length}</b></div><div class="bar"><i style="width:${Math.round((tDone / mine.length) * 100)}%;background:${G}"></i></div></div>` : `<div class="c t" data-focus="${ds}"><div class="none">frei</div></div>`;
+          return mine.length ? `<div class="c t" data-focus="${ds}"><div class="fc"><b>${tDone}/${mine.length}</b></div><div class="bar"><i style="width:${Math.round((tDone / mine.length) * 100)}%;background:${G}"></i></div></div>` : `<div class="c t" data-focus="${ds}"></div>`;
         }
         if (ds === tStr) {
-          if (!mine.length) return `<div class="c t"><div class="free"><ha-icon icon="mdi:party-popper"></ha-icon>Heute frei</div></div>`;
+          if (!mine.length) return '<div class="c t"></div>';
           const all = tDone === mine.length;
           return `<div class="c t"><div class="prog"><span>${tDone} von ${mine.length} erledigt</span>${all ? '<span class="gr">Super!</span>' : ''}</div><div class="bg">` +
             mine.map((i) => `<button class="btn${i.status === 'completed' ? ' done' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${esc(i.summary)}${dueTag(i.m, tStr)}</span></button>`).join('') + `</div></div>`;
@@ -464,9 +471,9 @@ class LoxWochenplanerCard extends FpBase {
         if (T[ds] !== 's') {
           const lim = ds === focus ? 99 : 4;
           const op = opl.map((i) => `<div class="pl op">⏳ ${esc(i.summary)}</div>`).join('');
-          return `<div class="c f${ds === focus ? ' fx' : ''}" data-focus="${ds}">${op}${pl.length ? pl.slice(0, lim).map((p) => `<div class="pl">${esc(p)}</div>`).join('') + (pl.length > lim ? `<div class="more">+${pl.length - lim} weitere</div>` : '') : (op ? '' : '<div class="none">frei</div>')}</div>`;
+          return `<div class="c f${ds === focus ? ' fx' : ''}" data-focus="${ds}">${op}${pl.length ? pl.slice(0, lim).map((p) => `<div class="pl">${esc(p)}</div>`).join('') + (pl.length > lim ? `<div class="more">+${pl.length - lim} weitere</div>` : '') : ''}</div>`;
         }
-        return `<div class="c f" data-focus="${ds}">${pl.length ? `<div class="fc"><b>${pl.length}</b>Ämtli</div>` : (opl.length ? '' : '<div class="none">frei</div>')}${opl.length ? `<div class="opn">⏳ ${opl.length} offen</div>` : ''}</div>`;
+        return `<div class="c f" data-focus="${ds}">${pl.length ? `<div class="fc"><b>${pl.length}</b>Ämtli</div>` : ''}${opl.length ? `<div class="opn">⏳ ${opl.length} offen</div>` : ''}</div>`;
       })(d))).join('');
       return label + cells;
     }).join('');
@@ -482,7 +489,7 @@ class LoxWochenplanerCard extends FpBase {
       .sub{font-size:12px;color:#7a7a7a;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px}
       .nav{margin-left:auto;display:flex;align-items:center;gap:8px}
       .nb{background:#262626;border:1px solid #333;color:#ddd;border-radius:10px;height:42px;min-width:42px;padding:0 14px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:inherit;font-size:14px;-webkit-tap-highlight-color:transparent}
-      .nb ha-icon{--mdc-icon-size:22px}.nb.g{color:${G};border-color:rgba(105,195,80,.5)}
+      .nb ha-icon{--mdc-icon-size:22px}.nb.td{gap:6px}.tdn{background:${G};color:#141414;border-radius:10px;padding:0 7px;font-size:12px;line-height:20px}.nb.g{color:${G};border-color:rgba(105,195,80,.5)}
       .wk{font-size:12px;color:#8a8a8a;padding:0 8px;text-align:center;min-width:150px}.wk b{display:block;color:#ececec;font-size:15px;font-weight:600}
       .grid{display:grid;grid-template-columns:178px ${cols};gap:5px;align-items:stretch}
       .corner{font-size:10px;color:#555;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;padding:0 4px 6px}
@@ -524,6 +531,7 @@ class LoxWochenplanerCard extends FpBase {
       .crown{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-10deg);color:#F5C542;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7));z-index:2;display:flex}.crown ha-icon{--mdc-icon-size:18px}
       .bdg{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
       .md{width:18px;height:18px;border-radius:50%;background:color-mix(in srgb,var(--mc) 22%,transparent);border:1px solid var(--mc);color:var(--mc);display:inline-flex;align-items:center;justify-content:center;flex:none}.md ha-icon{--mdc-icon-size:12px}
+      .lv2 .md{width:30px;height:30px;border-width:2px}.lv2 .md ha-icon{--mdc-icon-size:20px}.lv2{gap:6px}
       .md.lg{width:36px;height:36px}.md.lg ha-icon{--mdc-icon-size:20px}
       .ovl{position:absolute;inset:0;background:rgba(0,0,0,.6);border-radius:16px;display:flex;align-items:center;justify-content:center;z-index:10}
       .pnl{background:#1e1e1e;border:1px solid #3a3a3a;border-radius:16px;width:min(600px,94%);max-height:92%;overflow:auto;padding:20px 22px;box-shadow:0 20px 60px rgba(0,0,0,.6);box-sizing:border-box}
@@ -543,7 +551,7 @@ class LoxWochenplanerCard extends FpBase {
       .ring .ava{display:block;width:48px;height:48px;border-radius:50%;overflow:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
       .ring .ava > span{width:100%!important;height:100%!important;border-radius:50%}.ring .ava svg{display:block}
       .streak{font-size:11px;color:#9a9a9a;display:flex;align-items:center;gap:3px;margin-top:3px}.streak ha-icon{--mdc-icon-size:13px;color:#E0A84F}
-      .bg{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:6px}
+      .bg{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,135px),1fr));gap:6px}
       .btn{display:flex;align-items:center;gap:9px;width:100%;background:#323232;border:1px solid #3a3a3a;border-radius:9px;padding:6px 9px;margin:0;color:#eee;font:inherit;font-size:13px;line-height:1.25;min-height:40px;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;box-sizing:border-box;transition:background .2s,border-color .2s}
       .btn:active{transform:scale(.98)}
       .btn .cb{width:22px;height:22px;border-radius:50%;border:2px solid #5d5d5d;flex:none;position:relative;box-sizing:border-box;transition:all .2s}
@@ -586,6 +594,7 @@ class LoxWochenplanerCard extends FpBase {
         <div><div class="sub">${esc(this._cfg.titel)}</div><div class="date">${WDL[isoWd(now) - 1]}, <b>${now.getDate()}. ${MON[now.getMonth()]}</b></div></div>
         <div class="seg">${[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['termine', 'Termine'], ['schule', 'Stundenplan']].filter(([v]) => v !== 'schule' || Object.keys(this._cfg.schule || {}).length).map(([v, l]) => `<button class="${(this._mode || 'alle') === v ? 'on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
         <div class="nav">
+          ${this._cfg.todos_knopf ? `<button class="nb td${this._cfg.todos_offen ? ' g' : ''}" data-todos title="To-dos"><ha-icon icon="mdi:checkbox-marked-circle-outline"></ha-icon>To-dos${this._cfg.todos_offen ? ` <b class="tdn">${Number(this._cfg.todos_offen)}</b>` : ''}</button>` : ''}
           ${this._week !== 0 ? `<button class="nb g" data-nav="0">Heute</button>` : ''}
           ${cals.length ? `<button class="nb${this._syncing ? ' spin2' : ''}" data-sync title="Kalender synchronisieren"><ha-icon icon="mdi:calendar-sync-outline"></ha-icon></button>` : ''}
           <button class="nb" data-nav="-1"><ha-icon icon="mdi:chevron-left"></ha-icon></button>

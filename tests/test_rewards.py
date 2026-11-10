@@ -131,3 +131,26 @@ def test_speech():
     assert msg == "Hallo! Noch offen: Lea: Tisch decken, Abfall, WC und 1 weitere. Mia: Ratten."
     assert S.open_chores_message([("A", [])], "en") == ""
     assert "All chores" in S.all_done_message(["A"], "en")
+
+
+# ------------------------------------------------------------------ sizes (0.7.0)
+def test_size_points_round_up():
+    assert R.size_points(30) == {"none": 0, "s": 10, "m": 20, "l": 30}
+    assert R.size_points(31) == {"none": 0, "s": 11, "m": 21, "l": 31}  # always rounded up
+    assert R.size_points(1)["s"] == 1 and R.size_points(0)["s"] == 0 and R.size_points(-5)["l"] == 0
+
+
+def test_month_points_and_reward_costs():
+    game = {"day_points": 30, "day_bonus": 5, "streak_bonus": 20}
+    assert R.month_points(game) == 30 * 35 + 4 * 20  # 1130: every day complete for a month incl. bonuses
+    costs = R.reward_costs(game)
+    assert costs == {"s": 283, "m": 565, "l": 1130, "xl": 2260, "xxl": 5650}
+    assert R.reward_costs({"day_points": 0, "day_bonus": 0, "streak_bonus": 0})["s"] == 1  # never free
+    assert R.reward_values(20) == {"s": 5.0, "m": 10.0, "l": 20, "xl": 40, "xxl": 100}
+
+
+def test_sync_reward_costs_follows_settings():
+    rewards = {"a": {"title": "Kino", "size": "l", "cost": 1}, "b": {"title": "Glace", "cost": 50}}
+    assert R.sync_reward_costs(rewards, {"day_points": 30, "day_bonus": 5, "streak_bonus": 20})
+    assert rewards["a"]["cost"] == 1130 and rewards["b"]["cost"] == 50  # own cost stays untouched
+    assert not R.sync_reward_costs(rewards, {"day_points": 30, "day_bonus": 5, "streak_bonus": 20})

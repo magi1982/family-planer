@@ -46,6 +46,7 @@
       F('admin_only_edit', 'bool', 'Plan nur durch Admins änderbar', 'Only admins may change the plan', 'Kinder können trotzdem abhaken und Belohnungen anfragen.', 'Children can still tick off chores and request rewards.'),
       F('reliability_days', 'num', 'Zuverlässigkeit berechnen über', 'Calculate reliability over', 'Zeitraum für die Prozentzahl pro Person.', 'Period for the percentage per person.', { min: 7, max: 90, unit: { de: 'Tage', en: 'days' } }),
       F('school_gap', 'num', 'Heimweg über Mittag ab', 'Lunch at home from', 'Pause in Minuten, ab der der Schultag in zwei Blöcke geteilt wird (0 = automatisch).', 'Break in minutes from which the school day is split into two blocks (0 = automatic).', { min: 0, max: 240, unit: 'min' }),
+      F('school_window', 'num', 'Schule nur rund um die Schulzeit zeigen', 'Show school only around school time', 'So viele Minuten vor dem Losgehen bis nach dem Heimkommen erscheint der Schulblock in der Ansicht „Alles“ (0 = immer).', 'Minutes before leaving and after being home in which the school block shows in the "All" view (0 = always).', { min: 0, max: 240, unit: 'min' }),
     ] },
     { id: 'persons', icon: 'mdi:account-multiple-outline', label: { de: 'Personen & Schule', en: 'People & school' } },
     { id: 'vacation', icon: 'mdi:palm-tree', label: { de: 'Ferien', en: 'Holidays' }, fields: [
@@ -64,11 +65,14 @@
       F('default_points', 'num', 'Punkte pro Ämtli (Standard bzw. Gewicht)', 'Points per chore (default or weight)', 'Pro Ämtli im Ämtliplan änderbar.', 'Can be changed per chore in the chore plan.', { min: 0, max: 1000 }),
       F('day_bonus', 'num', 'Tagesbonus', 'Day bonus', 'Für einen ganz erledigten Tag.', 'For a fully completed day.', { min: 0, max: 1000 }),
       F('streak_bonus', 'num', 'Serienbonus', 'Streak bonus', 'Für jede 7-Tage-Serie.', 'For every 7-day streak.', { min: 0, max: 1000 }),
+      F('reward_value', 'num', 'Gegenwert einer grossen Belohnung', 'Value of a large reward', 'Gross = so viel, wie man in einem Monat mit allen Ämtli inkl. Boni verdient. Klein = ¼, Mittel = ½, Mega = 2×, Riesig = 5×. Nur zur Orientierung.', 'Large = what you earn in a month with every chore done incl. bonuses. Small = ¼, medium = ½, mega = 2×, giant = 5×. Just a guide.', { min: 0, max: 100000, step: 0.5 }),
+      F('currency', 'text', 'Währung', 'Currency', 'z. B. CHF oder €.', 'e.g. CHF or €.', { max: 8 }),
       F('reward_notify', 'entities', 'Anfragen zusätzlich melden an', 'Also send requests to', 'z. B. die Handy-App – zusätzlich zur Mitteilung in Home Assistant.', 'e.g. the mobile app – in addition to the Home Assistant notification.', { domain: 'notify' }),
     ] },
     { id: 'todos', icon: 'mdi:checkbox-marked-circle-outline', label: { de: 'To-dos', en: 'To-dos' }, fields: [
       F('confirm', 'bool', 'Erledigen bestätigen', 'Confirm completion', 'To-dos werden erst nach der Frage „Als erledigt markieren?“ abgehakt.', 'To-dos are only ticked off after the question "Mark as done?".'),
-      F('points', 'num', 'Standard-Punkte', 'Default points', 'Punkte für ein erledigtes To-do (0 = keine). Zählt nicht zum fairen Tageswert.', 'Points for a finished to-do (0 = none). Does not count towards the fair day value.', { min: 0, max: 1000 }),
+      F('size', 'select', 'Standard-Grösse', 'Default size', 'Gross = Punkte für einen ganzen Tag, Mittel = ⅔, Klein = ⅓ (aufgerundet). Eine andere Grösse beim Anlegen braucht die Eltern-PIN. Zählt nicht zum fairen Tageswert.', 'Large = points for a full day, medium = ⅔, small = ⅓ (rounded up). Another size when adding needs the parent PIN. Does not count towards the fair day value.',
+        { opts: [['none', { de: 'Ohne Punkte', en: 'No points' }], ['s', { de: 'Klein', en: 'Small' }], ['m', { de: 'Mittel', en: 'Medium' }], ['l', { de: 'Gross', en: 'Large' }]] }),
       F('keep_days', 'num', 'Erledigte anzeigen für', 'Show finished ones for', '0 = bis zum nächsten Tageswechsel.', '0 = until the next day change.', { min: 0, max: 30, unit: { de: 'Tage', en: 'days' } }),
     ] },
     { id: 'announce', icon: 'mdi:bullhorn-outline', label: { de: 'Ansagen', en: 'Announcements' }, fields: [
@@ -229,7 +233,7 @@
       const unit = fd.unit ? `<span class="u">${esc(typeof fd.unit === 'string' ? fd.unit : L(fd.unit, lang))}</span>` : '';
       let ctl = '';
       if (fd.type === 'bool') return `<label class="row b"><span class="lt"><b>${esc(L(fd.label, lang))}</b>${fd.desc[lang] ? `<small>${esc(L(fd.desc, lang))}</small>` : ''}</span><input type="checkbox" class="sw" ${a} ${v ? 'checked' : ''}></label>`;
-      if (fd.type === 'num') ctl = `<span class="nw"><input class="in n" type="number" inputmode="numeric" min="${fd.min}" max="${fd.max}" ${a} value="${esc(v)}">${unit}</span>`;
+      if (fd.type === 'num') ctl = `<span class="nw"><input class="in n" type="number" inputmode="${fd.step && fd.step < 1 ? 'decimal' : 'numeric'}" min="${fd.min}" max="${fd.max}" step="${fd.step || 1}" ${a} value="${esc(v)}">${unit}</span>`;
       else if (fd.type === 'time') ctl = `<input class="in t" type="time" ${a} value="${esc(String(v || '').slice(0, 5))}">`;
       else if (fd.type === 'text') ctl = `<input class="in" maxlength="${fd.max || 80}" ${a} value="${esc(v)}">`;
       else if (fd.type === 'words') ctl = `<input class="in" maxlength="600" ${a} value="${esc(Array.isArray(v) ? v.join(', ') : v)}">`;

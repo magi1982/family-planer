@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.7.0 – 2026-11-10
+
+### New
+- **Sizes instead of points for to-dos**: *No points*, *Small*, *Medium* or *Large*. Large = the points for a full day (setting), medium = ⅔, small = ⅓ – always rounded up to whole points. New setting *To-dos: default size*; another size when adding needs the parent PIN. Older to-dos keep their points.
+- **Give points** (rewards view) offers the same *Small / Medium / Large* choice, plus *Take away* and a number of your own.
+- **Reward categories**: *Small*, *Medium*, *Large*, *Mega* and *Giant*. Large = what a person earns in a month with every chore done every day, including day and streak bonuses; small = ¼, medium = ½, mega = 2×, giant = 5×. Costs follow the point settings automatically; *Own points* is still available.
+- New settings *Value of a large reward* (default 20) and *Currency* (default CHF): the dialog shows an approximate money value for every category.
+- **School only when it matters**: in the "All" view a school block appears 60 minutes before leaving and disappears 60 minutes after getting home, for each block. New setting *Show school only around school time* (0 = always).
+- **To-dos button** at the top right of the planner opens the to-dos in a window of their own (with the number of open to-dos); the chore plan still shows them at the bottom.
+
+### Improved
+- "All" view: today large, tomorrow medium, every other day very narrow.
+- Today's chores sit two side by side, so more fits on a landscape tablet.
+- Empty days stay empty – no more "free" / "Free today" text.
+- Trophies and awards next to the percentage are larger.
+
+### Fixed
+- Rewards view: with nobody selected it now shows all rewards and all pending requests; tapping a person shows only theirs (tap again to clear). Before, the first person was always selected and pending requests of one person were shown for everybody.
+
 ## 0.6.0 – 2026-11-10
 
 ### New

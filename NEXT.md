@@ -62,7 +62,16 @@
 - Vollbild per Doppelklick ein/aus (Standard: ein)
 - Beim Öffnen automatisch Vollbild (Standard: aus)
 
-## Ideen für 0.7.0
+## Umgesetzt in 0.7.0
+
+- To-dos und *Punkte geben* mit Grössen *Klein / Mittel / Gross* (Gross = Tagesmaximum, Klein = ⅓ aufgerundet)
+- Belohnungs-Kategorien *Klein / Mittel / Gross / Mega gross / Riesig* (Gross = ein Monat mit allen Ämtli inkl. Boni), Gegenwert einstellbar
+- Schulblöcke nur 1 h vor dem Losgehen bis 1 h nach dem Heimkommen (einstellbar)
+- Grössere Pokale, kein „frei“-Text, Spaltenbreiten heute/morgen/Rest, Ämtli zu zweit nebeneinander
+- To-dos im Planer über einen Knopf oben rechts in eigenem Fenster
+- Fehler: Belohnungen ohne Auswahl für alle, mit Auswahl nur für die Person
+
+## Ideen für 0.8.0
 
 ### 5. „+ Hinzufügen“-Knopf oben rechts im Ämtliplan
 **Status:** Idee – noch nicht umgesetzt

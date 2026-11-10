@@ -14,6 +14,7 @@ THEMES = ("ha", "loxone", "apple", "google", "light", "nord")
 LANGUAGES = ("auto", "de", "en")
 MODES = ("fair", "per_chore")
 MODULES = ("week", "lists")
+TODO_SIZES = ("none", "s", "m", "l")
 SECTIONS = ("general", "vacation", "points", "announce", "lists_settings", "todos")
 
 
@@ -47,6 +48,7 @@ def general(data: dict, cur: dict) -> tuple[dict, set[str]]:
         "admin_only_edit": _bool(data, "admin_only_edit", cur.get("admin_only_edit", False)),
         "reliability_days": validate.integer(data.get("reliability_days", cur.get("reliability_days")), 7, 90, 30),
         "school_gap": validate.integer(data.get("school_gap", cur.get("school_gap")), 0, 240, 0),
+        "school_window": validate.integer(data.get("school_window", cur.get("school_window", 60)), 0, 240, 60),
     }
     if not any(patch["modules"].values()):
         raise SettingsError("modules", "no_modules")
@@ -79,11 +81,14 @@ def vacation(data: dict, cur: dict) -> tuple[dict, set[str]]:
     return {"vacation": new}, flags
 
 
-def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list) -> tuple[dict, set[str]]:
+def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list,
+           cur_value: float = 20, cur_currency: str = "CHF") -> tuple[dict, set[str]]:
     game = {k: validate.integer(data.get(k, v), 0, 1000, v) for k, v in cur_game.items()}
     game["mode"] = data.get("mode") if data.get("mode") in MODES else cur_mode
     notify = validate.entities(data.get("reward_notify", cur_notify), ("notify",))
-    return {"gamification": game, "reward_notify": notify}, {"rebook"}
+    value = validate.number(data.get("reward_value", cur_value), 0, 100000, cur_value)
+    currency = validate.currency(data.get("currency", cur_currency), cur_currency)
+    return {"gamification": game, "reward_notify": notify, "reward_value": value, "currency": currency}, {"rebook"}
 
 
 def announce(data: dict, cur: dict, persons: dict) -> tuple[dict, set[str]]:
@@ -124,7 +129,7 @@ def lists_settings(data: dict, cur: dict) -> tuple[dict, set[str]]:
 
 def todos(data: dict, cur: dict) -> tuple[dict, set[str]]:
     new = {"confirm": _bool(data, "confirm", cur.get("confirm", True)),
-           "points": validate.integer(data.get("points", cur.get("points")), 0, 1000, 0),
+           "size": data.get("size") if data.get("size") in TODO_SIZES else cur.get("size", "s"),
            "keep_days": validate.integer(data.get("keep_days", cur.get("keep_days")), 0, 30, 1)}
     return {"todos": new}, set()
 

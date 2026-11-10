@@ -81,7 +81,8 @@
           "school_gap": "Lunch at home from",
           "todo_confirm": "To-dos: confirm completion",
           "todo_points": "To-dos: default points",
-          "todo_keep_days": "To-dos: show finished ones for"
+          "todo_keep_days": "To-dos: show finished ones for",
+          "school_window": "Show school only around school time"
         },
         "data_description": {
           "rollover_time": "Until this time the previous day's chores can still be ticked off; afterwards open ones count as missed and the new day starts.",
@@ -92,7 +93,8 @@
           "school_gap": "From this many minutes between two lessons the school day is split into two blocks (leave/home per block). 0 = automatic: at least 45 minutes or twice the travel time plus 15 minutes.",
           "todo_confirm": "To-dos without a date are only ticked off after the question \"Mark as done?\" (chores still with one tap).",
           "todo_points": "Points for a finished to-do (0 = none). Own points per to-do only with the parent PIN. To-dos do not count towards the fair day value.",
-          "todo_keep_days": "How long finished to-dos stay visible (0 = until the next day change)."
+          "todo_keep_days": "How long finished to-dos stay visible (0 = until the next day change).",
+          "school_window": "Minutes before leaving and after being home in which the school block is shown in the planner (\"All\" view). Outside this window it is hidden. 0 = always show."
         }
       },
       "person_add": {
@@ -283,7 +285,9 @@
           "remove_pin": "Reset parent PIN to 123456",
           "reward_notify": "Also send requests to",
           "mode": "How points are given",
-          "day_points": "Points for a full day (fair)"
+          "day_points": "Points for a full day (fair)",
+          "reward_value": "Value of a large reward",
+          "currency": "Currency"
         },
         "data_description": {
           "default_points": "In \"per chore\" mode the points per chore, in \"fair\" mode the default weight. Can be changed per chore in the chore plan.",
@@ -293,7 +297,9 @@
           "streak_bonus": "After 7, 14, 21 … days in a row with everything done.",
           "mode": "Fair: whoever finishes all of their chores of the day gets the same points – whether 2 or 6 chores. Per chore: each chore earns its points, so more chores means more points.",
           "day_points": "Split across the day's chores; each done chore immediately earns its share. The value in the chore plan acts as a weight (e.g. 20 counts twice as much as 10).",
-          "remove_pin": "Resets the PIN to the start PIN 123456. It must then be changed in the planner right away."
+          "remove_pin": "Resets the PIN to the start PIN 123456. It must then be changed in the planner right away.",
+          "reward_value": "Money equivalent of a large reward (what a person earns in a month with every chore done, incl. bonuses). Small = ¼, medium = ½, mega = 2×, giant = 5×. Only shown as a guide, e.g. 20.",
+          "currency": "Shown after the amounts, e.g. CHF or €."
         }
       },
       "announce": {

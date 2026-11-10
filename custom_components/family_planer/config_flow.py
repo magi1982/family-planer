@@ -366,12 +366,16 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
                 "gamification": {**{k: validate.integer(user_input.get(k), 0, 1000, v) for k, v in g.items()},
                                  "mode": user_input.get("mode") if user_input.get("mode") in rewards.MODES else "fair"},
                 "reward_notify": validate.entities(user_input.get("reward_notify"), ("notify",)),
+                "reward_value": validate.number(user_input.get("reward_value"), 0, 100000, 20),
+                "currency": validate.currency(user_input.get("currency")),
             }
             pin = (user_input.get("pin") or "").strip()
             if pin and not user_input.get("remove_pin") and not settings_spec.pin_valid(pin):
                 errors["pin"] = "bad_pin"
             if not errors:
+                rewards.sync_reward_costs(self._planner.data["rewards"], patch["gamification"])
                 await self._planner.async_update_settings(patch)
+                self._planner.book_points()
                 if user_input.get("remove_pin"):
                     await self._planner.async_set_pin(None)  # back to the start PIN, must be changed again
                 elif pin:
@@ -384,6 +388,9 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
             vol.Required("default_points", default=g["default_points"]): POINTS_SELECTOR,
             vol.Required("day_bonus", default=g["day_bonus"]): POINTS_SELECTOR,
             vol.Required("streak_bonus", default=g["streak_bonus"]): POINTS_SELECTOR,
+            vol.Required("reward_value", default=self._planner.sizes()["value"]): selector.NumberSelector(
+                selector.NumberSelectorConfig(min=0, max=100000, step=0.5, mode=selector.NumberSelectorMode.BOX)),
+            vol.Required("currency", default=self._planner.sizes()["currency"]): str,
             vol.Optional("pin"): PIN_SELECTOR,
             vol.Optional("remove_pin", default=False): bool,
             vol.Optional("reward_notify", description={"suggested_value": st.get("reward_notify") or []}): NOTIFY_SELECTOR,
@@ -457,6 +464,7 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
                 "admin_only_edit": bool(user_input.get("admin_only_edit")),
                 "reliability_days": validate.integer(user_input.get("reliability_days"), 7, 90, 30),
                 "school_gap": validate.integer(user_input.get("school_gap"), 0, 240, 0),
+                "school_window": validate.integer(user_input.get("school_window"), 0, 240, 60),
                 "todos": {"confirm": bool(user_input.get("todo_confirm", True)),
                           "points": validate.integer(user_input.get("todo_points"), 0, 1000, 0),
                           "keep_days": validate.integer(user_input.get("todo_keep_days"), 0, 30, 1)},
@@ -471,6 +479,7 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
             vol.Required("admin_only_edit", default=bool(st.get("admin_only_edit", False))): bool,
             vol.Required("reliability_days", default=validate.integer(st.get("reliability_days"), 7, 90, 30)): num(7, 90, "d"),
             vol.Required("school_gap", default=validate.integer(st.get("school_gap"), 0, 240, 0)): num(0, 240, "min"),
+            vol.Required("school_window", default=validate.integer(st.get("school_window", 60), 0, 240, 60)): num(0, 240, "min"),
             vol.Required("todo_confirm", default=self._planner.todo_settings()["confirm"]): bool,
             vol.Required("todo_points", default=self._planner.todo_settings()["points"]): num(0, 1000),
             vol.Required("todo_keep_days", default=self._planner.todo_settings()["keep_days"]): num(0, 30, "d"),

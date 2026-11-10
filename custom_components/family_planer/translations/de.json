@@ -81,7 +81,8 @@
           "school_gap": "Heimweg über Mittag ab",
           "todo_confirm": "To-dos: Erledigen bestätigen",
           "todo_points": "To-dos: Standard-Punkte",
-          "todo_keep_days": "To-dos: erledigte anzeigen für"
+          "todo_keep_days": "To-dos: erledigte anzeigen für",
+          "school_window": "Schule nur rund um die Schulzeit zeigen"
         },
         "data_description": {
           "rollover_time": "Bis zu dieser Uhrzeit können Ämtli des Vortags noch abgehakt werden; danach zählen offene als „nicht gemacht“ und der neue Tag beginnt.",
@@ -92,7 +93,8 @@
           "school_gap": "Ab so vielen Minuten Pause zwischen zwei Lektionen wird der Schultag in zwei Blöcke geteilt (los/zuhause je Block). 0 = automatisch: mindestens 45 Minuten bzw. doppelter Schulweg plus 15 Minuten.",
           "todo_confirm": "To-dos ohne Datum werden erst nach der Frage „Als erledigt markieren?“ abgehakt (Ämtli weiterhin mit einem Tipp).",
           "todo_points": "Punkte für ein erledigtes To-do (0 = keine). Eigene Punkte pro To-do nur mit Eltern-PIN. To-dos zählen nicht zum fairen Tageswert.",
-          "todo_keep_days": "Wie lange erledigte To-dos noch sichtbar bleiben (0 = bis zum nächsten Tageswechsel)."
+          "todo_keep_days": "Wie lange erledigte To-dos noch sichtbar bleiben (0 = bis zum nächsten Tageswechsel).",
+          "school_window": "So viele Minuten vor dem Losgehen bis nach dem Heimkommen erscheint der Schulblock im Planer (Ansicht „Alles“). Sonst ist er ausgeblendet. 0 = immer anzeigen."
         }
       },
       "person_add": {
@@ -283,7 +285,9 @@
           "remove_pin": "Eltern-PIN auf 123456 zurücksetzen",
           "reward_notify": "Anfragen zusätzlich melden an",
           "mode": "Punkte verteilen",
-          "day_points": "Punkte für einen ganzen Tag (fair)"
+          "day_points": "Punkte für einen ganzen Tag (fair)",
+          "reward_value": "Gegenwert einer grossen Belohnung",
+          "currency": "Währung"
         },
         "data_description": {
           "default_points": "Im Modus „Pro Ämtli“ die Punkte je Ämtli, im Modus „Fair“ das Standard-Gewicht. Pro Ämtli im Ämtliplan änderbar.",
@@ -293,7 +297,9 @@
           "streak_bonus": "Nach 7, 14, 21 … Tagen am Stück alles erledigt.",
           "mode": "Fair: Wer alle seine Ämtli des Tages erledigt, bekommt gleich viele Punkte – egal ob 2 oder 6 Ämtli. Pro Ämtli: jedes Ämtli bringt seine Punkte, wer mehr Ämtli hat, kann mehr verdienen.",
           "day_points": "Wird auf die Ämtli des Tages verteilt; jedes erledigte Ämtli bringt sofort seinen Anteil. Der Wert im Ämtliplan wirkt dabei als Gewicht (z. B. 20 = zählt doppelt so viel wie 10).",
-          "remove_pin": "Setzt die PIN auf die Start-PIN 123456 zurück. Sie muss danach im Planer sofort geändert werden."
+          "remove_pin": "Setzt die PIN auf die Start-PIN 123456 zurück. Sie muss danach im Planer sofort geändert werden.",
+          "reward_value": "Geldwert einer grossen Belohnung (so viel verdient jemand in einem Monat, wenn alle Ämtli erledigt sind – inkl. Boni). Klein = ¼, Mittel = ½, Mega = 2×, Riesig = 5×. Dient nur zur Orientierung, z. B. 20.",
+          "currency": "Wird hinter den Beträgen angezeigt, z. B. CHF oder €."
         }
       },
       "announce": {

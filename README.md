@@ -121,6 +121,7 @@ Per child (or person, e.g. university/work):
 - **School calendar** with the lessons (e.g. ICS from WebUntis or other school systems) **or fixed times** per weekday – up to **two blocks per day** (morning and afternoon, when the child comes home for lunch).
 - Optional **travel time** to school/work in minutes.
 - **"All" view**: one line per block, e.g. `🎒 leave 07:35 · home 12:00 · 07:50–11:45` and `🎒 leave 13:15 · home 15:25 · 13:30–15:10`. With a school calendar, blocks are split automatically when there is enough time between two lessons to go home.
+- **Only when it matters**: in the "All" view a school block appears **1 hour before leaving** and disappears **1 hour after getting home** – for each block separately. The minutes are adjustable (*Show school only around school time*, 0 = always show).
 - **"Timetable" view**: only persons with a timetable, every lesson with time and room (e.g. "Maths · Room 12").
 - The **"Events"** view stays free of school; **"Chores"** shows chores only.
 - No school is shown on holidays.
@@ -148,10 +149,22 @@ Per child (or person, e.g. university/work):
 ### Real rewards
 
 - Parents create and change rewards **directly in the *Rewards* view** with *Edit* (always with the parent PIN): e.g. *ice cream = 30 points*, *30 min gaming = 50*, *5 CHF pocket money = 250*, *cinema = 400*.
-- Per reward: icon, cost, **approval required** yes/no, **only for** certain persons, **at most x times per week**.
+- Per reward: icon, **category**, **approval required** yes/no, **only for** certain persons, **at most x times per week**.
+- **Categories instead of doing the maths**:
+
+  | Category | Points | Example with defaults | Value (default 20) |
+  |---|---|---|---|
+  | Small | ¼ of large | 283 | approx. 5 |
+  | Medium | ½ of large | 565 | approx. 10 |
+  | **Large** | what you earn in **one month** with **every chore done every day** – incl. day and streak bonus | 30 × (30 + 5) + 4 × 20 = **1130** | 20 |
+  | Mega | 2 × large | 2260 | approx. 40 |
+  | Giant | 5 × large | 5650 | approx. 100 |
+
+  When the point settings change, the costs follow automatically. *Own points* is still available for special cases. The **value of a large reward** (e.g. 20 CHF) is adjustable and only meant as a guide.
+- **View**: with nobody selected the page shows **all rewards and all pending requests**. Tapping a person shows only their rewards and requests and lets them redeem. Tap again to clear the selection.
 - Children redeem on the tablet; points are reserved until the parents decide.
 - Parents approve as **admin** or on the tablet with a **parent PIN** (4–8 digits). Notification in Home Assistant and optionally on the phone.
-- **Give points**: bonus (or deduction) with a reason, e.g. "Room tidied up perfectly +25".
+- **Give points**: bonus (or deduction) with a reason, e.g. "Room tidied up perfectly" – with the same sizes as to-dos (**Small · Medium · Large**) or a number of your own.
 
 ### Parent PIN
 
@@ -166,9 +179,9 @@ Per child (or person, e.g. university/work):
 ![To-dos](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/todos.png)
 
 - Simple to-dos for a person **without due date or repetition** – they stay until they are done (e.g. *tidy up the room*, *return library books*).
-- Shown below the planner and the chore plan, grouped by person; add one with person + text.
+- In the **planner** via the **"To-dos"** button at the top right (with the number of open to-dos) in a window of their own; in the **chore plan** at the bottom. Grouped by person; add one with person + text.
 - **Ticking off asks for confirmation** ("Mark as done?") – unlike chores, which are ticked with one tap. Can be switched off.
-- Optional **points**: a default for all to-dos, or own points per to-do (parent PIN). To-dos do not count towards the fair day value.
+- **Size instead of points**: *No points*, **Small**, **Medium** or **Large**. Large = points for a full day (setting, default 30), medium = ⅔, small = ⅓ – always rounded up to whole points (30 → 10 / 20 / 30). The default size is adjustable; another size when adding needs the parent PIN. To-dos do not count towards the fair day value.
 - Finished to-dos stay visible for a configurable number of days, then disappear.
 
 ### Announcements on motion
@@ -324,7 +337,7 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 
 | Setting | Default | Meaning |
 |---|---|---|
-| Reward: title, icon, cost | – | e.g. *30 min gaming*, 50 points |
+| Reward: title, icon, category | – | *Small · Medium · Large · Mega · Giant* or own points |
 | Needs parent approval / Only for / Max per week | yes / everyone / unlimited | rules per reward |
 | How points are given | Fair | *Fair*: a full day counts, not the number of chores · *Per chore*: each chore earns its points |
 | Points for a full day (fair) | 30 | split across the day's chores, each finished chore earns its share immediately |
@@ -333,6 +346,8 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Bonus for every 7-day streak | 20 | |
 | Parent PIN | 123456 (must be changed) | 4–8 digits, not 123456; protects rewards, settings, approvals and points; locked after 5 wrong attempts. *Reset parent PIN to 123456* if forgotten |
 | Also send requests to | – | additional notification (e.g. mobile app) |
+| Value of a large reward | 20 | money value as a guide; small ¼, medium ½, mega 2×, giant 5× |
+| Currency | CHF | shown after the amounts |
 
 **Week plan → Announcements on motion**
 
@@ -362,8 +377,9 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Only admins may change the plan | off | children can still tick off chores and request rewards |
 | Calculate reliability over | 30 days | |
 | Lunch at home from | 0 = automatic | break in minutes from which the school day is split into blocks |
+| Show school only around school time | 60 min | the school block appears X minutes before leaving until X minutes after getting home ("All" view); 0 = always |
 | To-dos: confirm completion | on | ask "Mark as done?" before ticking off a to-do |
-| To-dos: default points | 0 | points for a finished to-do; own points per to-do with the parent PIN |
+| To-dos: default size | Small | *No points · Small (⅓) · Medium (⅔) · Large (a full day)*; another size when adding needs the parent PIN |
 | To-dos: show finished ones for | 1 day | 0 = until the next day change |
 
 **Smart lists → Add / edit / remove list**
@@ -389,7 +405,11 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 The navigation is in the same place at the top centre on every page.
 
 **Planner** – the week in landscape format, optimised for tablets:
-- Today large, the next two days and the weekend medium, past and later days narrow (past days only coloured with a count).
+- **"All" view**: **today large, tomorrow medium, every other day very narrow** (past days only coloured with a count). In "Chores" and "Events" the next two days and the weekend are medium.
+- Today's chores sit **two side by side**, so more fits on a landscape screen.
+- Nothing planned leaves the cell **empty** (no "free").
+- **Trophies and awards** next to the percentage are large and easy to see.
+- The **"To-dos"** button at the top right opens the to-dos in a window of their own.
 - Tap a day to show it large; arrows for other weeks, "Today" jumps back.
 - Filters **All · Chores · Events · Timetable**.
 - Tap chores directly to tick them off; deadlines ("until Sat", "due today") are visible.
@@ -399,7 +419,7 @@ The navigation is in the same place at the top centre on every page.
 
 **Chore plan** – persons with picture & colour, week overview, chores by weekday, **special chores** and **to-dos** below.
 
-Below the planner: **to-dos** of every person (tap → confirm → done).
+In the planner: **"To-dos"** button at the top right → a window with every person's to-dos (tap → confirm → done).
 
 **Rewards** – points, levels, pending approvals, rewards per person, history, *Give points*, *Edit* (add/change/delete rewards, change PIN – parent PIN).
 

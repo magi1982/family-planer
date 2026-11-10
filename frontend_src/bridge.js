@@ -176,6 +176,28 @@
       this._sig = null; this._inner = null; this.innerHTML = ''; this._attach();
     }
     set hass(h) { this._hass = h; this._attach(); if (this._inner && this._wrapped) this._inner.hass = STORE_VIEWS.includes(this._cfg.view) ? h : this._wrap(); }
+    // to-do window of the planer (opened from the button in the top bar of the week view)
+    _todoWin(lang) {
+      if (!this._win || this._win.parentNode !== this) {
+        const win = document.createElement('div');
+        win.style.cssText = 'position:fixed;inset:0;z-index:20;display:none;align-items:flex-start;justify-content:center;background:rgba(10,10,10,.72);padding:6vh 3vw;overflow:auto;box-sizing:border-box';
+        const box = document.createElement('div'); box.style.cssText = 'position:relative;width:min(1000px,100%)';
+        const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕';
+        x.setAttribute('aria-label', lang === 'en' ? 'Close' : 'Schliessen');
+        x.style.cssText = 'position:absolute;right:10px;top:22px;z-index:5;width:40px;height:40px;border-radius:20px;border:1px solid #3a3a3a;background:#2b2b2b;color:#ddd;font-size:18px;cursor:pointer';
+        x.addEventListener('click', () => this._showTodos(false));
+        win.addEventListener('click', (e) => { if (e.target === win) this._showTodos(false); });
+        box.appendChild(x); win.appendChild(box); this.appendChild(win);
+        this._win = win; this._winBox = box;
+      }
+      if (!this._todoEv) {
+        this._todoEv = true;
+        this.addEventListener('fp-open-todos', () => this._showTodos(true));
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && this._win && this._win.style.display !== 'none') this._showTodos(false); });
+      }
+      return this._winBox;
+    }
+    _showTodos(on) { if (this._win) this._win.style.display = on ? 'flex' : 'none'; if (on && this._todos) this._todos.update(); }
     getCardSize() { return this._cfg && this._cfg.view === 'plan' ? 10 : 12; }
     getGridOptions() { return { columns: 'full', min_rows: 6 }; }
     connectedCallback() { this._attach(); }
@@ -215,12 +237,16 @@
           .map((p) => [p.name, { zeiten: p.school.times || {}, weg: p.school.travel || 0 }])),
         abwesend: Object.fromEntries(s.persons.map((p) => [p.name, (s.away || {})[p.id] || []])),
         tage_zuverlaessigkeit: st.reliability_days || 30, schulpause: st.school_gap || 0, ruhe_sekunden: st.idle_seconds || 45,
+        schulfenster: st.school_window == null ? 60 : st.school_window,
+        todos_knopf: view === 'week', todos_offen: (s.todos || []).filter((t) => !t.done).length,
         termine_nach_namen: st.match_names !== false, auch_beim_besitzer: !!st.show_owner, tageswechsel: roll,
         plan: VIRT.plan, heute: VIRT.heute, verlauf: VIRT.verlauf, einstellungen: VIRT.settings, script: VIRT.script };
-      const sig = JSON.stringify([lang, cfg.tage_zuverlaessigkeit, cfg.schulpause, cfg.ruhe_sekunden, cfg.schule, cfg.abwesend, cfg.punkte_standard, cfg.titel, kinder.map((k) => [k.name, k.farbe]), kalender, cfg.termine_nach_namen, cfg.auch_beim_besitzer, roll]);
+      const sig = JSON.stringify([lang, cfg.schulfenster, cfg.todos_offen, cfg.tage_zuverlaessigkeit, cfg.schulpause, cfg.ruhe_sekunden, cfg.schule, cfg.abwesend, cfg.punkte_standard, cfg.titel, kinder.map((k) => [k.name, k.farbe]), kalender, cfg.termine_nach_namen, cfg.auch_beim_besitzer, roll]);
       if (!this._inner || this._lang !== lang) { this._lang = lang; this.innerHTML = ''; this._special = null; this._todos = null; this._inner = document.createElement(tag(view, lang)); this.appendChild(this._inner); this._sig = null; }
       if (sig !== this._sig) { this._sig = sig; this._inner.setConfig(cfg); this._inner.hass = this._wrap(); }
-      if (!this._todos || this._todos.parentNode !== this) { this._todos = document.createElement('fp-todos-inner'); this._todos.store = this._store; this._todos.setConfig({ lang }); this.appendChild(this._todos); }
+      // planner: to-dos open in their own window (button in the top bar); chore plan: below the plan
+      const host = view === 'week' ? this._todoWin(lang) : this;
+      if (!this._todos || this._todos.parentNode !== host) { if (this._todos) this._todos.remove(); this._todos = document.createElement('fp-todos-inner'); this._todos.store = this._store; this._todos.setConfig({ lang }); host.appendChild(this._todos); }
       else this._todos.update();
       if (view === 'plan') {
         if (!this._special || this._special.parentNode !== this) { this._special = document.createElement('fp-special-inner'); this._special.store = this._store; this._special.setConfig({ lang }); this.insertBefore(this._special, this._todos); }

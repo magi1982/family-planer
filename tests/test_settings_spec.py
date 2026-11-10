@@ -75,5 +75,17 @@ def test_pin_rules():
 
 
 def test_todo_settings():
-    patch, _ = S.todos({"confirm": False, "points": -5, "keep_days": 99}, {})
-    assert patch["todos"] == {"confirm": False, "points": 0, "keep_days": 30}
+    patch, _ = S.todos({"confirm": False, "size": "xl", "keep_days": 99}, {})
+    assert patch["todos"] == {"confirm": False, "size": "s", "keep_days": 30}  # unknown size falls back
+    patch, _ = S.todos({"size": "l"}, {"size": "m"})
+    assert patch["todos"]["size"] == "l"
+
+
+def test_reward_value_and_currency():
+    game = {"default_points": 10, "day_points": 30, "day_bonus": 5, "streak_bonus": 20}
+    patch, _ = S.points({"reward_value": "17,5", "currency": "<b>EUR</b>"}, game, "fair", [])
+    assert patch["reward_value"] == 17.5 and "<" not in patch["currency"]
+    patch, _ = S.points({"reward_value": "nan"}, game, "fair", [], 20, "CHF")
+    assert patch["reward_value"] == 20 and patch["currency"] == "CHF"
+    patch, _ = S.points({"reward_value": -3}, game, "fair", [])
+    assert patch["reward_value"] == 0

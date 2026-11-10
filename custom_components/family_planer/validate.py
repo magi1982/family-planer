@@ -5,6 +5,7 @@ so the frontend escaping is only the second line of defence.
 """
 from __future__ import annotations
 
+import math
 import re
 import unicodedata
 from typing import Any
@@ -76,6 +77,23 @@ def integer(value, lo: int, hi: int, fallback: int) -> int:
         return max(lo, min(hi, int(value)))
     except (TypeError, ValueError):
         return fallback
+
+
+def number(value, lo: float, hi: float, fallback: float) -> float:
+    """A finite number in [lo, hi], rounded to 2 decimals (e.g. a money amount)."""
+    try:
+        num = float(str(value).replace(",", ".").replace("'", ""))
+    except (TypeError, ValueError):
+        return fallback
+    if not math.isfinite(num):
+        return fallback
+    return round(max(lo, min(hi, num)), 2)
+
+
+def currency(value, fallback: str = "CHF") -> str:
+    """Short currency label: letters, digits, currency symbols, dot, dash and space only (max. 8)."""
+    out = "".join(ch for ch in text(value, 16) if ch.isalnum() or ch in " .-'" or unicodedata.category(ch) == "Sc")
+    return out.strip()[:8].strip() or fallback
 
 
 def language(setting: Any, system: Any) -> str:

@@ -10,10 +10,12 @@
   const TXT = {
     de: { title: 'To-dos', sub: 'Ohne Datum – bleiben stehen, bis sie erledigt sind.', none: 'Keine offenen To-dos.', ph: 'Neues To-do …', add: 'Hinzufügen',
       ask: '„{t}“ als erledigt markieren?', reopen: '„{t}“ wieder öffnen?', yes: 'Erledigt', yesOpen: 'Wieder öffnen', cancel: 'Abbrechen', del: 'Löschen',
-      delAsk: '„{t}“ löschen?', pts: 'Punkte', ptsHint: 'Eigene Punkte (Eltern-PIN)', err: 'Konnte nicht gespeichert werden.' },
+      delAsk: '„{t}“ löschen?', pts: 'Punkte', sizeHint: 'Grösse ändern braucht die Eltern-PIN', err: 'Konnte nicht gespeichert werden.',
+      sizes: { none: 'Ohne Punkte', s: 'Klein', m: 'Mittel', l: 'Gross' }, open: 'To-dos', openN: 'To-dos ({n})', close: 'Schliessen' },
     en: { title: 'To-dos', sub: 'No date – they stay until they are done.', none: 'No open to-dos.', ph: 'New to-do …', add: 'Add',
       ask: 'Mark "{t}" as done?', reopen: 'Reopen "{t}"?', yes: 'Done', yesOpen: 'Reopen', cancel: 'Cancel', del: 'Delete',
-      delAsk: 'Delete "{t}"?', pts: 'points', ptsHint: 'Own points (parent PIN)', err: 'Could not be saved.' },
+      delAsk: 'Delete "{t}"?', pts: 'points', sizeHint: 'Changing the size needs the parent PIN', err: 'Could not be saved.',
+      sizes: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large' }, open: 'To-dos', openN: 'To-dos ({n})', close: 'Close' },
   };
   const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
 
@@ -23,7 +25,7 @@
       if (!this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.addEventListener('click', (e) => this._click(e));
-        this.shadowRoot.addEventListener('input', (e) => { if (e.target.dataset.new !== undefined) this._text = e.target.value; if (e.target.dataset.pts !== undefined) this._pts = e.target.value; });
+        this.shadowRoot.addEventListener('input', (e) => { if (e.target.dataset.new !== undefined) this._text = e.target.value; });
         this.shadowRoot.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.dataset.new !== undefined) { e.preventDefault(); this._add(); } });
       }
       this._render();
@@ -36,17 +38,18 @@
     async _add() {
       const s = this._snap(); const title = String(this._text || '').trim(); if (!title || !s) return;
       const pid = this._person || (s.persons[0] && s.persons[0].id);
-      const pts = String(this._pts || '').trim();
+      const def = this._defSize(s); const size = this._size || def;
       try {
-        if (pts !== '') await window.FPPIN.call(this._store, 'family_planer/todo/save', { person_id: pid, title, points: Math.max(0, Math.round(Number(pts) || 0)) }, { lang: this._cfg.lang, host: this });
+        if (size !== def) await window.FPPIN.call(this._store, 'family_planer/todo/save', { person_id: pid, title, size }, { lang: this._cfg.lang, host: this });
         else await this._store.ws('family_planer/todo/save', { person_id: pid, title });
-        this._text = ''; this._pts = ''; this._render();
+        this._text = ''; this._size = null; this._render();
       } catch (e) { if (e !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(this.T.err); }
     }
     async _click(e) {
       const t = e.target; const s = this._snap(); if (!s) return;
       const p = t.closest('[data-person]'); if (p) { this._person = p.dataset.person; this._render(); return; }
       if (t.closest('[data-add]')) { this._add(); return; }
+      const sz = t.closest('[data-size]'); if (sz) { this._size = sz.dataset.size; this._render(); return; }
       const td = t.closest('[data-todo]');
       if (td) {
         const it = (s.todos || []).find((x) => x.id === td.dataset.todo); if (!it) return;
@@ -63,6 +66,8 @@
       }
       if (t.closest('[data-close]') || t.classList.contains('ov')) { this._dlg = null; this._render(); }
     }
+    _defSize(s) { const v = s && s.todo_settings && s.todo_settings.size; return ['none', 's', 'm', 'l'].includes(v) ? v : 's'; }
+    _pts(s, it) { const sz = (s.sizes && s.sizes.todo) || {}; return it.size ? (sz[it.size] || 0) : (it.points || 0); }
     async _set(it, done) { try { await this._store.ws('family_planer/todo/set', { todo_id: it.id, done }); } catch (e) { this._flash(this.T.err); } }
     _render() {
       if (!this.shadowRoot || !this._cfg) return;
@@ -90,7 +95,8 @@
         .chip{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:18px;border:1px solid #3a3a3a;background:#2b2b2b;color:#ccc;font:inherit;font-size:13px;cursor:pointer}.chip.on{border-color:var(--c);color:var(--c)}
         .chip i{width:10px;height:10px;border-radius:50%;background:var(--c)}
         .in{flex:1;min-width:180px;height:42px;border-radius:10px;border:1px solid #333;background:#141414;color:#eee;font:inherit;font-size:15px;padding:0 12px;outline:none}
-        .in.n{flex:none;min-width:0;width:110px}
+        .sizes{display:flex;flex-wrap:wrap;gap:6px}.sz{height:36px;padding:0 12px;border-radius:18px;border:1px solid #3a3a3a;background:#2b2b2b;color:#ccc;font:inherit;font-size:13px;cursor:pointer}
+        .sz b{color:${G};font-weight:600}.sz.on{border-color:${G};color:#fff;background:#202820}
         .sg{height:40px;border-radius:20px;background:#2e2e2e;border:1px solid #3a3a3a;color:#ccc;font:inherit;font-size:14px;padding:0 16px;cursor:pointer}
         .sg.ok{background:${G};border-color:${G};color:#141414;font-weight:600}.sg.del{background:#3a2626;border-color:#E06B6B;color:#f3b4b4}
         .ov{position:absolute;inset:0;background:rgba(10,10,10,.72);border-radius:16px;display:flex;align-items:center;justify-content:center;z-index:4}
@@ -100,11 +106,12 @@
       </style><div class="card">
         <h3>${esc(T.title)}</h3><div class="sub">${esc(T.sub)}</div>
         ${groups.length ? `<div class="grid">${groups.map(({ p, list }) => `<div class="g" style="--c:${COLOR(p.color)}"><div class="gn">${esc(p.name)}</div>
-          ${list.map((x) => `<div class="row"><button class="t${x.done ? ' done' : ''}" data-todo="${esc(x.id)}"><span class="box">${x.done ? '✓' : ''}</span><span class="tt">${esc(x.title)}</span>${x.points ? `<span class="pt">+${x.points}</span>` : ''}</button>
+          ${list.map((x) => `<div class="row"><button class="t${x.done ? ' done' : ''}" data-todo="${esc(x.id)}"><span class="box">${x.done ? '✓' : ''}</span><span class="tt">${esc(x.title)}</span>${this._pts(s, x) ? `<span class="pt">+${this._pts(s, x)}</span>` : ''}</button>
             <button class="x" data-del="${esc(x.id)}" aria-label="${esc(T.del)}">✕</button></div>`).join('')}</div>`).join('')}</div>` : `<div class="empty">${esc(T.none)}</div>`}
         <div class="add">${persons.map((p) => `<button class="chip${sel && p.id === sel.id ? ' on' : ''}" style="--c:${COLOR(p.color)}" data-person="${esc(p.id)}"><i></i>${esc(p.name)}</button>`).join('')}
           <input class="in" data-new maxlength="80" placeholder="${esc(T.ph)}" value="${esc(this._text || '')}">
-          <input class="in n" data-pts type="number" min="0" max="1000" inputmode="numeric" placeholder="${esc(T.pts)}" title="${esc(T.ptsHint)}" value="${esc(this._pts || '')}">
+          <span class="sizes" title="${esc(T.sizeHint)}">${['none', 's', 'm', 'l'].map((k) => { const n = ((s.sizes && s.sizes.todo) || {})[k] || 0; const on = (this._size || this._defSize(s)) === k;
+            return `<button class="sz${on ? ' on' : ''}" data-size="${k}">${esc(T.sizes[k])}${k !== 'none' ? ` <b>+${n}</b>` : ''}</button>`; }).join('')}</span>
           <button class="sg ok" data-add>${esc(T.add)}</button></div>
         ${dlg}${this._msg ? `<div class="msg">${esc(this._msg)}</div>` : ''}
       </div>`;

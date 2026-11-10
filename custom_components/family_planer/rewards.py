@@ -20,8 +20,62 @@ DEFAULTS = {"default_points": 10, "day_points": 30, "day_bonus": 5, "streak_bonu
 MODES = ("fair", "per_chore")
 
 
+TODO_SIZES = ("none", "s", "m", "l")
+REWARD_SIZES = ("s", "m", "l", "xl", "xxl")
+MONTH_DAYS = 30
+
+
 def new_id() -> str:
     return secrets.token_hex(6)
+
+
+# ------------------------------------------------------------------ sizes instead of raw points
+def _ceil_div(a: int, b: int) -> int:
+    return -(-a // b)
+
+
+def size_points(day_points: int) -> dict[str, int]:
+    """Small / medium / large for to-dos and bonus points: large = a full day of chores, small = a third.
+
+    Always rounded up to whole points, so a small to-do is never worth 0 while day_points > 0.
+    """
+    day = max(0, int(day_points))
+    return {"none": 0, "s": _ceil_div(day, 3), "m": _ceil_div(2 * day, 3), "l": day}
+
+
+def month_points(game: dict) -> int:
+    """What a person earns in a month when every chore of every day is done (incl. day and streak bonuses)."""
+    day = int(game.get("day_points", DEFAULTS["day_points"]))
+    bonus = int(game.get("day_bonus", DEFAULTS["day_bonus"]))
+    streak = int(game.get("streak_bonus", DEFAULTS["streak_bonus"]))
+    return max(0, MONTH_DAYS * (day + bonus) + (MONTH_DAYS // 7) * streak)
+
+
+def reward_costs(game: dict) -> dict[str, int]:
+    """Reward categories: large = one month of complete days; mega = 2×, giant = 5×; small/medium = ¼ and ½."""
+    large = max(1, month_points(game))
+    return {"s": max(1, _ceil_div(large, 4)), "m": max(1, _ceil_div(large, 2)), "l": large,
+            "xl": 2 * large, "xxl": 5 * large}
+
+
+REWARD_VALUE_FACTOR = {"s": 0.25, "m": 0.5, "l": 1, "xl": 2, "xxl": 5}
+
+
+def reward_values(value_large: float) -> dict[str, float]:
+    """Money equivalent per category (setting: value of a large reward, e.g. 20)."""
+    return {k: round(value_large * f, 2) for k, f in REWARD_VALUE_FACTOR.items()}
+
+
+def sync_reward_costs(rewards: dict, game: dict) -> bool:
+    """Rewards with a category follow the current point settings; returns True when a cost changed."""
+    costs = reward_costs(game)
+    changed = False
+    for r in rewards.values():
+        size = r.get("size")
+        if size in costs and r.get("cost") != costs[size]:
+            r["cost"] = costs[size]
+            changed = True
+    return changed
 
 
 # ------------------------------------------------------------------ balances

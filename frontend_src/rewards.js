@@ -8,7 +8,7 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const TXT = {
     de: { title: 'Punkte & Belohnungen', pts: 'Punkte', lvl: 'Level', next: 'noch {n} bis Level {l}', max: 'Höchstes Level erreicht!',
-      shop: 'Belohnungen für {name}', redeem: 'Einlösen', missing: 'noch {n} Punkte', approval: 'mit Freigabe', noapproval: 'sofort',
+      shop: 'Belohnungen für {name}', shopAll: 'Alle Belohnungen', pickHint: 'Person antippen, um ihre Belohnungen zu sehen und einzulösen.', forOnly: 'nur für {n}', redeem: 'Einlösen', missing: 'noch {n} Punkte', approval: 'mit Freigabe', noapproval: 'sofort',
       week: 'max. {n}× pro Woche', none: 'Noch keine Belohnungen. Eltern legen sie hier mit „Bearbeiten“ an (Eltern-PIN).',
       pending: 'Wartet auf Freigabe', approve: 'Freigeben', deny: 'Ablehnen', history: 'Verlauf', bonus: 'Punkte geben',
       pin: 'Eltern-PIN', ok: 'OK', cancel: 'Abbrechen', reason: 'Grund (optional)', give: 'Vergeben',
@@ -18,9 +18,12 @@
       edit: 'Bearbeiten', editDone: 'Fertig', add: 'Neue Belohnung', changePin: 'PIN ändern', del: 'Löschen', save: 'Speichern',
       rTitle: 'Belohnung', rIcon: 'Icon', rCost: 'Kosten in Punkten', rApproval: 'Eltern müssen freigeben', rPersons: 'Nur für (leer = alle)', rWeek: 'Höchstens pro Woche (0 = unbegrenzt)',
       delAsk: '„{t}“ wirklich löschen? Offene Anfragen dafür werden abgelehnt.', saved: 'Gespeichert.', pinChanged: 'Eltern-PIN geändert.',
-      startPin: 'Die Start-PIN 123456 ist noch aktiv. Bitte jetzt eine eigene Eltern-PIN festlegen – vorher sind Belohnungen und Einstellungen gesperrt.' },
+      startPin: 'Die Start-PIN 123456 ist noch aktiv. Bitte jetzt eine eigene Eltern-PIN festlegen – vorher sind Belohnungen und Einstellungen gesperrt.',
+      rCat: 'Kategorie', own: 'Eigene Punkte', approx: 'ca.', minus: 'Abziehen',
+      sizes: { s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Mega gross', xxl: 'Riesig' },
+      catHint: 'Gross = so viel, wie man in einem Monat mit allen Ämtli verdient (inkl. Boni). Die Punkte passen sich an, wenn die Punkte-Einstellungen ändern.' },
     en: { title: 'Points & rewards', pts: 'points', lvl: 'Level', next: '{n} more to level {l}', max: 'Highest level reached!',
-      shop: 'Rewards for {name}', redeem: 'Redeem', missing: '{n} points to go', approval: 'needs approval', noapproval: 'instant',
+      shop: 'Rewards for {name}', shopAll: 'All rewards', pickHint: 'Tap a person to see and redeem their rewards.', forOnly: 'only for {n}', redeem: 'Redeem', missing: '{n} points to go', approval: 'needs approval', noapproval: 'instant',
       week: 'max. {n}× per week', none: 'No rewards yet. Parents add them here with "Edit" (parent PIN).',
       pending: 'Waiting for approval', approve: 'Approve', deny: 'Decline', history: 'History', bonus: 'Give points',
       pin: 'Parent PIN', ok: 'OK', cancel: 'Cancel', reason: 'Reason (optional)', give: 'Give',
@@ -30,10 +33,15 @@
       edit: 'Edit', editDone: 'Done', add: 'New reward', changePin: 'Change PIN', del: 'Delete', save: 'Save',
       rTitle: 'Reward', rIcon: 'Icon', rCost: 'Cost in points', rApproval: 'Parents must approve', rPersons: 'Only for (empty = everyone)', rWeek: 'At most per week (0 = unlimited)',
       delAsk: 'Really delete "{t}"? Pending requests for it are declined.', saved: 'Saved.', pinChanged: 'Parent PIN changed.',
-      startPin: 'The start PIN 123456 is still active. Please choose your own parent PIN now – until then rewards and settings are locked.' },
+      startPin: 'The start PIN 123456 is still active. Please choose your own parent PIN now – until then rewards and settings are locked.',
+      rCat: 'Category', own: 'Own points', approx: 'approx.', minus: 'Take away',
+      sizes: { s: 'Small', m: 'Medium', l: 'Large', xl: 'Mega', xxl: 'Giant' },
+      catHint: 'Large = what you earn in a month with every chore done (incl. bonuses). Points follow the point settings automatically.' },
   };
   const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
   const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
+  const RSIZES = ['s', 'm', 'l', 'xl', 'xxl'];
+  const money = (s, k) => { const z = s.sizes || {}; const v = (z.values || {})[k]; return v ? `${Number(v).toLocaleString('de-CH', { maximumFractionDigits: 2 })} ${z.currency || ''}`.trim() : ''; };
   const av = (p, size) => (window.FPX && window.FPX.avatarHtml
     ? window.FPX.avatarHtml({ name: p.name, farbe: COLOR(p.color), bild: /^(av:[a-z0-9.+]+|svg:[a-z-]+|img:\/family_planer_files\/avatars\/[a-z0-9_]+\.(jpg|png|webp))$/.test(p.image || '') ? p.image : '' }, size)
     : `<span style="width:${size}px;height:${size}px;border-radius:50%;background:${p.color};display:inline-block"></span>`);
@@ -69,16 +77,18 @@
     }
     async _click(e) {
       const t = e.target; const s = this._snap(); if (!s) return;
-      const pc = t.closest('[data-p]'); if (pc) { this._sel = pc.dataset.p; this._render(); return; }
+      const pc = t.closest('[data-p]'); if (pc) { this._sel = this._sel === pc.dataset.p ? null : pc.dataset.p; this._render(); return; }
       const rd = t.closest('[data-redeem]');
       if (rd) {
-        const r = s.rewards.find((x) => x.id === rd.dataset.redeem); const pid = this._sel || (s.persons[0] && s.persons[0].id);
+        const r = s.rewards.find((x) => x.id === rd.dataset.redeem); const pid = this._sel; if (!pid) return;
         try { const res = await this._store.ws('family_planer/reward/redeem', { person_id: pid, reward_id: r.id }); this._flash(fmt(res.status === 'approved' ? this.T.done : this.T.sent, { t: r.title })); } catch (er) { this._flash(this._errText(er), true); }
         return;
       }
       const dc = t.closest('[data-decide]');
       if (dc) { const id = dc.dataset.decide; const approve = dc.dataset.ok === '1'; this._parent((extra) => this._store.ws('family_planer/reward/decide', { request_id: id, approve, ...extra }).then(() => this._flash(approve ? this.T.approved : this.T.denied)).catch((er) => this._flash(this._errText(er), true))); return; }
-      if (t.closest('[data-bonus]')) { this._dlg = { kind: 'bonus', points: '10', reason: '', person: this._sel || (s.persons[0] && s.persons[0].id) }; this._render(); return; }
+      if (t.closest('[data-bonus]')) { this._dlg = { kind: 'bonus', points: String(((s.sizes || {}).todo || {}).s || 10), reason: '', person: this._sel || (s.persons[0] && s.persons[0].id) }; this._render(); return; }
+      const bz = t.closest('[data-bsize]'); if (bz && this._dlg && this._dlg.kind === 'bonus') { const n = ((s.sizes || {}).todo || {})[bz.dataset.bsize] || 0; this._dlg.points = String(this._dlg.neg ? -n : n); this._render(); return; }
+      if (t.closest('[data-bneg]') && this._dlg && this._dlg.kind === 'bonus') { this._dlg.neg = !this._dlg.neg; this._dlg.points = String(-(Number(this._dlg.points) || 0)); this._render(); return; }
       const bp = t.closest('[data-bperson]'); if (bp && this._dlg) { this._dlg.person = bp.dataset.bperson; this._render(); return; }
       if (t.closest('[data-give]') && this._dlg) {
         const d = this._dlg; const pts = Math.round(Number(d.points) || 0); if (!pts) return;
@@ -96,15 +106,18 @@
       }
       const er = t.closest('[data-redit]');
       if (er) {
-        const r = s.rewards.find((x) => x.id === er.dataset.redit) || { title: '', icon: 'mdi:gift-outline', cost: 100, approval: true, persons: [], per_week: 0 };
-        this._dlg = { kind: 'reward', id: r.id || null, r: { ...r, persons: [...(r.persons || [])] } }; this._render(); return;
+        const r = s.rewards.find((x) => x.id === er.dataset.redit) || { title: '', icon: 'mdi:gift-outline', size: 's', cost: ((s.sizes || {}).reward || {}).s || 100, approval: true, persons: [], per_week: 0 };
+        this._dlg = { kind: 'reward', id: r.id || null, r: { ...r, size: r.size || (r.id ? 'custom' : 's'), persons: [...(r.persons || [])] } }; this._render(); return;
+      }
+      const rz = t.closest('[data-rsize]');
+      if (rz && this._dlg && this._dlg.kind === 'reward') { const k = rz.dataset.rsize; this._dlg.r.size = k; if (k !== 'custom') this._dlg.r.cost = ((s.sizes || {}).reward || {})[k] || this._dlg.r.cost; this._render(); return;
       }
       const ic = t.closest('[data-ricon]'); if (ic && this._dlg && this._dlg.kind === 'reward') { this._dlg.r.icon = ic.dataset.ricon; this._render(); return; }
       const rp = t.closest('[data-rperson]');
       if (rp && this._dlg && this._dlg.kind === 'reward') { const ps = this._dlg.r.persons; const i = ps.indexOf(rp.dataset.rperson); if (i >= 0) ps.splice(i, 1); else ps.push(rp.dataset.rperson); this._render(); return; }
       if (t.closest('[data-rsave]') && this._dlg) {
         const d = this._dlg; const r = d.r; if (!String(r.title || '').trim()) return;
-        const data = { title: r.title, icon: r.icon, cost: Math.round(Number(r.cost) || 0), approval: !!r.approval, persons: r.persons, per_week: Math.round(Number(r.per_week) || 0) };
+        const data = { title: r.title, icon: r.icon, cost: Math.round(Number(r.cost) || 0), approval: !!r.approval, persons: r.persons, per_week: Math.round(Number(r.per_week) || 0), ...(RSIZES.includes(r.size) ? { size: r.size } : {}) };
         const res = await this._pinned('family_planer/reward/save', { ...(d.id ? { reward_id: d.id } : {}), data });
         if (res) { this._dlg = null; this._flash(this.T.saved); }
         return;
@@ -121,7 +134,7 @@
       if (!this.shadowRoot || !this._cfg) return;
       const T = this.T; const s = this._snap();
       if (!s) { this.shadowRoot.innerHTML = ''; return; }
-      const persons = s.persons; const sel = persons.find((p) => p.id === this._sel) || persons[0];
+      const persons = s.persons; const sel = persons.find((p) => p.id === this._sel) || null;  // nobody selected = everything
       const pts = s.points || {};
       const cards = persons.map((p) => { const x = pts[p.id] || { balance: 0, available: 0, level: 1, name: '', progress: 0, next: null, lifetime: 0 };
         return `<button class="pc${sel && p.id === sel.id ? ' on' : ''}" data-p="${esc(p.id)}" style="--c:${COLOR(p.color)}">${av(p, 52)}
@@ -130,20 +143,23 @@
           <span class="nx">${x.next == null ? esc(T.max) : esc(fmt(T.next, { n: x.next - x.lifetime, l: x.level + 1 }))}</span></div>
           <div class="pt"><strong>${x.balance}</strong><span>${esc(T.pts)}</span>${x.balance !== x.available ? `<em>${esc(fmt(T.reserved, { n: x.balance - x.available }))}</em>` : ''}</div></button>`; }).join('');
       const avail = sel ? (pts[sel.id] || {}).available || 0 : 0;
-      const rw = this._edit ? s.rewards : s.rewards.filter((r) => !r.persons || !r.persons.length || (sel && r.persons.includes(sel.id)));
+      const rw = this._edit || !sel ? s.rewards : s.rewards.filter((r) => !r.persons || !r.persons.length || r.persons.includes(sel.id));
+      const only = (r) => (r.persons && r.persons.length ? ' · ' + esc(fmt(T.forOnly, { n: r.persons.map((pid) => (persons.find((p) => p.id === pid) || {}).name).filter(Boolean).join(', ') })) : '');
       const edit = this._edit && window.FPPIN.unlocked(this._store);
       if (this._edit && !edit) this._edit = false;
       const shop = edit ? `<div class="shop">${rw.map((r) => `<div class="rw"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
-          <span>${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}${r.persons && r.persons.length ? ' · ' + esc(r.persons.map((pid) => (persons.find((p) => p.id === pid) || {}).name).filter(Boolean).join(', ')) : ''}</span></div>
+          <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}${r.persons && r.persons.length ? ' · ' + esc(r.persons.map((pid) => (persons.find((p) => p.id === pid) || {}).name).filter(Boolean).join(', ')) : ''}</span></div>
           <button class="tb" data-redit="${esc(r.id)}"><ha-icon icon="mdi:pencil"></ha-icon></button></div>`).join('')}
           <button class="rw add" data-redit=""><ha-icon icon="mdi:plus"></ha-icon>${esc(T.add)}</button></div>`
-        : !s.rewards.length ? `<div class="empty">${esc(T.none)}</div>` : `<div class="shop">${rw.map((r) => { const ok = avail >= r.cost;
+        : !s.rewards.length ? `<div class="empty">${esc(T.none)}</div>` : !sel ? `<div class="hint2">${esc(T.pickHint)}</div><div class="shop">${rw.map((r) => `<div class="rw"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
+          <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${only(r)}</span></div></div>`).join('')}</div>`
+        : `<div class="shop">${rw.map((r) => { const ok = avail >= r.cost;
         return `<div class="rw${ok ? '' : ' lock'}"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
-          <span>${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}</span>
+          <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}</span>
           ${ok ? '' : `<span class="ms"><span class="bar"><i style="width:${Math.round((avail / r.cost) * 100)}%"></i></span>${esc(fmt(T.missing, { n: r.cost - avail }))}</span>`}</div>
           <button class="rb" data-redeem="${esc(r.id)}" ${ok ? '' : 'disabled'}>${esc(T.redeem)}</button></div>`; }).join('')}</div>`;
       const name = (pid) => (persons.find((p) => p.id === pid) || {}).name || '?';
-      const pend = s.requests.filter((q) => q.status === 'pending');
+      const pend = s.requests.filter((q) => q.status === 'pending' && (!sel || q.pid === sel.id));
       const pending = pend.length ? `<div class="sec">${esc(T.pending)}</div><div class="pend">${pend.map((q) => `<div class="pq"><b>${esc(name(q.pid))}</b><span>${esc(q.title)} · ${q.cost} ${esc(T.pts)}</span>
           <button class="sg ok" data-decide="${esc(q.id)}" data-ok="1">${esc(T.approve)}</button><button class="sg" data-decide="${esc(q.id)}" data-ok="0">${esc(T.deny)}</button></div>`).join('')}</div>` : '';
       const hist = sel ? s.ledger.filter((e) => e.pid === sel.id).slice(0, 12) : [];
@@ -155,7 +171,9 @@
         dlg = `<div class="ov"><div class="dlg"><div class="dh">${esc(d.id ? r.title : T.add)}</div>
           <label class="fl">${esc(T.rTitle)}<input class="in" data-rf="title" maxlength="60" value="${esc(r.title)}"></label>
           <label class="fl">${esc(T.rIcon)}<span class="icons">${icons.map((i) => `<button class="ib${r.icon === i ? ' on' : ''}" data-ricon="${i}"><ha-icon icon="${i}"></ha-icon></button>`).join('')}</span><input class="in" data-rf="icon" maxlength="70" value="${esc(r.icon)}" placeholder="mdi:…"></label>
-          <div class="row2"><label class="fl">${esc(T.rCost)}<input class="in" type="number" min="1" max="100000" inputmode="numeric" data-rf="cost" value="${esc(r.cost)}"></label>
+          <div class="fl">${esc(T.rCat)}<div class="cats">${[...RSIZES, 'custom'].map((k) => { const n = ((s.sizes || {}).reward || {})[k]; const mv = money(s, k);
+            return `<button class="cat${r.size === k ? ' on' : ''}" data-rsize="${k}"><b>${esc(k === 'custom' ? T.own : T.sizes[k])}</b>${k === 'custom' ? '' : `<span>${n} ${esc(T.pts)}${mv ? ` · ${esc(T.approx)} ${esc(mv)}` : ''}</span>`}</button>`; }).join('')}</div><span class="hint">${esc(T.catHint)}</span></div>
+          <div class="row2">${r.size === 'custom' ? `<label class="fl">${esc(T.rCost)}<input class="in" type="number" min="1" max="100000" inputmode="numeric" data-rf="cost" value="${esc(r.cost)}"></label>` : ''}
           <label class="fl">${esc(T.rWeek)}<input class="in" type="number" min="0" max="50" inputmode="numeric" data-rf="per_week" value="${esc(r.per_week)}"></label></div>
           <label class="ck"><input type="checkbox" data-rf="approval" ${r.approval ? 'checked' : ''}>${esc(T.rApproval)}</label>
           <div class="fl">${esc(T.rPersons)}<div class="bps">${persons.map((p) => `<button class="chip${r.persons.includes(p.id) ? ' on' : ''}" data-rperson="${esc(p.id)}">${av(p, 22)}${esc(p.name)}</button>`).join('')}</div></div>
@@ -164,6 +182,9 @@
           <div class="ea"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg del" data-ryes>${esc(T.del)}</button></div></div></div>`;
       if (d && d.kind === 'bonus') dlg = `<div class="ov"><div class="dlg"><div class="dh">${esc(T.bonus)}</div>
           <div class="bps">${persons.map((p) => `<button class="chip${p.id === d.person ? ' on' : ''}" data-bperson="${esc(p.id)}">${av(p, 22)}${esc(p.name)}</button>`).join('')}</div>
+          <div class="cats">${['s', 'm', 'l'].map((k) => { const n = ((s.sizes || {}).todo || {})[k] || 0; const on = Math.abs(Number(d.points)) === n;
+            return `<button class="cat${on ? ' on' : ''}" data-bsize="${k}"><b>${esc(T.sizes[k])}</b><span>${d.neg ? '−' : '+'}${n} ${esc(T.pts)}</span></button>`; }).join('')}
+            <button class="cat${d.neg ? ' on neg' : ''}" data-bneg><b>${esc(T.minus)}</b><span>−</span></button></div>
           <div class="br"><input class="in num" data-bp type="number" value="${esc(d.points)}" inputmode="numeric"><input class="in" data-br placeholder="${esc(T.reason)}" value="${esc(d.reason || '')}" maxlength="80"></div>
           <div class="ea"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg ok" data-give>${esc(T.give)}</button></div></div></div>`;
       this.shadowRoot.innerHTML = `<style>
@@ -172,6 +193,9 @@
         .top{display:flex;align-items:center;gap:12px;margin-bottom:14px}.top h2{margin:0;font-size:20px;font-weight:600;flex:1}
         .tb{display:flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:10px;border:1px solid #333;background:#262626;color:#bbb;font:inherit;font-size:13px;cursor:pointer}
         ha-icon{--mdc-icon-size:20px}
+.cats{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.cat{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:92px;padding:8px 12px;border-radius:12px;border:1px solid #3a3a3a;background:#262626;color:#ccc;font:inherit;font-size:13px;cursor:pointer;text-align:left}
+        .cat b{font-weight:600;color:#eee}.cat span{font-size:11px;color:#999}.cat.on{border-color:#69C350;background:#202820}.cat.on span{color:#a7dc93}.cat.neg{border-color:#E06B6B;background:#3a2626}
+        .hint{display:block;font-size:11px;color:#888;margin-top:2px}
         .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
         .pc{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;border:1px solid #2a2a2a;background:#232323;color:inherit;font:inherit;text-align:left;cursor:pointer;border-left:4px solid var(--c)}
         .pc.on{border-color:var(--c);background:#262626}
@@ -187,7 +211,7 @@
         .rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.rt b{font-size:15px}.rt span{font-size:12px;color:#999}.ms{display:flex;flex-direction:column;gap:3px}
         .rb{height:40px;padding:0 16px;border-radius:10px;border:none;background:${G};color:#141414;font:inherit;font-weight:600;cursor:pointer}
         .rb[disabled]{background:#333;color:#777;cursor:default}
-        .pend,.hist{display:flex;flex-direction:column;gap:6px}
+        .pend,.hist{display:flex;flex-direction:column;gap:6px}.hint2{font-size:13px;color:#999;margin:0 2px 8px}
         .pq{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:#262626;border:1px dashed #4a4a4a}.pq span{flex:1;color:#bbb;font-size:14px}
         .hr{display:grid;grid-template-columns:110px 1fr 60px 60px;gap:8px;align-items:center;padding:8px 12px;border-radius:9px;background:#232323;font-size:13px}
         .hr .k{color:#aaa}.hr .tx{color:#ddd;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hr .d{color:#777}.hr b{text-align:right;color:${G}}.hr b.neg{color:#E06B6B}
@@ -222,7 +246,7 @@
         ${s.pin_default ? `<div class="warn"><ha-icon icon="mdi:shield-alert-outline"></ha-icon><span>${esc(T.startPin)}</span><button class="sg ok" data-chpin>${esc(T.changePin)}</button></div>` : ''}
         <div class="people">${cards}</div>
         ${pending}
-        <div class="sec">${esc(fmt(T.shop, { name: sel ? sel.name : '' }))}</div>${shop}
+        <div class="sec">${esc(sel ? fmt(T.shop, { name: sel.name }) : T.shopAll)}</div>${shop}
         ${history}
         ${dlg}
         ${this._msg ? `<div class="msg${this._msgErr ? ' e' : ''}">${esc(this._msg)}</div>` : ''}

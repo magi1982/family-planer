@@ -120,6 +120,7 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 - **Schulkalender** mit den Lektionen (z. B. ICS aus WebUntis, Schulnetz, LehrerOffice) **oder feste Zeiten** pro Wochentag – bis zu **zwei Blöcke pro Tag** (Vormittag und Nachmittag, wenn das Kind über Mittag heimkommt).
 - Optional der **Schul-/Arbeitsweg** in Minuten.
 - **Ansicht „Alles“**: pro Block eine Zeile, z. B. `🎒 los 07:35 · zuhause 12:00 · 07:50–11:45` und `🎒 los 13:15 · zuhause 15:25 · 13:30–15:10`. Beim Schulkalender werden Blöcke automatisch getrennt, wenn zwischen zwei Lektionen genug Zeit für den Heimweg ist.
+- **Nur wenn es zählt**: In der Ansicht „Alles“ erscheint ein Schulblock erst **1 Stunde vor dem Losgehen** und verschwindet **1 Stunde nach dem Heimkommen** – für jeden Block einzeln. Die Minuten sind einstellbar (*Schule nur rund um die Schulzeit zeigen*, 0 = immer anzeigen).
 - **Ansicht „Stundenplan“**: nur Personen mit Stundenplan, jede Lektion mit Zeit und Ort (z. B. „Mathematik · Zimmer 12“).
 - **Ansicht „Termine“** bleibt frei von Schule; **„Ämtli“** zeigt nur Ämtli.
 - An Ferientagen wird keine Schule angezeigt.
@@ -147,10 +148,22 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 ### Echte Belohnungen
 
 - Eltern legen Belohnungen **direkt in der Ansicht *Belohnungen*** mit *Bearbeiten* an und ändern sie (immer mit Eltern-PIN): z. B. *Glace = 30 Punkte*, *30 Min Gamen = 50*, *5 Fr. Taschengeld = 250*, *Kino = 400*.
-- Pro Belohnung: Icon, Kosten, **Freigabe nötig** ja/nein, **nur für** bestimmte Personen, **höchstens x-mal pro Woche**.
+- Pro Belohnung: Icon, **Kategorie**, **Freigabe nötig** ja/nein, **nur für** bestimmte Personen, **höchstens x-mal pro Woche**.
+- **Kategorien statt Punkte ausrechnen**:
+
+  | Kategorie | Punkte | Beispiel mit Standardwerten | Gegenwert (Standard 20) |
+  |---|---|---|---|
+  | Klein | ¼ von Gross | 283 | ca. 5 |
+  | Mittel | ½ von Gross | 565 | ca. 10 |
+  | **Gross** | so viel, wie man in **einem Monat** verdient, wenn **jeden Tag alle Ämtli** erledigt sind – inkl. Tages- und Serienbonus | 30 × (30 + 5) + 4 × 20 = **1130** | 20 |
+  | Mega gross | 2 × Gross | 2260 | ca. 40 |
+  | Riesig | 5 × Gross | 5650 | ca. 100 |
+
+  Ändern sich die Punkte-Einstellungen, passen sich die Kosten automatisch an. Für Spezialfälle gibt es weiterhin *Eigene Punkte*. Der **Gegenwert einer grossen Belohnung** (z. B. 20 CHF) ist einstellbar und dient nur zur Orientierung.
+- **Ansicht**: Ohne Auswahl zeigt die Seite **alle Belohnungen und alle offenen Anfragen**. Tippt man eine Person an, erscheinen nur ihre Belohnungen und Anfragen, und sie kann einlösen. Nochmals antippen hebt die Auswahl auf.
 - Kinder lösen am Tablet ein; Punkte werden reserviert, bis die Eltern entscheiden.
 - Eltern geben frei als **Admin** oder am Tablet mit **Eltern-PIN** (4–8 Ziffern). Mitteilung in Home Assistant und optional aufs Handy.
-- **Punkte geben**: Bonus (oder Abzug) mit Grund, z. B. „Zimmer super aufgeräumt +25“.
+- **Punkte geben**: Bonus (oder Abzug) mit Grund, z. B. „Zimmer super aufgeräumt“ – mit denselben Grössen wie bei den To-dos (**Klein · Mittel · Gross**) oder einer eigenen Zahl.
 
 ### Eltern-PIN
 
@@ -165,9 +178,9 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 ![To-dos](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/todos.png)
 
 - Einfache To-dos für eine Person **ohne Ablaufdatum und ohne Wiederholung** – sie bleiben stehen, bis sie erledigt sind (z. B. *Zimmer aufräumen*, *Bücher zurückbringen*).
-- Unter dem Planer und dem Ämtliplan, nach Person gruppiert; neues To-do mit Person + Text.
+- Im **Planer** über den Knopf **„To-dos“** oben rechts (mit Anzahl offener To-dos) in einem eigenen Fenster; im **Ämtliplan** unten. Nach Person gruppiert; neues To-do mit Person + Text.
 - **Abhaken mit Bestätigung** („Als erledigt markieren?“) – anders als Ämtli, die mit einem Tipp abgehakt werden. Abschaltbar.
-- Optional **Punkte**: Standardwert für alle To-dos oder eigene Punkte pro To-do (Eltern-PIN). To-dos zählen nicht zum fairen Tageswert.
+- **Grösse statt Punkte**: *Ohne Punkte*, **Klein**, **Mittel** oder **Gross**. Gross = Punkte für einen ganzen Tag (Einstellung, Standard 30), Mittel = ⅔, Klein = ⅓ – immer auf ganze Punkte aufgerundet (30 → 10 / 20 / 30). Die Standard-Grösse ist einstellbar; eine andere Grösse beim Anlegen braucht die Eltern-PIN. To-dos zählen nicht zum fairen Tageswert.
 - Erledigte To-dos bleiben eine einstellbare Anzahl Tage sichtbar und verschwinden dann.
 
 ### Ansagen bei Bewegung
@@ -323,7 +336,7 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 
 | Einstellung | Standard | Bedeutung |
 |---|---|---|
-| Belohnung: Titel, Icon, Kosten | – | z. B. *30 Min Gamen*, 50 Punkte |
+| Belohnung: Titel, Icon, Kategorie | – | *Klein · Mittel · Gross · Mega gross · Riesig* oder eigene Punkte |
 | Freigabe nötig / Nur für / Max. pro Woche | ja / alle / unbegrenzt | Regeln pro Belohnung |
 | Punkte verteilen | Fair | *Fair*: ein ganzer Tag zählt, nicht die Anzahl Ämtli · *Pro Ämtli*: jedes Ämtli bringt seine Punkte |
 | Punkte für einen ganzen Tag (fair) | 30 | Wird auf die Ämtli des Tages verteilt, jedes erledigte bringt sofort seinen Anteil |
@@ -332,6 +345,8 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Serienbonus | 20 | jede 7-Tage-Serie |
 | Eltern-PIN | 123456 (muss geändert werden) | 4–8 Ziffern, nicht 123456; schützt Belohnungen, Einstellungen, Freigaben und Punkte; Sperre nach 5 Fehlversuchen. Vergessen: *Eltern-PIN auf 123456 zurücksetzen* |
 | Anfragen melden an | – | zusätzliche Benachrichtigung (z. B. Handy-App) |
+| Gegenwert einer grossen Belohnung | 20 | Geldwert zur Orientierung; Klein ¼, Mittel ½, Mega 2×, Riesig 5× |
+| Währung | CHF | wird hinter den Beträgen angezeigt |
 
 **Wochenplan → Ansagen bei Bewegung**
 
@@ -361,8 +376,9 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Plan nur durch Admins änderbar | aus | Kinder können abhaken und Belohnungen anfragen |
 | Zuverlässigkeit berechnen über | 30 Tage | |
 | Heimweg über Mittag ab | 0 = automatisch | Pause in Minuten, ab der der Schultag in Blöcke geteilt wird |
+| Schule nur rund um die Schulzeit zeigen | 60 min | Schulblock erscheint X Minuten vor dem Losgehen bis X Minuten nach dem Heimkommen (Ansicht „Alles“); 0 = immer |
 | To-dos: Erledigen bestätigen | ein | Frage „Als erledigt markieren?“ vor dem Abhaken eines To-dos |
-| To-dos: Standard-Punkte | 0 | Punkte für ein erledigtes To-do; eigene Punkte pro To-do mit Eltern-PIN |
+| To-dos: Standard-Grösse | Klein | *Ohne Punkte · Klein (⅓) · Mittel (⅔) · Gross (ganzer Tag)*; eine andere Grösse beim Anlegen braucht die Eltern-PIN |
 | To-dos: erledigte anzeigen für | 1 Tag | 0 = bis zum nächsten Tageswechsel |
 
 **Smarte Listen → Liste hinzufügen / bearbeiten / entfernen**
@@ -388,7 +404,11 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 Die Navigation ist auf allen Seiten oben in der Mitte an derselben Stelle.
 
 **Planer** – die Woche im Querformat, optimiert fürs Tablet:
-- Heute gross, die nächsten zwei Tage und das Wochenende mittel, Vergangenheit und spätere Tage schmal (vergangene Tage nur farbig mit Anzahl).
+- Ansicht **„Alles“**: **heute gross, morgen mittel, alle anderen Tage ganz schmal** (vergangene Tage nur farbig mit Anzahl). In „Ämtli“ und „Termine“ sind die nächsten zwei Tage und das Wochenende mittel.
+- Die Ämtli von heute stehen **zu zweit nebeneinander**, damit mehr auf den Querformat-Bildschirm passt.
+- Ist nichts geplant, bleibt die Zelle **leer** (kein „frei“).
+- **Pokale und Auszeichnungen** neben der Prozentzahl sind gross und gut sichtbar.
+- Knopf **„To-dos“** oben rechts öffnet die To-dos in einem eigenen Fenster.
 - Tag antippen zeigt ihn gross; Pfeile für andere Wochen, „Heute“ springt zurück.
 - Filter **Alles · Ämtli · Termine · Stundenplan**.
 - Ämtli direkt antippen zum Abhaken; Fristen („bis Sa“, „heute fällig“) sichtbar.
@@ -398,7 +418,7 @@ Die Navigation ist auf allen Seiten oben in der Mitte an derselben Stelle.
 
 **Ämtliplan** – Personen mit Bild & Farbe, Wochenübersicht, Ämtli nach Wochentag, darunter **Besondere Ämtli** und **To-dos**.
 
-Unter dem Planer: **To-dos** jeder Person (antippen → bestätigen → erledigt).
+Im Planer: Knopf **„To-dos“** oben rechts → eigenes Fenster mit den To-dos jeder Person (antippen → bestätigen → erledigt).
 
 **Belohnungen** – Punkte, Level, offene Freigaben, Belohnungen pro Person, Verlauf, *Punkte geben*, *Bearbeiten* (Belohnungen anlegen/ändern/löschen, PIN ändern – Eltern-PIN).
 

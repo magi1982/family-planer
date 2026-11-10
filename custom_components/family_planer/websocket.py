@@ -624,6 +624,7 @@ async def ws_reward_remove(hass: HomeAssistant, connection: websocket_api.Active
                                   vol.Optional("todo_id"): ID, vol.Required("person_id"): ID,
                                   vol.Required("title"): vol.All(str, vol.Length(max=200)),
                                   vol.Optional("points"): vol.All(vol.Coerce(int), vol.Range(min=0, max=1000)),
+                                  vol.Optional("size"): vol.In(["none", "s", "m", "l"]),
                                   vol.Optional("token"): TOKEN})
 @websocket_api.async_response
 async def ws_todo_save(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
@@ -639,7 +640,10 @@ async def ws_todo_save(hass: HomeAssistant, connection: websocket_api.ActiveConn
         connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Unknown to-do")
         return
     may_points = not planner.pin_default and _token_ok(planner.entry.entry_id, msg.get("token"))
-    if "points" in msg and not may_points:
+    if "points" in msg and "size" not in msg:  # older dashboards: map own points to the nearest size
+        msg = {**msg, "size": min(planner.sizes()["todo"].items(), key=lambda kv: abs(kv[1] - msg["points"]))[0]}
+    default_size = planner.todo_settings()["size"]
+    if msg.get("size", default_size) != default_size and not may_points:
         connection.send_error(msg["id"], "pin_required", "Parent PIN required for points")
         return
     try:

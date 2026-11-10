@@ -670,9 +670,26 @@ class FamilyPlanner:
     # ------------------------------------------------------------------ to-dos without a date
     def todo_settings(self) -> dict[str, Any]:
         cur = self.settings.get("todos") or {}
-        return {"confirm": bool(cur.get("confirm", True)),
-                "points": validate.integer(cur.get("points"), 0, 1000, 0),
+        size = cur.get("size")
+        if size not in rewards.TODO_SIZES:  # before 0.7.0 a fixed number of points was the default
+            size = "s" if validate.integer(cur.get("points"), 0, 1000, 0) else "none"
+        return {"confirm": bool(cur.get("confirm", True)), "size": size,
                 "keep_days": validate.integer(cur.get("keep_days"), 0, 30, 1)}
+
+    def sizes(self) -> dict[str, Any]:
+        """Point values of the size choices (to-dos, bonus points) and the reward categories."""
+        g = self.gamification()
+        value = validate.number(self.settings.get("reward_value"), 0, 100000, 20)
+        return {"todo": rewards.size_points(g["day_points"]), "reward": rewards.reward_costs(g),
+                "month": rewards.month_points(g), "value": value,
+                "values": rewards.reward_values(value),
+                "currency": validate.currency(self.settings.get("currency"))}
+
+    def todo_points(self, todo: dict) -> int:
+        size = todo.get("size")
+        if size in rewards.TODO_SIZES:
+            return rewards.size_points(self.gamification()["day_points"])[size]
+        return validate.integer(todo.get("points"), 0, 1000, 0)
 
     async def async_save_todo(self, todo_id: str | None, spec: dict[str, Any], may_set_points: bool) -> str:
         title = validate.text(spec.get("title"), 80)
@@ -682,12 +699,21 @@ class FamilyPlanner:
         if pid not in self.data["persons"]:
             raise KeyError(pid)
         cur = self.data["todos"].get(todo_id or "")
-        pts = (validate.integer(spec.get("points"), 0, 1000, 0) if may_set_points and "points" in spec
-               else (cur or {}).get("points", self.todo_settings()["points"]))
+        if may_set_points and spec.get("size") in rewards.TODO_SIZES:
+            size = spec["size"]
+        elif cur is not None and cur.get("size") in rewards.TODO_SIZES:
+            size = cur["size"]
+        elif cur is not None and "points" in cur:  # to-do from before 0.7.0 keeps its own points
+            size = None
+        else:
+            size = self.todo_settings()["size"]
         if cur is None:
             todo_id = engine.new_id()
             cur = self.data["todos"][todo_id] = {"created": dt_util.now().isoformat(), "done": False, "done_at": None}
-        cur.update(title=title, person_id=pid, points=pts)
+        cur.update(title=title, person_id=pid)
+        if size is not None:
+            cur["size"] = size
+            cur.pop("points", None)
         self._changed()
         await self._store.async_save(self.data)
         return todo_id
@@ -698,8 +724,9 @@ class FamilyPlanner:
         todo["done_at"] = dt_util.now().isoformat() if done else None
         ref = f"todo:{todo_id}"
         self.data["ledger"][:] = [e for e in self.data["ledger"] if e.get("ref") != ref]
-        if done and todo.get("points", 0) > 0:
-            rewards._add(self.data["ledger"], todo["person_id"], todo["points"], "todo", ref, todo["title"],  # noqa: SLF001
+        pts = self.todo_points(todo)
+        if done and pts > 0:
+            rewards._add(self.data["ledger"], todo["person_id"], pts, "todo", ref, todo["title"],  # noqa: SLF001
                          dt_util.now().isoformat())
         self._changed()
         await self._store.async_save(self.data)
@@ -733,10 +760,12 @@ class FamilyPlanner:
                         "show_owner": bool(st.get(CONF_SHOW_OWNER, False)),
                         "admin_only_edit": bool(st.get("admin_only_edit")),
                         "reliability_days": self.reliability_days(),
-                        "school_gap": validate.integer(st.get("school_gap"), 0, 240, 0)},
+                        "school_gap": validate.integer(st.get("school_gap"), 0, 240, 0),
+                        "school_window": validate.integer(st.get("school_window", 60), 0, 240, 60)},
             "vacation": {k: v for k, v in self.vacation_settings().items() if k != "scanned"},
             "points": {**self.gamification(), "mode": self.points_mode(),
-                       "reward_notify": validate.entities(st.get("reward_notify"), ("notify",))},
+                       "reward_notify": validate.entities(st.get("reward_notify"), ("notify",)),
+                       "reward_value": self.sizes()["value"], "currency": self.sizes()["currency"]},
             "announce": {**DEFAULT_ANNOUNCE, **(st.get("announce") or {})},
             "lists_settings": {"optimize_time": st.get(CONF_OPTIMIZE_TIME) or "03:00", "ai_task": st.get(CONF_AI_TASK),
                                "prune_days": validate.integer(st.get("prune_days"), 7, 365, 30)},
@@ -760,7 +789,8 @@ class FamilyPlanner:
         elif section == "vacation":
             patch, flags = settings_spec.vacation(data, self.vacation_settings())
         elif section == "points":
-            patch, flags = settings_spec.points(data, self.gamification(), self.points_mode(), st.get("reward_notify") or [])
+            patch, flags = settings_spec.points(data, self.gamification(), self.points_mode(), st.get("reward_notify") or [],
+                                                self.sizes()["value"], self.sizes()["currency"])
         elif section == "announce":
             patch, flags = settings_spec.announce(data, {**DEFAULT_ANNOUNCE, **(st.get("announce") or {})},
                                                   self.data["persons"])
@@ -770,6 +800,8 @@ class FamilyPlanner:
             patch, flags = settings_spec.todos(data, self.todo_settings())
         else:
             raise settings_spec.SettingsError("section", "unknown_section")
+        if "gamification" in patch:
+            rewards.sync_reward_costs(self.data["rewards"], patch["gamification"])
         await self.async_update_settings(patch)
         if "rebook" in flags:
             self.book_points()
@@ -782,10 +814,13 @@ class FamilyPlanner:
     # ------------------------------------------------------------------ gamification & rewards
 
     async def async_save_reward(self, reward_id: str | None, spec: dict[str, Any]) -> str:
+        size = spec.get("size") if spec.get("size") in rewards.REWARD_SIZES else None
         clean = {
             "title": validate.text(spec.get("title"), 60) or "?",
             "icon": validate.icon(spec.get("icon"), "mdi:gift-outline"),
-            "cost": validate.integer(spec.get("cost"), 1, 100000, 100),
+            "size": size,
+            "cost": (rewards.reward_costs(self.gamification())[size] if size
+                     else validate.integer(spec.get("cost"), 1, 100000, 100)),
             "approval": bool(spec.get("approval", True)),
             "persons": [p for p in (spec.get("persons") or []) if p in self.data["persons"]],
             "per_week": validate.integer(spec.get("per_week"), 0, 50, 0),
@@ -908,12 +943,14 @@ class FamilyPlanner:
                          CONF_SHOW_OWNER: st.get(CONF_SHOW_OWNER), "admin_only_edit": bool(st.get("admin_only_edit")),
                          "reliability_days": self.reliability_days(),
                          "school_gap": validate.integer(st.get("school_gap"), 0, 240, 0),
+                         "school_window": validate.integer(st.get("school_window", 60), 0, 240, 60),
                          "idle_seconds": validate.integer(st.get("idle_seconds"), 10, 600, 45),
                          "fullscreen_dblclick": bool(st.get("fullscreen_dblclick", True)),
                          "fullscreen_auto": bool(st.get("fullscreen_auto", False))},
             "todos": sorted(({"id": tid, **t} for tid, t in self.data["todos"].items()),
                             key=lambda t: (t.get("done"), t.get("created") or "")),
             "todo_settings": self.todo_settings(),
+            "sizes": self.sizes(),
             "pin_default": self.pin_default,
             "persons": [{"id": pid, **p} for pid, p in self.persons_sorted()],
             "chores": [{"id": cid, **c, **({"upcoming": schedule.upcoming(c, self.data["persons"], today)} if c.get("schedule") else {})}
