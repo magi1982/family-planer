@@ -32,10 +32,14 @@ eingerichtet, **kein YAML**.
   - [Ferien pausieren Ämtli](#ferien-pausieren-ämtli)
   - [Zuverlässigkeit, Punkte, Level & Auszeichnungen](#zuverlässigkeit-punkte-level--auszeichnungen)
   - [Echte Belohnungen](#echte-belohnungen)
+  - [Eltern-PIN](#eltern-pin)
+  - [To-dos ohne Datum](#to-dos-ohne-datum)
   - [Ansagen bei Bewegung](#ansagen-bei-bewegung)
   - [Bilder: Avatare oder eigenes Foto](#bilder-avatare-oder-eigenes-foto)
 - [Modul Smarte Listen](#modul-smarte-listen)
 - [Designs](#designs)
+- [Einstellungen im Planer](#einstellungen-im-planer)
+- [Vollbild per Doppeltippen](#vollbild-per-doppeltippen)
 - [Installation](#installation)
 - [Einrichtung](#einrichtung)
 - [Ansichten & Bedienung](#ansichten--bedienung)
@@ -54,8 +58,8 @@ eingerichtet, **kein YAML**.
 | | |
 |---|---|
 | **Module** | *Wochenplan* (Ämtli, Termine, Schule, Ferien, Punkte, Belohnungen, Ansagen) und *Smarte Listen* – einzeln ein- und ausschaltbar, weitere Module folgen |
-| **Bedienung** | Eigener Eintrag in der Seitenleiste mit Navigation *Planer · Listen · Ämtliplan · Belohnungen*; optional als Karten in eigenen Dashboards |
-| **Einrichtung** | Komplett über *Einstellungen → Geräte & Dienste*, kein YAML |
+| **Bedienung** | Eigener Eintrag in der Seitenleiste mit Navigation *Planer · Listen · Ämtliplan · Belohnungen · Einstellungen*; optional als Karten in eigenen Dashboards; Vollbild per Doppeltippen |
+| **Einrichtung** | Direkt im Planer (*Einstellungen*, mit Eltern-PIN) oder über *Einstellungen → Geräte & Dienste* – kein YAML |
 | **Sprachen** | Deutsch und Englisch – automatisch wie Home Assistant oder für den Planer fest auf Deutsch bzw. Englisch (z. B. Home Assistant auf Englisch, Planer auf Deutsch) |
 | **Designs** | Home Assistant, Loxone, Apple Home, Google Home, Hell, Nord |
 | **Abhängigkeiten** | Keine. Kalender, Listen, Lautsprecher und KI sind optional – es funktioniert jede passende Entität |
@@ -142,11 +146,29 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 
 ### Echte Belohnungen
 
-- Eltern legen Belohnungen an: z. B. *Glace = 30 Punkte*, *30 Min Gamen = 50*, *5 Fr. Taschengeld = 250*, *Kino = 400*.
+- Eltern legen Belohnungen **direkt in der Ansicht *Belohnungen*** mit *Bearbeiten* an und ändern sie (immer mit Eltern-PIN): z. B. *Glace = 30 Punkte*, *30 Min Gamen = 50*, *5 Fr. Taschengeld = 250*, *Kino = 400*.
 - Pro Belohnung: Icon, Kosten, **Freigabe nötig** ja/nein, **nur für** bestimmte Personen, **höchstens x-mal pro Woche**.
 - Kinder lösen am Tablet ein; Punkte werden reserviert, bis die Eltern entscheiden.
 - Eltern geben frei als **Admin** oder am Tablet mit **Eltern-PIN** (4–8 Ziffern). Mitteilung in Home Assistant und optional aufs Handy.
 - **Punkte geben**: Bonus (oder Abzug) mit Grund, z. B. „Zimmer super aufgeräumt +25“.
+
+### Eltern-PIN
+
+- **Start-PIN `123456`** – sie muss **beim ersten Gebrauch geändert werden** (aktuelle PIN, neue PIN, wiederholen). Bis dahin lassen sich Belohnungen und Einstellungen nicht ändern, und Home Assistant zeigt einen Reparaturhinweis.
+- Die PIN schützt: **Belohnungen anlegen/ändern**, die **Einstellungs-Seite**, Freigaben und Punkte geben (Admins dürfen Freigaben und Punkte auch ohne PIN).
+- 4–8 Ziffern, nie wieder `123456`; nach 5 Fehlversuchen 5 Minuten gesperrt; gespeichert nur als PBKDF2-Hash.
+- Nach einmaliger Eingabe bleibt der Planer **10 Minuten** entsperrt (verlängert sich beim Arbeiten, *Sperren* beendet es sofort). Die PIN selbst wird nie im Browser gespeichert.
+- Ändern jederzeit: *Belohnungen → Bearbeiten → PIN ändern* oder *Einstellungen → Eltern-PIN ändern*. Vergessen? *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren → Punkte & Belohnungen → Eltern-PIN auf 123456 zurücksetzen* (nur Admins).
+
+### To-dos ohne Datum
+
+![To-dos](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/todos.png)
+
+- Einfache To-dos für eine Person **ohne Ablaufdatum und ohne Wiederholung** – sie bleiben stehen, bis sie erledigt sind (z. B. *Zimmer aufräumen*, *Bücher zurückbringen*).
+- Unter dem Planer und dem Ämtliplan, nach Person gruppiert; neues To-do mit Person + Text.
+- **Abhaken mit Bestätigung** („Als erledigt markieren?“) – anders als Ämtli, die mit einem Tipp abgehakt werden. Abschaltbar.
+- Optional **Punkte**: Standardwert für alle To-dos oder eigene Punkte pro To-do (Eltern-PIN). To-dos zählen nicht zum fairen Tageswert.
+- Erledigte To-dos bleiben eine einstellbare Anzahl Tage sichtbar und verschwinden dann.
 
 ### Ansagen bei Bewegung
 
@@ -212,6 +234,25 @@ Einstellbar unter *Konfigurieren → Design, Sprache & Seitenleiste*; Karten in 
 
 ---
 
+## Einstellungen im Planer
+
+![Einstellungen](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/settings.png)
+
+Alles, was die Home-Assistant-Dialoge bieten, auf einer übersichtlichen Seite – auch am Tablet: **Einstellungen** in der Navigation.
+- Geschützt mit der **Eltern-PIN** (immer, auch für Admins).
+- Register: *Allgemein* (Module, Sprache, Design, Vollbild, Seitenleiste, Tageswechsel …), *Personen & Schule* (Name, Farbe, Kalender, Spitznamen, Schulkalender, Blöcke pro Wochentag, Schulweg), *Ferien*, *Punkte*, *To-dos*, *Ansagen* (Entitäten aus Listen wählen), *Listen*.
+- Jedes Feld mit kurzer Beschreibung; ungültige Eingaben werden mit klarer Meldung abgelehnt (z. B. Ansagen ohne Lautsprecher).
+- Änderungen, die neue Zeitpläne brauchen (Tageswechsel, Module, Listen, Ansagen), laden die Integration automatisch neu; der Planer verbindet sich selbst wieder.
+- Die Dialoge unter *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren* bleiben verfügbar.
+
+## Vollbild per Doppeltippen
+
+- **Doppeltippen auf eine freie Stelle** des Planers (Titelleiste, Ränder, Zwischenräume) → Kopfzeile und Seitenleiste von Home Assistant verschwinden, und der Browser schaltet – wo erlaubt – in echtes Vollbild. Nochmals doppeltippen beendet es.
+- Tippen auf Ämtli, Knöpfe und Eingabefelder löst es nie aus – so wird nichts aus Versehen abgehakt.
+- Optional: **beim Öffnen automatisch Vollbild** – ideal fürs Wandtablet. Beides unter *Einstellungen → Allgemein*.
+
+---
+
 ## Installation
 
 **Home Assistant 2026.11 und neuer (Marketplace):**
@@ -228,7 +269,7 @@ Danach: *Einstellungen → Geräte & Dienste → Integration hinzufügen → Fam
 ## Einrichtung
 
 Beim Hinzufügen: **Name**, **Module**, **Familienmitglieder** (mit Komma getrennt) und optional die **erste Liste**.
-Alles Weitere unter *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren*. Jedes Feld hat dort eine
+Alles Weitere direkt im Planer unter **Einstellungen** (Eltern-PIN) oder unter *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren*. Jedes Feld hat eine
 Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bearbeitet (auch am Tablet).
 
 ### Alle Einstellungen
@@ -248,6 +289,8 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Eintrag in der Seitenleiste | ein | Öffnet den kompletten Planer ohne eigenes Dashboard |
 | Titel in der Seitenleiste | Name | Text in der Seitenleiste |
 | Zurück zur Startansicht nach | 45 s | Angetippter Tag / Person springt danach zurück zu heute |
+| Vollbild per Doppeltippen | ein | Doppeltippen auf eine freie Stelle blendet Kopfzeile und Seitenleiste aus (echtes Vollbild, wo erlaubt) |
+| Beim Öffnen automatisch Vollbild | aus | ideal fürs Wandtablet |
 
 **Wochenplan → Person hinzufügen / bearbeiten / entfernen**
 
@@ -287,7 +330,7 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Punkte pro Ämtli | 10 | Modus *Pro Ämtli*: Punkte je Ämtli · Modus *Fair*: Standard-Gewicht; pro Ämtli im Ämtliplan änderbar |
 | Tagesbonus | 5 | ganz erledigter Tag |
 | Serienbonus | 20 | jede 7-Tage-Serie |
-| Eltern-PIN | – | 4–8 Ziffern, für Freigaben am Tablet; Sperre nach 5 Fehlversuchen |
+| Eltern-PIN | 123456 (muss geändert werden) | 4–8 Ziffern, nicht 123456; schützt Belohnungen, Einstellungen, Freigaben und Punkte; Sperre nach 5 Fehlversuchen. Vergessen: *Eltern-PIN auf 123456 zurücksetzen* |
 | Anfragen melden an | – | zusätzliche Benachrichtigung (z. B. Handy-App) |
 
 **Wochenplan → Ansagen bei Bewegung**
@@ -318,6 +361,9 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Plan nur durch Admins änderbar | aus | Kinder können abhaken und Belohnungen anfragen |
 | Zuverlässigkeit berechnen über | 30 Tage | |
 | Heimweg über Mittag ab | 0 = automatisch | Pause in Minuten, ab der der Schultag in Blöcke geteilt wird |
+| To-dos: Erledigen bestätigen | ein | Frage „Als erledigt markieren?“ vor dem Abhaken eines To-dos |
+| To-dos: Standard-Punkte | 0 | Punkte für ein erledigtes To-do; eigene Punkte pro To-do mit Eltern-PIN |
+| To-dos: erledigte anzeigen für | 1 Tag | 0 = bis zum nächsten Tageswechsel |
 
 **Smarte Listen → Liste hinzufügen / bearbeiten / entfernen**
 
@@ -350,9 +396,13 @@ Die Navigation ist auf allen Seiten oben in der Mitte an derselben Stelle.
 
 **Listen** – Tabs pro Liste, Hinzufügen-Feld, Kategorien als Kacheln, *Kategorien* und *Optimieren*.
 
-**Ämtliplan** – Personen mit Bild & Farbe, Wochenübersicht, Ämtli nach Wochentag, darunter **Besondere Ämtli**.
+**Ämtliplan** – Personen mit Bild & Farbe, Wochenübersicht, Ämtli nach Wochentag, darunter **Besondere Ämtli** und **To-dos**.
 
-**Belohnungen** – Punkte, Level, offene Freigaben, Belohnungen pro Person, Verlauf, *Punkte geben*.
+Unter dem Planer: **To-dos** jeder Person (antippen → bestätigen → erledigt).
+
+**Belohnungen** – Punkte, Level, offene Freigaben, Belohnungen pro Person, Verlauf, *Punkte geben*, *Bearbeiten* (Belohnungen anlegen/ändern/löschen, PIN ändern – Eltern-PIN).
+
+**Einstellungen** – alle Einstellungen mit Beschreibung, geschützt mit der Eltern-PIN (siehe oben).
 
 ---
 
@@ -405,7 +455,7 @@ cards:
   - type: custom:family-planer-nav-card
     paths: { planer: planer, listen: einkauf, aemtliplan: aemtliplan, belohnungen: belohnungen }
   - type: custom:family-planer-card
-    view: week        # week | plan | lists | rewards
+    view: week        # week | plan | lists | rewards | settings
     theme: apple      # optional
     language: de      # optional, sonst Einstellung der Integration bzw. HA-Sprache
 ```
@@ -418,7 +468,7 @@ Für ein Vollbild-Tablet empfiehlt sich eine Panel-Ansicht pro Seite (Pfade wie 
 
 - Alles bleibt **lokal** in deinem Home Assistant; keine Cloud, kein Tracking. Externe Dienste nur, wenn du sie selbst wählst (Kalender, Listen, KI).
 - Eingaben werden serverseitig geprüft (Farben, Bilder, Icons, Texte, Längen), Ausgaben im Browser maskiert.
-- Eltern-PIN mit PBKDF2 gespeichert, Sperre nach 5 Fehlversuchen; optional dürfen nur Admins den Plan ändern.
+- Eltern-PIN mit PBKDF2 gespeichert (Prüfung ausserhalb der Ereignisschleife), Start-PIN muss geändert werden, Sperre nach 5 Fehlversuchen; Entsperren über zufällige 10-Minuten-Tokens des Servers – die PIN bleibt nie im Browser. Optional dürfen nur Admins den Plan ändern.
 - Fotos haben lange Zufallsnamen; Diagnose-Downloads enthalten keine Namen, Fotos oder Listeninhalte.
 - Bei jedem Commit: **CodeQL**, **Bandit**, ESLint-Sicherheitsregeln, hassfest, HACS-Prüfung, Tests.
 

@@ -6,7 +6,7 @@
 ## Ideen
 
 ### 1. To-dos im Ämtliplan (ohne Ablaufdatum)
-**Status:** Idee – noch nicht umgesetzt
+**Status:** ✅ umgesetzt in 0.6.0
 
 - Ein einfaches To-do kann einer Person im Ämtliplan zugeordnet werden, **ohne Datum und ohne Wiederholung**.
 - Es bleibt sichtbar, bis es erledigt ist, und wandert nicht beim Tageswechsel weg.
@@ -25,7 +25,7 @@
 - Sollen To-dos auch als `todo`-Entität in Home Assistant erscheinen?
 
 ### 2. Schöne Einstellungs-Oberfläche im Planer
-**Status:** Idee – noch nicht umgesetzt
+**Status:** ✅ umgesetzt in 0.6.0
 
 - Neue Ansicht **„Einstellungen“** direkt im Family Planer (Seitenleiste/Tablet), statt der mühsamen Home-Assistant-Dialoge.
 - Übersichtlich in Kacheln/Tabs: *Personen & Kalender*, *Schule*, *Ferien*, *Punkte & Belohnungen*, *Ansagen*, *Listen*, *Design & Sprache*, *Allgemein*.
@@ -37,7 +37,7 @@
 - Zugriff immer mit **Eltern-PIN** (entschieden), optional zusätzlich nur für Admins
 
 ### 3. Belohnungen im Dashboard anlegen und ändern – mit Eltern-PIN
-**Status:** Idee – noch nicht umgesetzt
+**Status:** ✅ umgesetzt in 0.6.0
 
 - In der Ansicht *Belohnungen* Belohnungen **hinzufügen, bearbeiten, löschen** (Titel, Icon, Punkte, Freigabe nötig, nur für, max. pro Woche).
 - **Jede Änderung verlangt die Eltern-PIN** (auch für Admins am Tablet).
@@ -52,7 +52,7 @@
 - Dieselbe Eltern-PIN schützt auch die **Einstellungs-Oberfläche** (Idee 2).
 
 ### 4. Vollbild per Doppelklick
-**Status:** Idee – noch nicht umgesetzt
+**Status:** ✅ umgesetzt in 0.6.0
 
 - **Doppelklick / Doppeltippen** auf den Family Planer schaltet in den **Vollbildmodus** (Kopfzeile und Seitenleiste von Home Assistant verschwinden), nochmals doppeltippen beendet ihn – wie in der früheren lokalen Version.
 - Funktioniert in der Seitenleisten-Ansicht und auf Dashboard-Karten; Doppeltippen auf Ämtli, Knöpfe oder Eingabefelder löst es nicht aus.

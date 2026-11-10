@@ -16,9 +16,23 @@
   class Store {
     constructor(conn, entryId) {
       this.conn = conn; this.entryId = entryId; this.snap = null; this.err = null; this.subs = new Set();
-      const msg = { type: 'family_planer/subscribe' }; if (entryId) msg.entry_id = entryId;
-      this.unsub = conn.subscribeMessage((s) => { this.snap = s; this.err = null; this.subs.forEach((f) => f()); }, msg)
-        .catch((e) => { this.err = (e && e.message) || String(e); this.subs.forEach((f) => f()); });
+      this._subscribe(0);
+    }
+    // the integration reloads after some settings changes: subscribe again until it is back
+    _subscribe(tries) {
+      const msg = { type: 'family_planer/subscribe' }; if (this.entryId) msg.entry_id = this.entryId;
+      this.unsub = this.conn.subscribeMessage((s) => {
+        if (s && s.reload) { this._resubscribe(); return; }
+        this.snap = s; this.err = null; this.subs.forEach((f) => f());
+      }, msg).catch((e) => {
+        if (tries > 0 && tries < 30) { setTimeout(() => this._subscribe(tries + 1), 2000); return; }
+        this.err = (e && e.message) || String(e); this.subs.forEach((f) => f());
+      });
+    }
+    _resubscribe() {
+      const old = this.unsub; this.unsub = null;
+      Promise.resolve(old).then((u) => { if (typeof u === 'function') u(); }).catch(() => {});
+      setTimeout(() => this._subscribe(1), 1500);
     }
     static get(conn, entryId) {
       const reg = Store._reg || (Store._reg = new Map());
@@ -130,8 +144,8 @@
       (hass && ((hass.locale && hass.locale.language) || hass.language)) || 'de').toLowerCase();
     return l.startsWith('de') || l.startsWith('gsw') ? 'de' : 'en';
   };
-  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner' };
-  const STORE_VIEWS = ['lists', 'rewards'];
+  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner', settings: 'fp-settings-inner' };
+  const STORE_VIEWS = ['lists', 'rewards', 'settings'];
   const tag = (view, lang) => (!STORE_VIEWS.includes(view) && lang === 'en' ? INNER[view] + '-en' : INNER[view]);
   // designs: CSS variables read by every card (inherited through the shadow roots)
   const SYS = '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif';
@@ -158,7 +172,7 @@
     static getStubConfig() { return { view: 'week' }; }
     setConfig(c) {
       this._cfg = { view: 'week', ...(c || {}) };
-      if (!INNER[this._cfg.view]) throw new Error('view: week | plan | lists | rewards');
+      if (!INNER[this._cfg.view]) throw new Error('view: week | plan | lists | rewards | settings');
       this._sig = null; this._inner = null; this.innerHTML = ''; this._attach();
     }
     set hass(h) { this._hass = h; this._attach(); if (this._inner && this._wrapped) this._inner.hass = STORE_VIEWS.includes(this._cfg.view) ? h : this._wrap(); }
@@ -171,14 +185,15 @@
       if (!this._hass || !this._cfg || !this.isConnected || this._off) return;
       this._store = Store.get(this._hass.connection, this._cfg.entry_id);
       this._off = this._store.listen(() => this._sync());
+      if (window.FPKIOSK) window.FPKIOSK.attach(this, this._store);
     }
     _sync() {
       const s = this._store.snap;
       if (!s) { if (this._store.err) this.innerHTML = `<ha-card style="padding:16px">Family Planer: ${this._store.err}</ha-card>`; return; }
       const lang = LANG(this._hass, this._cfg, this._store); const view = this._cfg.view;
-      const mod = view === 'lists' ? 'lists' : 'week';
+      const mod = view === 'lists' ? 'lists' : view === 'settings' ? null : 'week';
       applyTheme(this, this._cfg.theme || s.theme);
-      if (s.modules && s.modules[mod] === false) {
+      if (mod && s.modules && s.modules[mod] === false) {
         this._inner = null; this._sig = 'off';
         this.innerHTML = `<ha-card style="padding:20px;color:#bbb;background:#1e1e1e">${MSG[lang].off.replace('{m}', MSG[lang][mod])}</ha-card>`; return;
       }
@@ -203,10 +218,12 @@
         termine_nach_namen: st.match_names !== false, auch_beim_besitzer: !!st.show_owner, tageswechsel: roll,
         plan: VIRT.plan, heute: VIRT.heute, verlauf: VIRT.verlauf, einstellungen: VIRT.settings, script: VIRT.script };
       const sig = JSON.stringify([lang, cfg.tage_zuverlaessigkeit, cfg.schulpause, cfg.ruhe_sekunden, cfg.schule, cfg.abwesend, cfg.punkte_standard, cfg.titel, kinder.map((k) => [k.name, k.farbe]), kalender, cfg.termine_nach_namen, cfg.auch_beim_besitzer, roll]);
-      if (!this._inner || this._lang !== lang) { this._lang = lang; this.innerHTML = ''; this._special = null; this._inner = document.createElement(tag(view, lang)); this.appendChild(this._inner); this._sig = null; }
+      if (!this._inner || this._lang !== lang) { this._lang = lang; this.innerHTML = ''; this._special = null; this._todos = null; this._inner = document.createElement(tag(view, lang)); this.appendChild(this._inner); this._sig = null; }
       if (sig !== this._sig) { this._sig = sig; this._inner.setConfig(cfg); this._inner.hass = this._wrap(); }
+      if (!this._todos || this._todos.parentNode !== this) { this._todos = document.createElement('fp-todos-inner'); this._todos.store = this._store; this._todos.setConfig({ lang }); this.appendChild(this._todos); }
+      else this._todos.update();
       if (view === 'plan') {
-        if (!this._special || this._special.parentNode !== this) { this._special = document.createElement('fp-special-inner'); this._special.store = this._store; this._special.setConfig({ lang }); this.appendChild(this._special); }
+        if (!this._special || this._special.parentNode !== this) { this._special = document.createElement('fp-special-inner'); this._special.store = this._store; this._special.setConfig({ lang }); this.insertBefore(this._special, this._todos); }
         else this._special.update();
       }
     }
@@ -214,15 +231,15 @@
   if (!customElements.get('family-planer-card')) customElements.define('family-planer-card', FamilyPlanerCard);
 
   // Navigation bar: one button per active module view, same place on every page (also in kiosk mode)
-  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards' } };
-  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:cart-outline', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline' };
-  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week' };
-  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards' };
+  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', einstellungen: 'Settings' } };
+  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:cart-outline', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', einstellungen: 'mdi:cog-outline' };
+  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', einstellungen: null };
+  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', einstellungen: 'settings' };
   class FamilyPlanerNavCard extends HTMLElement {
     setConfig(c) {
       this._cfg = { ...(c || {}) };
       // paths of the dashboard views, e.g. { planer: 'planer', listen: 'einkauf', aemtliplan: 'aemtliplan' }
-      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
+      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
       if (!this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.addEventListener('click', (e) => {
@@ -241,10 +258,10 @@
       if (!this.shadowRoot || !this._cfg) return;
       const s = this._store && this._store.snap; const lang = LANG(this._hass, this._cfg, this._store);
       const mods = (s && s.modules) || { week: true, lists: true };
-      const order = this._cfg.order || ['planer', 'listen', 'aemtliplan', 'belohnungen'];
+      const order = this._cfg.order || ['planer', 'listen', 'aemtliplan', 'belohnungen', 'einstellungen'];
       if (s) applyTheme(this, this._cfg.theme || s.theme);
       const cur = location.pathname.split('/').filter(Boolean).pop();
-      const btns = order.filter((k) => NAV[lang][k] && mods[NAV_MOD[k]] !== false);
+      const btns = order.filter((k) => NAV[lang][k] && (!NAV_MOD[k] || mods[NAV_MOD[k]] !== false));
       const title = this._cfg.titel || this._cfg.title || (s && s.title) || 'Family Planer';
       this.shadowRoot.innerHTML = `<style>
         :host{display:block;margin-bottom:8px}
@@ -275,6 +292,7 @@
       if (!this._wrap) {
         this.style.cssText = 'display:block;min-height:100vh;box-sizing:border-box;padding:8px;background:var(--fp-bg0,#141414)';
         this._wrap = true; this._nav = document.createElement('family-planer-nav-card'); this.appendChild(this._nav);
+        if (window.FPKIOSK) window.FPKIOSK.attach(this, Store.get(this._hass.connection, cfg.entry_id));
       }
       const store = Store.get(this._hass.connection, cfg.entry_id);
       if (!this._offTheme) this._offTheme = store.listen(() => { if (store.snap) applyTheme(this, store.snap.theme); });
@@ -291,6 +309,6 @@
 
   window.customCards = window.customCards || [];
   window.customCards.push(
-    { type: 'family-planer-card', name: 'Family Planer', description: 'view: week (Wochenplan), plan (Ämtliplan), lists (Smarte Listen) oder rewards (Belohnungen); theme optional', preview: false },
+    { type: 'family-planer-card', name: 'Family Planer', description: 'view: week (Wochenplan), plan (Ämtliplan), lists (Smarte Listen), rewards (Belohnungen) oder settings (Einstellungen); theme optional', preview: false },
     { type: 'family-planer-nav-card', name: 'Family Planer Navigation', description: 'Planer · Listen · Ämtliplan', preview: false });
 })();

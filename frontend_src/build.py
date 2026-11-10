@@ -91,6 +91,10 @@ body = "\n".join([
     themify((src / "lists.js").read_text()),
     themify((src / "rewards.js").read_text()),
     themify((src / "special.js").read_text()),
+    themify((src / "todos.js").read_text()),
+    themify((src / "settings.js").read_text()),
+    (src / "pin.js").read_text(),
+    (src / "kiosk.js").read_text(),
     (src / "bridge.js").read_text(),
 ])
 out.parent.mkdir(parents=True, exist_ok=True)

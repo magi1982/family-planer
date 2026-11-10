@@ -21,7 +21,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 from homeassistant.util import slugify
 
-from . import engine, lists, msgqueue, rewards, schedule, speech, vacation, validate
+from . import engine, lists, msgqueue, rewards, schedule, settings_spec, speech, vacation, validate
 from .announce import Announcer
 from .const import (CONF_AI_TASK, CONF_MATCH_NAMES, CONF_MODULES, CONF_OPTIMIZE_TIME, CONF_PERSONS,
                     CONF_ROLLOVER_TIME, CONF_SHOW_OWNER, DEFAULT_COLORS, DEFAULT_SETTINGS, DOMAIN, LANGUAGES, FILES_DIR,
@@ -82,6 +82,7 @@ class FamilyPlanner:
         self._away_known = False
         self._pin_fail: list[datetime] = []
         self._ai_last: dict[str, datetime] = {}
+        self.closing = False
 
     # ------------------------------------------------------------------ lifecycle
     async def async_load(self) -> None:
@@ -97,7 +98,7 @@ class FamilyPlanner:
             for spec in self.entry.data.get("lists", []):
                 self.data.setdefault("lists", {})[engine.new_id()] = lists.new_list(
                     spec["name"], spec["entity"], spec.get("max_categories", 10))
-        for key in ("persons", "chores", "items", "history", "settings", "lists", "rewards", "requests"):
+        for key in ("persons", "chores", "items", "history", "settings", "lists", "rewards", "requests", "todos"):
             self.data.setdefault(key, {})
         self.data.setdefault("ledger", [])
         settings = self.data["settings"]
@@ -107,6 +108,9 @@ class FamilyPlanner:
             else:
                 settings.setdefault(key, copy.deepcopy(val))
         settings.pop("shopping_list", None)  # 0.1 setting, replaced by the lists module
+        if not settings.get("pin_hash"):  # start PIN 123456 – must be changed on first use
+            settings["pin_hash"] = await self.hass.async_add_executor_job(rewards.hash_pin, settings_spec.DEFAULT_PIN)
+            settings["pin_default"] = True
 
         # the day change waits until calendars are loaded, so holidays are known before anything counts as missed
         await self._store.async_save(self.data)
@@ -125,6 +129,8 @@ class FamilyPlanner:
 
     @callback
     def async_shutdown(self) -> None:
+        self.closing = True
+        self._changed(save=False)
         for unsub in self._unsubs:
             unsub()
         self._unsubs.clear()
@@ -351,6 +357,7 @@ class FamilyPlanner:
         streaks = {pid: engine.person_stats(self.data["history"], {}, pid, today)["streak"] for pid in self.data["persons"]}
         rewards.day_bonuses(self.data, yesterday, streaks, self.gamification(), dt_util.now().isoformat())
         rewards.trim(self.data, 400, today)
+        self._prune_todos(today)
         self.book_points()
         self._changed()
 
@@ -416,6 +423,7 @@ class FamilyPlanner:
         for chore in self.data["chores"].values():
             chore.get("assign", {}).pop(person_id, None)
         self.data["items"] = {k: v for k, v in self.data["items"].items() if v.get("person_id") != person_id}
+        self.data["todos"] = {k: v for k, v in self.data["todos"].items() if v.get("person_id") != person_id}
         for day in self.data["history"].values():
             day.pop(person_id, None)
         self.data["ledger"] = [e for e in self.data["ledger"] if e["pid"] != person_id]
@@ -618,19 +626,160 @@ class FamilyPlanner:
         self.list_maps.setdefault(list_id, {})[item] = category_id
         self._changed()
 
-    # ------------------------------------------------------------------ gamification & rewards
-    def pin_ok(self, pin: str | None) -> bool:
-        """Check the parent PIN with a simple lockout (5 wrong tries -> 5 minutes)."""
+    # ------------------------------------------------------------------ parent PIN
+    @property
+    def pin_default(self) -> bool:
+        return bool(self.settings.get("pin_default"))
+
+    async def async_check_pin(self, pin: str | None) -> str:
+        """'ok', 'change_required' (start PIN), 'wrong' or 'locked' (5 wrong tries -> 5 minutes).
+
+        PBKDF2 runs in the executor so a PIN check never blocks the event loop.
+        """
         now = dt_util.now()
         self._pin_fail = [t for t in self._pin_fail if now - t < timedelta(minutes=5)]
         if len(self._pin_fail) >= 5:
-            return False
-        if rewards.check_pin(self.settings.get("pin_hash"), pin):
+            return "locked"
+        if pin and await self.hass.async_add_executor_job(rewards.check_pin, self.settings.get("pin_hash"), pin):
             self._pin_fail.clear()
-            return True
-        if pin:
+            return "change_required" if self.pin_default else "ok"
+        if pin:  # an empty PIN (e.g. no token yet) is not a wrong guess
             self._pin_fail.append(now)
-        return False
+        return "wrong"
+
+    async def async_change_pin(self, old: str, new: str) -> str:
+        res = await self.async_check_pin(old)
+        if res not in ("ok", "change_required"):
+            return res
+        if not settings_spec.pin_valid(new) or new == old:
+            return "bad_pin"
+        await self.async_set_pin(new)
+        return "ok"
+
+    async def async_set_pin(self, new: str | None) -> None:
+        """Store a new PIN (hashed). None resets to the start PIN, which must be changed again."""
+        pin = new if new and settings_spec.pin_valid(new) else settings_spec.DEFAULT_PIN
+        self.settings["pin_hash"] = await self.hass.async_add_executor_job(rewards.hash_pin, pin)
+        self.settings["pin_default"] = pin == settings_spec.DEFAULT_PIN
+        self._pin_fail.clear()
+        from .repairs import async_check_pin
+        async_check_pin(self.hass, self)
+        self._changed()
+        await self._store.async_save(self.data)
+
+    # ------------------------------------------------------------------ to-dos without a date
+    def todo_settings(self) -> dict[str, Any]:
+        cur = self.settings.get("todos") or {}
+        return {"confirm": bool(cur.get("confirm", True)),
+                "points": validate.integer(cur.get("points"), 0, 1000, 0),
+                "keep_days": validate.integer(cur.get("keep_days"), 0, 30, 1)}
+
+    async def async_save_todo(self, todo_id: str | None, spec: dict[str, Any], may_set_points: bool) -> str:
+        title = validate.text(spec.get("title"), 80)
+        pid = spec.get("person_id")
+        if not title:
+            raise ValueError("title")
+        if pid not in self.data["persons"]:
+            raise KeyError(pid)
+        cur = self.data["todos"].get(todo_id or "")
+        pts = (validate.integer(spec.get("points"), 0, 1000, 0) if may_set_points and "points" in spec
+               else (cur or {}).get("points", self.todo_settings()["points"]))
+        if cur is None:
+            todo_id = engine.new_id()
+            cur = self.data["todos"][todo_id] = {"created": dt_util.now().isoformat(), "done": False, "done_at": None}
+        cur.update(title=title, person_id=pid, points=pts)
+        self._changed()
+        await self._store.async_save(self.data)
+        return todo_id
+
+    async def async_set_todo(self, todo_id: str, done: bool) -> None:
+        todo = self.data["todos"][todo_id]
+        todo["done"] = bool(done)
+        todo["done_at"] = dt_util.now().isoformat() if done else None
+        ref = f"todo:{todo_id}"
+        self.data["ledger"][:] = [e for e in self.data["ledger"] if e.get("ref") != ref]
+        if done and todo.get("points", 0) > 0:
+            rewards._add(self.data["ledger"], todo["person_id"], todo["points"], "todo", ref, todo["title"],  # noqa: SLF001
+                         dt_util.now().isoformat())
+        self._changed()
+        await self._store.async_save(self.data)
+
+    async def async_delete_todo(self, todo_id: str) -> None:
+        self.data["todos"].pop(todo_id, None)
+        self._changed()
+        await self._store.async_save(self.data)
+
+    def _prune_todos(self, today: date) -> None:
+        keep = self.todo_settings()["keep_days"]
+        limit = (today - timedelta(days=keep)).isoformat()
+        self.data["todos"] = {k: t for k, t in self.data["todos"].items()
+                              if not t.get("done") or (t.get("done_at") or "9999")[:10] >= limit}
+
+    # ------------------------------------------------------------------ settings page (PIN protected)
+    def settings_view(self) -> dict[str, Any]:
+        from .announce import DEFAULT_ANNOUNCE
+        st = self.settings
+        panel = st.get("panel") or {}
+        return {
+            "general": {"modules": {m: self.module_on(m) for m in (MODULE_WEEK, MODULE_LISTS)},
+                        "language": st.get("language") if st.get("language") in LANGUAGES else "auto",
+                        "theme": st.get("theme") or "loxone", "panel": bool(panel.get("enabled", True)),
+                        "panel_title": panel.get("title") or "",
+                        "idle_seconds": validate.integer(st.get("idle_seconds"), 10, 600, 45),
+                        "fullscreen_dblclick": bool(st.get("fullscreen_dblclick", True)),
+                        "fullscreen_auto": bool(st.get("fullscreen_auto", False)),
+                        "rollover_time": st.get(CONF_ROLLOVER_TIME) or "00:00",
+                        "match_names": bool(st.get(CONF_MATCH_NAMES, True)),
+                        "show_owner": bool(st.get(CONF_SHOW_OWNER, False)),
+                        "admin_only_edit": bool(st.get("admin_only_edit")),
+                        "reliability_days": self.reliability_days(),
+                        "school_gap": validate.integer(st.get("school_gap"), 0, 240, 0)},
+            "vacation": {k: v for k, v in self.vacation_settings().items() if k != "scanned"},
+            "points": {**self.gamification(), "mode": self.points_mode(),
+                       "reward_notify": validate.entities(st.get("reward_notify"), ("notify",))},
+            "announce": {**DEFAULT_ANNOUNCE, **(st.get("announce") or {})},
+            "lists_settings": {"optimize_time": st.get(CONF_OPTIMIZE_TIME) or "03:00", "ai_task": st.get(CONF_AI_TASK),
+                               "prune_days": validate.integer(st.get("prune_days"), 7, 365, 30)},
+            "todos": self.todo_settings(),
+            "persons": [{"id": pid, "name": p["name"], "color": p.get("color"), "calendar": p.get("calendar"),
+                         "aliases": p.get("aliases", []), "image": p.get("image", ""), "school": clean_school(p.get("school"))}
+                        for pid, p in self.persons_sorted()],
+            "lists": [{"id": lid, "name": lst["name"], "entity": lst["entity"], "icon": lst.get("icon") or "",
+                       "max_categories": lst.get("max_categories", 10), "auto": lst.get("auto", True)}
+                      for lid, lst in self.data["lists"].items()],
+            "rewards": [{"id": rid, **r} for rid, r in sorted(self.data["rewards"].items(), key=lambda x: x[1]["cost"])],
+        }
+
+    async def async_save_section(self, section: str, data: dict[str, Any]) -> set[str]:
+        """Validate and store one settings section; returns follow-up flags (reload, rollover, ...)."""
+        from .announce import DEFAULT_ANNOUNCE
+        st = self.settings
+        if section == "general":
+            cur = {**st, "panel": st.get("panel") or {}, "modules": {m: self.module_on(m) for m in (MODULE_WEEK, MODULE_LISTS)}}
+            patch, flags = settings_spec.general(data, cur)
+        elif section == "vacation":
+            patch, flags = settings_spec.vacation(data, self.vacation_settings())
+        elif section == "points":
+            patch, flags = settings_spec.points(data, self.gamification(), self.points_mode(), st.get("reward_notify") or [])
+        elif section == "announce":
+            patch, flags = settings_spec.announce(data, {**DEFAULT_ANNOUNCE, **(st.get("announce") or {})},
+                                                  self.data["persons"])
+        elif section == "lists_settings":
+            patch, flags = settings_spec.lists_settings(data, st)
+        elif section == "todos":
+            patch, flags = settings_spec.todos(data, self.todo_settings())
+        else:
+            raise settings_spec.SettingsError("section", "unknown_section")
+        await self.async_update_settings(patch)
+        if "rebook" in flags:
+            self.book_points()
+        if "refresh_away" in flags:
+            self.hass.async_create_task(self.async_refresh_away(apply=True, rescan="rescan" in flags))
+        if "rollover" in flags:
+            await self.async_rollover()
+        return flags
+
+    # ------------------------------------------------------------------ gamification & rewards
 
     async def async_save_reward(self, reward_id: str | None, spec: dict[str, Any]) -> str:
         clean = {
@@ -759,7 +908,13 @@ class FamilyPlanner:
                          CONF_SHOW_OWNER: st.get(CONF_SHOW_OWNER), "admin_only_edit": bool(st.get("admin_only_edit")),
                          "reliability_days": self.reliability_days(),
                          "school_gap": validate.integer(st.get("school_gap"), 0, 240, 0),
-                         "idle_seconds": validate.integer(st.get("idle_seconds"), 10, 600, 45)},
+                         "idle_seconds": validate.integer(st.get("idle_seconds"), 10, 600, 45),
+                         "fullscreen_dblclick": bool(st.get("fullscreen_dblclick", True)),
+                         "fullscreen_auto": bool(st.get("fullscreen_auto", False))},
+            "todos": sorted(({"id": tid, **t} for tid, t in self.data["todos"].items()),
+                            key=lambda t: (t.get("done"), t.get("created") or "")),
+            "todo_settings": self.todo_settings(),
+            "pin_default": self.pin_default,
             "persons": [{"id": pid, **p} for pid, p in self.persons_sorted()],
             "chores": [{"id": cid, **c, **({"upcoming": schedule.upcoming(c, self.data["persons"], today)} if c.get("schedule") else {})}
                        for cid, c in sorted(self.data["chores"].items(), key=lambda x: x[1]["title"].lower())],

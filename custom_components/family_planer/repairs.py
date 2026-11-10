@@ -37,3 +37,14 @@ def async_check_entities(hass: HomeAssistant, planner) -> None:
             ir.async_create_issue(hass, DOMAIN, prefix + ent, is_fixable=False, severity=ir.IssueSeverity.WARNING,
                                   translation_key="missing_entity",
                                   translation_placeholders={"entity": ent, "used_by": used_by})
+
+
+@callback
+def async_check_pin(hass: HomeAssistant, planner) -> None:
+    """Warn while the well-known start PIN 123456 is still active."""
+    issue_id = f"default_pin_{planner.entry.entry_id}"
+    if planner.pin_default:
+        ir.async_create_issue(hass, DOMAIN, issue_id, is_fixable=False, severity=ir.IssueSeverity.WARNING,
+                              translation_key="default_pin")
+    else:
+        ir.async_delete_issue(hass, DOMAIN, issue_id)

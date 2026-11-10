@@ -78,7 +78,10 @@
           "show_owner": "Zugeordnete Termine auch beim Kalenderbesitzer zeigen",
           "admin_only_edit": "Plan nur durch Admins änderbar",
           "reliability_days": "Zuverlässigkeit berechnen über",
-          "school_gap": "Heimweg über Mittag ab"
+          "school_gap": "Heimweg über Mittag ab",
+          "todo_confirm": "To-dos: Erledigen bestätigen",
+          "todo_points": "To-dos: Standard-Punkte",
+          "todo_keep_days": "To-dos: erledigte anzeigen für"
         },
         "data_description": {
           "rollover_time": "Bis zu dieser Uhrzeit können Ämtli des Vortags noch abgehakt werden; danach zählen offene als „nicht gemacht“ und der neue Tag beginnt.",
@@ -86,7 +89,10 @@
           "admin_only_edit": "Kinder können Ämtli abhaken und Belohnungen anfragen, aber den Plan, Personen und Kategorien nicht ändern.",
           "show_owner": "Ein Termin „Lea Turnen“ in Mamas Kalender erscheint dann bei Lea und bei Mama.",
           "reliability_days": "Anzahl Tage für die Prozentzahl bei jeder Person (Standard 30).",
-          "school_gap": "Ab so vielen Minuten Pause zwischen zwei Lektionen wird der Schultag in zwei Blöcke geteilt (los/zuhause je Block). 0 = automatisch: mindestens 45 Minuten bzw. doppelter Schulweg plus 15 Minuten."
+          "school_gap": "Ab so vielen Minuten Pause zwischen zwei Lektionen wird der Schultag in zwei Blöcke geteilt (los/zuhause je Block). 0 = automatisch: mindestens 45 Minuten bzw. doppelter Schulweg plus 15 Minuten.",
+          "todo_confirm": "To-dos ohne Datum werden erst nach der Frage „Als erledigt markieren?“ abgehakt (Ämtli weiterhin mit einem Tipp).",
+          "todo_points": "Punkte für ein erledigtes To-do (0 = keine). Eigene Punkte pro To-do nur mit Eltern-PIN. To-dos zählen nicht zum fairen Tageswert.",
+          "todo_keep_days": "Wie lange erledigte To-dos noch sichtbar bleiben (0 = bis zum nächsten Tageswechsel)."
         }
       },
       "person_add": {
@@ -203,14 +209,18 @@
           "panel": "Eintrag in der Seitenleiste",
           "panel_title": "Titel in der Seitenleiste",
           "idle_seconds": "Zurück zur Startansicht nach",
-          "language": "Sprache des Family Planers"
+          "language": "Sprache des Family Planers",
+          "fullscreen_dblclick": "Vollbild per Doppeltippen",
+          "fullscreen_auto": "Beim Öffnen automatisch Vollbild"
         },
         "data_description": {
           "panel": "Öffnet den kompletten Planer ohne eigenes Dashboard – kein YAML nötig.",
           "theme": "Farben und Formen aller Ansichten. „Home Assistant“ übernimmt dein aktuelles HA-Design.",
           "panel_title": "Leer = Name der Integration.",
           "idle_seconds": "Wird am Tablet ein anderer Tag oder eine Person angetippt, springt die Ansicht nach dieser Zeit ohne Berührung zurück zu heute.",
-          "language": "Automatisch: wie im Profil bzw. Home Assistant eingestellt. Deutsch oder Englisch: gilt fest für Planer, Tablet-Ansichten, Ansagen, Benachrichtigungen und Level-Namen – unabhängig von der Sprache von Home Assistant. Diese Einstellungsseiten folgen weiterhin der Sprache deines Profils."
+          "language": "Automatisch: wie im Profil bzw. Home Assistant eingestellt. Deutsch oder Englisch: gilt fest für Planer, Tablet-Ansichten, Ansagen, Benachrichtigungen und Level-Namen – unabhängig von der Sprache von Home Assistant. Diese Einstellungsseiten folgen weiterhin der Sprache deines Profils.",
+          "fullscreen_dblclick": "Doppeltippen auf eine freie Stelle des Planers blendet Kopfzeile und Seitenleiste von Home Assistant aus (bzw. echtes Vollbild, wo der Browser es erlaubt). Nochmals doppeltippen beendet es. Ämtli, Knöpfe und Eingabefelder lösen es nicht aus.",
+          "fullscreen_auto": "Ideal für ein Wandtablet: der Planer startet ohne Kopfzeile und Seitenleiste."
         }
       },
       "rewards": {
@@ -264,13 +274,13 @@
       },
       "gamification": {
         "title": "Punkte, Boni & Eltern-PIN",
-        "description": "Eltern-PIN gesetzt: {pin}. Mit der PIN können Belohnungen auch am Tablet freigegeben werden (Admins brauchen keine PIN).",
+        "description": "Eltern-PIN: {pin}. Die PIN schützt Freigaben, Punkte, das Anlegen und Ändern von Belohnungen sowie die Einstellungen im Planer. Admins können Freigaben und Punkte auch ohne PIN erledigen; Belohnungen und Einstellungen im Planer verlangen immer die PIN.",
         "data": {
           "default_points": "Punkte pro Ämtli (Standard bzw. Gewicht)",
           "day_bonus": "Bonus für einen ganz erledigten Tag",
           "streak_bonus": "Bonus für jede 7-Tage-Serie",
           "pin": "Neue Eltern-PIN (4–8 Ziffern)",
-          "remove_pin": "Eltern-PIN entfernen",
+          "remove_pin": "Eltern-PIN auf 123456 zurücksetzen",
           "reward_notify": "Anfragen zusätzlich melden an",
           "mode": "Punkte verteilen",
           "day_points": "Punkte für einen ganzen Tag (fair)"
@@ -278,11 +288,12 @@
         "data_description": {
           "default_points": "Im Modus „Pro Ämtli“ die Punkte je Ämtli, im Modus „Fair“ das Standard-Gewicht. Pro Ämtli im Ämtliplan änderbar.",
           "reward_notify": "z. B. die Handy-App der Eltern. Eine Mitteilung in Home Assistant gibt es immer.",
-          "pin": "Nach 5 falschen Eingaben ist die PIN 5 Minuten gesperrt.",
+          "pin": "4–8 Ziffern, nicht 123456. Nach 5 Fehlversuchen ist die PIN 5 Minuten gesperrt. Die PIN schützt Freigaben, Punkte, Belohnungen und die Einstellungen im Planer.",
           "day_bonus": "Wird beim Tageswechsel gutgeschrieben.",
           "streak_bonus": "Nach 7, 14, 21 … Tagen am Stück alles erledigt.",
           "mode": "Fair: Wer alle seine Ämtli des Tages erledigt, bekommt gleich viele Punkte – egal ob 2 oder 6 Ämtli. Pro Ämtli: jedes Ämtli bringt seine Punkte, wer mehr Ämtli hat, kann mehr verdienen.",
-          "day_points": "Wird auf die Ämtli des Tages verteilt; jedes erledigte Ämtli bringt sofort seinen Anteil. Der Wert im Ämtliplan wirkt dabei als Gewicht (z. B. 20 = zählt doppelt so viel wie 10)."
+          "day_points": "Wird auf die Ämtli des Tages verteilt; jedes erledigte Ämtli bringt sofort seinen Anteil. Der Wert im Ämtliplan wirkt dabei als Gewicht (z. B. 20 = zählt doppelt so viel wie 10).",
+          "remove_pin": "Setzt die PIN auf die Start-PIN 123456 zurück. Sie muss danach im Planer sofort geändert werden."
         }
       },
       "announce": {
@@ -388,7 +399,7 @@
       "no_persons": "Bitte einen Namen angeben.",
       "duplicate_person": "Diese Person gibt es schon.",
       "no_module": "Bitte mindestens ein Modul wählen.",
-      "bad_pin": "Die PIN muss aus 4–8 Ziffern bestehen.",
+      "bad_pin": "Die PIN muss 4–8 Ziffern haben und darf nicht 123456 sein.",
       "no_motion": "Bitte mindestens einen Bewegungsmelder wählen.",
       "no_target": "Bitte eine Benachrichtigungs-Entität oder TTS mit Lautsprecher wählen.",
       "bad_times": "Bitte Beginn und Ende angeben (Ende nach Beginn)."
@@ -609,6 +620,10 @@
     "missing_entity": {
       "title": "Family Planer: {entity} fehlt",
       "description": "Die Entität `{entity}` (verwendet für {used_by}) existiert nicht mehr oder ist nicht verfügbar. Bitte unter Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren eine andere wählen."
+    },
+    "default_pin": {
+      "title": "Family Planer: Start-PIN ändern",
+      "description": "Die Eltern-PIN ist noch die Start-PIN **123456**. Öffne im Family Planer *Belohnungen* oder *Einstellungen* und lege eine eigene PIN fest – vorher sind Änderungen an Belohnungen und Einstellungen gesperrt."
     }
   }
 }

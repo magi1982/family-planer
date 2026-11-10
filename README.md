@@ -33,10 +33,14 @@ home – and **shopping and to-do lists that sort themselves**. Everything is se
   - [Holidays pause chores](#holidays-pause-chores)
   - [Reliability, points, levels & awards](#reliability-points-levels--awards)
   - [Real rewards](#real-rewards)
+  - [Parent PIN](#parent-pin)
+  - [To-dos without a date](#to-dos-without-a-date)
   - [Announcements on motion](#announcements-on-motion)
   - [Pictures: avatars or your own photo](#pictures-avatars-or-your-own-photo)
 - [Smart lists module](#smart-lists-module)
 - [Designs](#designs)
+- [Settings in the planner](#settings-in-the-planner)
+- [Fullscreen on double tap](#fullscreen-on-double-tap)
 - [Installation](#installation)
 - [Setup](#setup)
 - [Views & usage](#views--usage)
@@ -55,8 +59,8 @@ home – and **shopping and to-do lists that sort themselves**. Everything is se
 | | |
 |---|---|
 | **Modules** | *Week plan* (chores, events, school, holidays, points, rewards, announcements) and *Smart lists* – each can be switched on or off, more modules to come |
-| **Usage** | Own sidebar entry with navigation *Planner · Lists · Chore plan · Rewards*; optionally as cards in your own dashboards |
-| **Setup** | Entirely via *Settings → Devices & services*, no YAML |
+| **Usage** | Own sidebar entry with navigation *Planner · Lists · Chore plan · Rewards · Settings*; optionally as cards in your own dashboards; fullscreen on double tap |
+| **Setup** | Directly in the planner (*Settings*, protected by the parent PIN) or via *Settings → Devices & services* – no YAML |
 | **Languages** | English and German – automatically like Home Assistant, or fixed to German or English for the planner (e.g. Home Assistant in English, planner in German) |
 | **Designs** | Home Assistant, Loxone, Apple Home, Google Home, Light, Nord |
 | **Dependencies** | None. Calendars, lists, speakers and AI are optional – any matching entity works |
@@ -143,11 +147,29 @@ Per child (or person, e.g. university/work):
 
 ### Real rewards
 
-- Parents create rewards: e.g. *ice cream = 30 points*, *30 min gaming = 50*, *5 CHF pocket money = 250*, *cinema = 400*.
+- Parents create and change rewards **directly in the *Rewards* view** with *Edit* (always with the parent PIN): e.g. *ice cream = 30 points*, *30 min gaming = 50*, *5 CHF pocket money = 250*, *cinema = 400*.
 - Per reward: icon, cost, **approval required** yes/no, **only for** certain persons, **at most x times per week**.
 - Children redeem on the tablet; points are reserved until the parents decide.
 - Parents approve as **admin** or on the tablet with a **parent PIN** (4–8 digits). Notification in Home Assistant and optionally on the phone.
 - **Give points**: bonus (or deduction) with a reason, e.g. "Room tidied up perfectly +25".
+
+### Parent PIN
+
+- **Start PIN `123456`** – it must be **changed on first use** (current PIN, new PIN, repeat). Until then, rewards and settings cannot be changed, and Home Assistant shows a repair notice.
+- The PIN protects: **adding/changing rewards**, the **settings page**, approving rewards and giving points (admins may approve and give points without it).
+- 4–8 digits, never `123456` again; locked for 5 minutes after 5 wrong attempts; stored only as a PBKDF2 hash.
+- After entering it once, the planner stays unlocked for **10 minutes** (refreshed while you work, *Lock* ends it immediately). The PIN itself is never stored in the browser.
+- Change it any time: *Rewards → Edit → Change PIN* or *Settings → Change parent PIN*. Forgotten? *Settings → Devices & services → Family Planer → Configure → Points & rewards → Reset parent PIN to 123456* (admins only).
+
+### To-dos without a date
+
+![To-dos](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/todos.png)
+
+- Simple to-dos for a person **without due date or repetition** – they stay until they are done (e.g. *tidy up the room*, *return library books*).
+- Shown below the planner and the chore plan, grouped by person; add one with person + text.
+- **Ticking off asks for confirmation** ("Mark as done?") – unlike chores, which are ticked with one tap. Can be switched off.
+- Optional **points**: a default for all to-dos, or own points per to-do (parent PIN). To-dos do not count towards the fair day value.
+- Finished to-dos stay visible for a configurable number of days, then disappear.
 
 ### Announcements on motion
 
@@ -213,6 +235,25 @@ Set under *Configure → Design, language & sidebar*; cards in your own dashboar
 
 ---
 
+## Settings in the planner
+
+![Settings](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/settings.png)
+
+Everything that the Home Assistant dialogs offer, in one clear page – also on the tablet: **Settings** in the navigation.
+- Protected by the **parent PIN** (always, also for admins).
+- Tabs: *General* (modules, language, design, fullscreen, sidebar, day change, …), *People & school* (name, colour, calendar, nicknames, school calendar, blocks per weekday, travel time), *Holidays*, *Points*, *To-dos*, *Announcements* (entities picked from lists), *Lists*.
+- Every field with a short description; invalid input is refused with a clear message (e.g. announcements without speaker).
+- Changes that need new timers (day change, modules, lists, announcements) reload the integration automatically; the planner reconnects by itself.
+- The dialogs under *Settings → Devices & services → Family Planer → Configure* remain available.
+
+## Fullscreen on double tap
+
+- **Double-tap an empty spot** of the planner (title bar, margins, gaps) → Home Assistant's header and sidebar disappear, and the browser switches to real fullscreen where allowed. Double-tap again to leave.
+- Taps on chores, buttons and input fields never trigger it, so nothing is ticked off by accident.
+- Optional: **fullscreen automatically when opened** – ideal for a wall tablet. Both under *Settings → General*.
+
+---
+
 ## Installation
 
 **Home Assistant 2026.11 and newer (Marketplace):**
@@ -229,7 +270,7 @@ Then: *Settings → Devices & services → Add integration → Family Planer*.
 ## Setup
 
 When adding: **name**, **modules**, **family members** (comma separated) and optionally the **first list**.
-Everything else under *Settings → Devices & services → Family Planer → Configure*. Every field there has a
+Everything else directly in the planner under **Settings** (parent PIN) or under *Settings → Devices & services → Family Planer → Configure*. Every field has a
 description. The chores themselves are edited directly in the **Chore plan** view (also on the tablet).
 
 ### All settings
@@ -249,6 +290,8 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Sidebar entry | on | opens the complete planner without a dashboard of your own |
 | Sidebar title | name | text in the sidebar |
 | Return to the start view after | 45 s | a tapped day / person jumps back to today afterwards |
+| Fullscreen on double tap | on | double-tap an empty spot hides header and sidebar (real fullscreen where allowed) |
+| Fullscreen automatically when opened | off | ideal for a wall tablet |
 
 **Week plan → Add / edit / remove person**
 
@@ -288,7 +331,7 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Points per chore | 10 | *Per chore* mode: points per chore · *Fair* mode: default weight; can be changed per chore in the chore plan |
 | Bonus for a fully completed day | 5 | |
 | Bonus for every 7-day streak | 20 | |
-| Parent PIN | – | 4–8 digits, for approvals on the tablet; locked after 5 wrong attempts |
+| Parent PIN | 123456 (must be changed) | 4–8 digits, not 123456; protects rewards, settings, approvals and points; locked after 5 wrong attempts. *Reset parent PIN to 123456* if forgotten |
 | Also send requests to | – | additional notification (e.g. mobile app) |
 
 **Week plan → Announcements on motion**
@@ -319,6 +362,9 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Only admins may change the plan | off | children can still tick off chores and request rewards |
 | Calculate reliability over | 30 days | |
 | Lunch at home from | 0 = automatic | break in minutes from which the school day is split into blocks |
+| To-dos: confirm completion | on | ask "Mark as done?" before ticking off a to-do |
+| To-dos: default points | 0 | points for a finished to-do; own points per to-do with the parent PIN |
+| To-dos: show finished ones for | 1 day | 0 = until the next day change |
 
 **Smart lists → Add / edit / remove list**
 
@@ -351,9 +397,13 @@ The navigation is in the same place at the top centre on every page.
 
 **Lists** – tabs per list, add field, categories as tiles, *Categories* and *Optimise*.
 
-**Chore plan** – persons with picture & colour, week overview, chores by weekday, **special chores** below.
+**Chore plan** – persons with picture & colour, week overview, chores by weekday, **special chores** and **to-dos** below.
 
-**Rewards** – points, levels, pending approvals, rewards per person, history, *Give points*.
+Below the planner: **to-dos** of every person (tap → confirm → done).
+
+**Rewards** – points, levels, pending approvals, rewards per person, history, *Give points*, *Edit* (add/change/delete rewards, change PIN – parent PIN).
+
+**Settings** – all settings with descriptions, protected by the parent PIN (see above).
 
 ---
 
@@ -406,7 +456,7 @@ cards:
   - type: custom:family-planer-nav-card
     paths: { planer: planer, listen: einkauf, aemtliplan: aemtliplan, belohnungen: belohnungen }
   - type: custom:family-planer-card
-    view: week        # week | plan | lists | rewards
+    view: week        # week | plan | lists | rewards | settings
     theme: apple      # optional
     language: en      # optional, otherwise the integration setting or the HA language
 ```
@@ -419,7 +469,7 @@ For a full-screen tablet, a panel view per page (paths as above) and e.g. *Kiosk
 
 - Everything stays **local** in your Home Assistant; no cloud, no tracking. External services only if you choose them yourself (calendars, lists, AI).
 - Input is validated on the server (colours, images, icons, texts, lengths), output is escaped in the browser.
-- Parent PIN stored with PBKDF2, locked after 5 wrong attempts; optionally only admins may change the plan.
+- Parent PIN stored with PBKDF2 (checked outside the event loop), start PIN must be changed, locked after 5 wrong attempts; unlocks are random 10-minute server tokens – the PIN never stays in the browser. Optionally only admins may change the plan.
 - Photos get long random file names; diagnostics downloads contain no names, photos or list contents.
 - On every commit: **CodeQL**, **Bandit**, ESLint security rules, hassfest, HACS validation, tests.
 

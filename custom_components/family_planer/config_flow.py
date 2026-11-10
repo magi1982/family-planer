@@ -14,7 +14,7 @@ from homeassistant.config_entries import ConfigFlow, ConfigFlowResult, OptionsFl
 from homeassistant.core import callback
 from homeassistant.helpers import selector
 
-from . import rewards, validate
+from . import rewards, settings_spec, validate
 from .const import (CONF_AI_TASK, CONF_ALIASES, CONF_AUTO, CONF_CALENDAR, CONF_COLOR, CONF_ENTITY, CONF_ICON,
                     CONF_LIST, CONF_MATCH_NAMES, CONF_MAX_CATEGORIES, CONF_MODULES, CONF_NAME, CONF_OPTIMIZE_TIME,
                     CONF_PERSON, CONF_PERSONS, CONF_ROLLOVER_TIME, CONF_SHOW_OWNER, CONF_TITLE, DOMAIN,
@@ -202,6 +202,8 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
                 "panel": {"enabled": bool(user_input.get("panel")), "title": validate.text(user_input.get("panel_title"), 40)},
                 "idle_seconds": validate.integer(user_input.get("idle_seconds"), 10, 600, 45),
                 "language": user_input.get("language") if user_input.get("language") in LANGUAGES else "auto",
+                "fullscreen_dblclick": bool(user_input.get("fullscreen_dblclick", True)),
+                "fullscreen_auto": bool(user_input.get("fullscreen_auto", False)),
             })
             return self._done(reload=True)
         schema = vol.Schema({
@@ -212,6 +214,8 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
             vol.Required("panel", default=bool(panel.get("enabled", True))): bool,
             vol.Optional("panel_title", description={"suggested_value": panel.get("title") or self.config_entry.title}): str,
             vol.Required("idle_seconds", default=validate.integer(st.get("idle_seconds"), 10, 600, 45)): num(10, 600, "s"),
+            vol.Required("fullscreen_dblclick", default=bool(st.get("fullscreen_dblclick", True))): bool,
+            vol.Required("fullscreen_auto", default=bool(st.get("fullscreen_auto", False))): bool,
         })
         return self.async_show_form(step_id="design", data_schema=schema)
 
@@ -364,15 +368,14 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
                 "reward_notify": validate.entities(user_input.get("reward_notify"), ("notify",)),
             }
             pin = (user_input.get("pin") or "").strip()
-            if user_input.get("remove_pin"):
-                patch["pin_hash"] = None
-            elif pin:
-                if not pin.isdigit() or not 4 <= len(pin) <= 8:
-                    errors["pin"] = "bad_pin"
-                else:
-                    patch["pin_hash"] = await self.hass.async_add_executor_job(rewards.hash_pin, pin)
+            if pin and not user_input.get("remove_pin") and not settings_spec.pin_valid(pin):
+                errors["pin"] = "bad_pin"
             if not errors:
                 await self._planner.async_update_settings(patch)
+                if user_input.get("remove_pin"):
+                    await self._planner.async_set_pin(None)  # back to the start PIN, must be changed again
+                elif pin:
+                    await self._planner.async_set_pin(pin)
                 return self._done(reload=False)
         schema = vol.Schema({
             vol.Required("mode", default=self._planner.points_mode()): selector.SelectSelector(selector.SelectSelectorConfig(
@@ -386,7 +389,7 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
             vol.Optional("reward_notify", description={"suggested_value": st.get("reward_notify") or []}): NOTIFY_SELECTOR,
         })
         return self.async_show_form(step_id="gamification", data_schema=schema, errors=errors,
-                                    description_placeholders={"pin": "✓" if st.get("pin_hash") else "–"})
+                                    description_placeholders={"pin": "123456 ⚠" if self._planner.pin_default else "✓"})
 
     # ---- spoken reminders
     async def async_step_announce(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
@@ -454,6 +457,9 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
                 "admin_only_edit": bool(user_input.get("admin_only_edit")),
                 "reliability_days": validate.integer(user_input.get("reliability_days"), 7, 90, 30),
                 "school_gap": validate.integer(user_input.get("school_gap"), 0, 240, 0),
+                "todos": {"confirm": bool(user_input.get("todo_confirm", True)),
+                          "points": validate.integer(user_input.get("todo_points"), 0, 1000, 0),
+                          "keep_days": validate.integer(user_input.get("todo_keep_days"), 0, 30, 1)},
             })
             if reload:
                 await self._planner.async_rollover()
@@ -465,6 +471,9 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
             vol.Required("admin_only_edit", default=bool(st.get("admin_only_edit", False))): bool,
             vol.Required("reliability_days", default=validate.integer(st.get("reliability_days"), 7, 90, 30)): num(7, 90, "d"),
             vol.Required("school_gap", default=validate.integer(st.get("school_gap"), 0, 240, 0)): num(0, 240, "min"),
+            vol.Required("todo_confirm", default=self._planner.todo_settings()["confirm"]): bool,
+            vol.Required("todo_points", default=self._planner.todo_settings()["points"]): num(0, 1000),
+            vol.Required("todo_keep_days", default=self._planner.todo_settings()["keep_days"]): num(0, 30, "d"),
         })
         return self.async_show_form(step_id="week_settings", data_schema=schema)
 

@@ -19,7 +19,7 @@ from homeassistant.helpers.typing import ConfigType
 
 from .const import CARDS_FILE, DOMAIN, FILES_DIR, FILES_URL, PANEL_URL, URL_BASE, VERSION
 from .planner import FamilyPlanner
-from .repairs import async_check_entities
+from .repairs import async_check_entities, async_check_pin
 from .websocket import async_register_websocket
 
 _LOGGER = logging.getLogger(__name__)
@@ -160,6 +160,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: FamilyPlanerConfigEntry)
     entry.runtime_data = planner
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     planner.owns_panel = await _async_register_panel(hass, entry)
+    async_check_pin(hass, planner)
 
     async def _check(_hass: HomeAssistant) -> None:
         async_check_entities(hass, planner)

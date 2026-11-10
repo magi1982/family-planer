@@ -2124,20 +2124,28 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const TXT = {
     de: { title: 'Punkte & Belohnungen', pts: 'Punkte', lvl: 'Level', next: 'noch {n} bis Level {l}', max: 'Höchstes Level erreicht!',
       shop: 'Belohnungen für {name}', redeem: 'Einlösen', missing: 'noch {n} Punkte', approval: 'mit Freigabe', noapproval: 'sofort',
-      week: 'max. {n}× pro Woche', none: 'Noch keine Belohnungen. Eltern legen sie unter Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren → Wochenplan → Punkte & Belohnungen an.',
+      week: 'max. {n}× pro Woche', none: 'Noch keine Belohnungen. Eltern legen sie hier mit „Bearbeiten“ an (Eltern-PIN).',
       pending: 'Wartet auf Freigabe', approve: 'Freigeben', deny: 'Ablehnen', history: 'Verlauf', bonus: 'Punkte geben',
       pin: 'Eltern-PIN', ok: 'OK', cancel: 'Abbrechen', reason: 'Grund (optional)', give: 'Vergeben',
       sent: '„{t}“ angefragt – die Eltern werden benachrichtigt.', done: '„{t}“ eingelöst. Viel Spass!', approved: 'Freigegeben', denied: 'Abgelehnt',
-      reserved: '{n} reserviert', err: { not_enough_points: 'Nicht genug Punkte.', weekly_limit: 'Diese Woche schon so oft eingelöst.', not_allowed: 'Diese Belohnung ist nicht für dich.', unauthorized: 'Falsche PIN oder keine Berechtigung.' },
-      kinds: { chore: 'Ämtli', bonus: 'Tagesbonus', streak: 'Serienbonus', adjust: 'Bonus', reward: 'Belohnung', carry: 'Übertrag' }, nopin: 'Für die Freigabe am Tablet zuerst eine Eltern-PIN festlegen (Konfigurieren → Punkte & Belohnungen).' },
+      reserved: '{n} reserviert', err: { not_enough_points: 'Nicht genug Punkte.', weekly_limit: 'Diese Woche schon so oft eingelöst.', not_allowed: 'Diese Belohnung ist nicht für dich.', unauthorized: 'Falsche PIN oder keine Berechtigung.', pin_wrong: 'Falsche PIN.', pin_locked: 'Zu viele Fehlversuche – bitte 5 Minuten warten.' },
+      kinds: { chore: 'Ämtli', bonus: 'Tagesbonus', streak: 'Serienbonus', adjust: 'Bonus', reward: 'Belohnung', carry: 'Übertrag', todo: 'To-do' },
+      edit: 'Bearbeiten', editDone: 'Fertig', add: 'Neue Belohnung', changePin: 'PIN ändern', del: 'Löschen', save: 'Speichern',
+      rTitle: 'Belohnung', rIcon: 'Icon', rCost: 'Kosten in Punkten', rApproval: 'Eltern müssen freigeben', rPersons: 'Nur für (leer = alle)', rWeek: 'Höchstens pro Woche (0 = unbegrenzt)',
+      delAsk: '„{t}“ wirklich löschen? Offene Anfragen dafür werden abgelehnt.', saved: 'Gespeichert.', pinChanged: 'Eltern-PIN geändert.',
+      startPin: 'Die Start-PIN 123456 ist noch aktiv. Bitte jetzt eine eigene Eltern-PIN festlegen – vorher sind Belohnungen und Einstellungen gesperrt.' },
     en: { title: 'Points & rewards', pts: 'points', lvl: 'Level', next: '{n} more to level {l}', max: 'Highest level reached!',
       shop: 'Rewards for {name}', redeem: 'Redeem', missing: '{n} points to go', approval: 'needs approval', noapproval: 'instant',
-      week: 'max. {n}× per week', none: 'No rewards yet. Parents add them under Settings → Devices & services → Family Planer → Configure → Week plan → Points & rewards.',
+      week: 'max. {n}× per week', none: 'No rewards yet. Parents add them here with "Edit" (parent PIN).',
       pending: 'Waiting for approval', approve: 'Approve', deny: 'Decline', history: 'History', bonus: 'Give points',
       pin: 'Parent PIN', ok: 'OK', cancel: 'Cancel', reason: 'Reason (optional)', give: 'Give',
       sent: '"{t}" requested – the parents are notified.', done: '"{t}" redeemed. Have fun!', approved: 'Approved', denied: 'Declined',
-      reserved: '{n} reserved', err: { not_enough_points: 'Not enough points.', weekly_limit: 'Already redeemed that often this week.', not_allowed: 'This reward is not for you.', unauthorized: 'Wrong PIN or not allowed.' },
-      kinds: { chore: 'Chore', bonus: 'Day bonus', streak: 'Streak bonus', adjust: 'Bonus', reward: 'Reward', carry: 'Carried over' }, nopin: 'To approve on the tablet, set a parent PIN first (Configure → Points & rewards).' },
+      reserved: '{n} reserved', err: { not_enough_points: 'Not enough points.', weekly_limit: 'Already redeemed that often this week.', not_allowed: 'This reward is not for you.', unauthorized: 'Wrong PIN or not allowed.', pin_wrong: 'Wrong PIN.', pin_locked: 'Too many wrong tries – please wait 5 minutes.' },
+      kinds: { chore: 'Chore', bonus: 'Day bonus', streak: 'Streak bonus', adjust: 'Bonus', reward: 'Reward', carry: 'Carried over', todo: 'To-do' },
+      edit: 'Edit', editDone: 'Done', add: 'New reward', changePin: 'Change PIN', del: 'Delete', save: 'Save',
+      rTitle: 'Reward', rIcon: 'Icon', rCost: 'Cost in points', rApproval: 'Parents must approve', rPersons: 'Only for (empty = everyone)', rWeek: 'At most per week (0 = unlimited)',
+      delAsk: 'Really delete "{t}"? Pending requests for it are declined.', saved: 'Saved.', pinChanged: 'Parent PIN changed.',
+      startPin: 'The start PIN 123456 is still active. Please choose your own parent PIN now – until then rewards and settings are locked.' },
   };
   const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
   const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
@@ -2151,7 +2159,9 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.addEventListener('click', (e) => this._click(e));
-        this.shadowRoot.addEventListener('input', (e) => { const d = e.target.dataset; if (d.bp !== undefined) this._dlg.points = e.target.value; if (d.br !== undefined) this._dlg.reason = e.target.value; });
+        this.shadowRoot.addEventListener('input', (e) => { const d = e.target.dataset; if (!this._dlg) return; if (d.bp !== undefined) this._dlg.points = e.target.value; if (d.br !== undefined) this._dlg.reason = e.target.value;
+          if (d.rf) this._dlg.r[d.rf] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; });
+        this.shadowRoot.addEventListener('change', (e) => { const d = e.target.dataset; if (this._dlg && d.rf && e.target.type === 'checkbox') this._dlg.r[d.rf] = e.target.checked; });
       }
       this._render();
     }
@@ -2162,11 +2172,15 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     _flash(msg, err) { this._msg = msg; this._msgErr = !!err; this._render(); clearTimeout(this._mt); this._mt = setTimeout(() => { this._msg = ''; this._render(); }, 4000); }
     _errText(e) { const code = String((e && (e.code || e.message)) || e).replace(/^reward_/, ''); return this.T.err[code] || (e && e.message) || code; }
     _isAdmin() { return !!(this._hass && this._hass.user && this._hass.user.is_admin); }
+    _ctx() { return { lang: this._cfg.lang, host: this }; }
+    // approvals and points: admins act directly, everyone else with the parent PIN (unlock token)
     async _parent(action) {
-      // admins act directly; everyone else needs the parent PIN
       if (this._isAdmin()) return action({});
-      const s = this._snap(); if (!s.pin_set) { this._flash(this.T.nopin, true); return null; }
-      this._dlg = { kind: 'pin', pin: '', then: action }; this._render(); return null;
+      try { const token = await window.FPPIN.ensure(this._store, this._ctx()); return action({ token }); } catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(this._errText(e), true); return null; }
+    }
+    // reward changes: always the parent PIN, also for admins
+    async _pinned(type, data) {
+      try { return await window.FPPIN.call(this._store, type, data, this._ctx()); } catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(this._errText(e), true); return null; }
     }
     async _click(e) {
       const t = e.target; const s = this._snap(); if (!s) return;
@@ -2183,16 +2197,38 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const bp = t.closest('[data-bperson]'); if (bp && this._dlg) { this._dlg.person = bp.dataset.bperson; this._render(); return; }
       if (t.closest('[data-give]') && this._dlg) {
         const d = this._dlg; const pts = Math.round(Number(d.points) || 0); if (!pts) return;
-        const act = (extra) => this._store.ws('family_planer/points/adjust', { person_id: d.person, points: pts, reason: d.reason || '', ...extra }).then(() => { this._dlg = null; this._render(); }).catch((er) => this._flash(this._errText(er), true));
-        if (this._isAdmin()) { act({}); return; }
-        if (!s.pin_set) { this._flash(this.T.nopin, true); return; }
-        this._dlg = { kind: 'pin', pin: '', then: act }; this._render(); return;
+        this._parent((extra) => this._store.ws('family_planer/points/adjust', { person_id: d.person, points: pts, reason: d.reason || '', ...extra }).then(() => { this._dlg = null; this._render(); }).catch((er) => this._flash(this._errText(er), true)));
+        return;
       }
-      const key = t.closest('[data-key]');
-      if (key && this._dlg && this._dlg.kind === 'pin') {
-        const k = key.dataset.key; const d = this._dlg;
-        if (k === 'del') d.pin = d.pin.slice(0, -1); else if (k === 'ok') { const then = d.then; const pin = d.pin; this._dlg = null; this._render(); if (then) await then({ pin }); return; } else if (d.pin.length < 8) d.pin += k;
-        this._render(); return;
+      if (t.closest('[data-chpin]')) {
+        try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); }
+        return;
+      }
+      if (t.closest('[data-edit]')) {
+        if (this._edit) { this._edit = false; this._render(); return; }
+        try { await window.FPPIN.ensure(this._store, this._ctx()); this._edit = true; this._render(); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); }
+        return;
+      }
+      const er = t.closest('[data-redit]');
+      if (er) {
+        const r = s.rewards.find((x) => x.id === er.dataset.redit) || { title: '', icon: 'mdi:gift-outline', cost: 100, approval: true, persons: [], per_week: 0 };
+        this._dlg = { kind: 'reward', id: r.id || null, r: { ...r, persons: [...(r.persons || [])] } }; this._render(); return;
+      }
+      const ic = t.closest('[data-ricon]'); if (ic && this._dlg && this._dlg.kind === 'reward') { this._dlg.r.icon = ic.dataset.ricon; this._render(); return; }
+      const rp = t.closest('[data-rperson]');
+      if (rp && this._dlg && this._dlg.kind === 'reward') { const ps = this._dlg.r.persons; const i = ps.indexOf(rp.dataset.rperson); if (i >= 0) ps.splice(i, 1); else ps.push(rp.dataset.rperson); this._render(); return; }
+      if (t.closest('[data-rsave]') && this._dlg) {
+        const d = this._dlg; const r = d.r; if (!String(r.title || '').trim()) return;
+        const data = { title: r.title, icon: r.icon, cost: Math.round(Number(r.cost) || 0), approval: !!r.approval, persons: r.persons, per_week: Math.round(Number(r.per_week) || 0) };
+        const res = await this._pinned('family_planer/reward/save', { ...(d.id ? { reward_id: d.id } : {}), data });
+        if (res) { this._dlg = null; this._flash(this.T.saved); }
+        return;
+      }
+      if (t.closest('[data-rdel]') && this._dlg) { this._dlg = { kind: 'confirm', id: this._dlg.id, title: this._dlg.r.title }; this._render(); return; }
+      if (t.closest('[data-ryes]') && this._dlg) {
+        const res = await this._pinned('family_planer/reward/remove', { reward_id: this._dlg.id });
+        if (res !== null) { this._dlg = null; this._flash(this.T.saved); }
+        return;
       }
       if (t.closest('[data-close]') || t.classList.contains('ov')) { this._dlg = null; this._render(); }
     }
@@ -2209,8 +2245,14 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           <span class="nx">${x.next == null ? esc(T.max) : esc(fmt(T.next, { n: x.next - x.lifetime, l: x.level + 1 }))}</span></div>
           <div class="pt"><strong>${x.balance}</strong><span>${esc(T.pts)}</span>${x.balance !== x.available ? `<em>${esc(fmt(T.reserved, { n: x.balance - x.available }))}</em>` : ''}</div></button>`; }).join('');
       const avail = sel ? (pts[sel.id] || {}).available || 0 : 0;
-      const rw = s.rewards.filter((r) => !r.persons || !r.persons.length || (sel && r.persons.includes(sel.id)));
-      const shop = !s.rewards.length ? `<div class="empty">${esc(T.none)}</div>` : `<div class="shop">${rw.map((r) => { const ok = avail >= r.cost;
+      const rw = this._edit ? s.rewards : s.rewards.filter((r) => !r.persons || !r.persons.length || (sel && r.persons.includes(sel.id)));
+      const edit = this._edit && window.FPPIN.unlocked(this._store);
+      if (this._edit && !edit) this._edit = false;
+      const shop = edit ? `<div class="shop">${rw.map((r) => `<div class="rw"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
+          <span>${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}${r.persons && r.persons.length ? ' · ' + esc(r.persons.map((pid) => (persons.find((p) => p.id === pid) || {}).name).filter(Boolean).join(', ')) : ''}</span></div>
+          <button class="tb" data-redit="${esc(r.id)}"><ha-icon icon="mdi:pencil"></ha-icon></button></div>`).join('')}
+          <button class="rw add" data-redit=""><ha-icon icon="mdi:plus"></ha-icon>${esc(T.add)}</button></div>`
+        : !s.rewards.length ? `<div class="empty">${esc(T.none)}</div>` : `<div class="shop">${rw.map((r) => { const ok = avail >= r.cost;
         return `<div class="rw${ok ? '' : ' lock'}"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
           <span>${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}</span>
           ${ok ? '' : `<span class="ms"><span class="bar"><i style="width:${Math.round((avail / r.cost) * 100)}%"></i></span>${esc(fmt(T.missing, { n: r.cost - avail }))}</span>`}</div>
@@ -2223,9 +2265,18 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const history = hist.length ? `<div class="sec">${esc(T.history)}</div><div class="hist">${hist.map((e) => `<div class="hr"><span class="k">${esc(T.kinds[e.kind] || e.kind)}</span><span class="tx">${esc(e.kind === 'bonus' || e.kind === 'streak' ? '' : e.text)}</span><span class="d">${esc((e.ts || '').slice(5, 10).split('-').reverse().join('.'))}</span><b class="${e.pts < 0 ? 'neg' : ''}">${e.pts > 0 ? '+' : ''}${e.pts}</b></div>`).join('')}</div>` : '';
       const d = this._dlg;
       let dlg = '';
-      if (d && d.kind === 'pin') dlg = `<div class="ov"><div class="dlg pin"><div class="dh">${esc(T.pin)}</div><div class="dots">${[0, 1, 2, 3, 4, 5, 6, 7].slice(0, Math.max(4, d.pin.length)).map((i) => `<i class="${i < d.pin.length ? 'on' : ''}"></i>`).join('')}</div>
-          <div class="keys">${['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'ok'].map((k) => `<button class="key${k === 'ok' ? ' okk' : ''}" data-key="${k}">${k === 'del' ? '⌫' : k === 'ok' ? esc(T.ok) : k}</button>`).join('')}</div>
-          <button class="sg" data-close>${esc(T.cancel)}</button></div></div>`;
+      if (d && d.kind === 'reward') { const r = d.r;
+        const icons = ['mdi:gift-outline', 'mdi:ice-cream', 'mdi:controller-classic-outline', 'mdi:television-classic', 'mdi:cash', 'mdi:movie-open-outline', 'mdi:pizza', 'mdi:bed-clock', 'mdi:tablet', 'mdi:book-open-variant', 'mdi:soccer', 'mdi:star-outline'];
+        dlg = `<div class="ov"><div class="dlg"><div class="dh">${esc(d.id ? r.title : T.add)}</div>
+          <label class="fl">${esc(T.rTitle)}<input class="in" data-rf="title" maxlength="60" value="${esc(r.title)}"></label>
+          <label class="fl">${esc(T.rIcon)}<span class="icons">${icons.map((i) => `<button class="ib${r.icon === i ? ' on' : ''}" data-ricon="${i}"><ha-icon icon="${i}"></ha-icon></button>`).join('')}</span><input class="in" data-rf="icon" maxlength="70" value="${esc(r.icon)}" placeholder="mdi:…"></label>
+          <div class="row2"><label class="fl">${esc(T.rCost)}<input class="in" type="number" min="1" max="100000" inputmode="numeric" data-rf="cost" value="${esc(r.cost)}"></label>
+          <label class="fl">${esc(T.rWeek)}<input class="in" type="number" min="0" max="50" inputmode="numeric" data-rf="per_week" value="${esc(r.per_week)}"></label></div>
+          <label class="ck"><input type="checkbox" data-rf="approval" ${r.approval ? 'checked' : ''}>${esc(T.rApproval)}</label>
+          <div class="fl">${esc(T.rPersons)}<div class="bps">${persons.map((p) => `<button class="chip${r.persons.includes(p.id) ? ' on' : ''}" data-rperson="${esc(p.id)}">${av(p, 22)}${esc(p.name)}</button>`).join('')}</div></div>
+          <div class="ea">${d.id ? `<button class="sg del" data-rdel>${esc(T.del)}</button>` : ''}<span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg ok" data-rsave>${esc(T.save)}</button></div></div></div>`; }
+      if (d && d.kind === 'confirm') dlg = `<div class="ov"><div class="dlg"><div class="dh">${esc(fmt(T.delAsk, { t: d.title }))}</div>
+          <div class="ea"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg del" data-ryes>${esc(T.del)}</button></div></div></div>`;
       if (d && d.kind === 'bonus') dlg = `<div class="ov"><div class="dlg"><div class="dh">${esc(T.bonus)}</div>
           <div class="bps">${persons.map((p) => `<button class="chip${p.id === d.person ? ' on' : ''}" data-bperson="${esc(p.id)}">${av(p, 22)}${esc(p.name)}</button>`).join('')}</div>
           <div class="br"><input class="in num" data-bp type="number" value="${esc(d.points)}" inputmode="numeric"><input class="in" data-br placeholder="${esc(T.reason)}" value="${esc(d.reason || '')}" maxlength="80"></div>
@@ -2270,9 +2321,20 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .ea{display:flex;gap:8px;margin-top:14px}.sp{flex:1}
         .msg{position:absolute;left:50%;transform:translateX(-50%);top:12px;background:#2e3a2a;border:1px solid ${G};color:var(--fp-text,#dfe);padding:8px 16px;border-radius:10px;font-size:13px;z-index:5;max-width:80%}
         .msg.e{background:#3a2626;border-color:#e06b6b}
+        .warn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(224,168,79,.14);border:1px solid #e0a84f;color:#f0d3a0;font-size:14px;margin-bottom:12px}.warn span{flex:1}
+        .rw.add{justify-content:center;gap:8px;border:1px dashed var(--fp-line,#4a4a4a);background:transparent;color:var(--fp-text2,#bbb);font:inherit;font-size:14px;cursor:pointer;min-height:72px}
+        .fl{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--fp-text2,#aaa);margin-bottom:12px}.fl .in{flex:none;width:100%;box-sizing:border-box}
+        .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .ck{display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:12px;cursor:pointer}.ck input{width:20px;height:20px;accent-color:${G}}
+        .icons{display:flex;flex-wrap:wrap;gap:6px}.ib{width:40px;height:40px;border-radius:10px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#2b2b2b);color:var(--fp-text2,#ccc);cursor:pointer;display:flex;align-items:center;justify-content:center}.ib.on{border-color:${G};color:${G}}
+        .sg.del{background:#3a2626;border-color:#e06b6b;color:#f3b4b4}
+        .dlg{max-height:calc(100% - 70px);overflow:auto}
       </style>
       <div class="card">
-        <div class="top"><h2>${esc(T.title)}</h2><button class="tb" data-bonus><ha-icon icon="mdi:star-plus-outline"></ha-icon>${esc(T.bonus)}</button></div>
+        <div class="top"><h2>${esc(T.title)}</h2>${edit ? `<button class="tb" data-chpin><ha-icon icon="mdi:form-textbox-password"></ha-icon>${esc(T.changePin)}</button>` : ''}
+          <button class="tb" data-edit><ha-icon icon="${edit ? 'mdi:check' : 'mdi:pencil-outline'}"></ha-icon>${esc(edit ? T.editDone : T.edit)}</button>
+          <button class="tb" data-bonus><ha-icon icon="mdi:star-plus-outline"></ha-icon>${esc(T.bonus)}</button></div>
+        ${s.pin_default ? `<div class="warn"><ha-icon icon="mdi:shield-alert-outline"></ha-icon><span>${esc(T.startPin)}</span><button class="sg ok" data-chpin>${esc(T.changePin)}</button></div>` : ''}
         <div class="people">${cards}</div>
         ${pending}
         <div class="sec">${esc(fmt(T.shop, { name: sel ? sel.name : '' }))}</div>${shop}
@@ -2458,6 +2520,672 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
 })();
 
 // ---------------------------------------------------------------------------
+// To-dos without a date: assigned to a person, stay until done. Ticking off asks for confirmation
+// (setting), unlike chores which are ticked with one tap. Shown below the planner and the chore plan.
+// ---------------------------------------------------------------------------
+(() => {
+  const G = 'var(--fp-accent)';
+  const FONT = '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
+  const TXT = {
+    de: { title: 'To-dos', sub: 'Ohne Datum – bleiben stehen, bis sie erledigt sind.', none: 'Keine offenen To-dos.', ph: 'Neues To-do …', add: 'Hinzufügen',
+      ask: '„{t}“ als erledigt markieren?', reopen: '„{t}“ wieder öffnen?', yes: 'Erledigt', yesOpen: 'Wieder öffnen', cancel: 'Abbrechen', del: 'Löschen',
+      delAsk: '„{t}“ löschen?', pts: 'Punkte', ptsHint: 'Eigene Punkte (Eltern-PIN)', err: 'Konnte nicht gespeichert werden.' },
+    en: { title: 'To-dos', sub: 'No date – they stay until they are done.', none: 'No open to-dos.', ph: 'New to-do …', add: 'Add',
+      ask: 'Mark "{t}" as done?', reopen: 'Reopen "{t}"?', yes: 'Done', yesOpen: 'Reopen', cancel: 'Cancel', del: 'Delete',
+      delAsk: 'Delete "{t}"?', pts: 'points', ptsHint: 'Own points (parent PIN)', err: 'Could not be saved.' },
+  };
+  const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
+
+  class FpTodosInner extends HTMLElement {
+    setConfig(cfg) {
+      this._cfg = cfg; this.T = TXT[cfg.lang === 'en' ? 'en' : 'de'];
+      if (!this.shadowRoot) {
+        this.attachShadow({ mode: 'open' });
+        this.shadowRoot.addEventListener('click', (e) => this._click(e));
+        this.shadowRoot.addEventListener('input', (e) => { if (e.target.dataset.new !== undefined) this._text = e.target.value; if (e.target.dataset.pts !== undefined) this._pts = e.target.value; });
+        this.shadowRoot.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.dataset.new !== undefined) { e.preventDefault(); this._add(); } });
+      }
+      this._render();
+    }
+    set store(s) { this._store = s; }
+    update() { if (!this._typing()) this._render(); }
+    _typing() { const a = this.shadowRoot && this.shadowRoot.activeElement; return !!(a && a.tagName === 'INPUT'); }
+    _snap() { return (this._store && this._store.snap) || null; }
+    _flash(m) { this._msg = m; this._render(); clearTimeout(this._mt); this._mt = setTimeout(() => { this._msg = ''; this._render(); }, 3500); }
+    async _add() {
+      const s = this._snap(); const title = String(this._text || '').trim(); if (!title || !s) return;
+      const pid = this._person || (s.persons[0] && s.persons[0].id);
+      const pts = String(this._pts || '').trim();
+      try {
+        if (pts !== '') await window.FPPIN.call(this._store, 'family_planer/todo/save', { person_id: pid, title, points: Math.max(0, Math.round(Number(pts) || 0)) }, { lang: this._cfg.lang, host: this });
+        else await this._store.ws('family_planer/todo/save', { person_id: pid, title });
+        this._text = ''; this._pts = ''; this._render();
+      } catch (e) { if (e !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(this.T.err); }
+    }
+    async _click(e) {
+      const t = e.target; const s = this._snap(); if (!s) return;
+      const p = t.closest('[data-person]'); if (p) { this._person = p.dataset.person; this._render(); return; }
+      if (t.closest('[data-add]')) { this._add(); return; }
+      const td = t.closest('[data-todo]');
+      if (td) {
+        const it = (s.todos || []).find((x) => x.id === td.dataset.todo); if (!it) return;
+        const confirm = !s.todo_settings || s.todo_settings.confirm !== false;
+        if (confirm || it.done) { this._dlg = { kind: 'done', it }; this._render(); return; }
+        this._set(it, true); return;
+      }
+      const dl = t.closest('[data-del]'); if (dl) { const it = (s.todos || []).find((x) => x.id === dl.dataset.del); if (it) { this._dlg = { kind: 'del', it }; this._render(); } return; }
+      if (t.closest('[data-yes]') && this._dlg) {
+        const d = this._dlg; this._dlg = null;
+        if (d.kind === 'done') this._set(d.it, !d.it.done);
+        else { try { await this._store.ws('family_planer/todo/delete', { todo_id: d.it.id }); } catch (er) { this._flash(this.T.err); } }
+        this._render(); return;
+      }
+      if (t.closest('[data-close]') || t.classList.contains('ov')) { this._dlg = null; this._render(); }
+    }
+    async _set(it, done) { try { await this._store.ws('family_planer/todo/set', { todo_id: it.id, done }); } catch (e) { this._flash(this.T.err); } }
+    _render() {
+      if (!this.shadowRoot || !this._cfg) return;
+      const s = this._snap(); const T = this.T; if (!s) { this.shadowRoot.innerHTML = ''; return; }
+      const persons = s.persons || []; const todos = s.todos || [];
+      const sel = persons.find((p) => p.id === this._person) || persons[0];
+      const groups = persons.map((p) => ({ p, list: todos.filter((x) => x.person_id === p.id) })).filter((g) => g.list.length);
+      const d = this._dlg;
+      const dlg = !d ? '' : `<div class="ov"><div class="dlg"><div class="dh">${esc(fmt(d.kind === 'del' ? T.delAsk : d.it.done ? T.reopen : T.ask, { t: d.it.title }))}</div>
+        <div class="ea"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg ${d.kind === 'del' ? 'del' : 'ok'}" data-yes>${esc(d.kind === 'del' ? T.del : d.it.done ? T.yesOpen : T.yes)}</button></div></div></div>`;
+      this.shadowRoot.innerHTML = `<style>
+        :host{display:block;margin-top:12px}
+        .card{position:relative;background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:16px 18px;font-family:var(--fp-font);color:var(--fp-text,#ececec)}
+        h3{margin:0;font-size:17px;font-weight:600}.sub{font-size:12px;color:var(--fp-text3,#888);margin:2px 0 12px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+        .g{border-radius:12px;background:var(--fp-bg2,#232323);border:1px solid var(--fp-line,#2a2a2a);border-left:4px solid var(--c);padding:8px 10px}
+        .gn{font-size:13px;font-weight:600;color:var(--c);margin:2px 2px 6px}
+        .t{display:flex;align-items:center;gap:8px;width:100%;min-height:42px;padding:6px 8px;border-radius:9px;border:none;background:transparent;color:inherit;font:inherit;font-size:15px;text-align:left;cursor:pointer}
+        .t:hover{background:var(--fp-bg3,#2a2a2a)}.box{width:22px;height:22px;border-radius:6px;border:2px solid var(--fp-line,#5a5a5a);flex:none;display:flex;align-items:center;justify-content:center}
+        .t.done{color:var(--fp-text3,#777);text-decoration:line-through}.t.done .box{background:${G};border-color:${G};color:var(--fp-on-accent,#141414)}
+        .tt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}.pt{font-size:11px;color:${G}}
+        .x{width:30px;height:30px;border-radius:8px;border:none;background:transparent;color:var(--fp-text3,#777);cursor:pointer;flex:none}.x:hover{color:#e06b6b;background:var(--fp-bg4,#2e2e2e)}
+        .row{display:flex}.empty{color:var(--fp-text3,#888);font-size:14px;padding:4px 2px 10px}
+        .add{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+        .chip{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:18px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#2b2b2b);color:var(--fp-text2,#ccc);font:inherit;font-size:13px;cursor:pointer}.chip.on{border-color:var(--c);color:var(--c)}
+        .chip i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+        .in{flex:1;min-width:180px;height:42px;border-radius:10px;border:1px solid var(--fp-line,#333);background:var(--fp-bg0,#141414);color:var(--fp-text,#eee);font:inherit;font-size:15px;padding:0 12px;outline:none}
+        .in.n{flex:none;min-width:0;width:110px}
+        .sg{height:40px;border-radius:20px;background:var(--fp-bg4,#2e2e2e);border:1px solid var(--fp-line,#3a3a3a);color:var(--fp-text2,#ccc);font:inherit;font-size:14px;padding:0 16px;cursor:pointer}
+        .sg.ok{background:${G};border-color:${G};color:var(--fp-on-accent,#141414);font-weight:600}.sg.del{background:#3a2626;border-color:#e06b6b;color:#f3b4b4}
+        .ov{position:absolute;inset:0;background:rgba(10,10,10,.72);border-radius:var(--fp-radius,16px);display:flex;align-items:center;justify-content:center;z-index:4}
+        .dlg{background:var(--fp-bg2,#232323);border:1px solid var(--fp-line,#3a3a3a);border-radius:14px;padding:18px;width:min(420px,92%)}.dh{font-size:16px;font-weight:600;margin-bottom:14px;line-height:1.4}
+        .ea{display:flex;gap:8px}.sp{flex:1}
+        .msg{position:absolute;right:14px;top:12px;background:#3a2626;border:1px solid #e06b6b;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px}
+      </style><div class="card">
+        <h3>${esc(T.title)}</h3><div class="sub">${esc(T.sub)}</div>
+        ${groups.length ? `<div class="grid">${groups.map(({ p, list }) => `<div class="g" style="--c:${COLOR(p.color)}"><div class="gn">${esc(p.name)}</div>
+          ${list.map((x) => `<div class="row"><button class="t${x.done ? ' done' : ''}" data-todo="${esc(x.id)}"><span class="box">${x.done ? '✓' : ''}</span><span class="tt">${esc(x.title)}</span>${x.points ? `<span class="pt">+${x.points}</span>` : ''}</button>
+            <button class="x" data-del="${esc(x.id)}" aria-label="${esc(T.del)}">✕</button></div>`).join('')}</div>`).join('')}</div>` : `<div class="empty">${esc(T.none)}</div>`}
+        <div class="add">${persons.map((p) => `<button class="chip${sel && p.id === sel.id ? ' on' : ''}" style="--c:${COLOR(p.color)}" data-person="${esc(p.id)}"><i></i>${esc(p.name)}</button>`).join('')}
+          <input class="in" data-new maxlength="80" placeholder="${esc(T.ph)}" value="${esc(this._text || '')}">
+          <input class="in n" data-pts type="number" min="0" max="1000" inputmode="numeric" placeholder="${esc(T.pts)}" title="${esc(T.ptsHint)}" value="${esc(this._pts || '')}">
+          <button class="sg ok" data-add>${esc(T.add)}</button></div>
+        ${dlg}${this._msg ? `<div class="msg">${esc(this._msg)}</div>` : ''}
+      </div>`;
+    }
+  }
+  if (!customElements.get('fp-todos-inner')) customElements.define('fp-todos-inner', FpTodosInner);
+})();
+
+// ---------------------------------------------------------------------------
+// Settings page inside the planner (view: settings). Everything that the Home Assistant options dialogs
+// offer, in one place, with a description next to every field. Always protected by the parent PIN.
+// ---------------------------------------------------------------------------
+(() => {
+  const G = 'var(--fp-accent)';
+  const FONT = '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
+  const L = (o, lang) => (o && (o[lang] || o.de)) || '';
+  const clone = (o) => JSON.parse(JSON.stringify(o || {}));
+
+  const UI = {
+    de: { title: 'Einstellungen', locked: 'Die Einstellungen sind mit der Eltern-PIN geschützt.', unlock: 'Entsperren', save: 'Speichern', saved: 'Gespeichert.',
+      reloading: 'Gespeichert – der Planer lädt die neuen Einstellungen …', cancel: 'Abbrechen', del: 'Löschen', add: 'Hinzufügen', none: '–', pin: 'Eltern-PIN ändern',
+      pinChanged: 'Eltern-PIN geändert.', lock: 'Sperren', newPerson: '+ Person', newList: '+ Liste', delAsk: '„{t}“ wirklich löschen?', search: 'Entität wählen …',
+      errors: { no_target: 'Bitte Alexa-Benachrichtigung oder TTS mit Lautsprechern wählen.', no_motion: 'Bitte mindestens einen Bewegungsmelder wählen.', no_modules: 'Mindestens ein Modul muss aktiv sein.',
+        bad_times: 'Zeiten prüfen: Beginn vor Ende, Blöcke ohne Überschneidung.', name: 'Bitte einen (eindeutigen) Namen angeben.', last_person: 'Die letzte Person kann nicht entfernt werden.', list: 'Bitte Name und To-do-Liste angeben.' },
+      days: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'], block: 'Block', from: 'von', to: 'bis' },
+    en: { title: 'Settings', locked: 'The settings are protected by the parent PIN.', unlock: 'Unlock', save: 'Save', saved: 'Saved.',
+      reloading: 'Saved – the planner is loading the new settings …', cancel: 'Cancel', del: 'Delete', add: 'Add', none: '–', pin: 'Change parent PIN',
+      pinChanged: 'Parent PIN changed.', lock: 'Lock', newPerson: '+ Person', newList: '+ List', delAsk: 'Really delete "{t}"?', search: 'Choose entity …',
+      errors: { no_target: 'Please choose an Alexa notify entity or TTS with speakers.', no_motion: 'Please choose at least one motion sensor.', no_modules: 'At least one module must be active.',
+        bad_times: 'Check the times: start before end, blocks must not overlap.', name: 'Please enter a (unique) name.', last_person: 'The last person cannot be removed.', list: 'Please enter a name and a to-do list.' },
+      days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], block: 'Block', from: 'from', to: 'to' },
+  };
+
+  // field: [key, type, {de, en} label, {de, en} description, extra]
+  const F = (k, type, de, en, dde, den, x) => ({ k, type, label: { de, en }, desc: { de: dde, en: den }, ...(x || {}) });
+  const TABS = [
+    { id: 'general', icon: 'mdi:tune-variant', label: { de: 'Allgemein', en: 'General' }, fields: [
+      F('mod_week', 'bool', 'Modul Wochenplan', 'Week plan module', 'Ämtli, Termine, Schule, Ferien, Punkte, Belohnungen und Ansagen.', 'Chores, events, school, holidays, points, rewards and announcements.'),
+      F('mod_lists', 'bool', 'Modul Smarte Listen', 'Smart lists module', 'Einkaufs- und To-do-Listen, die sich selbst sortieren.', 'Shopping and to-do lists that sort themselves.'),
+      F('language', 'select', 'Sprache des Family Planers', 'Family Planer language', 'Automatisch wie Profil/Home Assistant, oder fest Deutsch bzw. Englisch – unabhängig von Home Assistant.', 'Automatic like your profile/Home Assistant, or fixed German or English – independent of Home Assistant.',
+        { opts: [['auto', { de: 'Automatisch', en: 'Automatic' }], ['de', 'Deutsch'], ['en', 'English']] }),
+      F('theme', 'select', 'Design', 'Design', 'Aussehen des Planers. „Home Assistant“ übernimmt dein HA-Design.', 'Look of the planner. "Home Assistant" uses your HA theme.',
+        { opts: [['ha', 'Home Assistant'], ['loxone', 'Loxone'], ['apple', 'Apple Home'], ['google', 'Google Home'], ['light', { de: 'Hell', en: 'Light' }], ['nord', 'Nord']] }),
+      F('fullscreen_dblclick', 'bool', 'Vollbild per Doppeltippen', 'Fullscreen on double tap', 'Doppeltippen auf eine freie Stelle blendet Kopfzeile und Seitenleiste aus; nochmals doppeltippen holt sie zurück.', 'Double-tap an empty spot to hide header and sidebar; double-tap again to bring them back.'),
+      F('fullscreen_auto', 'bool', 'Beim Öffnen automatisch Vollbild', 'Fullscreen automatically when opened', 'Ideal für ein Wandtablet.', 'Ideal for a wall tablet.'),
+      F('idle_seconds', 'num', 'Zurück zur Startansicht nach', 'Return to the start view after', 'Angetippter Tag / Person springt danach zurück zu heute.', 'A tapped day / person jumps back to today afterwards.', { min: 10, max: 600, unit: 's' }),
+      F('panel', 'bool', 'Eintrag in der Seitenleiste', 'Sidebar entry', 'Öffnet den kompletten Planer ohne eigenes Dashboard.', 'Opens the complete planner without a dashboard of your own.'),
+      F('panel_title', 'text', 'Titel in der Seitenleiste', 'Sidebar title', 'Leer = Name der Integration.', 'Empty = name of the integration.', { max: 40 }),
+      F('rollover_time', 'time', 'Tageswechsel um', 'Day change at', 'Bis dahin können Ämtli des Vortags noch abgehakt werden.', 'Until then, the previous day\'s chores can still be ticked off.'),
+      F('match_names', 'bool', 'Termine anhand von Namen zuordnen', 'Assign events by names', '„Lea Turnen“ erscheint bei Lea, auch wenn es im Kalender von Mama steht.', '"Lea gymnastics" appears at Lea even if it is in mum\'s calendar.'),
+      F('show_owner', 'bool', 'Auch beim Kalenderbesitzer zeigen', 'Also show at the calendar owner', 'Zugeordnete Termine zusätzlich bei der Person des Kalenders anzeigen.', 'Show assigned events also at the calendar\'s person.'),
+      F('admin_only_edit', 'bool', 'Plan nur durch Admins änderbar', 'Only admins may change the plan', 'Kinder können trotzdem abhaken und Belohnungen anfragen.', 'Children can still tick off chores and request rewards.'),
+      F('reliability_days', 'num', 'Zuverlässigkeit berechnen über', 'Calculate reliability over', 'Zeitraum für die Prozentzahl pro Person.', 'Period for the percentage per person.', { min: 7, max: 90, unit: { de: 'Tage', en: 'days' } }),
+      F('school_gap', 'num', 'Heimweg über Mittag ab', 'Lunch at home from', 'Pause in Minuten, ab der der Schultag in zwei Blöcke geteilt wird (0 = automatisch).', 'Break in minutes from which the school day is split into two blocks (0 = automatic).', { min: 0, max: 240, unit: 'min' }),
+    ] },
+    { id: 'persons', icon: 'mdi:account-multiple-outline', label: { de: 'Personen & Schule', en: 'People & school' } },
+    { id: 'vacation', icon: 'mdi:palm-tree', label: { de: 'Ferien', en: 'Holidays' }, fields: [
+      F('enabled', 'bool', 'Ämtli in den Ferien pausieren', 'Pause chores during holidays', 'Ferientage zählen weder als erledigt noch als verpasst.', 'Holiday days count neither as done nor as missed.'),
+      F('words', 'words', 'Wörter für Ferien', 'Words for holidays', 'Mit Komma getrennt. Wortenden zählen: „Ferien“ findet „Skiferien“.', 'Comma separated. Word endings count: "holiday" finds "ski holiday".'),
+      F('scope', 'select', 'Ferien gelten für', 'Holidays apply to', 'Nur die Person des Kalenders bzw. die im Titel genannten – oder die ganze Familie.', 'Only the calendar\'s person or those named in the title – or the whole family.',
+        { opts: [['owner', { de: 'Person / Genannte', en: 'Person / persons named' }], ['family', { de: 'Ganze Familie', en: 'Whole family' }]] }),
+      F('min_hours', 'num', 'Ganzer Tag ab', 'Whole day from', 'Mindestdauer eines Termins mit Uhrzeit, um als Ferientag zu zählen.', 'Minimum duration of a timed event to count as a holiday.', { min: 12, max: 24, unit: 'h' }),
+      F('refresh_minutes', 'num', 'Kalender prüfen alle', 'Check calendars every', 'Wie oft auf neue Ferien geprüft wird.', 'How often new holidays are checked.', { min: 15, max: 240, unit: 'min' }),
+      F('rescan', 'bool', 'Kalender neu nach Ferien-Wörtern durchsuchen', 'Search calendars for holiday words again', 'Einmalig beim Speichern.', 'Once when saving.'),
+    ] },
+    { id: 'points', icon: 'mdi:star-circle-outline', label: { de: 'Punkte', en: 'Points' }, fields: [
+      F('mode', 'select', 'Punkte verteilen', 'How points are given', 'Fair: ein ganz erledigter Tag ist für alle gleich viel wert. Pro Ämtli: mehr Ämtli, mehr Punkte.', 'Fair: a fully completed day is worth the same for everybody. Per chore: more chores, more points.',
+        { opts: [['fair', { de: 'Fair', en: 'Fair' }], ['per_chore', { de: 'Pro Ämtli', en: 'Per chore' }]] }),
+      F('day_points', 'num', 'Punkte für einen ganzen Tag (fair)', 'Points for a full day (fair)', 'Wird auf die Ämtli des Tages verteilt.', 'Split across the day\'s chores.', { min: 0, max: 1000 }),
+      F('default_points', 'num', 'Punkte pro Ämtli (Standard bzw. Gewicht)', 'Points per chore (default or weight)', 'Pro Ämtli im Ämtliplan änderbar.', 'Can be changed per chore in the chore plan.', { min: 0, max: 1000 }),
+      F('day_bonus', 'num', 'Tagesbonus', 'Day bonus', 'Für einen ganz erledigten Tag.', 'For a fully completed day.', { min: 0, max: 1000 }),
+      F('streak_bonus', 'num', 'Serienbonus', 'Streak bonus', 'Für jede 7-Tage-Serie.', 'For every 7-day streak.', { min: 0, max: 1000 }),
+      F('reward_notify', 'entities', 'Anfragen zusätzlich melden an', 'Also send requests to', 'z. B. die Handy-App – zusätzlich zur Mitteilung in Home Assistant.', 'e.g. the mobile app – in addition to the Home Assistant notification.', { domain: 'notify' }),
+    ] },
+    { id: 'todos', icon: 'mdi:checkbox-marked-circle-outline', label: { de: 'To-dos', en: 'To-dos' }, fields: [
+      F('confirm', 'bool', 'Erledigen bestätigen', 'Confirm completion', 'To-dos werden erst nach der Frage „Als erledigt markieren?“ abgehakt.', 'To-dos are only ticked off after the question "Mark as done?".'),
+      F('points', 'num', 'Standard-Punkte', 'Default points', 'Punkte für ein erledigtes To-do (0 = keine). Zählt nicht zum fairen Tageswert.', 'Points for a finished to-do (0 = none). Does not count towards the fair day value.', { min: 0, max: 1000 }),
+      F('keep_days', 'num', 'Erledigte anzeigen für', 'Show finished ones for', '0 = bis zum nächsten Tageswechsel.', '0 = until the next day change.', { min: 0, max: 30, unit: { de: 'Tage', en: 'days' } }),
+    ] },
+    { id: 'announce', icon: 'mdi:bullhorn-outline', label: { de: 'Ansagen', en: 'Announcements' }, fields: [
+      F('enabled', 'bool', 'Ansagen einschalten', 'Enable announcements', 'Sagt bei Bewegung an, wer noch Ämtli offen hat.', 'Announces on motion who still has chores open.'),
+      F('motion', 'entities', 'Bewegungsmelder', 'Motion sensors', 'Bewegung, Präsenz oder Anwesenheit.', 'Motion, presence or occupancy.', { domain: 'binary_sensor', classes: ['motion', 'occupancy', 'presence'] }),
+      F('notify', 'entities', 'Ansage über (Alexa)', 'Announce via (Alexa)', 'Benachrichtigungs-Entität „Ankündigen“ oder „Sprechen“ der Integration Alexa Devices.', 'Notify entity "Announce" or "Speak" of the Alexa Devices integration.', { domain: 'notify' }),
+      F('tts', 'entity', 'Sprachausgabe (TTS)', 'Text-to-speech (TTS)', 'Alternativ zu Alexa, zusammen mit Lautsprechern.', 'Alternative to Alexa, together with speakers.', { domain: 'tts' }),
+      F('media_players', 'entities', 'Lautsprecher für TTS', 'Speakers for TTS', '', '', { domain: 'media_player' }),
+      F('start', 'time', 'Von', 'From', 'Zeitfenster für Ämtli-Erinnerungen.', 'Time window for chore reminders.'),
+      F('end', 'time', 'Bis', 'Until', '', ''),
+      F('cooldown', 'num', 'Höchstens alle', 'At most every', 'Pause zwischen zwei Erinnerungen.', 'Pause between two reminders.', { min: 5, max: 720, unit: 'min' }),
+      F('all_done', 'bool', 'Auch ansagen, wenn alles erledigt ist', 'Also announce when everything is done', 'Einmal pro Tag.', 'Once a day.'),
+      F('persons', 'persons', 'Nur für', 'Only for', 'Leer = alle Personen.', 'Empty = everyone.'),
+      F('max_items', 'num', 'Ämtli pro Person in der Ansage', 'Chores per person in the announcement', 'Weitere als „und 2 weitere“.', 'Further ones as "and 2 more".', { min: 1, max: 10 }),
+      F('queue', 'bool', 'Warteschlange für einmalige Meldungen', 'Queue for one-off messages', 'Meldungen warten auf die nächste Bewegung.', 'Messages wait for the next motion.'),
+      F('queue_start', 'time', 'Meldungen frühestens ab', 'Messages not before', 'Ruhezeiten der Warteschlange.', 'Quiet hours of the queue.'),
+      F('queue_end', 'time', 'Meldungen spätestens bis', 'Messages not after', '', ''),
+      F('queue_rewards', 'bool', 'Freigegebene Belohnungen ansagen', 'Announce approved rewards', '', ''),
+      F('reward_hours', 'num', 'Belohnungs-Meldung gültig für', 'Reward message valid for', '0 = bis zum Tageswechsel.', '0 = until the day change.', { min: 0, max: 48, unit: 'h' }),
+      F('queue_special', 'bool', 'Besondere Ämtli ansagen', 'Announce special chores', 'Entfällt, sobald das Ämtli erledigt ist.', 'Dropped once the chore is done.'),
+    ] },
+    { id: 'lists', icon: 'mdi:cart-outline', label: { de: 'Listen', en: 'Lists' }, fields: [
+      F('optimize_time', 'time', 'Tägliche Optimierung um', 'Daily optimisation at', 'Ordnet Unbekanntes unter „Sonstiges“ neu ein.', 'Re-sorts unknown items from "Other".'),
+      F('ai_task', 'entity', 'KI-Aufgabe (optional)', 'AI task (optional)', 'Ordnet auch Unbekanntes ein (OpenAI, Google, Ollama …).', 'Also sorts unknown items (OpenAI, Google, Ollama …).', { domain: 'ai_task' }),
+      F('prune_days', 'num', 'Ungenutzte Kategorie ersetzen nach', 'Replace unused category after', 'Macht Platz, wenn die Liste voll ist.', 'Makes room when the list is full.', { min: 7, max: 365, unit: { de: 'Tage', en: 'days' } }),
+    ] },
+  ];
+  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings' };
+
+  class FpSettingsInner extends HTMLElement {
+    setConfig(cfg) {
+      this._cfg = cfg; this._lang = cfg.lang === 'en' ? 'en' : 'de'; this.T = UI[this._lang];
+      this._tab = this._tab || 'general';
+      if (!this.shadowRoot) {
+        this.attachShadow({ mode: 'open' });
+        this.shadowRoot.addEventListener('click', (e) => this._click(e));
+        this.shadowRoot.addEventListener('input', (e) => this._input(e));
+        this.shadowRoot.addEventListener('change', (e) => this._input(e, true));
+      }
+      this._render();
+    }
+    set store(s) { this._store = s; }
+    set hass(h) { this._hass = h; }
+    update() { if (!this._data && window.FPPIN && window.FPPIN.unlocked(this._store)) this._load(); }
+    connectedCallback() { if (!this._data && !this._asked) { this._asked = true; setTimeout(() => this._load(), 50); } }
+    _ctx() { return { lang: this._lang, host: this }; }
+    _flash(m, err) { this._msg = m; this._err = !!err; this._render(); clearTimeout(this._mt); this._mt = setTimeout(() => { this._msg = ''; this._render(); }, 4500); }
+    _errText(e) {
+      const code = String((e && (e.code || e.message)) || e).replace(/^invalid_/, '');
+      return this.T.errors[code] || (e && e.message) || code;
+    }
+    async _call(type, data) {
+      try { return await window.FPPIN.call(this._store, type, data, this._ctx()); } catch (e) {
+        if (e === window.FPPIN.CANCEL) return null;
+        if (e && e.code === 'pin_required') { this._data = null; }
+        this._flash(this._errText(e), true); return null;
+      }
+    }
+    async _load() {
+      if (!this._store || !window.FPPIN) return;
+      const res = await this._call('family_planer/settings/get', {});
+      if (!res) { this._render(); return; }
+      this._data = res; this._forms = {};
+      for (const t of TABS) if (t.fields) this._forms[t.id] = this._formFor(t.id);
+      this._persons = clone(res.persons); this._lists = clone(res.lists);
+      this._render();
+    }
+    _formFor(id) {
+      const d = this._data;
+      if (id === 'general') { const g = clone(d.general); g.mod_week = g.modules.week; g.mod_lists = g.modules.lists; return g; }
+      if (id === 'lists') return clone(d.lists_settings);
+      return clone(d[id]);
+    }
+    _input(e, isChange) {
+      const el = e.target; const ds = el.dataset;
+      if (ds.k && ds.tab) {
+        const f = this._forms[ds.tab]; if (!f) return;
+        if (el.type === 'checkbox') f[ds.k] = el.checked;
+        else if (el.type === 'number') f[ds.k] = el.value === '' ? '' : Number(el.value);
+        else if (ds.type === 'words') f[ds.k] = el.value;
+        else if (ds.addent !== undefined) { if (isChange && el.value) { const cur = Array.isArray(f[ds.k]) ? f[ds.k] : []; if (!cur.includes(el.value)) cur.push(el.value); f[ds.k] = cur; this._render(); } }
+        else f[ds.k] = el.value || (ds.type === 'entity' ? null : el.value);
+        if (el.tagName === 'SELECT' && isChange && ds.addent === undefined) this._render();
+        return;
+      }
+      if (ds.pk) { // person field
+        const p = this._persons[Number(ds.pi)]; if (!p) return;
+        if (ds.pk === 'time') { const [day, n, w] = ds.pt.split('|'); const t = p.school.times; const spans = t[day] || (t[day] = [[null, null], [null, null]]); while (spans.length < 2) spans.push([null, null]); spans[Number(n)][w === 's' ? 0 : 1] = el.value || null; return; }
+        if (ds.pk === 'school_calendar') p.school.calendar = el.value || null;
+        else if (ds.pk === 'travel') p.school.travel = Number(el.value) || 0;
+        else if (ds.pk === 'aliases') p.aliases = el.value.split(',').map((x) => x.trim()).filter(Boolean);
+        else p[ds.pk] = el.value || (ds.pk === 'calendar' ? null : el.value);
+        return;
+      }
+      if (ds.lk) { const l = this._lists[Number(ds.li)]; if (!l) return; l[ds.lk] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? Number(el.value) : el.value; }
+    }
+    async _click(e) {
+      const t = e.target;
+      if (t.closest('[data-unlock]')) { this._load(); return; }
+      const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
+      if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
+      if (t.closest('[data-lock]')) { window.FPPIN.lock(this._store); this._data = null; this._render(); return; }
+      const rm = t.closest('[data-rment]');
+      if (rm) { const f = this._forms[rm.dataset.tab]; f[rm.dataset.k] = (f[rm.dataset.k] || []).filter((x) => x !== rm.dataset.rment); this._render(); return; }
+      const pc = t.closest('[data-pchip]');
+      if (pc) { const f = this._forms[pc.dataset.tab]; const cur = f[pc.dataset.k] || []; f[pc.dataset.k] = cur.includes(pc.dataset.pchip) ? cur.filter((x) => x !== pc.dataset.pchip) : [...cur, pc.dataset.pchip]; this._render(); return; }
+      if (t.closest('[data-savetab]')) { this._saveTab(); return; }
+      const sp = t.closest('[data-psave]'); if (sp) { this._savePerson(Number(sp.dataset.psave)); return; }
+      const dp = t.closest('[data-pdel]'); if (dp) { const p = this._persons[Number(dp.dataset.pdel)]; this._dlg = { kind: 'person', i: Number(dp.dataset.pdel), title: p.name }; this._render(); return; }
+      if (t.closest('[data-padd]')) { this._persons.push({ id: null, name: '', color: '#4FA3E0', calendar: null, aliases: [], school: { calendar: null, times: {}, travel: 0 }, open: true }); this._render(); return; }
+      const po = t.closest('[data-popen]'); if (po) { const p = this._persons[Number(po.dataset.popen)]; p.open = !p.open; this._render(); return; }
+      const ls = t.closest('[data-lsave]'); if (ls) { this._saveList(Number(ls.dataset.lsave)); return; }
+      const ld = t.closest('[data-ldel]'); if (ld) { const l = this._lists[Number(ld.dataset.ldel)]; this._dlg = { kind: 'list', i: Number(ld.dataset.ldel), title: l.name }; this._render(); return; }
+      if (t.closest('[data-ladd]')) { this._lists.push({ id: null, name: '', entity: null, icon: 'mdi:cart-outline', max_categories: 10, auto: true }); this._render(); return; }
+      if (t.closest('[data-yes]') && this._dlg) { const d = this._dlg; this._dlg = null; if (d.kind === 'person') await this._removePerson(d.i); else await this._removeList(d.i); this._render(); return; }
+      if (t.closest('[data-close]') || t.classList.contains('ov')) { this._dlg = null; this._render(); }
+    }
+    async _saveTab() {
+      const id = this._tab; const f = { ...this._forms[id] };
+      if (id === 'general') { f.modules = { week: !!f.mod_week, lists: !!f.mod_lists }; delete f.mod_week; delete f.mod_lists; }
+      if (id === 'vacation' && typeof f.words === 'string') f.words = f.words.split(',').map((x) => x.trim()).filter(Boolean);
+      const res = await this._call('family_planer/settings/save', { section: SECTION[id], data: f });
+      if (!res) return;
+      if (id === 'vacation') this._forms.vacation.rescan = false;
+      this._flash(res.reload ? this.T.reloading : this.T.saved);
+    }
+    async _savePerson(i) {
+      const p = this._persons[i]; const times = {};
+      for (const [day, spans] of Object.entries(p.school.times || {})) {
+        const ok = spans.filter((s) => s && s[0] && s[1]).map((s) => [s[0].slice(0, 5), s[1].slice(0, 5)]);
+        if (spans.some((s) => s && ((s[0] && !s[1]) || (!s[0] && s[1])))) { this._flash(this.T.errors.bad_times, true); return; }
+        if (ok.length) times[day] = ok;
+      }
+      const data = { name: p.name, color: p.color, calendar: p.calendar, aliases: p.aliases || [], school: { calendar: p.school.calendar, times, travel: p.school.travel || 0 } };
+      const res = await this._call('family_planer/settings/person', { ...(p.id ? { person_id: p.id } : {}), data });
+      if (!res) return; p.id = res.person_id; p.open = false; this._flash(res.reload ? this.T.reloading : this.T.saved);
+    }
+    async _removePerson(i) { const p = this._persons[i]; if (!p.id) { this._persons.splice(i, 1); return; } const res = await this._call('family_planer/settings/person_remove', { person_id: p.id }); if (res) { this._persons.splice(i, 1); this._flash(this.T.reloading); } }
+    async _saveList(i) {
+      const l = this._lists[i];
+      const res = await this._call('family_planer/settings/list', { ...(l.id ? { list_id: l.id } : {}), data: { name: l.name, entity: l.entity, icon: l.icon, max_categories: l.max_categories, auto: l.auto } });
+      if (res) { l.id = res.list_id; this._flash(this.T.saved); }
+    }
+    async _removeList(i) { const l = this._lists[i]; if (!l.id) { this._lists.splice(i, 1); return; } const res = await this._call('family_planer/settings/list_remove', { list_id: l.id }); if (res !== null) { this._lists.splice(i, 1); this._flash(this.T.saved); } }
+
+    _entities(domain, classes) {
+      const st = (this._hass && this._hass.states) || {};
+      return Object.keys(st).filter((e) => e.startsWith(domain + '.') && (!classes || classes.includes((st[e].attributes || {}).device_class)))
+        .sort().map((e) => [e, (st[e].attributes || {}).friendly_name || e]);
+    }
+    _entSelect(attrs, domain, classes, value, placeholder) {
+      const opts = this._entities(domain, classes);
+      if (value && !opts.some(([e]) => e === value)) opts.unshift([value, value]);
+      return `<select class="in" ${attrs}><option value="">${esc(placeholder || this.T.none)}</option>${opts.map(([e, n]) => `<option value="${esc(e)}" ${e === value ? 'selected' : ''}>${esc(n)} · ${esc(e)}</option>`).join('')}</select>`;
+    }
+    _field(tab, fd, v) {
+      const lang = this._lang; const a = `data-tab="${tab}" data-k="${fd.k}" data-type="${fd.type}"`;
+      const unit = fd.unit ? `<span class="u">${esc(typeof fd.unit === 'string' ? fd.unit : L(fd.unit, lang))}</span>` : '';
+      let ctl = '';
+      if (fd.type === 'bool') return `<label class="row b"><span class="lt"><b>${esc(L(fd.label, lang))}</b>${fd.desc[lang] ? `<small>${esc(L(fd.desc, lang))}</small>` : ''}</span><input type="checkbox" class="sw" ${a} ${v ? 'checked' : ''}></label>`;
+      if (fd.type === 'num') ctl = `<span class="nw"><input class="in n" type="number" inputmode="numeric" min="${fd.min}" max="${fd.max}" ${a} value="${esc(v)}">${unit}</span>`;
+      else if (fd.type === 'time') ctl = `<input class="in t" type="time" ${a} value="${esc(String(v || '').slice(0, 5))}">`;
+      else if (fd.type === 'text') ctl = `<input class="in" maxlength="${fd.max || 80}" ${a} value="${esc(v)}">`;
+      else if (fd.type === 'words') ctl = `<input class="in" maxlength="600" ${a} value="${esc(Array.isArray(v) ? v.join(', ') : v)}">`;
+      else if (fd.type === 'select') ctl = `<select class="in" ${a}>${fd.opts.map(([k, l]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${esc(typeof l === 'string' ? l : L(l, lang))}</option>`).join('')}</select>`;
+      else if (fd.type === 'entity') ctl = this._entSelect(a, fd.domain, fd.classes, v);
+      else if (fd.type === 'entities') {
+        const cur = Array.isArray(v) ? v : [];
+        ctl = `<div class="ents">${cur.map((e) => `<span class="ec">${esc(((this._hass && this._hass.states[e]) || { attributes: {} }).attributes.friendly_name || e)}<button data-rment="${esc(e)}" data-tab="${tab}" data-k="${fd.k}" aria-label="x">✕</button></span>`).join('')}
+          ${this._entSelect(`${a} data-addent`, fd.domain, fd.classes, '', '+ ' + this.T.search)}</div>`;
+      } else if (fd.type === 'persons') {
+        const cur = Array.isArray(v) ? v : [];
+        ctl = `<div class="ents">${(this._data.persons || []).map((p) => `<button class="chip${cur.includes(p.id) ? ' on' : ''}" style="--c:${COLOR(p.color)}" data-pchip="${esc(p.id)}" data-tab="${tab}" data-k="${fd.k}"><i></i>${esc(p.name)}</button>`).join('')}</div>`;
+      }
+      return `<div class="row"><span class="lt"><b>${esc(L(fd.label, lang))}</b>${fd.desc[lang] ? `<small>${esc(L(fd.desc, lang))}</small>` : ''}</span><span class="ctl">${ctl}</span></div>`;
+    }
+    _personsTab() {
+      const T = this.T; const lang = this._lang;
+      const lbl = (de, en) => (lang === 'en' ? en : de);
+      return `${this._persons.map((p, i) => {
+        const times = (p.school && p.school.times) || {};
+        const sch = [1, 2, 3, 4, 5, 6].map((d) => { const spans = times[String(d)] || []; return `<div class="day"><b>${esc(T.days[d - 1])}</b>${[0, 1].map((n) => { const s = spans[n] || [null, null];
+          return `<span class="blk">${esc(T.block)} ${n + 1}: <input class="in t" type="time" data-pk="time" data-pi="${i}" data-pt="${d}|${n}|s" value="${esc((s[0] || '').slice(0, 5))}"> – <input class="in t" type="time" data-pk="time" data-pi="${i}" data-pt="${d}|${n}|e" value="${esc((s[1] || '').slice(0, 5))}"></span>`; }).join('')}</div>`; }).join('');
+        return `<div class="pcard" style="--c:${COLOR(p.color)}"><button class="ph" data-popen="${i}"><i></i><b>${esc(p.name || lbl('Neue Person', 'New person'))}</b><span class="sp"></span><ha-icon icon="${p.open ? 'mdi:chevron-up' : 'mdi:chevron-down'}"></ha-icon></button>
+          ${p.open ? `<div class="pb">
+            <div class="row"><span class="lt"><b>${lbl('Name', 'Name')}</b></span><span class="ctl"><input class="in" maxlength="40" data-pk="name" data-pi="${i}" value="${esc(p.name)}"></span></div>
+            <div class="row"><span class="lt"><b>${lbl('Farbe', 'Colour')}</b><small>${lbl('Gilt auch für den Kalender der Person.', 'Also used for the person\'s calendar.')}</small></span><span class="ctl"><input class="col" type="color" data-pk="color" data-pi="${i}" value="${esc(COLOR(p.color))}"></span></div>
+            <div class="row"><span class="lt"><b>${lbl('Kalender', 'Calendar')}</b><small>${lbl('Termine dieser Person.', 'Events of this person.')}</small></span><span class="ctl">${this._entSelect(`data-pk="calendar" data-pi="${i}"`, 'calendar', null, p.calendar)}</span></div>
+            <div class="row"><span class="lt"><b>${lbl('Spitznamen', 'Nicknames')}</b><small>${lbl('Mit Komma getrennt – Termine mit diesem Namen erscheinen bei der Person.', 'Comma separated – events with this name appear at the person.')}</small></span><span class="ctl"><input class="in" maxlength="300" data-pk="aliases" data-pi="${i}" value="${esc((p.aliases || []).join(', '))}"></span></div>
+            <div class="sec2">${lbl('Schule & Stundenplan', 'School & timetable')}</div>
+            <div class="row"><span class="lt"><b>${lbl('Schulkalender', 'School calendar')}</b><small>${lbl('Kalender mit den Lektionen – hat Vorrang vor festen Zeiten.', 'Calendar with the lessons – takes priority over fixed times.')}</small></span><span class="ctl">${this._entSelect(`data-pk="school_calendar" data-pi="${i}"`, 'calendar', null, p.school && p.school.calendar)}</span></div>
+            <div class="row"><span class="lt"><b>${lbl('Schulweg', 'Travel time')}</b><small>${lbl('Zeigt „los“ und „zuhause“ pro Block (0 = aus).', 'Shows "leave" and "home" per block (0 = off).')}</small></span><span class="ctl"><span class="nw"><input class="in n" type="number" min="0" max="240" data-pk="travel" data-pi="${i}" value="${esc((p.school && p.school.travel) || 0)}"><span class="u">min</span></span></span></div>
+            <div class="days">${sch}</div>
+            <div class="acts">${p.id ? `<button class="sg del" data-pdel="${i}">${esc(T.del)}</button>` : ''}<span class="sp"></span><button class="sg ok" data-psave="${i}">${esc(T.save)}</button></div>
+          </div>` : ''}</div>`; }).join('')}
+        <button class="addb" data-padd>${esc(T.newPerson)}</button>`;
+    }
+    _listsExtra() {
+      const T = this.T; const lbl = (de, en) => (this._lang === 'en' ? en : de);
+      return `<div class="sec2">${lbl('Listen', 'Lists')}</div>${this._lists.map((l, i) => `<div class="lcard">
+          <input class="in" maxlength="40" placeholder="${lbl('Name', 'Name')}" data-lk="name" data-li="${i}" value="${esc(l.name)}">
+          ${this._entSelect(`data-lk="entity" data-li="${i}"`, 'todo', null, l.entity, lbl('To-do-Liste wählen …', 'Choose to-do list …'))}
+          <input class="in" maxlength="70" placeholder="mdi:cart-outline" data-lk="icon" data-li="${i}" value="${esc(l.icon)}">
+          <label class="mini">${lbl('Max. Kategorien', 'Max. categories')} <input class="in n" type="number" min="5" max="20" data-lk="max_categories" data-li="${i}" value="${esc(l.max_categories)}"></label>
+          <label class="mini"><input type="checkbox" class="sw" data-lk="auto" data-li="${i}" ${l.auto ? 'checked' : ''}> ${lbl('Kategorien automatisch pflegen', 'Maintain categories automatically')}</label>
+          <span class="acts"><button class="sg del" data-ldel="${i}">${esc(T.del)}</button><button class="sg ok" data-lsave="${i}">${esc(T.save)}</button></span></div>`).join('')}
+        <button class="addb" data-ladd>${esc(T.newList)}</button>`;
+    }
+    _render() {
+      if (!this.shadowRoot || !this._cfg) return;
+      const T = this.T; const lang = this._lang;
+      const style = `<style>
+        :host{display:block}
+        .card{position:relative;background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:18px;font-family:var(--fp-font);color:var(--fp-text,#ececec);min-height:360px}
+        .top{display:flex;align-items:center;gap:10px;margin-bottom:14px}.top h2{margin:0;font-size:20px;font-weight:600;flex:1}
+        .tb{display:flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--fp-line,#333);background:var(--fp-bg3,#262626);color:var(--fp-text2,#bbb);font:inherit;font-size:13px;cursor:pointer}
+        ha-icon{--mdc-icon-size:20px}
+        .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+        .tab{display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--fp-line,#2a2a2a);background:var(--fp-bg2,#232323);color:var(--fp-text2,#bbb);font:inherit;font-size:14px;cursor:pointer}
+        .tab.on{border-color:${G};color:${G};background:var(--fp-bg3,#262626);font-weight:600}
+        .rows{display:flex;flex-direction:column;gap:2px;max-width:980px}
+        .row{display:grid;grid-template-columns:minmax(220px,1fr) minmax(220px,1.1fr);gap:16px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--fp-line,#262626)}
+        .row.b{grid-template-columns:1fr auto;cursor:pointer}
+        .lt{display:flex;flex-direction:column;gap:3px}.lt b{font-size:15px;font-weight:500}.lt small{font-size:12px;color:var(--fp-text3,#8a8a8a);line-height:1.4}
+        .ctl{display:flex;justify-content:flex-start}
+        .in{height:42px;border-radius:10px;border:1px solid var(--fp-line,#333);background:var(--fp-bg0,#141414);color:var(--fp-text,#eee);font:inherit;font-size:15px;padding:0 12px;outline:none;width:100%;box-sizing:border-box;min-width:0}
+        .in:focus{border-color:${G}}select.in{padding:0 8px}.in.n{width:110px}.in.t{width:120px}
+        .nw{display:flex;align-items:center;gap:8px}.u{color:var(--fp-text3,#888);font-size:13px}
+        .sw{appearance:none;-webkit-appearance:none;width:50px;height:30px;border-radius:15px;background:var(--fp-bg4,#3a3a3a);position:relative;cursor:pointer;flex:none;margin:0;transition:background .15s}
+        .sw::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#ddd;transition:left .15s}
+        .sw:checked{background:${G}}.sw:checked::after{left:23px;background:#fff}
+        .ents{display:flex;flex-wrap:wrap;gap:6px;width:100%}.ents select{flex:1;min-width:200px}
+        .ec{display:flex;align-items:center;gap:6px;height:34px;padding:0 4px 0 12px;border-radius:17px;background:var(--fp-bg3,#2b2b2b);border:1px solid var(--fp-line,#3a3a3a);font-size:13px}
+        .ec button{width:26px;height:26px;border-radius:13px;border:none;background:transparent;color:var(--fp-text2,#999);cursor:pointer}.ec button:hover{color:#e06b6b}
+        .chip{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:18px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#2b2b2b);color:var(--fp-text2,#ccc);font:inherit;font-size:13px;cursor:pointer}.chip.on{border-color:var(--c);color:var(--c)}
+        .chip i{width:10px;height:10px;border-radius:50%;background:var(--c)}
+        .bar{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;max-width:980px}
+        .sg{height:42px;border-radius:21px;background:var(--fp-bg4,#2e2e2e);border:1px solid var(--fp-line,#3a3a3a);color:var(--fp-text2,#ccc);font:inherit;font-size:14px;padding:0 18px;cursor:pointer}
+        .sg.ok{background:${G};border-color:${G};color:var(--fp-on-accent,#141414);font-weight:600}.sg.del{background:#3a2626;border-color:#e06b6b;color:#f3b4b4}
+        .pcard{border:1px solid var(--fp-line,#2a2a2a);border-left:4px solid var(--c);border-radius:12px;background:var(--fp-bg2,#232323);margin-bottom:10px;max-width:980px}
+        .ph{display:flex;align-items:center;gap:10px;width:100%;height:52px;padding:0 14px;border:none;background:transparent;color:inherit;font:inherit;font-size:16px;cursor:pointer}
+        .ph i{width:14px;height:14px;border-radius:50%;background:var(--c)}.sp{flex:1}
+        .pb{padding:0 14px 14px}.col{width:60px;height:42px;border:none;background:transparent;padding:0;cursor:pointer}
+        .sec2{font-size:12px;color:${G};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin:18px 4px 6px}
+        .days{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;margin-top:8px}
+        .day{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:10px;background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a)}.day b{font-size:13px;color:var(--fp-text2,#bbb)}
+        .blk{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--fp-text3,#888)}.blk .in.t{width:110px;height:38px}
+        .acts{display:flex;gap:8px;margin-top:14px;align-items:center}
+        .addb{height:46px;border-radius:12px;border:1px dashed var(--fp-line,#4a4a4a);background:transparent;color:var(--fp-text2,#bbb);font:inherit;font-size:14px;cursor:pointer;padding:0 18px;margin-top:4px}
+        .lcard{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px;align-items:center;padding:12px;border-radius:12px;background:var(--fp-bg2,#232323);border:1px solid var(--fp-line,#2a2a2a);margin-bottom:8px;max-width:980px}
+        .lcard .mini{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--fp-text2,#aaa)}.lcard .acts{margin:0;justify-content:flex-end}
+        .lockd{display:flex;flex-direction:column;align-items:center;gap:16px;padding:60px 20px;color:var(--fp-text2,#aaa);text-align:center}.lockd ha-icon{--mdc-icon-size:48px;color:${G}}
+        .ov{position:absolute;inset:0;background:rgba(10,10,10,.72);border-radius:var(--fp-radius,16px);display:flex;align-items:center;justify-content:center;z-index:4}
+        .dlg{background:var(--fp-bg2,#232323);border:1px solid var(--fp-line,#3a3a3a);border-radius:14px;padding:18px;width:min(420px,92%)}.dh{font-size:16px;font-weight:600;margin-bottom:14px}
+        .msg{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:#2e3a2a;border:1px solid ${G};color:var(--fp-text,#dfe);padding:10px 18px;border-radius:12px;font-size:14px;z-index:20;max-width:80%}
+        .msg.e{background:#3a2626;border-color:#e06b6b;color:#fdd}
+        @media (max-width:700px){.row{grid-template-columns:1fr}.lcard{grid-template-columns:1fr}}
+      </style>`;
+      const msg = this._msg ? `<div class="msg${this._err ? ' e' : ''}">${esc(this._msg)}</div>` : '';
+      if (!this._data) {
+        this.shadowRoot.innerHTML = `${style}<div class="card"><div class="top"><h2>${esc(T.title)}</h2></div>
+          <div class="lockd"><ha-icon icon="mdi:shield-lock-outline"></ha-icon><div>${esc(T.locked)}</div><button class="sg ok" data-unlock>${esc(T.unlock)}</button></div>${msg}</div>`;
+        return;
+      }
+      const tab = TABS.find((x) => x.id === this._tab) || TABS[0];
+      let body = '';
+      if (tab.id === 'persons') body = this._personsTab();
+      else {
+        const f = this._forms[tab.id];
+        body = `<div class="rows">${tab.fields.map((fd) => this._field(tab.id, fd, f[fd.k])).join('')}</div><div class="bar"><button class="sg ok" data-savetab>${esc(T.save)}</button></div>`;
+        if (tab.id === 'lists') body += this._listsExtra();
+      }
+      const d = this._dlg;
+      const dlg = d ? `<div class="ov"><div class="dlg"><div class="dh">${esc(T.delAsk.replace('{t}', d.title || ''))}</div><div class="acts"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg del" data-yes>${esc(T.del)}</button></div></div></div>` : '';
+      const mods = this._data.general.modules;
+      const tabs = TABS.filter((x) => !((x.id === 'lists' && !mods.lists) || (['persons', 'vacation', 'points', 'todos', 'announce'].includes(x.id) && !mods.week)));
+      this.shadowRoot.innerHTML = `${style}<div class="card">
+        <div class="top"><h2>${esc(T.title)}</h2><button class="tb" data-chpin><ha-icon icon="mdi:form-textbox-password"></ha-icon>${esc(T.pin)}</button><button class="tb" data-lock><ha-icon icon="mdi:lock-outline"></ha-icon>${esc(T.lock)}</button></div>
+        <div class="tabs">${tabs.map((x) => `<button class="tab${x.id === tab.id ? ' on' : ''}" data-tabsel="${x.id}"><ha-icon icon="${x.icon}"></ha-icon>${esc(L(x.label, lang))}</button>`).join('')}</div>
+        ${body}${dlg}${msg}</div>`;
+    }
+  }
+  if (!customElements.get('fp-settings-inner')) customElements.define('fp-settings-inner', FpSettingsInner);
+})();
+
+// ---------------------------------------------------------------------------
+// Parent PIN: keypad dialog, forced change of the start PIN 123456, short-lived unlock token.
+// window.FPPIN.call(store, type, data, { lang, host }) sends a PIN-protected command and asks for the PIN
+// only when needed. The PIN itself is never stored in the browser – only the server's 10-minute token in memory.
+// ---------------------------------------------------------------------------
+(() => {
+  if (window.FPPIN) return;
+  const TXT = {
+    de: { unlock: 'Eltern-PIN', old: 'Aktuelle PIN', neu: 'Neue PIN (4–8 Ziffern)', again: 'Neue PIN wiederholen', ok: 'OK', cancel: 'Abbrechen',
+      start: 'Die Start-PIN 123456 muss zuerst geändert werden.', wrong: 'Falsche PIN.', locked: 'Zu viele Fehlversuche – bitte 5 Minuten warten.',
+      bad: 'Die neue PIN muss 4–8 Ziffern haben und darf nicht 123456 sein.', nomatch: 'Die PINs stimmen nicht überein.', changed: 'PIN geändert.' },
+    en: { unlock: 'Parent PIN', old: 'Current PIN', neu: 'New PIN (4–8 digits)', again: 'Repeat new PIN', ok: 'OK', cancel: 'Cancel',
+      start: 'The start PIN 123456 must be changed first.', wrong: 'Wrong PIN.', locked: 'Too many wrong tries – please wait 5 minutes.',
+      bad: 'The new PIN must have 4–8 digits and must not be 123456.', nomatch: 'The PINs do not match.', changed: 'PIN changed.' },
+  };
+  const VARS = ['--fp-bg0', '--fp-bg1', '--fp-bg2', '--fp-bg3', '--fp-bg4', '--fp-line', '--fp-text', '--fp-text2', '--fp-text3', '--fp-accent', '--fp-on-accent', '--fp-radius', '--fp-font'];
+  const tokens = new Map(); // store -> { t, exp }
+  const CANCEL = 'cancel';
+
+  // one keypad dialog; steps = [{ title, hint }] -> resolves with the entered values
+  function keypad(ctx, steps, firstMsg) {
+    const T = TXT[ctx.lang === 'en' ? 'en' : 'de'];
+    return new Promise((resolve, reject) => {
+      const el = document.createElement('div');
+      const cs = ctx.host ? getComputedStyle(ctx.host) : null;
+      el.style.cssText = 'position:fixed;inset:0;z-index:9999;' + (cs ? VARS.map((v) => `${v}:${cs.getPropertyValue(v)}`).join(';') : '');
+      const root = el.attachShadow({ mode: 'open' });
+      const vals = []; let step = 0; let pin = ''; let msg = firstMsg || ''; let err = !!firstMsg;
+      const close = () => { el.remove(); document.removeEventListener('keydown', onKey, true); };
+      const press = (k) => {
+        if (k === 'del') pin = pin.slice(0, -1);
+        else if (k === 'ok') { if (pin.length < 4) return; vals.push(pin); pin = ''; step += 1; msg = ''; if (step >= steps.length) { close(); resolve(vals); return; } }
+        else if (pin.length < 8 && /^\d$/.test(k)) pin += k;
+        draw();
+      };
+      const onKey = (e) => {
+        if (e.key === 'Escape') { close(); reject(CANCEL); return; }
+        if (/^\d$/.test(e.key)) press(e.key); else if (e.key === 'Backspace') press('del'); else if (e.key === 'Enter') press('ok'); else return;
+        e.preventDefault(); e.stopPropagation();
+      };
+      document.addEventListener('keydown', onKey, true);
+      root.addEventListener('click', (e) => {
+        const k = e.target.closest('[data-k]'); if (k) { press(k.dataset.k); return; }
+        if (e.target.closest('[data-x]') || e.target.classList.contains('ov')) { close(); reject(CANCEL); }
+      });
+      const draw = () => {
+        const s = steps[step];
+        root.innerHTML = `<style>
+          .ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-family:var(--fp-font,system-ui,sans-serif)}
+          .d{background:var(--fp-bg2,#232323);color:var(--fp-text,#eee);border:1px solid var(--fp-line,#3a3a3a);border-radius:var(--fp-radius,16px);padding:20px;width:290px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+          h3{margin:0 0 4px;font-size:16px;font-weight:600}.st{font-size:12px;color:var(--fp-text3,#888);margin-bottom:8px}
+          .m{font-size:13px;min-height:18px;margin:4px 0 8px;color:var(--fp-text2,#bbb)}.m.e{color:#E06B6B}
+          .dots{display:flex;gap:10px;justify-content:center;margin:8px 0 14px}.dots i{width:12px;height:12px;border-radius:50%;border:2px solid var(--fp-text3,#666)}.dots i.on{background:var(--fp-accent,#69C350);border-color:var(--fp-accent,#69C350)}
+          .keys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+          button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+          .k{height:56px;border-radius:12px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#2e2e2e);color:var(--fp-text,#eee);font-size:21px}
+          .k.ok{background:var(--fp-accent,#69C350);color:var(--fp-on-accent,#141414);font-size:15px;font-weight:600}
+          .x{height:38px;border-radius:19px;background:transparent;border:1px solid var(--fp-line,#3a3a3a);color:var(--fp-text2,#ccc);padding:0 18px}
+        </style><div class="ov"><div class="d" role="dialog" aria-modal="true">
+          <h3>${s.title}</h3>${steps.length > 1 ? `<div class="st">${step + 1} / ${steps.length}</div>` : ''}
+          <div class="m${err ? ' e' : ''}">${msg || s.hint || ''}</div>
+          <div class="dots">${Array.from({ length: Math.max(4, pin.length) }, (_, i) => `<i class="${i < pin.length ? 'on' : ''}"></i>`).join('')}</div>
+          <div class="keys">${['1', '2', '3', '4', '5', '6', '7', '8', '9', 'del', '0', 'ok'].map((k) => `<button class="k${k === 'ok' ? ' ok' : ''}" data-k="${k}" aria-label="${k}">${k === 'del' ? '⌫' : k === 'ok' ? T.ok : k}</button>`).join('')}</div>
+          <button class="x" data-x>${T.cancel}</button></div></div>`;
+        err = false;
+      };
+      draw();
+      document.body.appendChild(el);
+    });
+  }
+
+  const T = (ctx) => TXT[ctx.lang === 'en' ? 'en' : 'de'];
+  const cached = (store) => { const c = tokens.get(store); return c && c.exp > Date.now() ? c.t : null; };
+  const remember = (store, res) => { tokens.set(store, { t: res.token, exp: Date.now() + Math.max(60, (res.ttl || 600) - 60) * 1000 }); return res.token; };
+
+  async function change(store, ctx, msg) {
+    let note = msg || T(ctx).start;
+    for (;;) {
+      const [old, neu, again] = await keypad(ctx, [{ title: T(ctx).old }, { title: T(ctx).neu }, { title: T(ctx).again }], note);
+      if (neu !== again) { note = T(ctx).nomatch; continue; }
+      try { return remember(store, await store.ws('family_planer/pin/change', { old, new: neu })); } catch (e) {
+        const c = e && e.code;
+        if (c === 'pin_wrong') note = T(ctx).wrong; else if (c === 'pin_locked') note = T(ctx).locked; else if (c === 'pin_bad_pin') note = T(ctx).bad; else throw e;
+      }
+    }
+  }
+
+  async function ensure(store, ctx) {
+    const t = cached(store); if (t) return t;
+    if (store.snap && store.snap.pin_default) return change(store, ctx);
+    let note = '';
+    for (;;) {
+      const [pin] = await keypad(ctx, [{ title: T(ctx).unlock }], note);
+      try { return remember(store, await store.ws('family_planer/pin/unlock', { pin })); } catch (e) {
+        const c = e && e.code;
+        if (c === 'pin_change_required') return change(store, ctx);
+        if (c === 'pin_wrong') note = T(ctx).wrong; else if (c === 'pin_locked') note = T(ctx).locked; else throw e;
+      }
+    }
+  }
+
+  async function call(store, type, data, ctx) {
+    for (let i = 0; i < 3; i += 1) {
+      const token = await ensure(store, ctx);
+      try { return await store.ws(type, { ...(data || {}), token }); } catch (e) {
+        const c = e && e.code;
+        if (c === 'pin_required') { tokens.delete(store); continue; }
+        if (c === 'pin_change_required') { tokens.delete(store); await change(store, ctx); continue; }
+        throw e;
+      }
+    }
+    throw new Error('pin');
+  }
+
+  window.FPPIN = {
+    call, ensure, CANCEL,
+    change: (store, ctx) => change(store, ctx, ' '),
+    unlocked: (store) => !!cached(store),
+    lock: (store) => tokens.delete(store),
+    token: (store) => cached(store),
+  };
+})();
+
+// ---------------------------------------------------------------------------
+// Fullscreen on double tap: hides the Home Assistant sidebar and header (and uses real browser fullscreen
+// where allowed). Double-tap again to leave. Taps on buttons, chores and inputs never trigger it.
+// window.FPKIOSK.attach(element, store)
+// ---------------------------------------------------------------------------
+(() => {
+  if (window.FPKIOSK) return;
+  const STYLE_ID = 'fp-kiosk-style';
+  let on = false;
+  let autoDone = false;
+
+  const roots = () => {
+    const out = [];
+    try {
+      const ha = document.querySelector('home-assistant'); const main = ha && ha.shadowRoot && ha.shadowRoot.querySelector('home-assistant-main');
+      const mr = main && main.shadowRoot; if (!mr) return out;
+      out.push([mr, 'ha-sidebar{display:none!important} ha-drawer{--mdc-drawer-width:0px!important} :host{--mdc-drawer-width:0px!important}']);
+      const drawer = mr.querySelector('ha-drawer'); if (drawer && drawer.shadowRoot) out.push([drawer.shadowRoot, '.mdc-drawer{display:none!important;width:0!important} .mdc-drawer-app-content{margin-left:0!important;margin-inline-start:0!important}']);
+      const ppr = mr.querySelector('partial-panel-resolver');
+      const lov = ppr && ppr.querySelector('ha-panel-lovelace');
+      const root = lov && lov.shadowRoot && lov.shadowRoot.querySelector('hui-root');
+      if (root && root.shadowRoot) out.push([root.shadowRoot, '.header,.toolbar,app-header{display:none!important} #view,.view,hui-view-container{padding-top:0!important;min-height:100vh!important} :host{--header-height:0px!important}']);
+    } catch (e) { /* layout of Home Assistant changed – real fullscreen still works */ }
+    return out;
+  };
+  const apply = (state) => {
+    for (const [root, css] of roots()) {
+      let st = root.getElementById ? root.getElementById(STYLE_ID) : root.querySelector('#' + STYLE_ID);
+      if (state) { if (!st) { st = document.createElement('style'); st.id = STYLE_ID; root.appendChild(st); } st.textContent = css; } else if (st) st.remove();
+    }
+    window.dispatchEvent(new Event('resize'));
+  };
+  const set = (state, gesture) => {
+    on = state; apply(on);
+    const de = document.documentElement;
+    try {
+      if (on && gesture && de.requestFullscreen && !document.fullscreenElement) de.requestFullscreen().catch(() => {});
+      if (!on && document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+    } catch (e) { /* not allowed (e.g. iOS) – hiding header and sidebar is enough */ }
+  };
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && on) { on = false; apply(false); } });
+  window.addEventListener('location-changed', () => { if (on) setTimeout(() => apply(true), 300); });
+
+  const INTERACTIVE = new Set(['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'A', 'LABEL', 'HA-ICON-BUTTON', 'HA-SWITCH', 'HA-CHECKBOX']);
+  // only elements between the tap target and the planner itself count; data-fp-theme marks hosts, not controls
+  const interactive = (path, host) => {
+    for (const n of path) {
+      if (n === host) return false;
+      if (!n || n.nodeType !== 1) continue;
+      const keys = Object.keys(n.dataset || {}).filter((k) => k !== 'fpTheme');
+      if (INTERACTIVE.has(n.tagName) || n.getAttribute('role') === 'button' || n.hasAttribute('contenteditable') || keys.length) return true;
+    }
+    return false;
+  };
+
+  function attach(el, store) {
+    if (el.__fpKiosk) return; el.__fpKiosk = true;
+    let last = 0; let lx = 0; let ly = 0;
+    const enabled = () => !(store && store.snap && store.snap.settings && store.snap.settings.fullscreen_dblclick === false);
+    el.addEventListener('pointerup', (e) => {
+      if (e.__fpk || !enabled() || e.button > 0) return; e.__fpk = true;
+      if (interactive(e.composedPath(), el)) { last = 0; return; }
+      const now = Date.now();
+      if (now - last < 350 && Math.abs(e.clientX - lx) < 30 && Math.abs(e.clientY - ly) < 30) { last = 0; set(!on, true); return; }
+      last = now; lx = e.clientX; ly = e.clientY;
+    });
+    const auto = () => { if (!autoDone && store && store.snap && store.snap.settings && store.snap.settings.fullscreen_auto) { autoDone = true; setTimeout(() => set(true, false), 400); } };
+    if (store) store.listen(auto);
+  }
+  window.FPKIOSK = { attach, set, get on() { return on; } };
+})();
+
+// ---------------------------------------------------------------------------
 // Family Planer integration bridge
 // Feeds the dashboard UI from the integration (websocket "family_planer/subscribe")
 // and turns UI writes into family_planer/* commands. Cards:
@@ -2475,9 +3203,23 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   class Store {
     constructor(conn, entryId) {
       this.conn = conn; this.entryId = entryId; this.snap = null; this.err = null; this.subs = new Set();
-      const msg = { type: 'family_planer/subscribe' }; if (entryId) msg.entry_id = entryId;
-      this.unsub = conn.subscribeMessage((s) => { this.snap = s; this.err = null; this.subs.forEach((f) => f()); }, msg)
-        .catch((e) => { this.err = (e && e.message) || String(e); this.subs.forEach((f) => f()); });
+      this._subscribe(0);
+    }
+    // the integration reloads after some settings changes: subscribe again until it is back
+    _subscribe(tries) {
+      const msg = { type: 'family_planer/subscribe' }; if (this.entryId) msg.entry_id = this.entryId;
+      this.unsub = this.conn.subscribeMessage((s) => {
+        if (s && s.reload) { this._resubscribe(); return; }
+        this.snap = s; this.err = null; this.subs.forEach((f) => f());
+      }, msg).catch((e) => {
+        if (tries > 0 && tries < 30) { setTimeout(() => this._subscribe(tries + 1), 2000); return; }
+        this.err = (e && e.message) || String(e); this.subs.forEach((f) => f());
+      });
+    }
+    _resubscribe() {
+      const old = this.unsub; this.unsub = null;
+      Promise.resolve(old).then((u) => { if (typeof u === 'function') u(); }).catch(() => {});
+      setTimeout(() => this._subscribe(1), 1500);
     }
     static get(conn, entryId) {
       const reg = Store._reg || (Store._reg = new Map());
@@ -2589,8 +3331,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       (hass && ((hass.locale && hass.locale.language) || hass.language)) || 'de').toLowerCase();
     return l.startsWith('de') || l.startsWith('gsw') ? 'de' : 'en';
   };
-  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner' };
-  const STORE_VIEWS = ['lists', 'rewards'];
+  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner', settings: 'fp-settings-inner' };
+  const STORE_VIEWS = ['lists', 'rewards', 'settings'];
   const tag = (view, lang) => (!STORE_VIEWS.includes(view) && lang === 'en' ? INNER[view] + '-en' : INNER[view]);
   // designs: CSS variables read by every card (inherited through the shadow roots)
   const SYS = '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif';
@@ -2617,7 +3359,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     static getStubConfig() { return { view: 'week' }; }
     setConfig(c) {
       this._cfg = { view: 'week', ...(c || {}) };
-      if (!INNER[this._cfg.view]) throw new Error('view: week | plan | lists | rewards');
+      if (!INNER[this._cfg.view]) throw new Error('view: week | plan | lists | rewards | settings');
       this._sig = null; this._inner = null; this.innerHTML = ''; this._attach();
     }
     set hass(h) { this._hass = h; this._attach(); if (this._inner && this._wrapped) this._inner.hass = STORE_VIEWS.includes(this._cfg.view) ? h : this._wrap(); }
@@ -2630,14 +3372,15 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!this._hass || !this._cfg || !this.isConnected || this._off) return;
       this._store = Store.get(this._hass.connection, this._cfg.entry_id);
       this._off = this._store.listen(() => this._sync());
+      if (window.FPKIOSK) window.FPKIOSK.attach(this, this._store);
     }
     _sync() {
       const s = this._store.snap;
       if (!s) { if (this._store.err) this.innerHTML = `<ha-card style="padding:16px">Family Planer: ${this._store.err}</ha-card>`; return; }
       const lang = LANG(this._hass, this._cfg, this._store); const view = this._cfg.view;
-      const mod = view === 'lists' ? 'lists' : 'week';
+      const mod = view === 'lists' ? 'lists' : view === 'settings' ? null : 'week';
       applyTheme(this, this._cfg.theme || s.theme);
-      if (s.modules && s.modules[mod] === false) {
+      if (mod && s.modules && s.modules[mod] === false) {
         this._inner = null; this._sig = 'off';
         this.innerHTML = `<ha-card style="padding:20px;color:#bbb;background:#1e1e1e">${MSG[lang].off.replace('{m}', MSG[lang][mod])}</ha-card>`; return;
       }
@@ -2662,10 +3405,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         termine_nach_namen: st.match_names !== false, auch_beim_besitzer: !!st.show_owner, tageswechsel: roll,
         plan: VIRT.plan, heute: VIRT.heute, verlauf: VIRT.verlauf, einstellungen: VIRT.settings, script: VIRT.script };
       const sig = JSON.stringify([lang, cfg.tage_zuverlaessigkeit, cfg.schulpause, cfg.ruhe_sekunden, cfg.schule, cfg.abwesend, cfg.punkte_standard, cfg.titel, kinder.map((k) => [k.name, k.farbe]), kalender, cfg.termine_nach_namen, cfg.auch_beim_besitzer, roll]);
-      if (!this._inner || this._lang !== lang) { this._lang = lang; this.innerHTML = ''; this._special = null; this._inner = document.createElement(tag(view, lang)); this.appendChild(this._inner); this._sig = null; }
+      if (!this._inner || this._lang !== lang) { this._lang = lang; this.innerHTML = ''; this._special = null; this._todos = null; this._inner = document.createElement(tag(view, lang)); this.appendChild(this._inner); this._sig = null; }
       if (sig !== this._sig) { this._sig = sig; this._inner.setConfig(cfg); this._inner.hass = this._wrap(); }
+      if (!this._todos || this._todos.parentNode !== this) { this._todos = document.createElement('fp-todos-inner'); this._todos.store = this._store; this._todos.setConfig({ lang }); this.appendChild(this._todos); }
+      else this._todos.update();
       if (view === 'plan') {
-        if (!this._special || this._special.parentNode !== this) { this._special = document.createElement('fp-special-inner'); this._special.store = this._store; this._special.setConfig({ lang }); this.appendChild(this._special); }
+        if (!this._special || this._special.parentNode !== this) { this._special = document.createElement('fp-special-inner'); this._special.store = this._store; this._special.setConfig({ lang }); this.insertBefore(this._special, this._todos); }
         else this._special.update();
       }
     }
@@ -2673,15 +3418,15 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   if (!customElements.get('family-planer-card')) customElements.define('family-planer-card', FamilyPlanerCard);
 
   // Navigation bar: one button per active module view, same place on every page (also in kiosk mode)
-  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards' } };
-  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:cart-outline', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline' };
-  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week' };
-  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards' };
+  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', einstellungen: 'Settings' } };
+  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:cart-outline', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', einstellungen: 'mdi:cog-outline' };
+  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', einstellungen: null };
+  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', einstellungen: 'settings' };
   class FamilyPlanerNavCard extends HTMLElement {
     setConfig(c) {
       this._cfg = { ...(c || {}) };
       // paths of the dashboard views, e.g. { planer: 'planer', listen: 'einkauf', aemtliplan: 'aemtliplan' }
-      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
+      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
       if (!this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.addEventListener('click', (e) => {
@@ -2700,10 +3445,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!this.shadowRoot || !this._cfg) return;
       const s = this._store && this._store.snap; const lang = LANG(this._hass, this._cfg, this._store);
       const mods = (s && s.modules) || { week: true, lists: true };
-      const order = this._cfg.order || ['planer', 'listen', 'aemtliplan', 'belohnungen'];
+      const order = this._cfg.order || ['planer', 'listen', 'aemtliplan', 'belohnungen', 'einstellungen'];
       if (s) applyTheme(this, this._cfg.theme || s.theme);
       const cur = location.pathname.split('/').filter(Boolean).pop();
-      const btns = order.filter((k) => NAV[lang][k] && mods[NAV_MOD[k]] !== false);
+      const btns = order.filter((k) => NAV[lang][k] && (!NAV_MOD[k] || mods[NAV_MOD[k]] !== false));
       const title = this._cfg.titel || this._cfg.title || (s && s.title) || 'Family Planer';
       this.shadowRoot.innerHTML = `<style>
         :host{display:block;margin-bottom:8px}
@@ -2734,6 +3479,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!this._wrap) {
         this.style.cssText = 'display:block;min-height:100vh;box-sizing:border-box;padding:8px;background:var(--fp-bg0,#141414)';
         this._wrap = true; this._nav = document.createElement('family-planer-nav-card'); this.appendChild(this._nav);
+        if (window.FPKIOSK) window.FPKIOSK.attach(this, Store.get(this._hass.connection, cfg.entry_id));
       }
       const store = Store.get(this._hass.connection, cfg.entry_id);
       if (!this._offTheme) this._offTheme = store.listen(() => { if (store.snap) applyTheme(this, store.snap.theme); });
@@ -2750,6 +3496,6 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
 
   window.customCards = window.customCards || [];
   window.customCards.push(
-    { type: 'family-planer-card', name: 'Family Planer', description: 'view: week (Wochenplan), plan (Ämtliplan), lists (Smarte Listen) oder rewards (Belohnungen); theme optional', preview: false },
+    { type: 'family-planer-card', name: 'Family Planer', description: 'view: week (Wochenplan), plan (Ämtliplan), lists (Smarte Listen), rewards (Belohnungen) oder settings (Einstellungen); theme optional', preview: false },
     { type: 'family-planer-nav-card', name: 'Family Planer Navigation', description: 'Planer · Listen · Ämtliplan', preview: false });
 })();

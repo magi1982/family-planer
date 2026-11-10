@@ -78,7 +78,10 @@
           "show_owner": "Also show assigned events at the calendar owner",
           "admin_only_edit": "Only admins may change the plan",
           "reliability_days": "Calculate reliability over",
-          "school_gap": "Lunch at home from"
+          "school_gap": "Lunch at home from",
+          "todo_confirm": "To-dos: confirm completion",
+          "todo_points": "To-dos: default points",
+          "todo_keep_days": "To-dos: show finished ones for"
         },
         "data_description": {
           "rollover_time": "Until this time the previous day's chores can still be ticked off; afterwards open ones count as missed and the new day starts.",
@@ -86,7 +89,10 @@
           "admin_only_edit": "Children can tick off chores and request rewards but cannot change the plan, people or categories.",
           "show_owner": "An event \"Anna swimming\" in mum's calendar then shows at Anna and at mum.",
           "reliability_days": "Number of days for each person's percentage (default 30).",
-          "school_gap": "From this many minutes between two lessons the school day is split into two blocks (leave/home per block). 0 = automatic: at least 45 minutes or twice the travel time plus 15 minutes."
+          "school_gap": "From this many minutes between two lessons the school day is split into two blocks (leave/home per block). 0 = automatic: at least 45 minutes or twice the travel time plus 15 minutes.",
+          "todo_confirm": "To-dos without a date are only ticked off after the question \"Mark as done?\" (chores still with one tap).",
+          "todo_points": "Points for a finished to-do (0 = none). Own points per to-do only with the parent PIN. To-dos do not count towards the fair day value.",
+          "todo_keep_days": "How long finished to-dos stay visible (0 = until the next day change)."
         }
       },
       "person_add": {
@@ -203,14 +209,18 @@
           "panel": "Sidebar entry",
           "panel_title": "Sidebar title",
           "idle_seconds": "Return to the start view after",
-          "language": "Family Planer language"
+          "language": "Family Planer language",
+          "fullscreen_dblclick": "Fullscreen on double tap",
+          "fullscreen_auto": "Fullscreen automatically when opened"
         },
         "data_description": {
           "panel": "Opens the complete planner without creating a dashboard – no YAML needed.",
           "theme": "Colours and shapes of all views. \"Home Assistant\" follows your current HA theme.",
           "panel_title": "Empty = name of the integration.",
           "idle_seconds": "When another day or a person is tapped on the tablet, the view returns to today after this time without touch.",
-          "language": "Automatic: as set in your profile or Home Assistant. German or English: fixed for the planner, tablet views, announcements, notifications and level names – independent of the Home Assistant language. These settings pages keep following your profile language."
+          "language": "Automatic: as set in your profile or Home Assistant. German or English: fixed for the planner, tablet views, announcements, notifications and level names – independent of the Home Assistant language. These settings pages keep following your profile language.",
+          "fullscreen_dblclick": "Double-tapping an empty spot of the planner hides the Home Assistant header and sidebar (or real fullscreen where the browser allows it). Double-tap again to leave. Chores, buttons and input fields do not trigger it.",
+          "fullscreen_auto": "Ideal for a wall tablet: the planner starts without header and sidebar."
         }
       },
       "rewards": {
@@ -264,13 +274,13 @@
       },
       "gamification": {
         "title": "Points, bonuses & parent PIN",
-        "description": "Parent PIN set: {pin}. With the PIN rewards can be approved on the tablet too (admins need no PIN).",
+        "description": "Parent PIN: {pin}. The PIN protects approvals, points, adding and changing rewards and the settings in the planner. Admins can approve and give points without the PIN; rewards and settings in the planner always need the PIN.",
         "data": {
           "default_points": "Points per chore (default or weight)",
           "day_bonus": "Bonus for a fully completed day",
           "streak_bonus": "Bonus for every 7-day streak",
           "pin": "New parent PIN (4–8 digits)",
-          "remove_pin": "Remove parent PIN",
+          "remove_pin": "Reset parent PIN to 123456",
           "reward_notify": "Also send requests to",
           "mode": "How points are given",
           "day_points": "Points for a full day (fair)"
@@ -278,11 +288,12 @@
         "data_description": {
           "default_points": "In \"per chore\" mode the points per chore, in \"fair\" mode the default weight. Can be changed per chore in the chore plan.",
           "reward_notify": "e.g. the parents' phone app. A Home Assistant notification is always created.",
-          "pin": "After 5 wrong entries the PIN is locked for 5 minutes.",
+          "pin": "4–8 digits, not 123456. After 5 wrong entries the PIN is locked for 5 minutes. The PIN protects approvals, points, rewards and the settings in the planner.",
           "day_bonus": "Credited at the day change.",
           "streak_bonus": "After 7, 14, 21 … days in a row with everything done.",
           "mode": "Fair: whoever finishes all of their chores of the day gets the same points – whether 2 or 6 chores. Per chore: each chore earns its points, so more chores means more points.",
-          "day_points": "Split across the day's chores; each done chore immediately earns its share. The value in the chore plan acts as a weight (e.g. 20 counts twice as much as 10)."
+          "day_points": "Split across the day's chores; each done chore immediately earns its share. The value in the chore plan acts as a weight (e.g. 20 counts twice as much as 10).",
+          "remove_pin": "Resets the PIN to the start PIN 123456. It must then be changed in the planner right away."
         }
       },
       "announce": {
@@ -388,7 +399,7 @@
       "no_persons": "Please enter a name.",
       "duplicate_person": "This person already exists.",
       "no_module": "Please choose at least one module.",
-      "bad_pin": "The PIN must have 4–8 digits.",
+      "bad_pin": "The PIN must have 4–8 digits and must not be 123456.",
       "no_motion": "Please choose at least one motion sensor.",
       "no_target": "Please choose a notify entity or TTS with a speaker.",
       "bad_times": "Please enter start and end (end after start)."
@@ -609,6 +620,10 @@
     "missing_entity": {
       "title": "Family Planer: {entity} is missing",
       "description": "The entity `{entity}` (used for {used_by}) no longer exists or is unavailable. Please choose another one under Settings → Devices & services → Family Planer → Configure."
+    },
+    "default_pin": {
+      "title": "Family Planer: change the start PIN",
+      "description": "The parent PIN is still the start PIN **123456**. Open *Rewards* or *Settings* in Family Planer and choose your own PIN – until then, changes to rewards and settings are locked."
     }
   }
 }

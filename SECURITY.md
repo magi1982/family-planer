@@ -32,5 +32,9 @@ Reviewed by category like a SAST report (Checkmarx/CodeQL style). Every finding 
 | 9 | Resource exhaustion (CWE-400) | Low | Unbounded lists in websocket messages; repeated AI calls cost money. | Length limits on all schemas (assignments, aliases, categories, texts); AI optimisation at most once per minute per list. |
 | 10 | Prompt injection (CWE-1427) | Low | List items are sent to the configured AI task. | AI output is only used as category *names* (validated, length-limited, max. category limit); it can never trigger actions. |
 | 11 | Sensitive data in diagnostics (CWE-532) | Low | Diagnostics download. | Only counts and settings, no names, photos, list contents or PIN. |
+| 12 | Default credentials (CWE-1392) | Medium | Start PIN 123456 (0.6.0). | Must be changed before any PIN-protected change is possible; repair issue while active; 123456 can never be chosen again. |
+| 13 | Missing authorization (CWE-862) | Medium | Settings page and reward editing in the dashboard (0.6.0). | Always require the parent PIN, also for admins; the PIN is exchanged for a random 256-bit token valid 10 minutes (sliding), bound to the entry, compared in constant time; the PIN is never kept in the browser. Own points per to-do also need the token. |
+| 14 | Denial of service (CWE-400) | Low | PBKDF2 (200 000 iterations) in the event loop. | PIN checks run in the executor (0.6.0); empty PINs are not counted as wrong guesses. |
+| 15 | Mass assignment (CWE-915) | Medium | Settings saved from the browser (0.6.0). | Every section is rebuilt from known keys only (`settings_spec.py`, unit-tested): numbers clamped, entity ids must match the expected domain, enums whitelisted, texts normalised. |
 
 Not applicable: SQL/command injection (no database or shell), SSRF (no outgoing HTTP besides the HA services you choose), CSRF (HA websocket is authenticated per connection).

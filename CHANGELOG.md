@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.0 – 2026-11-10
+
+### New
+- **Settings page in the planner** (*Settings* in the navigation): all options with descriptions in tabs – general, people & school, holidays, points, to-dos, announcements, lists. Entities are picked from lists, invalid input is refused with a clear message. Protected by the parent PIN.
+- **Edit rewards in the dashboard**: add, change and delete rewards directly in the *Rewards* view – always with the parent PIN.
+- **Parent PIN**: start PIN `123456` that must be changed on first use (repair notice while active); change it in the dashboard; one PIN entry unlocks for 10 minutes; *Lock* ends it.
+- **To-dos without a date**: per person, stay until done, ticking off asks for confirmation; optional points. Shown below the planner and the chore plan.
+- **Fullscreen on double tap**: hides the Home Assistant header and sidebar (real fullscreen where allowed); optional automatic fullscreen when opened.
+- New settings: *Fullscreen on double tap*, *Fullscreen automatically when opened*, *To-dos: confirm completion / default points / show finished ones for*, *Reset parent PIN to 123456*.
+
+### Improved
+- The dashboard reconnects by itself after the integration reloads (e.g. after saving settings).
+- PIN checks no longer block Home Assistant (PBKDF2 runs in the executor).
+
+### Security
+- Settings input is rebuilt from known keys only (`settings_spec.py`), unit-tested; PIN unlock tokens are random, short-lived and bound to the entry. See SECURITY.md (items 12–15).
+
 ## 0.5.4 – 2026-11-10
 
 ### New
