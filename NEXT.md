@@ -100,6 +100,21 @@
 - **Fehlende Dashboard-Seite melden:** Zeigt die Navigationsleiste auf eine Seite, die es im Dashboard nicht gibt (z. B. `einstellungen`), springt Home Assistant still auf die erste Seite. Besser: Knopf ausblenden oder einen Hinweis zeigen, welche Ansicht/`paths` fehlt.
 - **Zweiten Planer bewusst anlegen:** Wird die Integration ein zweites Mal hinzugefügt, entstehen alle Entitäten doppelt (`_2`). Beim Einrichten fragen „Es gibt schon einen Planer – wirklich einen zweiten anlegen?“.
 
+### 7. Goldener Rahmen statt kleiner Krone („Krone der Woche“)
+**Status:** Idee – noch nicht umgesetzt
+
+- Wer die **Krone der Woche** hat, bekommt statt der kleinen Krone auf dem Kopf der Figur einen **goldenen, coolen Rahmen** um das runde Personenbild.
+- Rahmen z. B. als goldener Verlauf (hell → dunkel) mit leichtem Glanz bzw. sanftem Schimmer; dezent animiert, ohne vom Planer abzulenken.
+- Gilt überall, wo das runde Bild erscheint: Planer (Personenspalte), Personendetails, Belohnungen.
+- Optisch passend zu jedem Design (Loxone, Apple, Google, Hell, Nord, Home Assistant), auch im hellen Design gut sichtbar.
+
+**Mögliche Einstellungen** (bei der Umsetzung prüfen, jeweils mit Beschreibung DE/EN):
+- Rahmen animiert (Schimmer) ein/aus – Standard: ein; auf Geräten mit „Bewegung reduzieren“ automatisch aus
+- Krone zusätzlich anzeigen: ja/nein (Standard: nein)
+
+**Offene Fragen:**
+- Sollen auch **Pokal des Monats** (z. B. Silber-/Bronzerahmen) oder **Perfekte Woche** einen eigenen Rahmen bekommen?
+
 ---
 
 ## Release-Checkliste (bei jedem Update)
