@@ -48,7 +48,7 @@
           "modules": "Module ein-/ausschalten",
           "week": "Wochenplan",
           "lists": "Smarte Listen",
-          "design": "Design & Seitenleiste"
+          "design": "Design, Sprache & Seitenleiste"
         }
       },
       "modules": {
@@ -196,19 +196,21 @@
         }
       },
       "design": {
-        "title": "Design",
+        "title": "Design, Sprache & Seitenleiste",
         "description": "Wie soll der Family Planer aussehen? Die Karten in eigenen Dashboards können das Design mit `theme:` überschreiben.",
         "data": {
           "theme": "Design",
           "panel": "Eintrag in der Seitenleiste",
           "panel_title": "Titel in der Seitenleiste",
-          "idle_seconds": "Zurück zur Startansicht nach"
+          "idle_seconds": "Zurück zur Startansicht nach",
+          "language": "Sprache des Family Planers"
         },
         "data_description": {
           "panel": "Öffnet den kompletten Planer ohne eigenes Dashboard – kein YAML nötig.",
           "theme": "Farben und Formen aller Ansichten. „Home Assistant“ übernimmt dein aktuelles HA-Design.",
           "panel_title": "Leer = Name der Integration.",
-          "idle_seconds": "Wird am Tablet ein anderer Tag oder eine Person angetippt, springt die Ansicht nach dieser Zeit ohne Berührung zurück zu heute."
+          "idle_seconds": "Wird am Tablet ein anderer Tag oder eine Person angetippt, springt die Ansicht nach dieser Zeit ohne Berührung zurück zu heute.",
+          "language": "Automatisch: wie im Profil bzw. Home Assistant eingestellt. Deutsch oder Englisch: gilt fest für Planer, Tablet-Ansichten, Ansagen, Benachrichtigungen und Level-Namen – unabhängig von der Sprache von Home Assistant. Diese Einstellungsseiten folgen weiterhin der Sprache deines Profils."
         }
       },
       "rewards": {
@@ -424,6 +426,13 @@
       "options": {
         "fair": "Fair – ganzer Tag zählt, nicht die Anzahl Ämtli",
         "per_chore": "Pro Ämtli – mehr Ämtli, mehr Punkte"
+      }
+    },
+    "language": {
+      "options": {
+        "auto": "Automatisch (Home Assistant)",
+        "de": "Deutsch",
+        "en": "English"
       }
     }
   },

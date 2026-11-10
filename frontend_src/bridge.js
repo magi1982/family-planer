@@ -123,8 +123,11 @@
     });
   };
 
-  const LANG = (hass, cfg) => {
-    const l = String((cfg && cfg.language) || (hass && ((hass.locale && hass.locale.language) || hass.language)) || 'de').toLowerCase();
+  // card option `language` > integration setting (Design & sidebar) > profile / HA language
+  const LANG = (hass, cfg, store) => {
+    const fixed = store && store.snap && store.snap.settings && store.snap.settings.language;
+    const l = String((cfg && cfg.language) || (fixed === 'de' || fixed === 'en' ? fixed : '') ||
+      (hass && ((hass.locale && hass.locale.language) || hass.language)) || 'de').toLowerCase();
     return l.startsWith('de') || l.startsWith('gsw') ? 'de' : 'en';
   };
   const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner' };
@@ -172,7 +175,7 @@
     _sync() {
       const s = this._store.snap;
       if (!s) { if (this._store.err) this.innerHTML = `<ha-card style="padding:16px">Family Planer: ${this._store.err}</ha-card>`; return; }
-      const lang = LANG(this._hass, this._cfg); const view = this._cfg.view;
+      const lang = LANG(this._hass, this._cfg, this._store); const view = this._cfg.view;
       const mod = view === 'lists' ? 'lists' : 'week';
       applyTheme(this, this._cfg.theme || s.theme);
       if (s.modules && s.modules[mod] === false) {
@@ -236,7 +239,7 @@
     getGridOptions() { return { columns: 'full', rows: 1 }; }
     _render() {
       if (!this.shadowRoot || !this._cfg) return;
-      const s = this._store && this._store.snap; const lang = LANG(this._hass, this._cfg);
+      const s = this._store && this._store.snap; const lang = LANG(this._hass, this._cfg, this._store);
       const mods = (s && s.modules) || { week: true, lists: true };
       const order = this._cfg.order || ['planer', 'listen', 'aemtliplan', 'belohnungen'];
       if (s) applyTheme(this, this._cfg.theme || s.theme);

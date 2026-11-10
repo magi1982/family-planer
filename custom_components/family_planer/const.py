@@ -3,7 +3,7 @@ from __future__ import annotations
 
 DOMAIN = "family_planer"
 NAME = "Family Planer"
-VERSION = "0.5.3"
+VERSION = "0.5.4"
 STORAGE_VERSION = 1
 
 # modules (can be switched on/off; more will follow)
@@ -38,9 +38,12 @@ DEFAULT_SETTINGS = {
     CONF_OPTIMIZE_TIME: "03:00",
     CONF_AI_TASK: None,
     "theme": "loxone",
+    "language": "auto",
     "admin_only_edit": False,
     "panel": {"enabled": True, "title": ""},
 }
+
+LANGUAGES = ("auto", "de", "en")
 
 SIGNAL_UPDATE = f"{DOMAIN}_update_{{}}"
 URL_BASE = "/family_planer_static"

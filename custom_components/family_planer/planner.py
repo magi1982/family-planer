@@ -24,7 +24,7 @@ from homeassistant.util import slugify
 from . import engine, lists, msgqueue, rewards, schedule, speech, vacation, validate
 from .announce import Announcer
 from .const import (CONF_AI_TASK, CONF_MATCH_NAMES, CONF_MODULES, CONF_OPTIMIZE_TIME, CONF_PERSONS,
-                    CONF_ROLLOVER_TIME, CONF_SHOW_OWNER, DEFAULT_COLORS, DEFAULT_SETTINGS, DOMAIN, FILES_DIR,
+                    CONF_ROLLOVER_TIME, CONF_SHOW_OWNER, DEFAULT_COLORS, DEFAULT_SETTINGS, DOMAIN, LANGUAGES, FILES_DIR,
                     FILES_URL, MAX_IMAGE_BYTES, MODULE_LISTS, MODULE_WEEK, SIGNAL_UPDATE, STORAGE_VERSION)
 
 _LOGGER = logging.getLogger(__name__)
@@ -240,7 +240,7 @@ class FamilyPlanner:
 
     @property
     def lang(self) -> str:
-        return "de" if (self.hass.config.language or "").lower().startswith(("de", "gsw")) else "en"
+        return validate.language(self.data.get("settings", {}).get("language"), self.hass.config.language)
 
     def day_offset(self) -> timedelta:
         h, m = parse_hhmm(self.data.get("settings", {}).get(CONF_ROLLOVER_TIME))
@@ -754,7 +754,8 @@ class FamilyPlanner:
             "today": today.isoformat(),
             "day_offset_min": int(self.day_offset().total_seconds() // 60),
             "week_index": engine.week_index(today),
-            "settings": {CONF_ROLLOVER_TIME: st.get(CONF_ROLLOVER_TIME), CONF_MATCH_NAMES: st.get(CONF_MATCH_NAMES),
+            "settings": {"language": st.get("language") if st.get("language") in LANGUAGES else "auto",
+                         CONF_ROLLOVER_TIME: st.get(CONF_ROLLOVER_TIME), CONF_MATCH_NAMES: st.get(CONF_MATCH_NAMES),
                          CONF_SHOW_OWNER: st.get(CONF_SHOW_OWNER), "admin_only_edit": bool(st.get("admin_only_edit")),
                          "reliability_days": self.reliability_days(),
                          "school_gap": validate.integer(st.get("school_gap"), 0, 240, 0),

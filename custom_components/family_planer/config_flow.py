@@ -18,7 +18,7 @@ from . import rewards, validate
 from .const import (CONF_AI_TASK, CONF_ALIASES, CONF_AUTO, CONF_CALENDAR, CONF_COLOR, CONF_ENTITY, CONF_ICON,
                     CONF_LIST, CONF_MATCH_NAMES, CONF_MAX_CATEGORIES, CONF_MODULES, CONF_NAME, CONF_OPTIMIZE_TIME,
                     CONF_PERSON, CONF_PERSONS, CONF_ROLLOVER_TIME, CONF_SHOW_OWNER, CONF_TITLE, DOMAIN,
-                    MODULE_LISTS, MODULE_WEEK, MODULES, NAME, THEMES)
+                    LANGUAGES, MODULE_LISTS, MODULE_WEEK, MODULES, NAME, THEMES)
 
 TODO_SELECTOR = selector.EntitySelector(selector.EntitySelectorConfig(domain="todo"))
 CALENDAR_SELECTOR = selector.EntitySelector(selector.EntitySelectorConfig(domain="calendar"))
@@ -157,7 +157,7 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
         return self.config_entry.runtime_data
 
     def _de(self) -> bool:
-        return (self.hass.config.language or "").lower().startswith("de")
+        return self._planner.lang == "de"
 
     def _done(self, reload: bool) -> ConfigFlowResult:
         if reload:
@@ -201,9 +201,13 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
                 "theme": user_input["theme"] if user_input.get("theme") in THEMES else "loxone",
                 "panel": {"enabled": bool(user_input.get("panel")), "title": validate.text(user_input.get("panel_title"), 40)},
                 "idle_seconds": validate.integer(user_input.get("idle_seconds"), 10, 600, 45),
+                "language": user_input.get("language") if user_input.get("language") in LANGUAGES else "auto",
             })
             return self._done(reload=True)
         schema = vol.Schema({
+            vol.Required("language", default=st.get("language") if st.get("language") in LANGUAGES else "auto"):
+                selector.SelectSelector(selector.SelectSelectorConfig(options=list(LANGUAGES),
+                                        mode=selector.SelectSelectorMode.LIST, translation_key="language")),
             vol.Required("theme", default=st.get("theme") or "loxone"): THEME_SELECTOR,
             vol.Required("panel", default=bool(panel.get("enabled", True))): bool,
             vol.Optional("panel_title", description={"suggested_value": panel.get("title") or self.config_entry.title}): str,

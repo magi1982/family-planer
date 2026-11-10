@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from typing import Any
 
 COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 ICON_RE = re.compile(r"^mdi:[a-z0-9-]{1,64}$")
@@ -75,3 +76,10 @@ def integer(value, lo: int, hi: int, fallback: int) -> int:
         return max(lo, min(hi, int(value)))
     except (TypeError, ValueError):
         return fallback
+
+
+def language(setting: Any, system: Any) -> str:
+    """Language of the planner: a fixed choice ("de"/"en") wins, otherwise the Home Assistant language."""
+    if setting in ("de", "en"):
+        return setting
+    return "de" if str(system or "").lower().startswith(("de", "gsw")) else "en"

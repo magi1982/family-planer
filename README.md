@@ -57,7 +57,7 @@ home – and **shopping and to-do lists that sort themselves**. Everything is se
 | **Modules** | *Week plan* (chores, events, school, holidays, points, rewards, announcements) and *Smart lists* – each can be switched on or off, more modules to come |
 | **Usage** | Own sidebar entry with navigation *Planner · Lists · Chore plan · Rewards*; optionally as cards in your own dashboards |
 | **Setup** | Entirely via *Settings → Devices & services*, no YAML |
-| **Languages** | English and German (settings and interface, follows the Home Assistant language) |
+| **Languages** | English and German – automatically like Home Assistant, or fixed to German or English for the planner (e.g. Home Assistant in English, planner in German) |
 | **Designs** | Home Assistant, Loxone, Apple Home, Google Home, Light, Nord |
 | **Dependencies** | None. Calendars, lists, speakers and AI are optional – any matching entity works |
 | **Requirement** | Home Assistant 2026.3 or newer |
@@ -209,7 +209,7 @@ data:
 
 ![Light design](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/theme-light.png)
 
-Set under *Configure → Design & sidebar*; cards in your own dashboards can override it with `theme:`.
+Set under *Configure → Design, language & sidebar*; cards in your own dashboards can override it with `theme:`.
 
 ---
 
@@ -240,10 +240,11 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 |---|---|---|
 | Active modules | both | switch *Week plan* and *Smart lists* on or off individually |
 
-**Design & sidebar**
+**Design, language & sidebar**
 
 | Setting | Default | Meaning |
 |---|---|---|
+| Family Planer language | Automatic | *Automatic*: like your profile / Home Assistant · *Deutsch* or *English*: fixed for planner, tablet views, announcements, notifications and level names, independent of the Home Assistant language. The settings pages themselves follow your profile language. |
 | Design | Loxone | Home Assistant, Loxone, Apple Home, Google Home, Light, Nord |
 | Sidebar entry | on | opens the complete planner without a dashboard of your own |
 | Sidebar title | name | text in the sidebar |
@@ -407,7 +408,7 @@ cards:
   - type: custom:family-planer-card
     view: week        # week | plan | lists | rewards
     theme: apple      # optional
-    language: en      # optional, otherwise the HA language
+    language: en      # optional, otherwise the integration setting or the HA language
 ```
 
 For a full-screen tablet, a panel view per page (paths as above) and e.g. *Kiosk Mode* are recommended.

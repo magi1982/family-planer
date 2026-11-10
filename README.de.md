@@ -56,7 +56,7 @@ eingerichtet, **kein YAML**.
 | **Module** | *Wochenplan* (Ämtli, Termine, Schule, Ferien, Punkte, Belohnungen, Ansagen) und *Smarte Listen* – einzeln ein- und ausschaltbar, weitere Module folgen |
 | **Bedienung** | Eigener Eintrag in der Seitenleiste mit Navigation *Planer · Listen · Ämtliplan · Belohnungen*; optional als Karten in eigenen Dashboards |
 | **Einrichtung** | Komplett über *Einstellungen → Geräte & Dienste*, kein YAML |
-| **Sprachen** | Deutsch und Englisch (Einstellungen und Oberfläche, folgt der HA-Sprache) |
+| **Sprachen** | Deutsch und Englisch – automatisch wie Home Assistant oder für den Planer fest auf Deutsch bzw. Englisch (z. B. Home Assistant auf Englisch, Planer auf Deutsch) |
 | **Designs** | Home Assistant, Loxone, Apple Home, Google Home, Hell, Nord |
 | **Abhängigkeiten** | Keine. Kalender, Listen, Lautsprecher und KI sind optional – es funktioniert jede passende Entität |
 | **Voraussetzung** | Home Assistant 2026.3 oder neuer |
@@ -208,7 +208,7 @@ data:
 
 ![Design Hell](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/theme-light.png)
 
-Einstellbar unter *Konfigurieren → Design & Seitenleiste*; Karten in eigenen Dashboards können es mit `theme:` überschreiben.
+Einstellbar unter *Konfigurieren → Design, Sprache & Seitenleiste*; Karten in eigenen Dashboards können es mit `theme:` überschreiben.
 
 ---
 
@@ -239,10 +239,11 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 |---|---|---|
 | Aktive Module | beide | *Wochenplan* und *Smarte Listen* einzeln ein-/ausschalten |
 
-**Design & Seitenleiste**
+**Design, Sprache & Seitenleiste**
 
 | Einstellung | Standard | Bedeutung |
 |---|---|---|
+| Sprache des Family Planers | Automatisch | *Automatisch*: wie im Profil bzw. Home Assistant · *Deutsch* oder *English*: gilt fest für Planer, Tablet-Ansichten, Ansagen, Benachrichtigungen und Level-Namen – unabhängig von der Sprache von Home Assistant. Die Einstellungsseiten selbst folgen der Sprache deines Profils. |
 | Design | Loxone | Home Assistant, Loxone, Apple Home, Google Home, Hell, Nord |
 | Eintrag in der Seitenleiste | ein | Öffnet den kompletten Planer ohne eigenes Dashboard |
 | Titel in der Seitenleiste | Name | Text in der Seitenleiste |
@@ -406,7 +407,7 @@ cards:
   - type: custom:family-planer-card
     view: week        # week | plan | lists | rewards
     theme: apple      # optional
-    language: de      # optional, sonst HA-Sprache
+    language: de      # optional, sonst Einstellung der Integration bzw. HA-Sprache
 ```
 
 Für ein Vollbild-Tablet empfiehlt sich eine Panel-Ansicht pro Seite (Pfade wie oben) und z. B. *Kiosk Mode*.

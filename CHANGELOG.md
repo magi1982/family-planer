@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.4 – 2026-11-10
+
+### New
+- **Language setting** under *Configure → Design, language & sidebar*: *Automatic* (follows your profile / Home Assistant), *Deutsch* or *English*. A fixed language applies to the planner, tablet views, announcements, notifications and level names – e.g. Home Assistant in English, Family Planer in German.
+- Priority: `language:` option of a dashboard card > integration setting > profile / Home Assistant language.
+- Tests for the language selection.
+
+### Note
+- The settings pages of the integration are rendered by Home Assistant and keep following your profile language.
+
 ## 0.5.3 – 2026-11-09
 
 ### Maintenance

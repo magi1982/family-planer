@@ -48,7 +48,7 @@
           "modules": "Switch modules on/off",
           "week": "Week plan",
           "lists": "Smart lists",
-          "design": "Design & sidebar"
+          "design": "Design, language & sidebar"
         }
       },
       "modules": {
@@ -196,19 +196,21 @@
         }
       },
       "design": {
-        "title": "Design",
+        "title": "Design, language & sidebar",
         "description": "How should Family Planer look? Cards in your own dashboards can override it with `theme:`.",
         "data": {
           "theme": "Design",
           "panel": "Sidebar entry",
           "panel_title": "Sidebar title",
-          "idle_seconds": "Return to the start view after"
+          "idle_seconds": "Return to the start view after",
+          "language": "Family Planer language"
         },
         "data_description": {
           "panel": "Opens the complete planner without creating a dashboard – no YAML needed.",
           "theme": "Colours and shapes of all views. \"Home Assistant\" follows your current HA theme.",
           "panel_title": "Empty = name of the integration.",
-          "idle_seconds": "When another day or a person is tapped on the tablet, the view returns to today after this time without touch."
+          "idle_seconds": "When another day or a person is tapped on the tablet, the view returns to today after this time without touch.",
+          "language": "Automatic: as set in your profile or Home Assistant. German or English: fixed for the planner, tablet views, announcements, notifications and level names – independent of the Home Assistant language. These settings pages keep following your profile language."
         }
       },
       "rewards": {
@@ -424,6 +426,13 @@
       "options": {
         "fair": "Fair – a full day counts, not the number of chores",
         "per_chore": "Per chore – more chores, more points"
+      }
+    },
+    "language": {
+      "options": {
+        "auto": "Automatic (Home Assistant)",
+        "de": "Deutsch",
+        "en": "English"
       }
     }
   },
