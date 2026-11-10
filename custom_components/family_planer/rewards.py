@@ -88,6 +88,30 @@ def lifetime(ledger: list[dict], pid: str) -> int:
     return sum(e["pts"] for e in ledger if e["pid"] == pid and e["kind"] != "reward" and e["pts"] > 0)
 
 
+PACE_DAYS = 30
+EARN_KINDS = ("chore", "fair", "bonus", "streak", "todo", "award", "adjust")
+
+
+def pace(ledger: list[dict], persons: list[str], today, days: int = PACE_DAYS) -> dict:
+    """Points earned per day (last `days` days, only since the first booking) – for reward forecasts.
+
+    {"persons": {pid: pts_per_day}, "family": average over persons with data}
+    """
+    from datetime import date as _date, timedelta as _td
+    start = (today - _td(days=days - 1)).isoformat()
+    out: dict[str, float] = {}
+    for pid in persons:
+        mine = [e for e in ledger if e["pid"] == pid and e["kind"] in EARN_KINDS and e["pts"] > 0 and e["ts"][:10] >= start]
+        if not mine:
+            out[pid] = 0.0
+            continue
+        first = min(e["ts"][:10] for e in mine)
+        span = max(1, (today - _date.fromisoformat(first)).days + 1)
+        out[pid] = round(sum(e["pts"] for e in mine) / min(days, span), 1)
+    active = [v for v in out.values() if v > 0]
+    return {"persons": out, "family": round(sum(active) / len(active), 1) if active else 0.0}
+
+
 def reserved(requests: dict, pid: str) -> int:
     return sum(r["cost"] for r in requests.values() if r["pid"] == pid and r["status"] == "pending")
 

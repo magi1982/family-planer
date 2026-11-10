@@ -53,6 +53,10 @@ def themify(js: str) -> str:
         css = re.sub(r"([a-z-]+)\s*:\s*([^;{}]+)", lambda d: f"{d.group(1)}:{_decl(d.group(1), d.group(2))}", css)
         css = css.replace("border-radius:16px", "border-radius:var(--fp-radius,16px)")
         css = css.replace(f"font-family:${{FONT}}", "font-family:var(--fp-font)")
+        # styles "transparent" / "glass": frosted surfaces and the design's soft shadow on the main cards
+        css += (".card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);"
+                "box-shadow:var(--fp-glow,none)}"
+                ".card{position:relative}.card::before{content:\"\";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}")
         return f"<style>{css}</style>"
     js = re.sub(r"<style>(.*?)</style>", style, js, flags=re.S)
     return js.replace("const G = '#69C350';", "const G = 'var(--fp-accent)';")
@@ -95,6 +99,7 @@ body = "\n".join([
     themify((src / "settings.js").read_text()),
     (src / "pin.js").read_text(),
     (src / "kiosk.js").read_text(),
+    (src / "confetti.js").read_text(),
     (src / "bridge.js").read_text(),
 ])
 out.parent.mkdir(parents=True, exist_ok=True)

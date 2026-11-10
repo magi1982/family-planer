@@ -21,7 +21,11 @@
       startPin: 'Die Start-PIN 123456 ist noch aktiv. Bitte jetzt eine eigene Eltern-PIN festlegen – vorher sind Belohnungen und Einstellungen gesperrt.',
       rCat: 'Kategorie', own: 'Eigene Punkte', approx: 'ca.', minus: 'Abziehen',
       sizes: { s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Mega gross', xxl: 'Riesig' },
-      catHint: 'Gross = so viel, wie man in einem Monat mit allen Ämtli verdient (inkl. Boni). Die Punkte passen sich an, wenn die Punkte-Einstellungen ändern.' },
+      catHint: 'Gross = so viel, wie man in einem Monat mit allen Ämtli verdient (inkl. Boni). Die Punkte passen sich an, wenn die Punkte-Einstellungen ändern.',
+      open: 'Noch zu gewinnen', fam: 'Familie', per: { week: 'jede Woche', month: 'jeden Monat', reach: 'beim Erreichen', day: 'jeden Tag' }, lead: 'Vorne: {n}', noLead: 'Noch niemand vorne',
+      units: { pct: '{n} %', days: '{n} Tage', chores: '{n} Ämtli' }, worth: '+{n} Punkte', addFor: 'Belohnung', saving: 'Spart für', waiting: 'Wartet auf Freigabe',
+      ready: 'Jetzt einlösbar', inDays: 'in ca. {n} Tagen', inDay: 'morgen', noPace: 'noch keine Prognose', nothing: 'Noch nichts am Laufen',
+      fc: 'Prognose', fcFam: 'Familienschnitt ({p} Punkte/Tag): ca. {n} Tage', fcNow: 'jetzt', awards: 'Auszeichnungen', noAw: 'Noch keine – siehe oben, was es zu gewinnen gibt.' },
     en: { title: 'Points & rewards', pts: 'points', lvl: 'Level', next: '{n} more to level {l}', max: 'Highest level reached!',
       shop: 'Rewards for {name}', shopAll: 'All rewards', forAll: 'For everyone', pickHint: 'Tap a person to see and redeem their rewards.', forOnly: 'only for {n}', redeem: 'Redeem', missing: '{n} points to go', approval: 'needs approval', noapproval: 'instant',
       week: 'max. {n}× per week', none: 'No rewards yet. Parents add them here with "Edit" (parent PIN).',
@@ -36,11 +40,20 @@
       startPin: 'The start PIN 123456 is still active. Please choose your own parent PIN now – until then rewards and settings are locked.',
       rCat: 'Category', own: 'Own points', approx: 'approx.', minus: 'Take away',
       sizes: { s: 'Small', m: 'Medium', l: 'Large', xl: 'Mega', xxl: 'Giant' },
-      catHint: 'Large = what you earn in a month with every chore done (incl. bonuses). Points follow the point settings automatically.' },
+      catHint: 'Large = what you earn in a month with every chore done (incl. bonuses). Points follow the point settings automatically.',
+      open: 'Still to win', fam: 'Family', per: { week: 'every week', month: 'every month', reach: 'when reached', day: 'every day' }, lead: 'Ahead: {n}', noLead: 'Nobody ahead yet',
+      units: { pct: '{n} %', days: '{n} days', chores: '{n} chores' }, worth: '+{n} points', addFor: 'Reward', saving: 'Saving for', waiting: 'Waiting for approval',
+      ready: 'Can be redeemed now', inDays: 'in about {n} days', inDay: 'tomorrow', noPace: 'no forecast yet', nothing: 'Nothing running yet',
+      fc: 'Forecast', fcFam: 'Family average ({p} points/day): about {n} days', fcNow: 'now', awards: 'Awards', noAw: 'None yet – see above what there is to win.' },
   };
   const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
   const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
   const RSIZES = ['s', 'm', 'l', 'xl', 'xxl'];
+  const UNIT = { crown: 'pct', climber: 'pct', perfect: 'pct', weekend: 'pct', trophy: 'pct', bee: 'days', early: 'days', diamond: 'days', milestone: 'chores' };
+  const MILES = [100, 500, 1000];
+  // days until a person can afford `cost` at their current pace (null = no pace yet)
+  const daysTo = (s, pid, cost) => { const pace = s.pace || {}; const have = ((s.points || {})[pid] || {}).available || 0; if (have >= cost) return 0;
+    const v = (pace.persons || {})[pid] || pace.family || 0; return v > 0 ? Math.ceil((cost - have) / v) : null; };
   const money = (s, k) => { const z = s.sizes || {}; const v = (z.values || {})[k]; return v ? `${Number(v).toLocaleString('de-CH', { maximumFractionDigits: 2 })} ${z.currency || ''}`.trim() : ''; };
   const av = (p, size) => (window.FPX && window.FPX.avatarHtml
     ? window.FPX.avatarHtml({ name: p.name, farbe: COLOR(p.color), bild: /^(av:[a-z0-9.+]+|svg:[a-z-]+|img:\/family_planer_files\/avatars\/[a-z0-9_]+\.(jpg|png|webp))$/.test(p.image || '') ? p.image : '' }, size)
@@ -77,6 +90,9 @@
     }
     async _click(e) {
       const t = e.target; const s = this._snap(); if (!s) return;
+      const ra = t.closest('[data-radd]');
+      if (ra) { const r = { title: '', icon: 'mdi:gift-outline', size: 's', cost: ((s.sizes || {}).reward || {}).s || 100, approval: true, persons: [ra.dataset.radd], per_week: 0 };
+        this._dlg = { kind: 'reward', id: null, r }; this._render(); return; }
       const pc = t.closest('[data-p]'); if (pc) { this._sel = this._sel === pc.dataset.p ? null : pc.dataset.p; this._render(); return; }
       const rd = t.closest('[data-redeem]');
       if (rd) {
@@ -136,12 +152,45 @@
       if (!s) { this.shadowRoot.innerHTML = ''; return; }
       const persons = s.persons; const sel = persons.find((p) => p.id === this._sel) || null;  // nobody selected = everything
       const pts = s.points || {};
+      const FX = (this._cfg.lang === 'en' ? window.FPX_EN : window.FPX) || window.FPX || {}; const AWT = FX.AWT || {}; const AWR = FX.AWR || [];
+      const et = (s.settings || {}).early_time || '12:00'; const apts = s.award_points || {};
+      const awName = (id, v) => String((AWT[id] || [id])[0]).replace(/\{n\}/g, v == null ? '' : v);
+      const medal = (a, big) => `<span class="md${big ? ' big' : ''}" style="--mc:${COLOR(a.color)}" title="${esc(awName(a.id, a.value))}"><ha-icon icon="${esc(a.icon)}"></ha-icon></span>`;
+      const ring = (p, size) => { const r = (s.awards || {})[p.id] || {}; const fr = ['platinum', 'gold', 'silver', 'bronze'].includes(r.frame) ? r.frame : '';
+        const crown = (r.list || []).some((a) => a.id === 'crown');
+        return `<div class="ring${fr ? ' fr-' + fr : ''}" style="width:${size}px;height:${size}px"><span class="ava" style="width:${size}px;height:${size}px">${av(p, size)}</span>${crown ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>`; };
+      const forP = (r, pid) => !r.persons || !r.persons.length || r.persons.includes(pid);
+      const eta = (pid, cost) => { const d = daysTo(s, pid, cost); return d === 0 ? T.ready : d == null ? T.noPace : d === 1 ? T.inDay : fmt(T.inDays, { n: d }); };
+      // what is running for a person: requests waiting for approval, rewards made for them, else the next goal
+      const running = (p) => { const x = pts[p.id] || {}; const have = x.available || 0;
+        const wait = s.requests.filter((q) => q.status === 'pending' && q.pid === p.id).map((q) => `<div class="run w"><ha-icon icon="mdi:timer-sand"></ha-icon><span><b>${esc(q.title)}</b><em>${esc(T.waiting)}</em></span></div>`);
+        let goals = s.rewards.filter((r) => r.persons && r.persons.includes(p.id));
+        if (!goals.length) goals = s.rewards.filter((r) => forP(r, p.id) && r.cost > have).sort((u, v) => u.cost - v.cost).slice(0, 1);
+        const g = goals.slice(0, 3 - Math.min(wait.length, 2)).map((r) => `<div class="run"><ha-icon icon="${esc(r.icon)}"></ha-icon><span><b>${esc(r.title)}</b>
+          <i class="bar"><i style="width:${Math.min(100, Math.round((have / Math.max(1, r.cost)) * 100))}%"></i></i><em>${Math.min(have, r.cost)} / ${r.cost} · ${esc(eta(p.id, r.cost))}</em></span></div>`);
+        const all = [...wait, ...g]; return all.length ? all.join('') : `<div class="run none">${esc(T.nothing)}</div>`; };
       const cards = persons.map((p) => { const x = pts[p.id] || { balance: 0, available: 0, level: 1, name: '', progress: 0, next: null, lifetime: 0 };
-        return `<button class="pc${sel && p.id === sel.id ? ' on' : ''}" data-p="${esc(p.id)}" style="--c:${COLOR(p.color)}">${av(p, 52)}
+        const aw = ((s.awards || {})[p.id] || {}).list || [];
+        return `<div class="pc${sel && p.id === sel.id ? ' on' : ''}" data-p="${esc(p.id)}" role="button" tabindex="0" style="--c:${COLOR(p.color)}">
+          <div class="ph">${ring(p, 56)}
           <div class="pi"><b>${esc(p.name)}</b><span class="lv">${esc(T.lvl)} ${x.level} · ${esc(x.name)}</span>
           <span class="bar"><i style="width:${Math.max(3, x.progress)}%"></i></span>
           <span class="nx">${x.next == null ? esc(T.max) : esc(fmt(T.next, { n: x.next - x.lifetime, l: x.level + 1 }))}</span></div>
-          <div class="pt"><strong>${x.balance}</strong><span>${esc(T.pts)}</span>${x.balance !== x.available ? `<em>${esc(fmt(T.reserved, { n: x.balance - x.available }))}</em>` : ''}</div></button>`; }).join('');
+          <div class="pt"><strong>${x.balance}</strong><span>${esc(T.pts)}</span>${x.balance !== x.available ? `<em>${esc(fmt(T.reserved, { n: x.balance - x.available }))}</em>` : ''}</div></div>
+          ${aw.length ? `<div class="mds">${aw.slice(0, 6).map((a) => medal(a)).join('')}${aw.length > 6 ? `<span class="mdm">+${aw.length - 6}</span>` : ''}</div>` : ''}
+          <div class="runs">${running(p)}</div>
+          <button class="add1" data-radd="${esc(p.id)}"><ha-icon icon="mdi:plus"></ha-icon>${esc(T.addFor)}</button></div>`; }).join('');
+      const oa = (s.open_awards || []).filter((a) => AWR.some((r) => r[0] === a.id));
+      const openAw = oa.length ? `<div class="sec">${esc(T.open)}</div><div class="oas">${oa.map((a) => { const rule = (AWR.find((r) => r[0] === a.id) || [])[4] || '';
+          const lp = persons.find((p) => p.id === a.leader); const u = T.units[UNIT[a.id]] || '{n}';
+          const nm = a.id === 'milestone' ? awName('milestone', MILES.find((m) => m > (a.value || 0)) || 1000) : awName(a.id, a.id === 'diamond' ? 30 : '');
+          return `<div class="oa" style="--mc:${COLOR(a.color)}">${medal(a, true)}<div class="ot"><b>${esc(nm)}</b><span>${esc(rule.replace('{t}', et))}</span>
+            <span class="om"><em>${esc(T.per[a.period] || '')}</em>${apts[a.id] ? `<em class="pp">${esc(fmt(T.worth, { n: apts[a.id] }))}</em>` : ''}
+            ${lp && a.value ? `<em class="ld">${av(lp, 18)}${esc(fmt(T.lead, { n: lp.name }))} · ${esc(fmt(u, { n: a.value }))}</em>` : `<em>${esc(T.noLead)}</em>`}</span></div></div>`; }).join('')}</div>` : '';
+      const selAw = sel ? (((s.awards || {})[sel.id] || {}).list || []) : [];
+      const detail = sel ? `<div class="sec">${esc(T.awards)} · ${esc(sel.name)}</div>${selAw.length ? `<div class="oas">${selAw.map((a) => { const tx = AWT[a.id] || [a.id, ''];
+          const f = (x) => String(x).replace(/\{n\}/g, a.value == null ? '' : a.value).replace('{t}', et);
+          return `<div class="oa won" style="--mc:${COLOR(a.color)}">${medal(a, true)}<div class="ot"><b>${esc(f(tx[0]))}</b><span>${esc(f(tx[1]))}</span>${a.since ? `<span class="om"><em>${esc(String(a.since).slice(0, 10).split('-').reverse().join('.'))}</em></span>` : ''}</div></div>`; }).join('')}</div>` : `<div class="hint2">${esc(T.noAw)}</div>`}` : '';
       const avail = sel ? (pts[sel.id] || {}).available || 0 : 0;
       const rw = this._edit || !sel ? s.rewards : s.rewards.filter((r) => !r.persons || !r.persons.length || r.persons.includes(sel.id));
       const edit = this._edit && window.FPPIN.unlocked(this._store);
@@ -178,6 +227,10 @@
           <label class="fl">${esc(T.rWeek)}<input class="in" type="number" min="0" max="50" inputmode="numeric" data-rf="per_week" value="${esc(r.per_week)}"></label></div>
           <label class="ck"><input type="checkbox" data-rf="approval" ${r.approval ? 'checked' : ''}>${esc(T.rApproval)}</label>
           <div class="fl">${esc(T.rPersons)}<div class="bps">${persons.map((p) => `<button class="chip${r.persons.includes(p.id) ? ' on' : ''}" data-rperson="${esc(p.id)}">${av(p, 22)}${esc(p.name)}</button>`).join('')}</div></div>
+          ${(() => { const cost = Math.max(1, Math.round(Number(r.cost) || 0)); const fam = (s.pace || {}).family || 0;
+            const who = (r.persons.length ? persons.filter((p) => r.persons.includes(p.id)) : persons.filter((p) => p.role !== 'adult'));
+            return `<div class="fc"><b>${esc(T.fc)}</b>${fam > 0 ? `<span>${esc(fmt(T.fcFam, { p: Math.round(fam), n: Math.ceil(cost / fam) }))}</span>` : `<span>${esc(T.noPace)}</span>`}
+              <span class="fcp">${who.map((p) => { const dd = daysTo(s, p.id, cost); return `<em>${av(p, 18)}${esc(p.name)}: ${esc(dd === 0 ? T.fcNow : dd == null ? '–' : '~' + dd + (this._cfg.lang === 'en' ? ' d' : ' T'))}</em>`; }).join('')}</span></div>`; })()}
           <div class="ea">${d.id ? `<button class="sg del" data-rdel>${esc(T.del)}</button>` : ''}<span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg ok" data-rsave>${esc(T.save)}</button></div></div></div>`; }
       if (d && d.kind === 'confirm') dlg = `<div class="ov"><div class="dlg"><div class="dh">${esc(fmt(T.delAsk, { t: d.title }))}</div>
           <div class="ea"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg del" data-ryes>${esc(T.del)}</button></div></div></div>`;
@@ -190,6 +243,7 @@
           <div class="ea"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg ok" data-give>${esc(T.give)}</button></div></div></div>`;
       this.shadowRoot.innerHTML = `<style>
         :host{display:block}
+        ${(window.FPX || {}).AWCSS || ''}
         .card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:16px;padding:18px;font-family:${FONT};color:#ececec;position:relative;min-height:300px}
         .top{display:flex;align-items:center;gap:12px;margin-bottom:14px}.top h2{margin:0;font-size:20px;font-weight:600;flex:1}
         .tb{display:flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:10px;border:1px solid #333;background:#262626;color:#bbb;font:inherit;font-size:13px;cursor:pointer}
@@ -198,7 +252,20 @@
         .cat b{font-weight:600;color:#eee}.cat span{font-size:11px;color:#999}.cat.on{border-color:#69C350;background:#202820}.cat.on span{color:#a7dc93}.cat.neg{border-color:#E06B6B;background:#3a2626}
         .hint{display:block;font-size:11px;color:#888;margin-top:2px}
         .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-        .pc{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;border:1px solid #2a2a2a;background:#232323;color:inherit;font:inherit;text-align:left;cursor:pointer;border-left:4px solid var(--c)}
+        .pc{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:14px;border:1px solid #2a2a2a;background:#232323;color:inherit;font:inherit;text-align:left;cursor:pointer;border-left:4px solid var(--c)}
+        .ph{display:flex;align-items:center;gap:12px}
+        .mds{display:flex;flex-wrap:wrap;gap:5px}.md{width:28px!important;height:28px!important}.md ha-icon{--mdc-icon-size:17px!important}.md.big{width:44px!important;height:44px!important}.md.big ha-icon{--mdc-icon-size:26px!important}.mdm{font-size:12px;color:#888;align-self:center}
+        .runs{display:flex;flex-direction:column;gap:6px}
+        .run{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:#262626;font-size:13px}.run>ha-icon{color:var(--c);flex:none}
+        .run span{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.run b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.run em{font-style:normal;font-size:11px;color:#999}
+        .run.w{border:1px dashed #E0A84F}.run.w>ha-icon{color:#E0A84F}.run.none{color:#777;font-size:12px;justify-content:center}
+        .add1{display:flex;align-items:center;justify-content:center;gap:6px;height:38px;border-radius:10px;border:1px dashed #4a4a4a;background:transparent;color:#bbb;font:inherit;font-size:13px;cursor:pointer}
+        .oas{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+        .oa{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:12px;background:#232323;border:1px solid #2a2a2a;border-top:3px solid color-mix(in srgb,var(--mc) 70%,transparent)}
+        .oa:not(.won) .md{filter:saturate(.75)}.ot{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.ot b{font-size:14px}.ot>span{font-size:12px;color:#aaa;line-height:1.35}
+        .om{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}.om em{font-style:normal;font-size:11px;color:#999;background:#2b2b2b;border-radius:9px;padding:2px 8px;display:inline-flex;align-items:center;gap:5px}.om em.pp{color:${G}}
+        .fc{display:flex;flex-direction:column;gap:5px;padding:10px 12px;border-radius:10px;background:#2b2b2b;font-size:12px;color:#bbb;margin-bottom:6px}.fc b{color:#eee;font-size:12px}
+        .fcp{display:flex;flex-wrap:wrap;gap:6px}.fcp em{font-style:normal;display:inline-flex;align-items:center;gap:5px;background:#232323;border-radius:12px;padding:2px 9px 2px 3px}
         .pc.on{border-color:var(--c);background:#262626}
         .pi{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.pi b{font-size:16px}
         .lv{font-size:12px;color:#aaa}.nx{font-size:11px;color:#777}
@@ -247,7 +314,10 @@
           <button class="tb" data-edit><ha-icon icon="${edit ? 'mdi:check' : 'mdi:pencil-outline'}"></ha-icon>${esc(edit ? T.editDone : T.edit)}</button>
           <button class="tb" data-bonus><ha-icon icon="mdi:star-plus-outline"></ha-icon>${esc(T.bonus)}</button></div>
         ${s.pin_default ? `<div class="warn"><ha-icon icon="mdi:shield-alert-outline"></ha-icon><span>${esc(T.startPin)}</span><button class="sg ok" data-chpin>${esc(T.changePin)}</button></div>` : ''}
+        ${openAw}
+        <div class="sec">${esc(T.fam)}</div>
         <div class="people">${cards}</div>
+        ${detail}
         ${pending}
         <div class="sec">${esc(sel ? fmt(T.shop, { name: sel.name }) : T.shopAll)}</div>${shop}
         ${history}

@@ -6,11 +6,12 @@ import time
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant, callback
 
-from .settings_spec import THEMES
+from .settings_spec import STYLES, THEMES
+
+TOKEN = vol.All(str, vol.Length(max=64))
 
 RULE = vol.Schema({
     vol.Optional("every", default=1): vol.All(vol.Coerce(int), vol.Range(min=1, max=8)),
@@ -89,6 +90,14 @@ async def _parent(connection: websocket_api.ActiveConnection, msg: dict[str, Any
     return False
 
 
+def _change(connection: websocket_api.ActiveConnection, msg: dict[str, Any], planner) -> bool:
+    """Every change (plan, people, lists, to-dos, design, settings) needs the parent PIN since 0.9.0.
+
+    Free without PIN: ticking off chores and to-dos, redeeming (asks the parents anyway), a person's picture.
+    """
+    return _may_edit(connection, msg, planner) and _unlocked(connection, msg, planner)
+
+
 def _not_found(connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
     connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Family Planer is not set up")
 
@@ -100,7 +109,7 @@ def async_register_websocket(hass: HomeAssistant) -> None:
                     ws_redeem, ws_decide, ws_adjust, ws_announce_test,
                     ws_pin_unlock, ws_pin_change, ws_settings_get, ws_settings_save, ws_person_save, ws_person_remove,
                     ws_list_save, ws_list_remove, ws_reward_save, ws_reward_remove,
-                    ws_todo_save, ws_todo_set, ws_todo_delete, ws_theme_set):
+                    ws_todo_save, ws_todo_set, ws_todo_delete, ws_theme_set, ws_vacation_decide, ws_person_order):
         websocket_api.async_register_command(hass, handler)
 
 
@@ -144,6 +153,7 @@ async def ws_set_item(hass: HomeAssistant, connection: websocket_api.ActiveConne
 
 @websocket_api.websocket_command({
     vol.Required("type"): "family_planer/chore/save", vol.Optional("entry_id"): str,
+    vol.Optional("token"): TOKEN,
     vol.Optional("chore_id"): vol.Any(str, None), vol.Required("title"): vol.All(str, vol.Length(min=1, max=120)),
     vol.Optional("assign", default={}): vol.All(
         {vol.All(str, vol.Length(max=80)): {vol.In(["1", "2", "3", "4", "5", "6", "7"]): RULE}}, vol.Length(max=50)),
@@ -170,7 +180,7 @@ async def ws_save_chore(hass: HomeAssistant, connection: websocket_api.ActiveCon
         _not_found(connection, msg)
         return
     try:
-        if not _may_edit(connection, msg, planner):
+        if not _change(connection, msg, planner):
             return
         cid = await planner.async_save_chore(msg.get("chore_id"), {
             "title": msg["title"], "assign": msg["assign"], "points": msg.get("points"),
@@ -183,7 +193,7 @@ async def ws_save_chore(hass: HomeAssistant, connection: websocket_api.ActiveCon
 
 
 @websocket_api.websocket_command({
-    vol.Required("type"): "family_planer/chore/delete", vol.Optional("entry_id"): str, vol.Required("chore_id"): str,
+    vol.Required("type"): "family_planer/chore/delete", vol.Optional("entry_id"): str, vol.Optional("token"): TOKEN, vol.Required("chore_id"): str,
 })
 @websocket_api.async_response
 async def ws_delete_chore(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
@@ -191,14 +201,14 @@ async def ws_delete_chore(hass: HomeAssistant, connection: websocket_api.ActiveC
     if planner is None:
         _not_found(connection, msg)
         return
-    if not _may_edit(connection, msg, planner):
+    if not _change(connection, msg, planner):
         return
     await planner.async_delete_chore(msg["chore_id"])
     connection.send_result(msg["id"])
 
 
 @websocket_api.websocket_command({
-    vol.Required("type"): "family_planer/person/update", vol.Optional("entry_id"): str,
+    vol.Required("type"): "family_planer/person/update", vol.Optional("entry_id"): str, vol.Optional("token"): TOKEN,
     vol.Required("person_id"): str,
     vol.Optional("color"): vol.Match(r"^#[0-9A-Fa-f]{6}$"),
     vol.Optional("image"): vol.All(str, vol.Length(max=200)),
@@ -211,9 +221,10 @@ async def ws_update_person(hass: HomeAssistant, connection: websocket_api.Active
     if planner is None:
         _not_found(connection, msg)
         return
-    if not _may_edit(connection, msg, planner):
-        return
     patch = {k: msg[k] for k in ("color", "image", "aliases") if k in msg}
+    # a person's picture may be changed without the PIN; colour and nicknames need it
+    if not (_may_edit(connection, msg, planner) if set(patch) <= {"image"} else _change(connection, msg, planner)):
+        return
     try:
         await planner.async_update_person(msg["person_id"], patch)
     except KeyError:
@@ -258,7 +269,7 @@ async def ws_upload_image(hass: HomeAssistant, connection: websocket_api.ActiveC
 
 
 @websocket_api.websocket_command({
-    vol.Required("type"): "family_planer/list/refresh", vol.Optional("entry_id"): str,
+    vol.Required("type"): "family_planer/list/refresh", vol.Optional("entry_id"): str, vol.Optional("token"): TOKEN,
     vol.Required("list_id"): str, vol.Optional("ai", default=True): bool,
 })
 @websocket_api.async_response
@@ -267,6 +278,8 @@ async def ws_list_refresh(hass: HomeAssistant, connection: websocket_api.ActiveC
     planner = _planner(hass, msg)
     if planner is None:
         _not_found(connection, msg)
+        return
+    if not _change(connection, msg, planner):
         return
     try:
         result = await planner.async_refresh_list(msg["list_id"], use_ai=msg["ai"])
@@ -277,7 +290,7 @@ async def ws_list_refresh(hass: HomeAssistant, connection: websocket_api.ActiveC
 
 
 @websocket_api.websocket_command({
-    vol.Required("type"): "family_planer/list/categories", vol.Optional("entry_id"): str,
+    vol.Required("type"): "family_planer/list/categories", vol.Optional("entry_id"): str, vol.Optional("token"): TOKEN,
     vol.Required("list_id"): str,
     vol.Required("categories"): vol.All([vol.Schema({
         vol.Optional("id"): vol.Any(str, None),
@@ -292,7 +305,7 @@ async def ws_list_categories(hass: HomeAssistant, connection: websocket_api.Acti
     if planner is None:
         _not_found(connection, msg)
         return
-    if not _may_edit(connection, msg, planner):
+    if not _change(connection, msg, planner):
         return
     try:
         await planner.async_set_categories(msg["list_id"], msg["categories"])
@@ -303,7 +316,7 @@ async def ws_list_categories(hass: HomeAssistant, connection: websocket_api.Acti
 
 
 @websocket_api.websocket_command({
-    vol.Required("type"): "family_planer/list/assign", vol.Optional("entry_id"): str,
+    vol.Required("type"): "family_planer/list/assign", vol.Optional("entry_id"): str, vol.Optional("token"): TOKEN,
     vol.Required("list_id"): str, vol.Required("item"): vol.All(str, vol.Length(min=1, max=255)),
     vol.Required("category_id"): str,
 })
@@ -313,6 +326,8 @@ async def ws_list_assign(hass: HomeAssistant, connection: websocket_api.ActiveCo
     planner = _planner(hass, msg)
     if planner is None:
         _not_found(connection, msg)
+        return
+    if not _change(connection, msg, planner):
         return
     try:
         await planner.async_assign(msg["list_id"], msg["item"], msg["category_id"])
@@ -390,7 +405,8 @@ async def ws_adjust(hass: HomeAssistant, connection: websocket_api.ActiveConnect
     connection.send_result(msg["id"])
 
 
-@websocket_api.websocket_command({vol.Required("type"): "family_planer/announce/test", vol.Optional("entry_id"): str})
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/announce/test", vol.Optional("entry_id"): str,
+                                  vol.Optional("token"): TOKEN})
 @websocket_api.require_admin
 @websocket_api.async_response
 async def ws_announce_test(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
@@ -399,11 +415,12 @@ async def ws_announce_test(hass: HomeAssistant, connection: websocket_api.Active
     if planner is None:
         _not_found(connection, msg)
         return
+    if not _change(connection, msg, planner):
+        return
     connection.send_result(msg["id"], {"message": await planner.announcer.async_check(force=True)})
 
 
 # ---------------------------------------------------------------------- parent PIN, settings page, rewards
-TOKEN = vol.All(str, vol.Length(max=64))
 ID = vol.All(str, vol.Length(max=40))
 DATA = vol.All(dict, vol.Length(max=60))
 
@@ -502,7 +519,7 @@ async def ws_person_save(hass: HomeAssistant, connection: websocket_api.ActiveCo
         return
     try:
         patch: dict[str, Any] = {"name": name}
-        for key in ("color", "calendar"):
+        for key in ("color", "calendar", "role", "image"):
             if key in data:
                 patch[key] = data[key]
         if "aliases" in data:
@@ -623,20 +640,18 @@ async def ws_reward_remove(hass: HomeAssistant, connection: websocket_api.Active
 
 # ---------------------------------------------------------------------- to-dos without a date
 @websocket_api.websocket_command({vol.Required("type"): "family_planer/theme/set", vol.Optional("entry_id"): str,
-                                  vol.Required("theme"): vol.In(list(THEMES)),
+                                  vol.Optional("theme"): vol.In(list(THEMES)), vol.Optional("style"): vol.In(list(STYLES)),
                                   vol.Optional("token"): TOKEN})
 @websocket_api.async_response
 async def ws_theme_set(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
-    """Quick design switch from the navigation bar; optionally protected by the parent PIN (setting)."""
+    """Design and style picker in the navigation bar (parent PIN, like every change)."""
     planner = _planner(hass, msg)
     if planner is None:
         _not_found(connection, msg)
         return
-    if not _may_edit(connection, msg, planner):
+    if not _change(connection, msg, planner):
         return
-    if planner.settings.get("theme_pin") and not _unlocked(connection, msg, planner):
-        return
-    await planner.async_update_settings({"theme": msg["theme"]})
+    await planner.async_update_settings({k: msg[k] for k in ("theme", "style") if k in msg})
     connection.send_result(msg["id"])
 
 
@@ -648,12 +663,12 @@ async def ws_theme_set(hass: HomeAssistant, connection: websocket_api.ActiveConn
                                   vol.Optional("token"): TOKEN})
 @websocket_api.async_response
 async def ws_todo_save(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
-    """Anyone who may edit the plan can add to-dos; own points per to-do need the parent PIN."""
+    """Adding or changing a to-do needs the parent PIN (since 0.9.0)."""
     planner = _planner(hass, msg)
     if planner is None:
         _not_found(connection, msg)
         return
-    if not _may_edit(connection, msg, planner):
+    if not _change(connection, msg, planner):
         return
     tid = msg.get("todo_id")
     if tid and tid not in planner.data["todos"]:
@@ -689,7 +704,7 @@ async def ws_todo_set(hass: HomeAssistant, connection: websocket_api.ActiveConne
     connection.send_result(msg["id"])
 
 
-@websocket_api.websocket_command({vol.Required("type"): "family_planer/todo/delete", vol.Optional("entry_id"): str,
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/todo/delete", vol.Optional("entry_id"): str, vol.Optional("token"): TOKEN,
                                   vol.Required("todo_id"): ID})
 @websocket_api.async_response
 async def ws_todo_delete(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
@@ -697,7 +712,41 @@ async def ws_todo_delete(hass: HomeAssistant, connection: websocket_api.ActiveCo
     if planner is None:
         _not_found(connection, msg)
         return
-    if not _may_edit(connection, msg, planner):
+    if not _change(connection, msg, planner):
         return
     await planner.async_delete_todo(msg["todo_id"])
+    connection.send_result(msg["id"])
+
+
+# ---------------------------------------------------------------------- 0.9.0: holiday check, order of persons
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/vacation/decide", vol.Optional("entry_id"): str,
+                                  vol.Required("key"): vol.All(str, vol.Match(r"^[0-9a-f]{16}$")),
+                                  vol.Required("decision"): vol.Any("away", "home", None),
+                                  vol.Optional("token"): TOKEN})
+@websocket_api.async_response
+async def ws_vacation_decide(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    """Holiday from the calendar: are we away (pause chores) or at home (keep them going)?"""
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    if not _change(connection, msg, planner):
+        return
+    await planner.async_vacation_decide(msg["key"], msg["decision"])
+    connection.send_result(msg["id"])
+
+
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/person/order", vol.Optional("entry_id"): str,
+                                  vol.Required("order"): vol.All([ID], vol.Length(max=30)),
+                                  vol.Optional("token"): TOKEN})
+@websocket_api.async_response
+async def ws_person_order(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    """Order of the persons everywhere (e.g. children on top, parents below)."""
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    if not _change(connection, msg, planner):
+        return
+    await planner.async_person_order(msg["order"])
     connection.send_result(msg["id"])

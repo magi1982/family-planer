@@ -38,6 +38,7 @@ eingerichtet, **kein YAML**.
   - [Bilder: Avatare oder eigenes Foto](#bilder-avatare-oder-eigenes-foto)
 - [Modul Smarte Listen](#modul-smarte-listen)
 - [Designs](#designs)
+- [Navigation](#navigation)
 - [Einstellungen im Planer](#einstellungen-im-planer)
 - [Vollbild per Doppeltippen](#vollbild-per-doppeltippen)
 - [Installation](#installation)
@@ -61,7 +62,7 @@ eingerichtet, **kein YAML**.
 | **Bedienung** | Eigener Eintrag in der Seitenleiste mit Navigation *Planer · Listen · Ämtliplan · Belohnungen · Einstellungen*; optional als Karten in eigenen Dashboards; Vollbild per Doppeltippen |
 | **Einrichtung** | Direkt im Planer (*Einstellungen*, mit Eltern-PIN) oder über *Einstellungen → Geräte & Dienste* – kein YAML |
 | **Sprachen** | Deutsch und Englisch – automatisch wie Home Assistant oder für den Planer fest auf Deutsch bzw. Englisch (z. B. Home Assistant auf Englisch, Planer auf Deutsch) |
-| **Designs** | Home Assistant, Loxone, Apple Home, Google Home, Hell, Nord |
+| **Designs** | Standard (Home Assistant), Hell, Dunkel, Regenbogen, Weltall – je als Standard, Transparent oder Glas |
 | **Abhängigkeiten** | Keine. Kalender, Listen, Lautsprecher und KI sind optional – es funktioniert jede passende Entität |
 | **Voraussetzung** | Home Assistant 2026.3 oder neuer |
 
@@ -138,11 +139,29 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 
 ![Belohnungen](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/rewards.png)
 
-- **Zuverlässigkeit** in Prozent (30 Tage), farbiges Band pro Person; Neue starten mit 100 % (*Startbonus*).
+- **Zuverlässigkeit** in Prozent (30 Tage), farbiges Band pro Person.
 - **Faire Punkte** (Standard): Wer **alle** Ämtli des Tages erledigt, bekommt gleich viele Punkte (Standard 30) – egal ob 2 oder 6 Ämtli. Jedes erledigte Ämtli bringt sofort seinen Anteil; 3 von 6 erledigt = 50 % = 15 Punkte. Die Punkte im Ämtliplan wirken als Gewicht (ein schweres Ämtli mit 20 zählt doppelt so viel wie eines mit 10). Alternativ Modus *Pro Ämtli*: mehr Ämtli, mehr Punkte.
 - **Punkte**: zusätzlich **Tagesbonus** für einen ganz erledigten Tag, **Serienbonus** für jede 7-Tage-Serie. Wird ein Ämtli wieder geöffnet, werden die Punkte zurückgebucht.
 - **10 Level** von *Starter* über *Profi* und *Held* bis *Grossmeister* – mit Fortschrittsbalken. Eingelöste Punkte senken das Level nie.
-- **Auszeichnungen**: 👑 Krone der Woche, 🏆 Pokal des Monats, 🐝 Fleissbiene, ⭐ Perfekte Woche, 🔥 Serie, 🚀 Startbonus – antippen zeigt, warum.
+- **Auszeichnungen und Pokale** – jede hat einen Zeitraum, damit niemand drei Pokale am Tag sammelt:
+
+  | Auszeichnung | Gewonnen | Rahmen / Punkte (Standard) |
+  |---|---|---|
+  | 🏆 Pokal des Monats | beste Quote des Vormonats, am Monatsersten | **Platin**-Rahmen · gross |
+  | 👑 Krone der Woche | beste Quote der Vorwoche, am Montag | **Gold**-Rahmen · mittel |
+  | ⭐ Perfekte Woche | eine ganze Woche alle Ämtli erledigt | **Silber**-Rahmen · mittel |
+  | 🐝 Fleissbiene | am meisten erledigt in einer Woche | **Bronze**-Rahmen · klein |
+  | 🛡️ Wochenend-Held | Samstag und Sonntag alles erledigt | klein |
+  | 📈 Aufsteiger | mindestens 15 Punkte besser als in der Vorwoche | mittel |
+  | 🌅 Frühaufsteher | an 4 Tagen der Woche alles vor 12 Uhr erledigt (einstellbar) | klein |
+  | 💎 Diamant-Serie | 30 Tage am Stück alles erledigt | riesig |
+  | 🏅 Meilensteine | 100, 500 und 1000 Ämtli insgesamt | mittel |
+  | 👪 Familien-Teamwork | die ganze Familie hat an einem Tag alles erledigt | klein |
+  | 🔥 Serie | Tage am Stück (wechselt täglich, keine Punkte) | – |
+
+- Die **beste Auszeichnung legt einen Metall-Rahmen** ums Bild (Platin, Gold, Silber, Bronze) mit sanftem Glanz; die Krone sitzt gerade über dem Kopf.
+- **Punkte pro Auszeichnung**: einmal pro Gewinn, und wieder, wenn man sie neu gewinnt. Grössen: klein = ⅓, mittel = ⅔, gross = 1×, riesig = 2× der Punkte für einen ganzen Tag. Jede Auszeichnung lässt sich unter *Einstellungen → Punkte* ausschalten oder anders gewichten.
+- **Konfetti für alle** (auch Erwachsene): kleines Konfetti mit Namen, wenn jemand alle Ämtli des Tages erledigt hat; mittleres oder grosses in der Pokalfarbe bei Pokalen. Höchstens ein grosses Konfetti pro Person und Tag; täglich wechselnde Auszeichnungen (Serie, Fleissbiene, Frühaufsteher) bekommen keines. Abschaltbar; berücksichtigt *Bewegung reduzieren*.
 - **Fair auch bei Prozent und Auszeichnungen**: Im Modus *Fair* zählt bei der Zuverlässigkeit, der Krone der Woche, dem Pokal des Monats und der Fleissbiene **jeder Tag gleich viel** – egal ob 2 oder 6 Ämtli. Die Quote ist der Durchschnitt der Tagesquoten; die Fleissbiene hat die meisten ganzen Ämtli-Tage. Im Modus *Pro Ämtli* zählen wie bisher die einzelnen Ämtli.
 - **Verlauf** pro Person: Ämtli, Boni, Belohnungen.
 
@@ -161,7 +180,10 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
   | Riesig | 5 × Gross | 5650 | ca. 100 |
 
   Ändern sich die Punkte-Einstellungen, passen sich die Kosten automatisch an. Für Spezialfälle gibt es weiterhin *Eigene Punkte*. Der **Gegenwert einer grossen Belohnung** (z. B. 20 CHF) ist einstellbar und dient nur zur Orientierung.
-- **Ansicht**: Ohne Auswahl zeigt die Seite **alle Belohnungen** – jede mit den **Personen, für die sie gilt** (Bild + Name, sonst „Für alle“) – und alle offenen Anfragen. Tippt man eine Person an (oder ihren Namen bei einer Belohnung), erscheinen nur ihre Belohnungen und Anfragen, und sie kann einlösen. Nochmals antippen hebt die Auswahl auf.
+- **Ansicht**: oben **Noch zu gewinnen** – jeder Pokal, den gerade niemand hat, mit Regel, Zeitpunkt der Vergabe, Punkten und wer vorne liegt.
+- Darunter eine **Kachel pro Person** wie im Planer: Bild mit Rahmen, Medaillen, Punkte und Level, **was gerade läuft** (Anfragen, die auf Freigabe warten, Belohnungen für diese Person bzw. das nächste Ziel mit Fortschritt und *„in ca. 6 Tagen“*) und ein Knopf **„+ Belohnung“**, der eine Belohnung genau für diese Person anlegt (Eltern-PIN).
+- Antippen einer Person zeigt ihre Auszeichnungen, Belohnungen und den Verlauf; ohne Auswahl sieht man alle Belohnungen mit den Personen, für die sie gelten.
+- **Prognose** im Belohnungs-Dialog: wie viele Tage der Familienschnitt für die gewählten Kosten braucht, und wie lange jede Person mit ihrem aktuellen Tempo braucht.
 - Kinder lösen am Tablet ein; Punkte werden reserviert, bis die Eltern entscheiden.
 - Eltern geben frei als **Admin** oder am Tablet mit **Eltern-PIN** (4–8 Ziffern). Mitteilung in Home Assistant und optional aufs Handy.
 - **Punkte geben**: Bonus (oder Abzug) mit Grund, z. B. „Zimmer super aufgeräumt“ – mit denselben Grössen wie bei den To-dos (**Klein · Mittel · Gross**) oder einer eigenen Zahl.
@@ -169,7 +191,8 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 ### Eltern-PIN
 
 - **Start-PIN `123456`** – sie muss **beim ersten Gebrauch geändert werden** (aktuelle PIN, neue PIN, wiederholen). Bis dahin lassen sich Belohnungen und Einstellungen nicht ändern, und Home Assistant zeigt einen Reparaturhinweis.
-- Die PIN schützt: **Belohnungen anlegen/ändern**, die **Einstellungs-Seite**, Freigaben und Punkte geben (Admins dürfen Freigaben und Punkte auch ohne PIN).
+- **Was die PIN braucht**: jede Änderung – Ämtli und Ämtliplan, besondere Ämtli, To-dos (anlegen/löschen), Personen (Name, Farbe, Kalender, Rolle, Reihenfolge), Listen, Belohnungen, das Design, Ferien-Entscheide und die Einstellungs-Seite. Ebenso Freigaben und Punkte geben (Admins dürfen diese beiden auch ohne PIN).
+- **Was ohne PIN geht**: Ämtli und To-dos abhaken, Belohnungen einlösen und **Bilder ändern** (Figur, Frisur, Hautfarbe, Extras, Verkleidung) – jeder darf jedes Bild ändern.
 - 4–8 Ziffern, nie wieder `123456`; nach 5 Fehlversuchen 5 Minuten gesperrt; gespeichert nur als PBKDF2-Hash.
 - Nach einmaliger Eingabe bleibt der Planer **10 Minuten** entsperrt (verlängert sich beim Arbeiten, *Sperren* beendet es sofort). Die PIN selbst wird nie im Browser gespeichert.
 - Ändern jederzeit: *Belohnungen → Bearbeiten → PIN ändern* oder *Einstellungen → Eltern-PIN ändern*. Vergessen? *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren → Punkte & Belohnungen → Eltern-PIN auf 123456 zurücksetzen* (nur Admins).
@@ -215,7 +238,8 @@ data:
 
 ![Bildauswahl](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/avatars.png)
 
-- Viele **bunte, gezeichnete Avatare**: Mädchen, Jungen, Frauen, Männer, Grosseltern, Verkleidete (Held, Astronaut, Pirat, Zauberer, Krone, Katze …).
+- **Avatar-Baukasten**: Figur (Kind, Erwachsen, Grosseltern), 12 Frisuren, 12 Haarfarben (auch Rosa, Blau, Lila, Grün), **9 Hautfarben**, frei kombinierbare Extras (Sommersprossen, Bart, Kopfhörer, Brille, Sonnenbrille, Cap, Krone, Katzenohren, Einhorn, Schleife, Stirnband) und **Verkleidungen**: unsere eigenen Helden *Sternenkraft*, *Funkenflug* und *Mondfee*, Ninja, Ritter, Astronaut, Pirat und Zauberer. Teile, die sich beissen würden (z. B. ein Cap unter dem Ritterhelm), werden automatisch weggelassen – so sieht jede Kombination gut aus; ein automatischer Test zeichnet alle durch.
+- Dazu viele fertige Avatare: Mädchen, Jungen, Frauen, Männer, Grosseltern, Verkleidete.
 - **Eigenes Foto hochladen**: wird im Browser quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.
 - Farbe pro Person und Spitznamen direkt im Ämtliplan änderbar.
 
@@ -238,20 +262,24 @@ data:
 
 ## Designs
 
-| Home Assistant | Loxone | Apple Home | Google Home | Hell | Nord |
-|---|---|---|---|---|---|
-| übernimmt dein HA-Design (Farben, Rundungen) | dunkel, Grün | schwarz, Orange | Material You | weiss, Blau | Nord-Farben |
+| Standard | Hell | Dunkel | Regenbogen | Weltall |
+|---|---|---|---|---|
+| übernimmt dein Home-Assistant-Design | weiss, Blau | dunkel, Grün | dunkel mit Regenbogen-Band und farbigem Schimmer | tiefblau mit Sternen und Nebel |
 
-![Design Hell](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/theme-light.png)
+Jedes Design gibt es in drei **Stilen**: *Standard*, *Transparent* und *Glas* (Milchglas-Flächen über dem Hintergrund des Designs). Ältere Designs (Loxone, Apple, Google, Nord) werden automatisch auf *Dunkel* umgestellt.
 
-**Design wechseln wie in einer App**: oben rechts in der Navigation zeigt eine kleine Farbprobe das aktuelle Design. Antippen öffnet die Auswahl mit einer **Mini-Vorschau** jedes Designs, ein Tipp wechselt sofort, für alle Geräte.
+**Design wechseln wie in einer App**: oben rechts in der Navigation zeigt eine kleine Farbprobe das aktuelle Design. Antippen öffnet die Auswahl mit einer **Mini-Vorschau** jedes Designs und dem Stil; ein Tipp wechselt sofort, für alle Geräte. Das Wechseln braucht die Eltern-PIN.
 
-![Design-Auswahl](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/design-picker.png)
+- Weiterhin auch unter *Einstellungen → Allgemein* und *Konfigurieren → Design, Sprache & Seitenleiste*. Karten in eigenen Dashboards können es mit `theme:` / `style:` überschreiben. `theme_picker: false` an der Navigationskarte blendet die Auswahl aus.
+- Ein eigenes Dashboard kann den Hintergrund des Designs mit `background: var(--fp-page)` an der Ansicht übernehmen.
 
-- Optional **nur mit Eltern-PIN** (*Einstellungen → Allgemein → Design-Wechsel nur mit Eltern-PIN*), damit Kinder das Aussehen nicht ändern.
-- Weiterhin auch unter *Konfigurieren → Design, Sprache & Seitenleiste*. Karten in eigenen Dashboards können es mit `theme:` überschreiben. `theme_picker: false` an der Navigationskarte blendet die Auswahl aus.
+## Navigation
 
----
+- Eine Zeile: links **Uhrzeit und Datum** (oder der Titel des Planers), in der Mitte die Seiten, rechts der **Ferien-Check** 🌴 und die Design-Auswahl.
+- **Ferien-Check**: Stehen Ferien im Kalender, zeigt ein Zähler, wie viele noch offen sind. Pro Ferien wählt man *Wir sind weg* (Ämtli pausieren) oder *Wir sind zu Hause* (Ämtli laufen weiter). Eltern-PIN.
+- **Reihenfolge und sichtbare Knöpfe** unter *Einstellungen → Allgemein*. Zeigt ein Knopf auf eine Ansicht, die es im Dashboard nicht gibt, erscheint er gestrichelt mit Hinweis statt einer leeren Seite.
+- **Heute**: Eine rote Jetzt-Linie trennt vergangene und kommende Termine, beim nächsten steht *in 25 Min*; beim Abhaken gibt es eine kleine Häkchen-Animation.
+- **Handy**: Der Planer zeigt nur heute, mit ‹ › Pfeilen und Wischen für die anderen Tage; nach der Ruhezeit springt er zurück auf heute.
 
 ## Einstellungen im Planer
 
@@ -259,7 +287,7 @@ data:
 
 Alles, was die Home-Assistant-Dialoge bieten, auf einer übersichtlichen Seite – auch am Tablet: **Einstellungen** in der Navigation.
 - Geschützt mit der **Eltern-PIN** (immer, auch für Admins).
-- Register: *Allgemein* (Module, Sprache, Design, Vollbild, Seitenleiste, Tageswechsel …), *Personen & Schule* (Name, Farbe, Kalender, Spitznamen, Schulkalender, Blöcke pro Wochentag, Schulweg), *Ferien*, *Punkte*, *To-dos*, *Ansagen* (Entitäten aus Listen wählen), *Listen*.
+- Register: *Allgemein* (Module, Sprache, Design und Stil, Reihenfolge der Navigation, Vollbild, Seitenleiste, Tageswechsel …), *Personen* (Reihenfolge, Rolle Kind/Erwachsen, Bild-Baukasten, Farbe, Kalender, Spitznamen, Schulkalender, Blöcke pro Wochentag, Schulweg), ***Ämtli*** (der ganze Ämtliplan inkl. besondere Ämtli und To-dos – die eigene Ämtliplan-Seite ist standardmässig ausgeblendet), *Punkte* (inkl. jeder Auszeichnung mit ein/aus und Grösse, Frühaufsteher-Zeit, Konfetti), *To-dos*, *Listen*, *Ferien* (inkl. Entscheid weg / zu Hause), *Ansagen*, ***Status*** (letzter erfolgreicher Abgleich und letzter Fehler pro Kalender, Liste und Tageswechsel).
 - Jedes Feld mit kurzer Beschreibung; ungültige Eingaben werden mit klarer Meldung abgelehnt (z. B. Ansagen ohne Lautsprecher).
 - Änderungen, die neue Zeitpläne brauchen (Tageswechsel, Module, Listen, Ansagen), laden die Integration automatisch neu; der Planer verbindet sich selbst wieder.
 - Die Dialoge unter *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren* bleiben verfügbar.
@@ -304,7 +332,8 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Einstellung | Standard | Bedeutung |
 |---|---|---|
 | Sprache des Family Planers | Automatisch | *Automatisch*: wie im Profil bzw. Home Assistant · *Deutsch* oder *English*: gilt fest für Planer, Tablet-Ansichten, Ansagen, Benachrichtigungen und Level-Namen – unabhängig von der Sprache von Home Assistant. Die Einstellungsseiten selbst folgen der Sprache deines Profils. |
-| Design | Loxone | Home Assistant, Loxone, Apple Home, Google Home, Hell, Nord |
+| Design | Standard | Standard (Home Assistant), Hell, Dunkel, Regenbogen, Weltall |
+| Stil | Standard | Standard, Transparent, Glas |
 | Eintrag in der Seitenleiste | ein | Öffnet den kompletten Planer ohne eigenes Dashboard |
 | Titel in der Seitenleiste | Name | Text in der Seitenleiste |
 | Zurück zur Startansicht nach | 45 s | Angetippter Tag / Person springt danach zurück zu heute |
@@ -479,10 +508,11 @@ Nicht nötig – aber möglich. Die Karten werden automatisch geladen.
 type: vertical-stack
 cards:
   - type: custom:family-planer-nav-card
-    paths: { planer: planer, listen: einkauf, aemtliplan: aemtliplan, belohnungen: belohnungen }
+    paths: { planer: planer, listen: einkauf, belohnungen: belohnungen, einstellungen: einstellungen }
   - type: custom:family-planer-card
     view: week        # week | plan | lists | rewards | settings
-    theme: apple      # optional
+    theme: space      # optional: ha | light | dark | rainbow | space
+    style: glass      # optional: standard | transparent | glass
     language: de      # optional, sonst Einstellung der Integration bzw. HA-Sprache
 ```
 

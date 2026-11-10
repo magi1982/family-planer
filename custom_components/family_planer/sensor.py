@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import FamilyPlanerConfigEntry, engine
+from . import awards as fp_awards
 from .const import MODULE_WEEK
 from .entity import PersonEntity
 
@@ -49,15 +50,16 @@ class ReliabilitySensor(PersonEntity, SensorEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         s = self._stats()
         all_stats = self.planner.stats()
-        awards = engine.awards(all_stats, self.planner.points_mode() == "fair").get(self.person_id, [])
+        streaks = {p: x["streak"] for p, x in all_stats.items()}
+        awards = fp_awards.person_awards(self.planner.data, streaks).get(self.person_id, [])
         return {
             "open_today": s["open_today"],
             "done_today": s["done_today"],
             "streak": s["streak"],
             "week_done": s["week"][0], "week_total": s["week"][1],
             "month_done": s["month"][0], "month_total": s["month"][1],
-            "start_bonus": s["start_bonus"],
             "awards": [a["id"] for a in awards],
+            "frame": fp_awards.frame(awards),
         }
 
 

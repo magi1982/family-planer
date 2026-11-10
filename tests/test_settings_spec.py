@@ -17,7 +17,7 @@ def test_general_clamps_and_flags():
     cur = {"modules": {"week": True, "lists": True}, "panel": {"enabled": True, "title": ""}, "rollover_time": "00:00"}
     patch, flags = S.general({"theme": "evil", "language": "fr", "idle_seconds": 99999, "rollover_time": "03:00",
                               "reliability_days": 1, "panel_title": "<b>x</b>" * 20}, cur)
-    assert patch["theme"] == "loxone" and patch["language"] == "auto"
+    assert patch["theme"] == "ha" and patch["language"] == "auto" and patch["style"] == "standard"
     assert patch["idle_seconds"] == 600 and patch["reliability_days"] == 7
     assert len(patch["panel"]["title"]) <= 40
     assert patch["rollover_time"] == "03:00" and {"reload", "rollover"} <= flags
@@ -91,9 +91,26 @@ def test_reward_value_and_currency():
     assert patch["reward_value"] == 0
 
 
-def test_theme_pin_and_theme_kept():
+def test_theme_style_migration_and_nav():
     cur = {"theme": "apple", "modules": {"week": True, "lists": True}, "panel": {}}
-    patch, _ = S.general({"theme_pin": True}, cur)
-    assert patch["theme_pin"] is True and patch["theme"] == "apple"  # saving the page keeps the picked design
-    patch, _ = S.general({"theme": "evil"}, cur)
-    assert patch["theme"] == "apple" and patch["theme_pin"] is False
+    patch, _ = S.general({}, cur)
+    assert patch["theme"] == "dark" and patch["style"] == "standard"  # designs of 0.8 map onto the new set
+    patch, _ = S.general({"theme": "space", "style": "glass"}, cur)
+    assert patch["theme"] == "space" and patch["style"] == "glass"
+    patch, _ = S.general({"theme": "evil", "style": "<x>"}, {**cur, "theme": "rainbow", "style": "transparent"})
+    assert patch["theme"] == "rainbow" and patch["style"] == "transparent"
+    assert "theme_pin" not in patch
+    nav = S.clean_nav({"order": ["belohnungen", "evil", "planer"], "hidden": ["einstellungen", "listen", "x"]})
+    assert nav["order"][:2] == ["belohnungen", "planer"] and set(nav["order"]) == set(S.NAV_IDS)
+    assert nav["hidden"] == ["listen"]  # settings can never be hidden
+    assert S.clean_nav(None)["hidden"] == ["aemtliplan"]
+
+
+def test_award_settings_in_points_section():
+    game = {"default_points": 10, "day_points": 30, "day_bonus": 5, "streak_bonus": 20}
+    patch, _ = S.points({"awards": {"items": {"crown": {"on": False, "size": "xl"}, "bee": {"size": "huge"}},
+                                    "early_time": "25:00", "confetti": False}}, game, "fair", [])
+    aw = patch["awards"]
+    assert aw["items"]["crown"] == {"on": False, "size": "xl"}
+    assert aw["items"]["bee"]["size"] == "s" and aw["items"]["bee"]["on"] is True  # invalid size -> default
+    assert aw["early_time"] == "12:00" and aw["confetti"] is False

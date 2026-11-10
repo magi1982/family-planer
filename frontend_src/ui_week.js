@@ -31,6 +31,20 @@ const dueTag = (m, tStr) => { const e = m.e || m.d; if (!e) return ''; if (e > t
 const durTxt = (ms, short) => { const m = Math.max(0, Math.round(ms / 60000)); const h = Math.floor(m / 60), r = m % 60;
   if (short) return h ? (r ? `${h}h${pad(r)}` : `${h}h`) : `${m}′`;
   return h ? (r ? `${h} h ${r} Min` : `${h} h`) : `${m} Min`; };
+// nächster Termin: „in 25 Min“; vorbei = abgeblendet
+const SOON_T = ['in {n} Min', 'in {n} Std'];
+const evState = (e) => { if (e.allDay) return { c: '', b: '' }; const now = new Date();
+  if (e.e <= now) return { c: ' past', b: '' };
+  const m = Math.round((e.s - now) / 60000);
+  if (m > 0 && m <= 180) return { c: ' soon', b: `<em class="soon">${(m < 60 ? SOON_T[0] : SOON_T[1]).replace('{n}', m < 60 ? m : Math.round(m / 6) / 10)}</em>` };
+  if (e.s <= now) return { c: ' now', b: '' };
+  return { c: '', b: '' }; };
+// Jetzt-Linie zwischen vergangenen und kommenden Terminen von heute
+const nowLine = () => { const n = new Date(); return `<div class="nowl"><span>${pad(n.getHours())}:${pad(n.getMinutes())}</span></div>`; };
+const withNow = (list, today, html) => { if (!today) return list.map(html).join(''); const now = new Date(); let put = false;
+  const out = list.map((e) => { let pre = ''; if (!put && !e.allDay && e.s > now) { put = true; pre = nowLine(); } return pre + html(e); });
+  if (!put && list.some((e) => !e.allDay)) out.push(nowLine());
+  return out.join(''); };
 const evTime = (e, wide) => {
   if (e.allDay) { const n = Math.round((e.e - e.s) / 86400000); return `<b>${wide ? 'Ganztägig' : 'Ganzt.'}</b>${n > 1 ? `<span class="du">${n} Tage</span>` : ''}`; }
   const t = (x) => pad(x.getHours()) + ':' + pad(x.getMinutes());
@@ -42,6 +56,47 @@ const level = (p) => p === null ? { c: '#5a5a5a', t: 'Noch keine Daten' }
   : p >= 50 ? { c: '#E0A84F', t: 'Geht noch besser' }
   : { c: '#E06B6B', t: 'Unzuverlässig' };
 // Avatare (flache SVG-Portraits): maedchen-lang, maedchen-zoepfe, maedchen-dutt, frau, mann
+// Auszeichnungen: Titel und Erklärung (Titel, warum man sie hat)
+const AWT = {
+  trophy: ['Pokal des Monats', 'Beste Quote im letzten Monat.'],
+  crown: ['Krone der Woche', 'Beste Quote der letzten Woche.'],
+  perfect: ['Perfekte Woche', 'Letzte Woche alle Ämtli erledigt.'],
+  bee: ['Fleissbiene', 'Am meisten erledigt in der letzten Woche.'],
+  weekend: ['Wochenend-Held', 'Am Wochenende alles erledigt.'],
+  climber: ['Aufsteiger', 'Am meisten verbessert gegenüber der Vorwoche.'],
+  early: ['Frühaufsteher', 'An mindestens 4 Tagen alles vor {t} Uhr erledigt.'],
+  diamond: ['Diamant-Serie', '{n} Tage am Stück alles erledigt.'],
+  milestone: ['Meilenstein {n}', '{n} Ämtli insgesamt erledigt.'],
+  team: ['Familien-Teamwork', 'Gestern hat die ganze Familie alles erledigt.'],
+  streak: ['{n}-Tage-Serie', '{n} Tage am Stück alles erledigt.'],
+};
+// So gewinnt man sie (Regel-Liste in den Personendetails)
+const AWR = [
+  ['trophy', 'mdi:trophy', '#D9E4F0', 'Pokal des Monats', 'Beste Quote eines ganzen Monats (mind. 10 Ämtli/Tage) – vergeben am Monatsersten.'],
+  ['crown', 'mdi:crown', '#F5C542', 'Krone der Woche', 'Beste Quote einer Woche (mind. 3 Ämtli/Tage) – vergeben jeden Montag.'],
+  ['perfect', 'mdi:star-four-points', '#C9D1D9', 'Perfekte Woche', 'Eine ganze Woche alle Ämtli erledigt (mind. 5).'],
+  ['bee', 'mdi:bee', '#CD8A4E', 'Fleissbiene', 'Am meisten erledigt in einer Woche (im Modus Fair: die meisten ganzen Tage).'],
+  ['weekend', 'mdi:shield-star', '#E06B6B', 'Wochenend-Held', 'Samstag und Sonntag alles erledigt.'],
+  ['climber', 'mdi:trending-up', '#4FD1C5', 'Aufsteiger', 'Mindestens 15 Prozentpunkte besser als in der Vorwoche.'],
+  ['early', 'mdi:weather-sunset-up', '#FFB74D', 'Frühaufsteher', 'An mindestens 4 Tagen der Woche alles vor {t} Uhr erledigt.'],
+  ['diamond', 'mdi:diamond-stone', '#7FDBFF', 'Diamant-Serie', '30 Tage am Stück alles erledigt.'],
+  ['milestone', 'mdi:medal', '#E0A84F', 'Meilenstein', '100, 500 und 1000 Ämtli insgesamt erledigt.'],
+  ['team', 'mdi:account-group', '#C771D6', 'Familien-Teamwork', 'An einem Tag erledigt die ganze Familie alles.'],
+];
+// Rahmen, Krone und Medaillen – auch von der Belohnungs-Ansicht genutzt
+const AWCSS = `.crown{position:absolute;top:-13px;left:0;right:0;margin:0 auto;width:20px;height:18px;justify-content:center;color:#F5C542;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7)) drop-shadow(0 0 4px rgba(245,197,66,.55));z-index:3;display:flex}.crown ha-icon{--mdc-icon-size:20px}
+.ring[class*=fr-]{padding:3px;box-sizing:content-box;border-radius:50%;margin:3px}.ring[class*=fr-]::before{content:"";position:absolute;inset:0;border-radius:50%;padding:3px;background:var(--fr);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;z-index:1;pointer-events:none}
+.ring[class*=fr-]::after{content:"";position:absolute;inset:0;border-radius:50%;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%);background-size:250% 100%;mix-blend-mode:overlay;animation:fpshine 4.5s ease-in-out infinite;pointer-events:none;z-index:2}
+.ring.fr-platinum{--fr:conic-gradient(from 200deg,#f7fbff,#9fb3cc,#ffffff,#b9c9de,#e9f2ff,#8ea4c0,#f7fbff);filter:drop-shadow(0 0 6px rgba(190,215,255,.45))}
+.ring.fr-gold{--fr:conic-gradient(from 200deg,#fff4b8,#d4a017,#fff7cf,#b8860b,#ffe27a,#a87a0a,#fff4b8);filter:drop-shadow(0 0 6px rgba(245,197,66,.45))}
+.ring.fr-silver{--fr:conic-gradient(from 200deg,#ffffff,#a8b1bc,#f3f5f8,#8a939e,#e2e6eb,#7d8792,#ffffff)}
+.ring.fr-bronze{--fr:conic-gradient(from 200deg,#ffd0a0,#a35a28,#ffdcb8,#8a4a22,#e7a46c,#7a3f1c,#ffd0a0)}
+@keyframes fpshine{0%,60%{background-position:150% 0}100%{background-position:-60% 0}}
+@media (prefers-reduced-motion:reduce){.ring[class*=fr-]::after{animation:none;display:none}}
+.md{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 32% 28%,color-mix(in srgb,var(--mc) 55%,#fff) 0%,var(--mc) 45%,color-mix(in srgb,var(--mc) 60%,#000) 100%);border:1px solid color-mix(in srgb,var(--mc) 70%,#fff);color:#1b1b1b;display:inline-flex;align-items:center;justify-content:center;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.45)}.md ha-icon{--mdc-icon-size:13px}
+.ring{position:relative;width:48px;height:48px;flex:none}
+.ring .ava{display:block;width:48px;height:48px;border-radius:50%;overflow:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
+.ring .ava > span{width:100%!important;height:100%!important;border-radius:50%}.ring .ava svg{display:block}`;
 const SKIN = '#F3CDA6', HAIR = '#EBC55A', HAIR2 = '#D4A63B';
 const AV_TYPES = ['maedchen-lang', 'maedchen-zoepfe', 'maedchen-dutt', 'frau', 'mann'];
 const avatarSvg = (type, bg) => {
@@ -70,8 +125,9 @@ const avatarBase = (k, size) => (k.avatar && AV_TYPES.includes(k.avatar))
   ? `<span class="avs" style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;display:inline-flex;flex:none">${avatarSvg(k.avatar, k.farbe)}</span>`
   : `<span style="width:${size}px;height:${size}px;border-radius:50%;background:${k.farbe};display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.round(size * 0.42)}px;color:#161616;flex:none">${esc((k.name || '?').charAt(0).toUpperCase())}</span>`;
 // Avatar-Baukasten: 'av:<alter>.<frisur>.<haarfarbe>.<haut>.<extras>'  alter k=Kind e=Erwachsen o=Grosseltern; extras mit + verbunden, 0 = keine
-const AV_HC = { blond: ['#EBC55A', '#D4A63B'], braun: ['#8B5A2B', '#6E4520'], schwarz: ['#3A3330', '#26211F'], rot: ['#D2662F', '#A9491E'], grau: ['#CDD1D5', '#A9AEB3'] };
-const AV_SK = { hell: '#F3CDA6', mittel: '#E3B48A', oliv: '#C99167', dunkel: '#8D5A3B' };
+const AV_HC = { platin: ['#F2E6C2', '#D9C998'], blond: ['#EBC55A', '#D4A63B'], hellbraun: ['#B5814A', '#94663A'], braun: ['#8B5A2B', '#6E4520'], schwarz: ['#3A3330', '#26211F'], rot: ['#D2662F', '#A9491E'],
+  grau: ['#CDD1D5', '#A9AEB3'], weiss: ['#F1F1F1', '#D2D2D2'], rosa: ['#F49AC1', '#D9779F'], blau: ['#5FA8E8', '#3F86C6'], lila: ['#A98BE8', '#8566C9'], gruen: ['#5CC98A', '#3FA56B'] };
+const AV_SK = { porzellan: '#FBE3CF', hell: '#F3CDA6', pfirsich: '#EDBB8F', mittel: '#E3B48A', oliv: '#C99167', karamell: '#B07A52', dunkel: '#8D5A3B', tief: '#6B4129', espresso: '#4A2C1C' };
 const AV_HB = {
   long: (c) => `<path d="M10.5 19c0-7.5 4.2-12 9.5-12s9.5 4.5 9.5 12v13c0 2-2 3.5-4 3.5h-11c-2 0-4-1.5-4-3.5z" fill="${c}"/>`,
   zoepfe: (c) => `<ellipse cx="9.6" cy="22.5" rx="2.8" ry="5.4" fill="${c}"/><ellipse cx="30.4" cy="22.5" rx="2.8" ry="5.4" fill="${c}"/>`,
@@ -92,10 +148,18 @@ const AV_HF = {
   glatze: (c) => `<path d="M12.2 20.5c-.9-2.2-.5-4.6.8-5.6.5 1.9.6 3.6-.8 5.6zM27.8 20.5c.9-2.2.5-4.6-.8-5.6-.5 1.9-.6 3.6.8 5.6z" fill="${c}"/>`
 };
 const AV_ST = { long: ['long', 'long'], ponylang: ['long', 'pony'], zoepfe: ['zoepfe', 'zoepfe'], dutt: ['dutt', 'dutt'], bob: ['bob', 'pony'], locken: ['locken', 'locken'], pferd: ['pferd', 'seite'], kurz: [null, 'kurz'], seite: [null, 'seite'], stachel: [null, 'stachel'], lockenkurz: [null, 'locken'], glatze: [null, 'glatze'] };
+const AV_MASK = (c) => `<path d="M12.3 16.6c2.2-1 5-1 7.7.2 2.7-1.2 5.5-1.2 7.7-.2-.2 2.4-1.6 4-3.6 4-1.6 0-2.8-.8-4.1-2-1.3 1.2-2.5 2-4.1 2-2 0-3.4-1.6-3.6-4z" fill="${c}"/><circle cx="16.8" cy="18.2" r="1.25" fill="#fff"/><circle cx="23.2" cy="18.2" r="1.25" fill="#fff"/><circle cx="16.9" cy="18.3" r=".6" fill="#222"/><circle cx="23.1" cy="18.3" r=".6" fill="#222"/>`;
 const AV_ACC = {
+  sommersprossen: () => `<g fill="#B5774F" opacity=".7"><circle cx="15.6" cy="20.5" r=".38"/><circle cx="16.7" cy="21.3" r=".34"/><circle cx="15.1" cy="21.7" r=".32"/><circle cx="24.4" cy="20.5" r=".38"/><circle cx="23.3" cy="21.3" r=".34"/><circle cx="24.9" cy="21.7" r=".32"/></g>`,
+  sonnenbrille: () => `<g fill="#1d1d24"><rect x="14.3" y="16.9" width="5.1" height="3.6" rx="1.5"/><rect x="20.6" y="16.9" width="5.1" height="3.6" rx="1.5"/></g><path d="M19.4 18h1.2M12.5 17.5l1.8.3M27.5 17.5l-1.8.3" stroke="#1d1d24" stroke-width=".8"/><path d="M15.2 17.7l1.4-.1M21.5 17.7l1.4-.1" stroke="#fff" stroke-width=".5" opacity=".6"/>`,
+  stirnband: () => `<path d="M12.1 13.8c4.9-1.9 10.9-1.9 15.8 0l-.3 2.1c-4.9-1.7-10.3-1.7-15.2 0z" fill="#4FD1C5"/><path d="M12.4 14.9c4.7-1.5 10.5-1.5 15.2 0" stroke="#fff" stroke-width=".4" opacity=".7" fill="none"/>`,
+  blitz: () => AV_MASK('#F5C542').replace('<circle cx="16.9" cy="18.3" r=".6" fill="#222"/><circle cx="23.1" cy="18.3" r=".6" fill="#222"/>', '<circle cx="16.9" cy="18.3" r=".6" fill="#1d3f6e"/><circle cx="23.1" cy="18.3" r=".6" fill="#1d3f6e"/>'),
+  nacht: () => AV_MASK('#4B3B8F'),
+  ninja: () => `<path d="M11.4 16.8c0-6 3.8-9.8 8.6-9.8s8.6 3.8 8.6 9.8z" fill="#2B2F3A"/><path d="M12.1 20.5h15.8c-.4 4.1-3.6 6.6-7.9 6.6s-7.5-2.5-7.9-6.6z" fill="#2B2F3A"/><rect x="11.5" y="13.9" width="17" height="1.7" fill="#D63C3C"/><path d="M28.3 14.2l3.9-1.6-.7 2.3 2.1.9-4.8.6z" fill="#D63C3C"/>`,
+  ritter: () => `<path d="M10.8 22.6c-.7-9.2 3.6-14.8 9.2-14.8s9.9 5.6 9.2 14.8l-2.5.5c.3-1.9.3-3.4.1-4.5H13.2c-.2 1.1-.2 2.6.1 4.5z" fill="#B9C3CE"/><path d="M13.2 18.6h13.6" stroke="#8A96A3" stroke-width=".9"/><path d="M20 8v6.4" stroke="#8A96A3" stroke-width=".9"/><path d="M19 4.4c2.6.4 4 1.9 4 3.6h-3.6z" fill="#D63C3C"/>`,
   brille: () => `<g fill="none" stroke="#2b2b2b" stroke-width=".9"><circle cx="17.1" cy="18.6" r="2.4"/><circle cx="22.9" cy="18.6" r="2.4"/><path d="M19.5 18.4h1"/></g>`,
   bart: (h) => `<path d="M12.8 20.6c.4 4.4 3.4 7.2 7.2 7.2s6.8-2.8 7.2-7.2c-1.4 1.6-3.2 2.4-4.6 2-.8-.3-1.6-.5-2.6-.5s-1.8.2-2.6.5c-1.4.4-3.2-.4-4.6-2z" fill="${h}"/><path d="M17.6 22.6q2.4 1.6 4.8 0" stroke="#7a3b22" stroke-width=".9" fill="none" stroke-linecap="round"/>`,
-  held: () => `<path d="M12.3 16.6c2.2-1 5-1 7.7.2 2.7-1.2 5.5-1.2 7.7-.2-.2 2.4-1.6 4-3.6 4-1.6 0-2.8-.8-4.1-2-1.3 1.2-2.5 2-4.1 2-2 0-3.4-1.6-3.6-4z" fill="#D63C3C"/><circle cx="16.8" cy="18.2" r="1.25" fill="#fff"/><circle cx="23.2" cy="18.2" r="1.25" fill="#fff"/><circle cx="16.9" cy="18.3" r=".6" fill="#222"/><circle cx="23.1" cy="18.3" r=".6" fill="#222"/>`,
+  held: () => AV_MASK('#D63C3C'),
   astro: () => `<circle cx="20" cy="18.6" r="11.6" fill="rgba(170,215,255,.22)" stroke="#E8EEF5" stroke-width="2.2"/><path d="M27.5 9.8l2.6-3.4" stroke="#E8EEF5" stroke-width="1.2"/><circle cx="30.4" cy="6.1" r="1.2" fill="#E06B6B"/>`,
   pirat: () => `<path d="M11.4 15.6c.6-5.2 4-8.4 8.6-8.4s8 3.2 8.6 8.4c-2.6-1.4-5.4-2-8.6-2s-6 .6-8.6 2z" fill="#C0392B"/><circle cx="14.5" cy="11.5" r=".8" fill="#fff"/><circle cx="19" cy="9.8" r=".8" fill="#fff"/><circle cx="24" cy="11" r=".8" fill="#fff"/><path d="M12.4 15.8l15.4 4.8" stroke="#1e1e1e" stroke-width=".8"/><ellipse cx="22.9" cy="18.8" rx="2.1" ry="1.9" fill="#1e1e1e"/>`,
   zauber: () => `<path d="M8.5 13.8c4.5-1.4 18.5-1.4 23 0-1.6-.6-3.4-1.6-4.6-1.8L21.2 1.2l-5.6 10.8c-1.4.2-4.2 1-7.1 1.8z" fill="#5B4FC4"/><circle cx="18.2" cy="8.4" r=".8" fill="#F5C542"/><circle cx="22.4" cy="10.6" r=".6" fill="#F5C542"/><circle cx="20.6" cy="5.4" r=".5" fill="#F5C542"/>`,
@@ -106,24 +170,99 @@ const AV_ACC = {
   kopfhoerer: () => `<path d="M10.4 19.5c0-6.4 4.2-10.6 9.6-10.6s9.6 4.2 9.6 10.6" fill="none" stroke="#333" stroke-width="1.7"/><rect x="8.6" y="17.6" width="3.6" height="5.8" rx="1.6" fill="#E06B6B"/><rect x="27.8" y="17.6" width="3.6" height="5.8" rx="1.6" fill="#E06B6B"/>`,
   schleife: () => `<path d="M24.6 9.6l3.8-2.2v4.4zM24.6 9.6l-3.8-2.2v4.4z" fill="#FF7AA8"/><circle cx="24.6" cy="9.6" r="1.1" fill="#E0568A"/>`
 };
+// Gruppen: pro Gruppe höchstens eins; Kostüme schliessen Kopfbedeckungen / Brillen / Kopfhörer aus, damit jede Kombination gut aussieht
+const AV_COST = ['held', 'blitz', 'nacht', 'ninja', 'ritter', 'astro', 'pirat', 'zauber'];
+const AV_HEAD = ['cap', 'krone', 'katze', 'einhorn', 'schleife', 'stirnband'];
+const AV_EYES = ['brille', 'sonnenbrille'];
+const AV_FACE = ['sommersprossen', 'bart', 'kopfhoerer'];
+const AV_ORDER = ['sommersprossen', 'bart', 'brille', 'sonnenbrille', 'held', 'blitz', 'nacht', 'ninja', 'kopfhoerer', 'stirnband', 'schleife', 'cap', 'katze', 'einhorn', 'krone', 'pirat', 'zauber', 'ritter', 'astro'];
+const AV_HAT_COST = ['ninja', 'ritter', 'astro', 'pirat', 'zauber'];
+const AV_MASK_COST = ['held', 'blitz', 'nacht', 'ninja'];
+const AV_BODY = { held: ['#C0392B', '<path d="M20 32.2l1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="#F5C542"/>'],
+  blitz: ['#2F64A6', '<path d="M20.9 31.6l-2.7 3.7h1.9l-1 3.4 3.1-4.1h-1.9l1.2-3z" fill="#F5C542"/>'],
+  nacht: ['#2A2340', '<path d="M21.4 32.3a2.7 2.7 0 1 0 .9 5 2.2 2.2 0 1 1-.9-5z" fill="#E8E3FF"/>'],
+  ninja: ['#2B2F3A', '<path d="M14 33.2l12 4" stroke="#D63C3C" stroke-width="1.4"/>'], ritter: ['#9AA5B1', '<path d="M20 31.8v6.4M17 34.6h6" stroke="#D63C3C" stroke-width="1.3"/>'],
+  astro: ['#E8EEF5', '<rect x="17.6" y="33" width="4.8" height="3" rx=".6" fill="#4FA3E0"/>'], zauber: ['#5B4FC4', '<circle cx="18" cy="34" r=".6" fill="#F5C542"/><circle cx="22.2" cy="36" r=".5" fill="#F5C542"/>'],
+  pirat: ['#F4F4F4', '<path d="M12 33.6h16M11 36.2h18M10.4 38.8h19.2" stroke="#2F64A6" stroke-width="1.1"/>'] };
+// gültige, widerspruchsfreie Extras in Zeichen-Reihenfolge
+const avNorm = (age, list) => {
+  let ex = (list || []).filter((a) => AV_ORDER.includes(a));
+  const one = (grp) => { const hit = ex.filter((a) => grp.includes(a)); if (hit.length > 1) ex = ex.filter((a) => !grp.includes(a) || a === hit[hit.length - 1]); };
+  one(AV_COST); one(AV_HEAD); one(AV_EYES);
+  const c = ex.find((a) => AV_COST.includes(a));
+  if (c && AV_HAT_COST.includes(c)) ex = ex.filter((a) => !AV_HEAD.includes(a));
+  if (c && AV_MASK_COST.includes(c)) ex = ex.filter((a) => !AV_EYES.includes(a));
+  if (c === 'ninja') ex = ex.filter((a) => a !== 'bart' && a !== 'sommersprossen');
+  if (c === 'astro' || c === 'ritter') ex = ex.filter((a) => a !== 'kopfhoerer');
+  if (age === 'k') ex = ex.filter((a) => a !== 'bart');
+  return AV_ORDER.filter((a) => ex.includes(a));
+};
 const avatarGen = (code, bg) => {
-  const [age, st, hc, sk, acc] = String(code).split('.');
+  const [age0, st0, hc, sk, acc] = String(code).split('.');
+  const age = ['k', 'e', 'o'].includes(age0) ? age0 : 'k';
+  const st = st0 === 'glatze' && age === 'k' ? 'kurz' : st0;
   const [h1, h2] = AV_HC[hc] || AV_HC.blond; const skin = AV_SK[sk] || AV_SK.hell;
-  const [bk, fr] = AV_ST[st] || [null, 'kurz']; const kid = age === 'k';
-  const ex = acc && acc !== '0' ? acc.split('+') : [];
+  const kid = age === 'k';
+  const ex = avNorm(age, acc && acc !== '0' ? acc.split('+') : []);
+  const cost = ex.find((a) => AV_COST.includes(a));
+  let [bk, fr] = AV_ST[st] || [null, 'kurz'];
+  if (cost === 'ninja' || cost === 'ritter') bk = null;
   const body = kid ? 'M8 41c0-7.5 5.4-11.5 12-11.5S32 33.5 32 41z' : 'M4 41c0-8.5 7-12.5 16-12.5S36 32.5 36 41z';
   let s = `<rect width="40" height="40" fill="${bg}"/>`;
   if (bk) s += AV_HB[bk](h2);
-  s += ex.includes('astro') ? `<path d="${body}" fill="#E8EEF5"/>` : ex.includes('held') ? `<path d="${body}" fill="#C0392B"/><path d="M20 32.2l1 2.1 2.3.3-1.7 1.6.4 2.3-2-1.1-2 1.1.4-2.3-1.7-1.6 2.3-.3z" fill="#F5C542"/>` : `<path d="${body}" fill="#111" opacity=".28"/>`;
+  s += cost && AV_BODY[cost] ? `<path d="${body}" fill="${AV_BODY[cost][0]}"/>${AV_BODY[cost][1]}` : `<path d="${body}" fill="#111" opacity=".28"/>`;
   s += `<rect x="17" y="23" width="6" height="7" fill="${skin}"/><ellipse cx="20" cy="18.5" rx="7.6" ry="8.4" fill="${skin}"/>`;
-  if (fr) s += AV_HF[fr](h1);
+  if (fr && cost !== 'ninja') s += AV_HF[fr](h1);
   if (age === 'o') s += '<path d="M14.6 15.4h1.8M23.6 15.4h1.8M15.4 21.6l-.8.6M24.6 21.6l.8.6" stroke="#9a6a4a" stroke-width=".5"/>';
-  s += '<circle cx="17.1" cy="18.6" r="1.05" fill="#3b2a1e"/><circle cx="22.9" cy="18.6" r="1.05" fill="#3b2a1e"/>';
-  if (!ex.includes('bart')) s += '<path d="M17.6 22q2.4 1.9 4.8 0" stroke="#b0613a" stroke-width="1" fill="none" stroke-linecap="round"/>';
-  if (kid || ['long', 'ponylang', 'zoepfe', 'dutt', 'bob', 'locken', 'pferd'].includes(st)) s += '<circle cx="15.3" cy="21" r="1.3" fill="#F29A9A" opacity=".55"/><circle cx="24.7" cy="21" r="1.3" fill="#F29A9A" opacity=".55"/>';
+  const dark = ['tief', 'espresso'].includes(sk);
+  s += `<circle cx="17.1" cy="18.6" r="1.05" fill="${dark ? '#1a110b' : '#3b2a1e'}"/><circle cx="22.9" cy="18.6" r="1.05" fill="${dark ? '#1a110b' : '#3b2a1e'}"/>`;
+  if (!ex.includes('bart')) s += `<path d="M17.6 22q2.4 1.9 4.8 0" stroke="${dark ? '#2a1610' : '#b0613a'}" stroke-width="1" fill="none" stroke-linecap="round"/>`;
+  if (kid || ['long', 'ponylang', 'zoepfe', 'dutt', 'bob', 'locken', 'pferd'].includes(st)) s += `<circle cx="15.3" cy="21" r="1.3" fill="#F29A9A" opacity="${dark ? '.3' : '.55'}"/><circle cx="24.7" cy="21" r="1.3" fill="#F29A9A" opacity="${dark ? '.3' : '.55'}"/>`;
   ex.forEach((a) => { if (AV_ACC[a]) s += AV_ACC[a](h2); });
   return `<svg viewBox="0 0 40 40" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
 };
+// Baukasten: Code ändern (Teil = age | st | hc | sk | acc | cost)
+const avParse = (code) => { const [age, st, hc, sk, acc] = String(code || 'k.kurz.braun.hell.0').replace(/^av:/, '').split('.');
+  return { age: ['k', 'e', 'o'].includes(age) ? age : 'k', st: AV_ST[st] ? st : 'kurz', hc: AV_HC[hc] ? hc : 'braun', sk: AV_SK[sk] ? sk : 'hell', ex: acc && acc !== '0' ? acc.split('+').filter((a) => AV_ORDER.includes(a)) : [] }; };
+const avCode = (o) => `av:${o.age}.${o.age === 'k' && o.st === 'glatze' ? 'kurz' : o.st}.${o.hc}.${o.sk}.${avNorm(o.age, o.ex).join('+') || '0'}`;
+const avSet = (code, part, val) => {
+  const o = avParse(code);
+  if (part === 'acc') { o.ex = o.ex.includes(val) ? o.ex.filter((a) => a !== val) : [...o.ex.filter((a) => !(AV_HEAD.includes(val) && AV_HEAD.includes(a)) && !(AV_EYES.includes(val) && AV_EYES.includes(a))), val];
+    const c = o.ex.find((a) => AV_COST.includes(a)); if (c && o.ex.includes(val) && !AV_COST.includes(val)) { if ((AV_HAT_COST.includes(c) && AV_HEAD.includes(val)) || (AV_MASK_COST.includes(c) && AV_EYES.includes(val)) || ((c === 'astro' || c === 'ritter') && val === 'kopfhoerer') || (c === 'ninja' && (val === 'bart' || val === 'sommersprossen'))) o.ex = o.ex.filter((a) => a !== c); } }
+  else if (part === 'cost') { o.ex = o.ex.filter((a) => !AV_COST.includes(a)); if (val !== '0') o.ex.push(val); }
+  else o[part] = val;
+  return avCode(o);
+};
+const AVB_LANG = 'de';
+const AVB_T = { de: { age: 'Figur', st: 'Frisur', hc: 'Haarfarbe', sk: 'Hautfarbe', acc: 'Extras (kombinierbar)', cost: 'Verkleidung', none: 'Keine', ages: { k: 'Kind', e: 'Erwachsen', o: 'Grosseltern' },
+    n: { long: 'Lang', ponylang: 'Lang mit Pony', zoepfe: 'Zöpfe', dutt: 'Dutt', bob: 'Bob', locken: 'Locken', pferd: 'Pferdeschwanz', kurz: 'Kurz', seite: 'Seitenscheitel', stachel: 'Stachelig', lockenkurz: 'Kurze Locken', glatze: 'Glatze',
+      sommersprossen: 'Sommersprossen', bart: 'Bart', kopfhoerer: 'Kopfhörer', brille: 'Brille', sonnenbrille: 'Sonnenbrille', cap: 'Cap', krone: 'Krone', katze: 'Katzenohren', einhorn: 'Einhorn', schleife: 'Schleife', stirnband: 'Stirnband',
+      held: 'Held Sternenkraft', blitz: 'Held Funkenflug', nacht: 'Heldin Mondfee', ninja: 'Ninja', ritter: 'Ritter', astro: 'Astronaut', pirat: 'Pirat', zauber: 'Zauberer' } },
+  en: { age: 'Figure', st: 'Hair', hc: 'Hair colour', sk: 'Skin tone', acc: 'Extras (combine freely)', cost: 'Costume', none: 'None', ages: { k: 'Child', e: 'Adult', o: 'Grandparent' },
+    n: { long: 'Long', ponylang: 'Long with fringe', zoepfe: 'Pigtails', dutt: 'Bun', bob: 'Bob', locken: 'Curls', pferd: 'Ponytail', kurz: 'Short', seite: 'Side parting', stachel: 'Spiky', lockenkurz: 'Short curls', glatze: 'Bald',
+      sommersprossen: 'Freckles', bart: 'Beard', kopfhoerer: 'Headphones', brille: 'Glasses', sonnenbrille: 'Sunglasses', cap: 'Cap', krone: 'Crown', katze: 'Cat ears', einhorn: 'Unicorn', schleife: 'Bow', stirnband: 'Headband',
+      held: 'Hero Star Power', blitz: 'Hero Sparkwing', nacht: 'Hero Moon Fairy', ninja: 'Ninja', ritter: 'Knight', astro: 'Astronaut', pirat: 'Pirate', zauber: 'Wizard' } } };
+// HTML des Baukastens; Knöpfe tragen data-avb="teil|wert" und zeigen jeweils die Vorschau mit dieser Änderung
+const avBuilder = (code, color) => {
+  const T = AVB_T[AVB_LANG] || AVB_T.de; const o = avParse(code); const cur = avCode(o);
+  const pic = (c, on, title, kind) => `<button class="avo${on ? ' on' : ''}" data-avb="${kind}" title="${esc(title)}"><span class="avs" style="width:40px;height:40px;border-radius:50%;overflow:hidden;display:inline-flex">${avatarGen(c.slice(3), color)}</span></button>`;
+  const dot = (c, on, title, kind) => `<button class="avd${on ? ' on' : ''}" data-avb="${kind}" title="${esc(title)}" style="background:${c}"></button>`;
+  const row = (label, html) => `<div class="avr"><b>${esc(label)}</b><div class="avg">${html}</div></div>`;
+  const ex = avNorm(o.age, o.ex); const cost = ex.find((a) => AV_COST.includes(a)) || '0';
+  return `<div class="avb"><div class="avp"><span class="avs" style="width:96px;height:96px;border-radius:50%;overflow:hidden;display:inline-flex">${avatarGen(cur.slice(3), color)}</span></div><div class="avc">
+    ${row(T.age, ['k', 'e', 'o'].map((a) => pic(avSet(cur, 'age', a), o.age === a, T.ages[a], 'age|' + a)).join(''))}
+    ${row(T.st, Object.keys(AV_ST).filter((x) => !(x === 'glatze' && o.age === 'k')).map((x) => pic(avSet(cur, 'st', x), o.st === x, T.n[x] || x, 'st|' + x)).join(''))}
+    ${row(T.hc, Object.entries(AV_HC).map(([k, c]) => dot(c[0], o.hc === k, k, 'hc|' + k)).join(''))}
+    ${row(T.sk, Object.entries(AV_SK).map(([k, c]) => dot(c, o.sk === k, k, 'sk|' + k)).join(''))}
+    ${row(T.acc, [...AV_FACE, ...AV_EYES, ...AV_HEAD].filter((a) => !(a === 'bart' && o.age === 'k')).map((a) => pic(avSet(cur, 'acc', a), ex.includes(a), T.n[a] || a, 'acc|' + a)).join(''))}
+    ${row(T.cost, ['0', ...AV_COST].map((c) => (c === '0' ? `<button class="avo txt${cost === '0' ? ' on' : ''}" data-avb="cost|0">${esc(T.none)}</button>` : pic(avSet(cur, 'cost', c), cost === c, T.n[c] || c, 'cost|' + c))).join(''))}
+  </div></div>`;
+};
+const AVB_CSS = `.avb{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}.avp{flex:none}.avc{flex:1;min-width:260px;display:flex;flex-direction:column;gap:10px}
+.avr b{display:block;font-size:12px;color:#aaa;font-weight:500;margin-bottom:5px}.avg{display:flex;flex-wrap:wrap;gap:6px}
+.avo{padding:2px;border-radius:50%;border:2px solid transparent;background:transparent;cursor:pointer;line-height:0}.avo.on{border-color:var(--fp-accent,#69C350)}
+.avo.txt{border-radius:22px;height:44px;padding:0 14px;line-height:1;color:inherit;font:inherit;font-size:13px;border:1px solid #444}.avo.txt.on{border:2px solid var(--fp-accent,#69C350)}
+.avd{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0}.avd.on{outline:3px solid var(--fp-accent,#69C350);outline-offset:2px}`;
 // Termin-Zeit kurz: "14:30–15:20" bzw. schmal "14:30–15"
 const evRange = (e, short) => {
   if (e.allDay) return short ? 'ganzt.' : 'ganztägig';
@@ -201,6 +340,31 @@ class LoxWochenplanerCard extends FpBase {
     this._week = 0; this._events = []; this._tick = 0;
     try { this._mode = localStorage.getItem('fp_mode') || 'alle'; } catch (e) { this._mode = 'alle'; }
     this.shadowRoot.addEventListener('click', (e) => this._onClick(e));
+    // swipe left/right: next/previous week (phone: next/previous day)
+    this.shadowRoot.addEventListener('touchstart', (e) => { const t = e.touches[0]; this._sw = t ? [t.clientX, t.clientY] : null; }, { passive: true });
+    this.shadowRoot.addEventListener('touchend', (e) => {
+      const t = e.changedTouches[0]; if (!this._sw || !t || this._detail) return;
+      const dx = t.clientX - this._sw[0], dy = t.clientY - this._sw[1]; this._sw = null;
+      if (Math.abs(dx) > 70 && Math.abs(dx) > 2 * Math.abs(dy)) this._go(dx < 0 ? 1 : -1);
+    }, { passive: true });
+    this._onResize = () => { const ph = this._isPhone(); if (ph !== this._phoneOn) this._render(); };
+    window.addEventListener('resize', this._onResize);
+  }
+  _isPhone() { const w = this.getBoundingClientRect().width || window.innerWidth; return w > 0 && w < 700; }
+  // phone: one day at a time; tablet/desktop: one week at a time. Returns to today after the idle time.
+  _go(step) {
+    this._focus = null;
+    if (this._phoneOn) {
+      this._dayOff = step === 0 ? 0 : (this._dayOff || 0) + step;
+      const t = startOfDay(fpDay()); const sel = addDays(t, this._dayOff);
+      const wk = Math.round((addDays(sel, 1 - isoWd(sel)) - addDays(t, 1 - isoWd(t))) / (7 * 86400000));
+      if (wk !== this._week) { this._week = wk; this._events = []; this._fetchEvents(); }
+    } else {
+      this._week = step === 0 ? 0 : this._week + step; this._dayOff = 0; this._events = []; this._fetchEvents();
+    }
+    clearTimeout(this._navT);
+    if (this._week || this._dayOff) this._navT = setTimeout(() => { this._week = 0; this._dayOff = 0; this._focus = null; this._events = []; this._fetchEvents(); this._render(); }, (Number(this._cfg.ruhe_sekunden) || 45) * 1000);
+    this._render();
   }
   _started() {
     this._lastDay = ymd(fpDay());
@@ -272,61 +436,35 @@ class LoxWochenplanerCard extends FpBase {
     const pct = this._cfg.fair ? (fall[1] ? Math.round((fall[0] / fall[1]) * 100) : 100) : (tot ? Math.round((done / tot) * 100) : 100);
     return { pct, start: !tot, streak, w, m, fw, fm };
   }
-  // Fair: Tage zählen, nicht die Anzahl Ämtli – wer 2 von 2 macht, steht gleich da wie wer 6 von 6 macht
-  _awardsFair(kids, pre, A, best, rate) {
-    const pf = (x) => Math.round(rate(x) * 100); const d1 = (v) => (Math.round(v * 10) / 10).toString();
-    best('fw', 3).forEach((n) => A[n].push({ id: 'krone', icon: 'mdi:crown', c: '#F5C542', t: 'Krone der Woche', why: `Beste Tagesquote der letzten 7 Tage: Ø ${pf(pre[n].fw)} % an ${pre[n].fw[1]} Tagen.` }));
-    best('fm', 10).forEach((n) => A[n].push({ id: 'pokal', icon: 'mdi:trophy', c: '#E0A84F', t: 'Pokal des Monats', why: `Beste Tagesquote der letzten 30 Tage: Ø ${pf(pre[n].fm)} % an ${pre[n].fm[1]} Tagen.` }));
-    const maxF = Math.max(0, ...kids.map((k) => pre[k.name].fw[0]));
-    const fl = kids.filter((k) => maxF >= 3 && pre[k.name].fw[0] === maxF);
-    if (fl.length === 1) A[fl[0].name].push({ id: 'fleiss', icon: 'mdi:bee', c: '#F5C542', t: 'Fleissbiene', why: `Am meisten ganze Ämtli-Tage: ${d1(maxF)} in den letzten 7 Tagen.` });
+  // Auszeichnungen kommen vom Server (vergeben jeden Montag / am Monatsersten / beim Erreichen)
+  _srvAwards(kids) {
+    const s = this.fpStore && this.fpStore.snap; const A = {}; const F = {}; kids.forEach((k) => { A[k.name] = []; });
+    if (!s) return { A, F };
+    const byName = Object.fromEntries((s.persons || []).map((p) => [p.name, p.id]));
+    const et = (s.settings || {}).early_time || '12:00';
     kids.forEach((k) => {
-      const s = pre[k.name];
-      if (s.w[1] >= 5 && s.w[0] === s.w[1]) A[k.name].push({ id: 'perfekt', icon: 'mdi:star-four-points', c: '#69C350', t: 'Perfekte Woche', why: `Alle ${s.w[1]} Ämtli der letzten 7 Tage erledigt.` });
-      if (s.streak >= 3) A[k.name].push({ id: 'serie', icon: 'mdi:fire', c: '#E06B6B', t: `${s.streak}-Tage-Serie`, why: `${s.streak} Tage am Stück alle Ämtli erledigt.` });
-      if (s.start) A[k.name].push({ id: 'start', icon: 'mdi:rocket-launch', c: '#4FA3E0', t: 'Startbonus', why: 'Noch keine abgeschlossenen Ämtli-Tage – du startest mit 100 %. Halte sie hoch!' });
+      const r = (s.awards || {})[byName[k.name]] || { list: [] }; F[k.name] = r.frame || '';
+      A[k.name] = (r.list || []).map((a) => { const tx = AWT[a.id] || [a.id, '']; const f = (x) => x.replace(/\{n\}/g, a.value == null ? '' : a.value).replace('{t}', et);
+        return { id: a.id, icon: a.icon, c: a.color, t: f(tx[0]), why: f(tx[1]) }; });
     });
-    return A;
+    return { A, F };
   }
-  // Auszeichnungen aus dem Verlauf (wandern je nach Leistung zwischen den Personen)
-  _awards(kids, pre) {
-    const A = {}; kids.forEach((k) => { A[k.name] = []; });
-    const rate = (x) => (x[1] ? x[0] / x[1] : -1); const pc = (x) => Math.round(rate(x) * 100);
-    const best = (key, minTot) => {
-      const c = kids.filter((k) => pre[k.name][key][1] >= minTot); if (!c.length) return [];
-      const top = Math.max(...c.map((k) => rate(pre[k.name][key]))); const c2 = c.filter((k) => rate(pre[k.name][key]) === top);
-      const td = Math.max(...c2.map((k) => pre[k.name][key][0])); return c2.filter((k) => pre[k.name][key][0] === td).map((k) => k.name);
-    };
-    if (this._cfg.fair) return this._awardsFair(kids, pre, A, best, rate);
-    best('w', 3).forEach((n) => A[n].push({ id: 'krone', icon: 'mdi:crown', c: '#F5C542', t: 'Krone der Woche', why: `Beste Quote der letzten 7 Tage: ${pre[n].w[0]} von ${pre[n].w[1]} Ämtli (${pc(pre[n].w)} %).` }));
-    best('m', 10).forEach((n) => A[n].push({ id: 'pokal', icon: 'mdi:trophy', c: '#E0A84F', t: 'Pokal des Monats', why: `Beste Quote der letzten 30 Tage: ${pre[n].m[0]} von ${pre[n].m[1]} Ämtli (${pc(pre[n].m)} %).` }));
-    const maxDone = Math.max(0, ...kids.map((k) => pre[k.name].w[0]));
-    const fl = kids.filter((k) => maxDone >= 5 && pre[k.name].w[0] === maxDone);
-    if (fl.length === 1) A[fl[0].name].push({ id: 'fleiss', icon: 'mdi:bee', c: '#F5C542', t: 'Fleissbiene', why: `Am meisten Ämtli erledigt: ${maxDone} in den letzten 7 Tagen.` });
-    kids.forEach((k) => {
-      const s = pre[k.name];
-      if (s.w[1] >= 5 && s.w[0] === s.w[1]) A[k.name].push({ id: 'perfekt', icon: 'mdi:star-four-points', c: '#69C350', t: 'Perfekte Woche', why: `Alle ${s.w[1]} Ämtli der letzten 7 Tage erledigt.` });
-      if (s.streak >= 3) A[k.name].push({ id: 'serie', icon: 'mdi:fire', c: '#E06B6B', t: `${s.streak}-Tage-Serie`, why: `${s.streak} Tage am Stück alle Ämtli erledigt.` });
-      if (s.start) A[k.name].push({ id: 'start', icon: 'mdi:rocket-launch', c: '#4FA3E0', t: 'Startbonus', why: 'Noch keine abgeschlossenen Ämtli-Tage – du startest mit 100 %. Halte sie hoch!' });
-    });
-    return A;
-  }
-  _detailHtml(kids, pre, awards) {
+  _detailHtml(kids, pre, awards, frames) {
     const k = kids.find((x) => x.name === this._detail); if (!k) return '';
     const s = pre[k.name]; const lv = level(s.pct); const aw = awards[k.name] || [];
+    const snap = (this.fpStore && this.fpStore.snap) || {}; const pts = snap.award_points || {}; const et = (snap.settings || {}).early_time || '12:00';
+    const on = ((snap.award_settings || {}).items) || {};
     const q = (x) => (x[1] ? `${x[0]} / ${x[1]} <small>(${Math.round((x[0] / x[1]) * 100)} %)</small>` : '<small>noch keine</small>');
     const holders = (id) => kids.filter((x) => (awards[x.name] || []).some((a) => a.id === id)).map((x) => x.name).join(', ') || 'noch niemand';
-    const RULES_FAIR = [['mdi:crown', '#F5C542', 'Krone der Woche', 'Beste Tagesquote der letzten 7 Tage – jeder Tag zählt gleich viel (mind. 3 Tage).', 'krone'], ['mdi:trophy', '#E0A84F', 'Pokal des Monats', 'Beste Tagesquote der letzten 30 Tage – jeder Tag zählt gleich viel (mind. 10 Tage).', 'pokal'], ['mdi:bee', '#F5C542', 'Fleissbiene', 'Am meisten ganze Ämtli-Tage in den letzten 7 Tagen (mind. 3).', 'fleiss']];
-    const RULES = [['mdi:crown', '#F5C542', 'Krone der Woche', 'Beste Quote der letzten 7 Tage (mind. 3 Ämtli).', 'krone'], ['mdi:trophy', '#E0A84F', 'Pokal des Monats', 'Beste Quote der letzten 30 Tage (mind. 10 Ämtli).', 'pokal'], ['mdi:bee', '#F5C542', 'Fleissbiene', 'Am meisten Ämtli erledigt in den letzten 7 Tagen (mind. 5).', 'fleiss'], ['mdi:star-four-points', '#69C350', 'Perfekte Woche', 'Alle Ämtli der letzten 7 Tage erledigt (mind. 5).', 'perfekt'], ['mdi:fire', '#E06B6B', 'Serie', 'Mindestens 3 Tage am Stück alles erledigt.', 'serie'], ['mdi:rocket-launch', '#4FA3E0', 'Startbonus', 'Wer neu startet, beginnt mit 100 %.', 'start']];
     return `<div class="ovl" data-close><div class="pnl" data-keep>
-      <div class="ph"><div class="ring bigr">${avatarHtml(k, 64)}${aw.some((a) => a.id === 'krone') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}<span class="rib" style="--rc:${lv.c}">${s.pct}%</span></div>
-        <div class="phn"><div class="pn2">${esc(k.name)}</div><div class="lv" style="color:${lv.c}">${s.start ? 'Startbonus' : lv.t} · Zuverlässigkeit ${s.pct} %</div></div>
+      <div class="ph"><div class="ring bigr${frames[k.name] ? ' fr-' + frames[k.name] : ''}"><span class="ava">${avatarHtml(k, 64)}</span>${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}<span class="rib" style="--rc:${lv.c}">${s.pct}%</span></div>
+        <div class="phn"><div class="pn2">${esc(k.name)}</div><div class="lv" style="color:${lv.c}">${lv.t} · Zuverlässigkeit ${s.pct} %</div></div>
         <button class="nb" data-x><ha-icon icon="mdi:close"></ha-icon></button></div>
       <div class="kp"><div><span>Letzte 7 Tage</span><b>${q(s.w)}</b></div><div><span>Letzte 30 Tage</span><b>${q(s.m)}</b></div><div><span>Serie</span><b>${s.streak} ${s.streak === 1 ? 'Tag' : 'Tage'}</b></div></div>
       <div class="sec2">Auszeichnungen</div>
       ${aw.length ? aw.map((a) => `<div class="aw"><span class="md lg" style="--mc:${a.c}"><ha-icon icon="${a.icon}"></ha-icon></span><div><b>${esc(a.t)}</b><div>${esc(a.why)}</div></div></div>`).join('') : '<div class="aw0">Noch keine Auszeichnung – erledige deine Ämtli und hol dir die Krone!</div>'}
       <div class="sec2">So holst du dir Auszeichnungen</div>
-      ${(this._cfg.fair ? [...RULES_FAIR, ...RULES.slice(3)] : RULES).map(([ic, c, t, d, id]) => `<div class="rl2"><span class="md" style="--mc:${c}"><ha-icon icon="${ic}"></ha-icon></span><b>${t}</b><span>${d}</span>${['krone', 'pokal', 'fleiss'].includes(id) ? `<em>aktuell: ${esc(holders(id))}</em>` : ''}</div>`).join('')}
+      ${AWR.filter(([id]) => !on[id] || on[id].on !== false).map(([id, ic, c, t, d]) => `<div class="rl2"><span class="md" style="--mc:${c}"><ha-icon icon="${ic}"></ha-icon></span><b>${t}${pts[id] ? ` <small class="pp">+${Number(pts[id])}</small>` : ''}</b><span>${d.replace('{t}', esc(et))}</span><em>aktuell: ${esc(holders(id))}</em></div>`).join('')}
     </div></div>`;
   }
   _planFor(kid, date) {
@@ -345,6 +483,8 @@ class LoxWochenplanerCard extends FpBase {
     if (b && this._hass) {
       const done = b.classList.contains('done');
       b.classList.toggle('done');
+      // little check animation only for the chore that was just ticked off
+      if (!done) { this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
       this._call('todo', 'update_item', { item: b.dataset.uid, status: done ? 'needs_action' : 'completed' }, this._cfg.heute).catch(() => this._render());
       return;
     }
@@ -354,6 +494,7 @@ class LoxWochenplanerCard extends FpBase {
     if (md) { this._mode = md.dataset.mode; try { localStorage.setItem('fp_mode', this._mode); } catch (er) { /* ignorieren */ } this._render(); return; }
     if (e.target.closest('[data-sync]')) { this._syncCal(); return; }
     if (e.target.closest('[data-todos]')) { this.dispatchEvent(new CustomEvent('fp-open-todos', { bubbles: true, composed: true })); return; }
+    if (e.target.closest('[data-todoadd]')) { this.dispatchEvent(new CustomEvent('fp-open-todos', { bubbles: true, composed: true, detail: { add: true } })); return; }
     const fc = e.target.closest('[data-focus]');
     if (fc) {
       const v = fc.dataset.focus; this._focus = v === ymd(fpDay()) ? null : v;
@@ -361,12 +502,14 @@ class LoxWochenplanerCard extends FpBase {
       this._render(); return;
     }
     const n = e.target.closest('[data-nav]');
-    if (n) { const v = n.dataset.nav; this._focus = null; this._week = v === '0' ? 0 : this._week + Number(v); this._events = []; this._render(); this._fetchEvents(); }
+    if (n) this._go(Number(n.dataset.nav));
   }
   _render() {
     if (!this.shadowRoot || !this._cfg) return;
     const now = new Date(); const today = startOfDay(fpDay()); const tStr = ymd(today);
-    const ws = this._weekStart(); const days = [...Array(7)].map((_, i) => addDays(ws, i));
+    const phone = this._isPhone(); this._phoneOn = phone;
+    const ws = this._weekStart(); const sel = addDays(today, phone ? (this._dayOff || 0) : 0);
+    const days = phone ? [sel] : [...Array(7)].map((_, i) => addDays(ws, i));
     const kids = this._kids(); const h = this._history(); const cals = this._calendars();
     // Termine immer mit der aktuellen Farbe der Kalender-Besitzerin/des Besitzers anzeigen
     this._events.forEach((e) => { const cc = cals.find((x) => x.entity === e.c.entity); if (cc) e.c = cc; });
@@ -381,7 +524,7 @@ class LoxWochenplanerCard extends FpBase {
     }));
     const alle = (this._data.heute || []).map((i) => ({ ...i, m: parseDesc(i.description) }));
     const heute = alle.filter((i) => (i.m.d || '') <= tStr && (i.m.e || i.m.d || '') >= tStr);
-    const focus = (this._focus && days.some((d) => ymd(d) === this._focus)) ? this._focus : (days.some((d) => ymd(d) === tStr) ? tStr : null);
+    const focus = phone ? ymd(sel) : (this._focus && days.some((d) => ymd(d) === this._focus)) ? this._focus : (days.some((d) => ymd(d) === tStr) ? tStr : null);
     // Spaltenbreiten: xl = heute/angetippt, m = morgen (und heute, wenn ein anderer Tag angetippt ist), s = alle anderen Tage.
     // In den Ansichten Ämtli/Termine bleiben die nächsten 2 Tage und das Wochenende mittel.
     const T = {}; const curWeek = days.some((d) => ymd(d) === tStr); const allMode = (this._mode || 'alle') === 'alle';
@@ -390,9 +533,9 @@ class LoxWochenplanerCard extends FpBase {
       T[s] = s === focus ? 'xl' : !curWeek ? 'm' : allMode ? ((s === tStr || diff === 1) ? 'm' : 's')
         : (s === tStr || we || (diff > 0 && diff <= 2)) ? 'm' : 's';
     });
-    const cols = days.map((d) => (T[ymd(d)] === 's' ? (allMode && curWeek ? 'minmax(0,0.42fr)' : startOfDay(d) < today ? 'minmax(0,0.4fr)' : 'minmax(0,0.6fr)')
+    const cols = phone ? 'minmax(0,1fr)' : days.map((d) => (T[ymd(d)] === 's' ? (allMode && curWeek ? 'minmax(0,0.42fr)' : startOfDay(d) < today ? 'minmax(0,0.4fr)' : 'minmax(0,0.6fr)')
       : ({ xl: allMode && curWeek ? 'minmax(0,4.6fr)' : 'minmax(0,3.6fr)', m: allMode && curWeek ? 'minmax(0,1.5fr)' : 'minmax(0,1.15fr)' })[T[ymd(d)]])).join(' ');
-    const we = days[6];
+    const we = addDays(ws, 6);
 
     const legCals = cals.filter((c) => !c.schule);
     const head = `<div class="corner">${legCals.length ? `<div class="leg">${legCals.map((c) => `<span class="lgi"><i style="background:${c.farbe}"></i>${esc(c.name)}</span>`).join('')}</div>` : ''}<span>Tag antippen für Details</span></div>` + days.map((d) => {
@@ -409,22 +552,22 @@ class LoxWochenplanerCard extends FpBase {
         const evs = this._events.filter((e) => !(evWho.get(e) || []).length && e.s < de && e.e > ds).sort((a, b) => (b.allDay - a.allDay) || (a.s - b.s));
         const t = ymd(d) === tStr;
         const shown = evs.slice(0, ymd(d) === focus ? 6 : 2);
-        return `<div class="c ev-c${t ? ' t' : ''}">${shown.map((e) => `<div class="ev${ymd(d) === focus ? ' w' : ''}" style="border-color:${e.c.farbe}">${evTime(e, ymd(d) === focus)}${ymd(d) === focus ? '<br>' : ''}${esc(e.title)}</div>`).join('')}${evs.length > shown.length ? `<div class="more">+${evs.length - shown.length} weitere</div>` : ''}</div>`;
+        return `<div class="c ev-c${t ? ' t' : ''}">${withNow(shown, t && ymd(d) === focus, (e) => { const st = t ? evState(e) : { c: '', b: '' }; return `<div class="ev${ymd(d) === focus ? ' w' : ''}${st.c}" style="border-color:${e.c.farbe}">${evTime(e, ymd(d) === focus)}${st.b}${ymd(d) === focus ? '<br>' : ''}${esc(e.title)}</div>`; })}${evs.length > shown.length ? `<div class="more">+${evs.length - shown.length} weitere</div>` : ''}</div>`;
       }).join('');
 
     const pre = {};
     kids.forEach((k) => { const mi = heute.filter((i) => i.m.k === k.name); pre[k.name] = this._stats(k.name, h, today, mi.filter((i) => i.status === 'completed').length, mi.length); });
-    const awards = this._awards(kids, pre);
+    const { A: awards, F: frames } = this._srvAwards(kids);
     // timetable view: only persons with a timetable
     const rowKids = (this._mode || 'alle') === 'schule' ? kids.filter((x) => (this._cfg.schule || {})[x.name]) : kids;
     const rows = rowKids.map((k) => {
-      const mine = heute.filter((i) => i.m.k === k.name).sort((a, b) => a.summary.localeCompare(b.summary, 'de'));
+      const mine = heute.filter((i) => i.m.k === k.name).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
       const tDone = mine.filter((i) => i.status === 'completed').length;
       const st = pre[k.name]; const aw = awards[k.name] || [];
       const lv = level(st.pct); const C = 2 * Math.PI * 24;
       const label = `<div class="lab" data-person="${esc(k.name)}" style="box-shadow:inset 3px 0 0 ${k.farbe}">
-          <div class="ring"><span class="ava">${avatarHtml(k, 48)}</span>${aw.some((a) => a.id === 'krone') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
-          <div class="lt"><div class="nm">${esc(k.name)}</div><div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div>
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}"><span class="ava">${avatarHtml(k, 48)}</span>${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
+          <div class="lt"><div class="nm">${esc(k.name)}</div><div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, phone ? 3 : 6).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}${aw.length > (phone ? 3 : 6) ? `<span class="mdm">+${aw.length - (phone ? 3 : 6)}</span>` : ''}</div>
           </div>
           </div>`;
       const injectEv = (d, html) => {
@@ -462,7 +605,7 @@ class LoxWochenplanerCard extends FpBase {
         if (!pev.length) return mode === 'termine' ? open + '<div class="none">–</div></div>' : html;
         if (tr === 's') { const evn = `<div class="evn">${pev.slice(0, 4).map((e) => `<i style="background:${e.c.farbe}"></i>`).join('')}<b>${pev.length}</b></div>`; return mode === 'termine' ? open + evn + '</div>' : html.replace(/^<div[^>]*>/, (m) => m + evn); }
         const lim = mode === 'termine' ? (wide ? 12 : 6) : mx;
-        const evh = `<div class="pev ${wide ? 'xl' : 'mid'}">${pev.slice(0, lim).map((e) => `<div class="ev one" style="border-color:${e.c.farbe}"><span class="et">${esc(e.title)}</span><span class="tm">${evRange(e, !wide)}</span><span class="src" style="background:${e.c.farbe}" title="Kalender ${esc(e.c.name)}">${wide ? esc(e.c.name) : esc((e.c.name || '?').charAt(0).toUpperCase())}</span></div>`).join('')}${pev.length > lim ? `<div class="more">+${pev.length - lim} weitere</div>` : ''}</div>`;
+        const evh = `<div class="pev ${wide ? 'xl' : 'mid'}">${withNow(pev.slice(0, lim), wide && ymd(d) === ymd(new Date()), (e) => { const st = ymd(d) === ymd(new Date()) ? evState(e) : { c: '', b: '' }; return `<div class="ev one${st.c}" style="border-color:${e.c.farbe}"><span class="et">${esc(e.title)}</span><span class="tm">${evRange(e, !wide)}</span>${st.b}<span class="src" style="background:${e.c.farbe}" title="Kalender ${esc(e.c.name)}">${wide ? esc(e.c.name) : esc((e.c.name || '?').charAt(0).toUpperCase())}</span></div>`; })}${pev.length > lim ? `<div class="more">+${pev.length - lim} weitere</div>` : ''}</div>`;
         return mode === 'termine' ? open + evh + '</div>' : html.replace(/^<div[^>]*>/, (m) => m + evh);
       };
       const cells = days.map((d) => injectEv(d, ((d) => {
@@ -477,7 +620,7 @@ class LoxWochenplanerCard extends FpBase {
           if (!mine.length) return '<div class="c t"></div>';
           const all = tDone === mine.length;
           return `<div class="c t"><div class="prog"><span>${tDone} von ${mine.length} erledigt</span>${all ? '<span class="gr">Super!</span>' : ''}</div><div class="bg">` +
-            mine.map((i) => `<button class="btn${i.status === 'completed' ? ' done' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${esc(i.summary)}${dueTag(i.m, tStr)}</span></button>`).join('') + `</div></div>`;
+            mine.map((i) => `<button class="btn${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${esc(i.summary)}${dueTag(i.m, tStr)}</span></button>`).join('') + `</div></div>`;
         }
         if (ds < tStr) {
           const s = h[ds] && h[ds].s[k.name];
@@ -505,15 +648,19 @@ class LoxWochenplanerCard extends FpBase {
     this.shadowRoot.innerHTML = `<style>
       :host{display:block}
       .card{position:relative;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:16px;padding:14px 16px;color:#ececec;font-family:${FONT}}
-      .top{display:flex;align-items:center;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+      .top{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
       .clock{font-size:38px;font-weight:200;color:${G};line-height:1;font-variant-numeric:tabular-nums}
       .date{font-size:24px;font-weight:300}.date b{font-weight:600}
       .sub{font-size:12px;color:#7a7a7a;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px}
-      .nav{margin-left:auto;display:flex;align-items:center;gap:8px}
+      .nav{margin-left:auto;display:flex;align-items:center;gap:8px}.tdg{display:flex;gap:6px}
+      .top{flex-wrap:nowrap}.card.phone .top{flex-wrap:wrap}
       .nb{background:#262626;border:1px solid #333;color:#ddd;border-radius:10px;height:42px;min-width:42px;padding:0 14px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:inherit;font-size:14px;-webkit-tap-highlight-color:transparent}
       .nb ha-icon{--mdc-icon-size:22px}.nb.td{gap:6px}.tdn{background:${G};color:#141414;border-radius:10px;padding:0 7px;font-size:12px;line-height:20px}.nb.g{color:${G};border-color:rgba(105,195,80,.5)}
       .wk{font-size:12px;color:#8a8a8a;padding:0 8px;text-align:center;min-width:150px}.wk b{display:block;color:#ececec;font-size:15px;font-weight:600}
-      .grid{display:grid;grid-template-columns:178px ${cols};gap:5px;align-items:stretch}
+      .grid{display:grid;grid-template-columns:${phone ? '104px' : '178px'} ${cols};gap:5px;align-items:stretch}
+      .card.phone .lab{flex-direction:column;align-items:flex-start;gap:6px;padding:8px 6px}.card.phone .lt .nm{font-size:13px}.card.phone .corner{visibility:hidden}
+      .card.phone .bg{grid-template-columns:1fr}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 9px}
+      .dnav{display:flex;align-items:center;gap:6px}.dd{font-size:14px;text-align:center;min-width:120px}.dd b{display:block;font-size:16px}
       .corner{font-size:10px;color:#555;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;padding:0 4px 6px}
       .corner .leg{background:none;padding:0;margin:0;gap:4px 10px}.corner .lgi{font-size:12px}
       .pev.mid .src{display:none}
@@ -527,6 +674,8 @@ class LoxWochenplanerCard extends FpBase {
       .ev-c{min-height:38px}
       .syn{cursor:pointer;-webkit-tap-highlight-color:transparent}.syn:active{background:#2a2a2a}
       .spin .ic ha-icon,.spin2 ha-icon{animation:fpspin 1s linear infinite}
+      .nowl{position:relative;height:0;border-top:2px solid #E06B6B;margin:5px 0 5px 4px}.nowl::before{content:"";position:absolute;left:-5px;top:-5px;width:8px;height:8px;border-radius:50%;background:#E06B6B}.nowl span{position:absolute;right:0;top:-8px;font-size:9px;font-weight:700;color:#E06B6B;background:var(--fp-bg2,#1e1e1e);padding:0 4px;border-radius:4px;line-height:14px}
+      .ev.past{opacity:.45}.ev.now{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fp-accent,#69C350) 60%,transparent)}.ev.soon{background:color-mix(in srgb,var(--fp-accent,#69C350) 14%,#303030)}.ev em.soon{font-style:normal;font-size:10px;font-weight:700;color:var(--fp-accent,#69C350);margin:0 4px;white-space:nowrap}
       .pev{margin-bottom:6px;display:flex;flex-direction:column;gap:3px}.pev .ev{margin-top:0}
       .pev.sm .ev{font-size:10px;padding:2px 4px 2px 5px}
       .ev .du{color:#8a8a8a;font-weight:400;margin-right:5px}
@@ -550,10 +699,9 @@ class LoxWochenplanerCard extends FpBase {
       .lv b{font-weight:700}
       .lab[data-person]{cursor:pointer;-webkit-tap-highlight-color:transparent}.lab[data-person]:active{background:#2a2a2a}
       .rib{position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);background:var(--rc);color:#141414;font-size:9px;font-weight:800;padding:1px 8px;line-height:13px;white-space:nowrap;letter-spacing:.3px;clip-path:polygon(0 0,100% 0,90% 50%,100% 100%,0 100%,10% 50%);z-index:2}
-      .crown{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-10deg);color:#F5C542;filter:drop-shadow(0 1px 1px rgba(0,0,0,.7));z-index:2;display:flex}.crown ha-icon{--mdc-icon-size:18px}
       .bdg{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
-      .md{width:18px;height:18px;border-radius:50%;background:color-mix(in srgb,var(--mc) 22%,transparent);border:1px solid var(--mc);color:var(--mc);display:inline-flex;align-items:center;justify-content:center;flex:none}.md ha-icon{--mdc-icon-size:12px}
-      .lv2 .md{width:30px;height:30px;border-width:2px}.lv2 .md ha-icon{--mdc-icon-size:20px}.lv2{gap:6px}
+      ${AWCSS}
+      .lv2 .md{width:32px;height:32px;border-width:1.5px}.lv2 .md ha-icon{--mdc-icon-size:19px}.lv2{gap:6px}.mdm{font-size:12px;color:#8a8a8a;font-weight:600}.pp{color:${G};font-weight:600}
       .md.lg{width:36px;height:36px}.md.lg ha-icon{--mdc-icon-size:20px}
       .ovl{position:absolute;inset:0;background:rgba(0,0,0,.6);border-radius:16px;display:flex;align-items:center;justify-content:center;z-index:10}
       .pnl{background:#1e1e1e;border:1px solid #3a3a3a;border-radius:16px;width:min(600px,94%);max-height:92%;overflow:auto;padding:20px 22px;box-shadow:0 20px 60px rgba(0,0,0,.6);box-sizing:border-box}
@@ -569,9 +717,6 @@ class LoxWochenplanerCard extends FpBase {
       .nm{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .lv{font-size:11px;margin-top:2px}
       .cls{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:2px}.cl{font-size:11px;color:#7a7a7a;display:flex;align-items:center;gap:4px}.cl i{width:7px;height:7px;border-radius:50%;display:inline-block}
-      .ring{position:relative;width:48px;height:48px;flex:none}
-      .ring .ava{display:block;width:48px;height:48px;border-radius:50%;overflow:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
-      .ring .ava > span{width:100%!important;height:100%!important;border-radius:50%}.ring .ava svg{display:block}
       .streak{font-size:11px;color:#9a9a9a;display:flex;align-items:center;gap:3px;margin-top:3px}.streak ha-icon{--mdc-icon-size:13px;color:#E0A84F}
       .bg{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,135px),1fr));gap:6px}
       .btn{display:flex;align-items:center;gap:9px;width:100%;background:#323232;border:1px solid #3a3a3a;border-radius:9px;padding:6px 9px;margin:0;color:#eee;font:inherit;font-size:13px;line-height:1.25;min-height:40px;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;box-sizing:border-box;transition:background .2s,border-color .2s}
@@ -581,6 +726,9 @@ class LoxWochenplanerCard extends FpBase {
       .btn.done .cb{background:${G};border-color:${G}}
       .btn.done .cb::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #1e1e1e;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
       .btn.done .bt{color:#a7dc93}
+      .btn.pop .cb{animation:fpcheck .5s cubic-bezier(.3,1.6,.5,1)}.btn.pop .cb::before{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid ${G};animation:fpring .6s ease-out forwards}
+      @keyframes fpcheck{0%{transform:scale(.55)}60%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes fpring{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.3);opacity:0}}
+      @media (prefers-reduced-motion:reduce){.btn.pop .cb,.btn.pop .cb::before{animation:none}}
       .due{font-style:normal;font-size:10px;font-weight:600;color:#E0A84F;border:1px solid rgba(224,168,79,.5);border-radius:8px;padding:1px 6px;margin-left:6px;white-space:nowrap;display:inline-block}
       .due.last{color:#1e1e1e;background:#E0A84F;border-color:#E0A84F}.btn.done .due{opacity:.5}
       .pl.op{color:#c39a4a}.pl.op::before{display:none}
@@ -610,23 +758,22 @@ class LoxWochenplanerCard extends FpBase {
       .emptyk{grid-column:1/-1;color:#7a7a7a;padding:20px;text-align:center}
       .err{color:#E06B6B;font-size:12px;margin-top:10px}
     </style>
-    <div class="card">
+    <div class="card${phone ? ' phone' : ''}">
       <div class="top">
-        <div class="clock">${pad(now.getHours())}:${pad(now.getMinutes())}</div>
-        <div><div class="sub">${esc(this._cfg.titel)}</div><div class="date">${WDL[isoWd(now) - 1]}, <b>${now.getDate()}. ${MON[now.getMonth()]}</b></div></div>
         <div class="seg">${[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['termine', 'Termine'], ['schule', 'Stundenplan']].filter(([v]) => v !== 'schule' || Object.keys(this._cfg.schule || {}).length).map(([v, l]) => `<button class="${(this._mode || 'alle') === v ? 'on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
+        ${this._cfg.todos_knopf ? `<div class="tdg"><button class="nb td${this._cfg.todos_offen ? ' g' : ''}" data-todos title="To-dos"><ha-icon icon="mdi:checkbox-marked-circle-outline"></ha-icon>${phone ? '' : 'To-dos'}${this._cfg.todos_offen ? ` <b class="tdn">${Number(this._cfg.todos_offen)}</b>` : ''}</button><button class="nb" data-todoadd title="To-do hinzufügen"><ha-icon icon="mdi:plus"></ha-icon></button></div>` : ''}
         <div class="nav">
-          ${this._cfg.todos_knopf ? `<button class="nb td${this._cfg.todos_offen ? ' g' : ''}" data-todos title="To-dos"><ha-icon icon="mdi:checkbox-marked-circle-outline"></ha-icon>To-dos${this._cfg.todos_offen ? ` <b class="tdn">${Number(this._cfg.todos_offen)}</b>` : ''}</button>` : ''}
-          ${this._week !== 0 ? `<button class="nb g" data-nav="0">Heute</button>` : ''}
-          ${cals.length ? `<button class="nb${this._syncing ? ' spin2' : ''}" data-sync title="Kalender synchronisieren"><ha-icon icon="mdi:calendar-sync-outline"></ha-icon></button>` : ''}
+          ${(phone ? (this._dayOff || 0) !== 0 : this._week !== 0) ? `<button class="nb g" data-nav="0">Heute</button>` : ''}
+          ${cals.length && !phone ? `<button class="nb${this._syncing ? ' spin2' : ''}" data-sync title="Kalender synchronisieren"><ha-icon icon="mdi:calendar-sync-outline"></ha-icon></button>` : ''}
           <button class="nb" data-nav="-1"><ha-icon icon="mdi:chevron-left"></ha-icon></button>
-          <div class="wk"><b>KW ${isoWeek(ws)}</b>${ws.getDate()}. ${ws.getMonth() !== we.getMonth() ? MON[ws.getMonth()].slice(0, 3) + '. ' : ''}– ${we.getDate()}. ${MON[we.getMonth()]}</div>
+          ${phone ? `<div class="dd"><b>${ymd(sel) === tStr ? 'Heute' : WDL[isoWd(sel) - 1]}</b>${sel.getDate()}. ${MON[sel.getMonth()]}</div>`
+            : `<div class="wk"><b>KW ${isoWeek(ws)}</b>${ws.getDate()}. ${ws.getMonth() !== we.getMonth() ? MON[ws.getMonth()].slice(0, 3) + '. ' : ''}– ${we.getDate()}. ${MON[we.getMonth()]}</div>`}
           <button class="nb" data-nav="1"><ha-icon icon="mdi:chevron-right"></ha-icon></button>
         </div>
       </div>
       <div class="grid">${head}${(!cals.length || cals.some((c) => !c.person)) ? termine : ''}${rows}${empty}</div>
       ${this._err ? `<div class="err">${esc(this._err)}</div>` : ''}
-      ${this._detail ? this._detailHtml(kids, pre, awards) : ''}
+      ${this._detail ? this._detailHtml(kids, pre, awards, frames) : ''}
     </div>`;
   }
 }
@@ -637,5 +784,5 @@ const fpNavigate = (p) => {
   history.pushState(null, '', `/${parts[0] || 'family-planer'}/${p}${location.search}`);
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
-window.FP = { FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
+window.FP = { AWT, AWR, AWCSS, avBuilder, avSet, avNorm, avatarGen, AVB_CSS, AV_HC, AV_SK, AV_ST, AV_COST, AV_HEAD, AV_EYES, AV_FACE, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
 customElements.define('lox-wochenplaner-card', LoxWochenplanerCard);

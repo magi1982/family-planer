@@ -113,3 +113,19 @@ def test_discover_words():
               {"summary": "Reise nach Rom", "start": "2026-08-01", "end": "2026-08-04"},
               {"summary": "Ferienplanung", "start": "2026-02-01T10:00:00+01:00", "end": "2026-02-01T11:00:00+01:00"}]
     assert V.discover(events) == ["Ferien", "Urlaub", "OOO"]
+
+
+# ------------------------------------------------------------------ 0.9.0: holiday check "away / at home"
+def test_found_and_decisions():
+    persons = {"lea": {"name": "Lea"}, "tom": {"name": "Tom"}}
+    ev = {"summary": "Herbstferien", "start": "2026-11-20", "end": "2026-11-23"}
+    other = {"summary": "Zahnarzt", "start": "2026-11-20T10:00:00+01:00", "end": "2026-11-20T11:00:00+01:00"}
+    by_owner = {"lea": [ev, other], "tom": [ev]}
+    found = V.found(by_owner, persons, ["Ferien"], "owner")
+    assert len(found) == 1 and found[0]["persons"] == ["lea", "tom"] and found[0]["days"][0] == "2026-11-20"
+    key = found[0]["key"]
+    assert key == V.event_key(ev) and len(key) == 16
+    assert V.absences(by_owner, persons, ["Ferien"], "owner")["lea"] == {"2026-11-20", "2026-11-21", "2026-11-22"}
+    # "we stay at home": the holiday no longer pauses chores
+    assert V.absences(by_owner, persons, ["Ferien"], "owner", decisions={key: "home"}) == {}
+    assert V.absences(by_owner, persons, ["Ferien"], "owner", decisions={key: "away"})["tom"]

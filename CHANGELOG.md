@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.9.0 – 2026-11-11
+
+### New
+- **Trophies reworked**: metallic frames around the picture – platinum (trophy of the month), gold (crown of the week), silver (perfect week), bronze (busy bee) – with a gentle shine; the crown sits straight and centred above the head. Medals are metallic and larger.
+- **Six new awards**: climber, early bird (time adjustable), weekend hero, diamond streak (30 days), milestones (100 / 500 / 1000 chores) and family teamwork.
+- Awards are given **per week, per month or when reached** (no more three trophies a day), and **earn points** once per win – again when won anew. Every award can be switched off or resized (*Settings → Points*).
+- **Confetti for everyone**: small confetti with the name when somebody has finished the day; medium or large confetti in the trophy colour for trophies. At most one big confetti per person and day; none for daily changing awards. Respects *reduce motion*; can be switched off.
+- **New designs**: Standard (follows Home Assistant), Light, Dark, Rainbow and Space – each with the styles Standard, Transparent and Glass. Older designs move to Dark automatically.
+- **Navigation in one row** with time and date, an adjustable **order and visibility of the buttons**, a hint when a button points to a missing dashboard view, and a **holiday check**: for every holiday found in the calendars choose *away* (chores pause) or *at home* (chores go on).
+- **Rewards page**: *still to win* on top (rule, period, points, who is ahead), a tile per person with frame, medals, **running rewards** and a **"+ Reward"** button, person details, and a **forecast** in the reward dialog (family average and per person).
+- **Settings** reorganised: General, People, **Chores** (the complete chore plan now lives here), Points, To-dos, Lists, Holidays, Announcements, **Status** (last sync and last error per calendar, list and day change).
+- **People**: order (children first) and role (child / adult).
+- **Avatar builder**: figure, 12 hair styles, 12 hair colours, 9 skin tones, combinable extras and original costumes (our own heroes, ninja, knight, astronaut, pirate, wizard). Clashing parts are left out automatically; a test renders every combination.
+- **"+ Special chore" and "+ To-do"** at the top of the chore plan, **"+"** next to *To-dos* in the planner.
+- **Phone**: the planner shows only today, with ‹ › arrows and swipe.
+- Today's events: a red **now line** between past and coming events, the next one shows *in 25 min*, past ones are dimmed.
+- Ticking off a chore plays a short check animation (off with *reduce motion*).
+- Adding a second planner now asks for confirmation first.
+
+### Changed
+- **Parent PIN for every change**: chores, the chore plan, special chores, to-dos, persons, lists, announcement test and the design. Without the PIN you can still tick off chores and to-dos, redeem rewards and change any picture.
+- The starter bonus is gone. Open chores are listed first.
+- The separate chore-plan page is hidden in the navigation by default (it can be shown again under *Settings → General*).
+
+### Security
+- New websocket commands `family_planer/vacation/decide` and `family_planer/person/order` (validated, parent PIN). Navigation and award settings are whitelisted. See SECURITY.md #18–21.
+
 ## 0.8.1 – 2026-11-10
 
 ### Improved

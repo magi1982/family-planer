@@ -32,6 +32,10 @@
           "entity": "Jede To-do-Liste: Alexa, AnyList, Bring!, Todoist, Google Tasks, HA-Einkaufsliste, …",
           "max_categories": "5 bis 20. Wird es mehr, werden selten genutzte Kategorien unter „Sonstiges“ zusammengefasst."
         }
+      },
+      "second": {
+        "title": "Es gibt schon einen Planer",
+        "description": "Es gibt bereits einen Family Planer ({names}). Ein zweiter Planer legt alle Entitäten und Karten ein zweites Mal an. Normalerweise reicht ein Planer pro Haushalt – um Personen, Ämtli oder Listen zu ändern, öffne stattdessen den bestehenden Planer unter Konfigurieren. Nur absenden, wenn du wirklich einen zweiten, getrennten Planer willst."
       }
     },
     "error": {
@@ -214,7 +218,7 @@
           "language": "Sprache des Family Planers",
           "fullscreen_dblclick": "Vollbild per Doppeltippen",
           "fullscreen_auto": "Beim Öffnen automatisch Vollbild",
-          "theme_pin": "Design-Wechsel nur mit Eltern-PIN"
+          "style": "Stil"
         },
         "data_description": {
           "panel": "Öffnet den kompletten Planer ohne eigenes Dashboard – kein YAML nötig.",
@@ -224,7 +228,7 @@
           "language": "Automatisch: wie im Profil bzw. Home Assistant eingestellt. Deutsch oder Englisch: gilt fest für Planer, Tablet-Ansichten, Ansagen, Benachrichtigungen und Level-Namen – unabhängig von der Sprache von Home Assistant. Diese Einstellungsseiten folgen weiterhin der Sprache deines Profils.",
           "fullscreen_dblclick": "Doppeltippen auf eine freie Stelle des Planers blendet Kopfzeile und Seitenleiste von Home Assistant aus (bzw. echtes Vollbild, wo der Browser es erlaubt). Nochmals doppeltippen beendet es. Ämtli, Knöpfe und Eingabefelder lösen es nicht aus.",
           "fullscreen_auto": "Ideal für ein Wandtablet: der Planer startet ohne Kopfzeile und Seitenleiste.",
-          "theme_pin": "Die Design-Auswahl oben rechts in der Navigation fragt dann nach der Eltern-PIN – so können Kinder das Aussehen nicht ändern."
+          "style": "Standard: feste Flächen. Transparent: durchscheinende Karten. Glas: durchscheinend mit Milchglas-Unschärfe und feinem hellem Rand."
         }
       },
       "rewards": {
@@ -427,12 +431,11 @@
     },
     "theme": {
       "options": {
-        "loxone": "Loxone",
-        "ha": "Home Assistant (aktuelles HA-Design)",
-        "apple": "Apple Home",
-        "google": "Google Home (Material You)",
-        "light": "Hell & minimal",
-        "nord": "Nord"
+        "ha": "Standard (übernimmt dein Home-Assistant-Design)",
+        "light": "Hell",
+        "dark": "Dunkel",
+        "rainbow": "Regenbogen",
+        "space": "Weltall"
       }
     },
     "vacation_scope": {
@@ -452,6 +455,13 @@
         "auto": "Automatisch (Home Assistant)",
         "de": "Deutsch",
         "en": "English"
+      }
+    },
+    "style": {
+      "options": {
+        "standard": "Standard",
+        "transparent": "Transparent",
+        "glass": "Glas (milchig, wie bei Apple)"
       }
     }
   },

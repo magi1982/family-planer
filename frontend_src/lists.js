@@ -66,19 +66,19 @@
       const to = t.closest('[data-to]');
       if (to && this._move) {
         const item = this._move; const cat = l.categories.find((c) => c.id === to.dataset.to); this._move = null;
-        this._store.ws('family_planer/list/assign', { list_id: l.id, item, category_id: cat.id })
-          .then(() => this._flash(fmt(this.T.learned, { i: item, c: cat.name }))).catch((er) => this._flash(this.T.err + (er.message || er), true));
+        this._store.pws('family_planer/list/assign', { list_id: l.id, item, category_id: cat.id })
+          .then(() => this._flash(fmt(this.T.learned, { i: item, c: cat.name }))).catch((er) => (er === (window.FPPIN && window.FPPIN.CANCEL) ? null : this._flash(this.T.err + (er.message || er), true)));
         this._render(); return;
       }
       if (t.classList.contains('ov') || t.closest('[data-x]')) { this._move = null; this._edit = null; this._render(); return; }
       const it = t.closest('[data-uid]');
       if (it) { const done = it.dataset.st === 'completed'; it.classList.toggle('done'); this._svc('update_item', { item: it.dataset.uid, status: done ? 'needs_action' : 'completed' }); return; }
-      if (t.closest('[data-clear]')) { this._hass.callService('todo', 'remove_completed_items', {}, { entity_id: l.entity }).catch((er) => this._flash(this.T.err + (er.message || er), true)); return; }
+      if (t.closest('[data-clear]')) { this._hass.callService('todo', 'remove_completed_items', {}, { entity_id: l.entity }).catch((er) => (er === (window.FPPIN && window.FPPIN.CANCEL) ? null : this._flash(this.T.err + (er.message || er), true))); return; }
       if (t.closest('[data-showdone]')) { this._showDone = !this._showDone; this._render(); return; }
       if (t.closest('[data-opt]')) {
         if (this._busy) return; this._busy = true; this._render();
         try {
-          const r = await this._store.ws('family_planer/list/refresh', { list_id: l.id, ai: true });
+          const r = await this._store.pws('family_planer/list/refresh', { list_id: l.id, ai: true });
           const parts = [];
           if (r && r.created && r.created.length) parts.push(fmt(this.T.created, { x: r.created.join(', ') }));
           if (r && r.removed && r.removed.length) parts.push(fmt(this.T.removed, { x: r.removed.join(', ') }));
@@ -96,7 +96,7 @@
         if (t.closest('[data-save]')) {
           const cats = this._edit.filter((c) => (c.name || '').trim()).map((c) => ({ id: c.id, name: c.name.trim(), icon: c.icon }));
           this._edit = null; this._render();
-          this._store.ws('family_planer/list/categories', { list_id: l.id, categories: cats }).catch((er) => this._flash(this.T.err + (er.message || er), true));
+          this._store.pws('family_planer/list/categories', { list_id: l.id, categories: cats }).catch((er) => (er === (window.FPPIN && window.FPPIN.CANCEL) ? null : this._flash(this.T.err + (er.message || er), true)));
         }
       }
     }

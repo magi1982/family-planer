@@ -154,3 +154,16 @@ def test_sync_reward_costs_follows_settings():
     assert R.sync_reward_costs(rewards, {"day_points": 30, "day_bonus": 5, "streak_bonus": 20})
     assert rewards["a"]["cost"] == 1130 and rewards["b"]["cost"] == 50  # own cost stays untouched
     assert not R.sync_reward_costs(rewards, {"day_points": 30, "day_bonus": 5, "streak_bonus": 20})
+
+
+# ------------------------------------------------------------------ 0.9.0: forecast pace
+def test_pace_per_day_since_first_booking():
+    today = date(2026, 11, 10)
+    ledger = [{"pid": "a", "pts": 30, "kind": "chore", "ts": "2026-11-09T10:00"},
+              {"pid": "a", "pts": 30, "kind": "chore", "ts": "2026-11-10T10:00"},
+              {"pid": "a", "pts": -50, "kind": "reward", "ts": "2026-11-10T11:00"},
+              {"pid": "a", "pts": 20, "kind": "award", "ts": "2026-11-10T06:00"},
+              {"pid": "b", "pts": 10, "kind": "chore", "ts": "2026-10-01T10:00"}]  # older than 30 days
+    p = R.pace(ledger, ["a", "b"], today)
+    assert p["persons"]["a"] == 40.0  # 80 points over 2 days, spending ignored
+    assert p["persons"]["b"] == 0.0 and p["family"] == 40.0

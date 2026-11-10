@@ -9,16 +9,40 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.core import callback
 from homeassistant.helpers import selector
 
 from . import rewards, settings_spec, validate
-from .const import (CONF_AI_TASK, CONF_ALIASES, CONF_AUTO, CONF_CALENDAR, CONF_COLOR, CONF_ENTITY, CONF_ICON,
-                    CONF_LIST, CONF_MATCH_NAMES, CONF_MAX_CATEGORIES, CONF_MODULES, CONF_NAME, CONF_OPTIMIZE_TIME,
-                    CONF_PERSON, CONF_PERSONS, CONF_ROLLOVER_TIME, CONF_SHOW_OWNER, CONF_TITLE, DOMAIN,
-                    LANGUAGES, MODULE_LISTS, MODULE_WEEK, MODULES, NAME, THEMES)
+from .const import (
+    CONF_AI_TASK,
+    CONF_ALIASES,
+    CONF_AUTO,
+    CONF_CALENDAR,
+    CONF_COLOR,
+    CONF_ENTITY,
+    CONF_ICON,
+    CONF_LIST,
+    CONF_MATCH_NAMES,
+    CONF_MAX_CATEGORIES,
+    CONF_MODULES,
+    CONF_NAME,
+    CONF_OPTIMIZE_TIME,
+    CONF_PERSON,
+    CONF_PERSONS,
+    CONF_ROLLOVER_TIME,
+    CONF_SHOW_OWNER,
+    CONF_TITLE,
+    DOMAIN,
+    LANGUAGES,
+    MODULE_LISTS,
+    MODULE_WEEK,
+    MODULES,
+    NAME,
+    STYLES,
+    THEME_MIGRATE,
+    THEMES,
+)
 
 TODO_SELECTOR = selector.EntitySelector(selector.EntitySelectorConfig(domain="todo"))
 CALENDAR_SELECTOR = selector.EntitySelector(selector.EntitySelectorConfig(domain="calendar"))
@@ -30,6 +54,8 @@ MAX_SELECTOR = selector.NumberSelector(selector.NumberSelectorConfig(
     min=5, max=20, step=1, mode=selector.NumberSelectorMode.SLIDER))
 THEME_SELECTOR = selector.SelectSelector(selector.SelectSelectorConfig(
     options=list(THEMES), mode=selector.SelectSelectorMode.LIST, translation_key="theme"))
+STYLE_SELECTOR = selector.SelectSelector(selector.SelectSelectorConfig(
+    options=list(STYLES), mode=selector.SelectSelectorMode.LIST, translation_key="style"))
 MOTION_SELECTOR = selector.EntitySelector(selector.EntitySelectorConfig(
     domain="binary_sensor", device_class=["motion", "occupancy", "presence"], multiple=True))
 NOTIFY_SELECTOR = selector.EntitySelector(selector.EntitySelectorConfig(domain="notify", multiple=True))
@@ -85,6 +111,9 @@ class FamilyPlanerConfigFlow(ConfigFlow, domain=DOMAIN):
         return (self.hass.config.language or "").lower().startswith("de")
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        # a second planner duplicates every entity; ask once before going on
+        if user_input is None and self._async_current_entries() and not getattr(self, "_second_ok", False):
+            return await self.async_step_second()
         errors: dict[str, str] = {}
         if user_input is not None:
             chosen = user_input.get(CONF_MODULES) or []
@@ -99,6 +128,14 @@ class FamilyPlanerConfigFlow(ConfigFlow, domain=DOMAIN):
             vol.Required(CONF_MODULES, default=list(MODULES)): MODULES_SELECTOR,
         })
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+
+    async def async_step_second(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
+        if user_input is not None:
+            self._second_ok = True
+            return await self.async_step_user()
+        names = ", ".join(e.title for e in self._async_current_entries())
+        return self.async_show_form(step_id="second", data_schema=vol.Schema({}),
+                                    description_placeholders={"names": names})
 
     async def _next(self) -> ConfigFlowResult:
         mods = self._data[CONF_MODULES]
@@ -198,26 +235,26 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
         panel = st.get("panel") or {}
         if user_input is not None:
             await self._planner.async_update_settings({
-                "theme": user_input["theme"] if user_input.get("theme") in THEMES else "loxone",
+                "theme": user_input["theme"] if user_input.get("theme") in THEMES else "ha",
+                "style": user_input["style"] if user_input.get("style") in STYLES else "standard",
                 "panel": {"enabled": bool(user_input.get("panel")), "title": validate.text(user_input.get("panel_title"), 40)},
                 "idle_seconds": validate.integer(user_input.get("idle_seconds"), 10, 600, 45),
                 "language": user_input.get("language") if user_input.get("language") in LANGUAGES else "auto",
                 "fullscreen_dblclick": bool(user_input.get("fullscreen_dblclick", True)),
                 "fullscreen_auto": bool(user_input.get("fullscreen_auto", False)),
-                "theme_pin": bool(user_input.get("theme_pin", False)),
             })
             return self._done(reload=True)
         schema = vol.Schema({
             vol.Required("language", default=st.get("language") if st.get("language") in LANGUAGES else "auto"):
                 selector.SelectSelector(selector.SelectSelectorConfig(options=list(LANGUAGES),
                                         mode=selector.SelectSelectorMode.LIST, translation_key="language")),
-            vol.Required("theme", default=st.get("theme") or "loxone"): THEME_SELECTOR,
+            vol.Required("theme", default=THEME_MIGRATE.get(st.get("theme"), st.get("theme")) if THEME_MIGRATE.get(st.get("theme"), st.get("theme")) in THEMES else "ha"): THEME_SELECTOR,
+            vol.Required("style", default=st.get("style") if st.get("style") in STYLES else "standard"): STYLE_SELECTOR,
             vol.Required("panel", default=bool(panel.get("enabled", True))): bool,
             vol.Optional("panel_title", description={"suggested_value": panel.get("title") or self.config_entry.title}): str,
             vol.Required("idle_seconds", default=validate.integer(st.get("idle_seconds"), 10, 600, 45)): num(10, 600, "s"),
             vol.Required("fullscreen_dblclick", default=bool(st.get("fullscreen_dblclick", True))): bool,
             vol.Required("fullscreen_auto", default=bool(st.get("fullscreen_auto", False))): bool,
-            vol.Required("theme_pin", default=bool(st.get("theme_pin", False))): bool,
         })
         return self.async_show_form(step_id="design", data_schema=schema)
 

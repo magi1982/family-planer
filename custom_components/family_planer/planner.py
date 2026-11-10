@@ -2,34 +2,67 @@
 from __future__ import annotations
 
 import base64
-from collections.abc import Callable
 import copy
-from datetime import date, datetime, timedelta
 import json
 import logging
-from pathlib import Path
 import secrets
+from collections.abc import Callable
+from datetime import date, datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_send
-from homeassistant.helpers.event import (async_call_later, async_track_state_change_event,
-                                         async_track_time_change, async_track_time_interval)
+from homeassistant.helpers.event import (
+    async_call_later,
+    async_track_state_change_event,
+    async_track_time_change,
+    async_track_time_interval,
+)
 from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 from homeassistant.util import slugify
 
-from . import engine, lists, msgqueue, rewards, schedule, settings_spec, speech, vacation, validate
+from . import (
+    awards,
+    engine,
+    lists,
+    msgqueue,
+    rewards,
+    schedule,
+    settings_spec,
+    speech,
+    vacation,
+    validate,
+)
 from .announce import Announcer
-from .const import (CONF_AI_TASK, CONF_MATCH_NAMES, CONF_MODULES, CONF_OPTIMIZE_TIME, CONF_PERSONS,
-                    CONF_ROLLOVER_TIME, CONF_SHOW_OWNER, DEFAULT_COLORS, DEFAULT_SETTINGS, DOMAIN, LANGUAGES, FILES_DIR,
-                    FILES_URL, MAX_IMAGE_BYTES, MODULE_LISTS, MODULE_WEEK, SIGNAL_UPDATE, STORAGE_VERSION)
+from .const import (
+    CONF_AI_TASK,
+    CONF_MATCH_NAMES,
+    CONF_MODULES,
+    CONF_OPTIMIZE_TIME,
+    CONF_PERSONS,
+    CONF_ROLLOVER_TIME,
+    CONF_SHOW_OWNER,
+    DEFAULT_COLORS,
+    DEFAULT_SETTINGS,
+    DOMAIN,
+    FILES_DIR,
+    FILES_URL,
+    LANGUAGES,
+    MAX_IMAGE_BYTES,
+    MODULE_LISTS,
+    MODULE_WEEK,
+    SIGNAL_UPDATE,
+    STORAGE_VERSION,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-PERSON_FIELDS = ("name", "color", "image", "aliases", "calendar", "school")
+PERSON_FIELDS = ("name", "color", "image", "aliases", "calendar", "school", "order", "role")
+ROLES = ("kid", "adult")
 
 
 def clean_school(value) -> dict:
@@ -79,6 +112,7 @@ class FamilyPlanner:
         self.announcer = Announcer(hass, self)
         self.owns_panel = False
         self.away: dict[str, set[str]] = {}
+        self.vacation_review: list[dict] = []  # holidays found in the calendars, waiting for "away / at home"
         self._away_known = False
         self._pin_fail: list[datetime] = []
         self._ai_last: dict[str, datetime] = {}
@@ -179,10 +213,13 @@ class FamilyPlanner:
                 "calendar", "get_events", {"entity_id": entity, "start_date_time": start.isoformat(),
                                            "end_date_time": end.isoformat()},
                 blocking=True, return_response=True)
-        except Exception as err:  # noqa: BLE001 - a broken calendar must not break the planner
+        except Exception as err:
             _LOGGER.debug("Cannot read %s: %s", entity, err)
+            self.set_status(f"calendar:{entity}", False, str(err))
             return []
-        return [e for e in (res or {}).get(entity, {}).get("events", []) if e.get("start") and e.get("end")][:2000]
+        events = [e for e in (res or {}).get(entity, {}).get("events", []) if e.get("start") and e.get("end")][:2000]
+        self.set_status(f"calendar:{entity}", True, str(len(events)))
+        return events
 
     async def async_refresh_away(self, apply: bool = False, rescan: bool = False) -> None:
         """Read the person calendars: learn holiday words on the first sync, then find absences."""
@@ -225,8 +262,16 @@ class FamilyPlanner:
                 events = await self._events(cal, now - timedelta(days=7), now + timedelta(days=60))
                 for pid in pids:
                     by_owner.setdefault(pid, []).extend(events)
-            away = vacation.absences(by_owner, self.data["persons"], v["words"] or vacation.DEFAULT_WORDS, v["scope"],
-                                     v["min_hours"])
+            words = v["words"] or vacation.DEFAULT_WORDS
+            decisions = self.settings.get("vacation_decisions") or {}
+            away = vacation.absences(by_owner, self.data["persons"], words, v["scope"], v["min_hours"], decisions)
+            today_iso = now.date().isoformat()
+            self.vacation_review = [
+                {**e, "decision": decisions.get(e["key"])}
+                for e in vacation.found(by_owner, self.data["persons"], words, v["scope"], v["min_hours"])
+                if e["days"][-1] >= today_iso][:20]
+        else:
+            self.vacation_review = []
         changed = away != self.away
         self.away = away
         self._away_known = True
@@ -235,6 +280,24 @@ class FamilyPlanner:
             self._changed()
         elif changed:
             self._changed(save=False)
+
+    async def async_vacation_decide(self, key: str, decision: str | None) -> None:
+        """Holiday found in a calendar: "away" pauses chores, "home" keeps them going, None = ask again."""
+        dec = dict(self.settings.get("vacation_decisions") or {})
+        if decision in ("away", "home"):
+            dec[key] = decision
+        else:
+            dec.pop(key, None)
+        known = {e["key"] for e in self.vacation_review}
+        dec = {k: v for k, v in dec.items() if k in known or k == key}  # forget events that are gone
+        await self.async_update_settings({"vacation_decisions": dict(list(dec.items())[-60:])})
+        await self.async_refresh_away(apply=True)
+
+    async def async_person_order(self, order: list[str]) -> None:
+        for n, pid in enumerate([p for p in order if p in self.data["persons"]]):
+            self.data["persons"][pid]["order"] = n
+        self._changed()
+        await self._store.async_save(self.data)
 
     # ------------------------------------------------------------------ helpers
     def module_on(self, module: str) -> bool:
@@ -328,6 +391,36 @@ class FamilyPlanner:
         g = self.settings.get("gamification") or {}
         return {k: validate.integer(g.get(k, v), 0, 1000, v) for k, v in rewards.DEFAULTS.items()}
 
+    def award_settings(self) -> dict[str, Any]:
+        return awards.clean_settings(self.settings.get("awards"))
+
+    def theme(self) -> tuple[str, str]:
+        """Design and style; designs of 0.8 and older are mapped onto the new set."""
+        name = self.settings.get("theme") or "ha"
+        name = settings_spec.THEME_MIGRATE.get(name, name)
+        style = self.settings.get("style")
+        return (name if name in settings_spec.THEMES else "ha",
+                style if style in settings_spec.STYLES else "standard")
+
+    def nav(self) -> dict[str, list[str]]:
+        return settings_spec.clean_nav(self.settings.get("nav"))
+
+    def set_status(self, source: str, ok: bool, detail: str | None = None) -> None:
+        """Remember when a sync last worked (shown under Settings → Status)."""
+        stt = self.data.setdefault("status", {}).setdefault(source, {})
+        now = dt_util.now().isoformat(timespec="seconds")
+        if ok:
+            stt["ok"] = now
+            stt["error"] = None
+        else:
+            stt["fail"] = now
+            stt["error"] = (detail or "error")[:200]
+        if detail and ok:
+            stt["detail"] = detail[:120]
+
+    def pace(self) -> dict[str, Any]:
+        return rewards.pace(self.data["ledger"], list(self.data["persons"]), self.today())
+
     def points_mode(self) -> str:
         mode = (self.settings.get("gamification") or {}).get("mode")
         return mode if mode in rewards.MODES else "fair"
@@ -356,7 +449,11 @@ class FamilyPlanner:
         yesterday = today - timedelta(days=1)
         streaks = {pid: engine.person_stats(self.data["history"], {}, pid, today)["streak"] for pid in self.data["persons"]}
         rewards.day_bonuses(self.data, yesterday, streaks, self.gamification(), dt_util.now().isoformat())
+        if self.module_on(MODULE_WEEK):
+            awards.evaluate(self.data, today, streaks, self.award_settings(), self.points_mode() == "fair",
+                            self.gamification()["day_points"], dt_util.now().isoformat(), rewards._add)
         rewards.trim(self.data, 400, today)
+        self.set_status("rollover", True)
         self._prune_todos(today)
         self.book_points()
         self._changed()
@@ -372,6 +469,12 @@ class FamilyPlanner:
         else:
             rewards.chore_done(self.data, item_id, item, self.chore_points(item.get("chore_id")),
                                dt_util.now().isoformat())
+        pid = item.get("person_id")
+        today = self.today()
+        mine = engine.active_items(self.data["items"], pid, today)
+        if done and mine and all(it.get("done") for _, it in mine) and pid in self.data["persons"]:
+            awards.day_done(self.data, pid, today, self.data["persons"][pid].get("color") or "#69C350",
+                            dt_util.now().isoformat(), self.award_settings())
         self._changed()
 
     async def async_save_chore(self, chore_id: str | None, chore: dict) -> str:
@@ -407,7 +510,9 @@ class FamilyPlanner:
                  "image": validate.image,
                  "aliases": validate.aliases,
                  "calendar": lambda v: validate.entity(v, ("calendar",)),
-                 "school": clean_school}
+                 "school": clean_school,
+                 "order": lambda v: validate.integer(v, 0, 99, person.get("order", 0)),
+                 "role": lambda v: v if v in ROLES else person.get("role", "kid")}
         for key in PERSON_FIELDS:
             if key in patch:
                 person[key] = clean[key](patch[key])
@@ -506,7 +611,7 @@ class FamilyPlanner:
             res = await self.hass.services.async_call(
                 "todo", "get_items", {"entity_id": entity, "status": ["needs_action", "completed"]},
                 blocking=True, return_response=True)
-        except Exception as err:  # noqa: BLE001 - a broken list must not break the planner
+        except Exception as err:
             _LOGGER.debug("Cannot read %s: %s", entity, err)
             return []
         return (res or {}).get(entity, {}).get("items", [])
@@ -521,7 +626,7 @@ class FamilyPlanner:
                 {"task_name": "Family Planer categories", "entity_id": ai_entity,
                  "instructions": lists.ai_prompt(lst, names, self.lang)},
                 blocking=True, return_response=True)
-        except Exception as err:  # noqa: BLE001
+        except Exception as err:
             _LOGGER.warning("AI categorisation failed: %s", err)
             return {}
         return lists.parse_ai((res or {}).get("data"))
@@ -532,6 +637,11 @@ class FamilyPlanner:
         if lst is None:
             raise KeyError(list_id)
         items = await self._list_items(lst["entity"])
+        ent = self.hass.states.get(lst["entity"])
+        if ent is None or ent.state in ("unavailable", "unknown"):
+            self.set_status(f"list:{list_id}", False, f"{lst['entity']} unavailable")
+        else:
+            self.set_status(f"list:{list_id}", True, str(len(items)))
         names = [it.get("summary", "") for it in items if it.get("summary")]
         open_names = [it["summary"] for it in items if it.get("summary") and it.get("status") == "needs_action"]
         before = json.dumps([lst["categories"], lst["assignments"]], sort_keys=True)
@@ -726,7 +836,7 @@ class FamilyPlanner:
         self.data["ledger"][:] = [e for e in self.data["ledger"] if e.get("ref") != ref]
         pts = self.todo_points(todo)
         if done and pts > 0:
-            rewards._add(self.data["ledger"], todo["person_id"], pts, "todo", ref, todo["title"],  # noqa: SLF001
+            rewards._add(self.data["ledger"], todo["person_id"], pts, "todo", ref, todo["title"],
                          dt_util.now().isoformat())
         self._changed()
         await self._store.async_save(self.data)
@@ -750,12 +860,12 @@ class FamilyPlanner:
         return {
             "general": {"modules": {m: self.module_on(m) for m in (MODULE_WEEK, MODULE_LISTS)},
                         "language": st.get("language") if st.get("language") in LANGUAGES else "auto",
-                        "theme": st.get("theme") or "loxone", "panel": bool(panel.get("enabled", True)),
+                        "theme": self.theme()[0], "style": self.theme()[1], "panel": bool(panel.get("enabled", True)),
                         "panel_title": panel.get("title") or "",
                         "idle_seconds": validate.integer(st.get("idle_seconds"), 10, 600, 45),
                         "fullscreen_dblclick": bool(st.get("fullscreen_dblclick", True)),
                         "fullscreen_auto": bool(st.get("fullscreen_auto", False)),
-                        "theme_pin": bool(st.get("theme_pin", False)),
+                        "nav": self.nav(), "nav_title": bool(st.get("nav_title", False)),
                         "rollover_time": st.get(CONF_ROLLOVER_TIME) or "00:00",
                         "match_names": bool(st.get(CONF_MATCH_NAMES, True)),
                         "show_owner": bool(st.get(CONF_SHOW_OWNER, False)),
@@ -766,13 +876,15 @@ class FamilyPlanner:
             "vacation": {k: v for k, v in self.vacation_settings().items() if k != "scanned"},
             "points": {**self.gamification(), "mode": self.points_mode(),
                        "reward_notify": validate.entities(st.get("reward_notify"), ("notify",)),
-                       "reward_value": self.sizes()["value"], "currency": self.sizes()["currency"]},
+                       "reward_value": self.sizes()["value"], "currency": self.sizes()["currency"],
+                       "awards": self.award_settings()},
             "announce": {**DEFAULT_ANNOUNCE, **(st.get("announce") or {})},
             "lists_settings": {"optimize_time": st.get(CONF_OPTIMIZE_TIME) or "03:00", "ai_task": st.get(CONF_AI_TASK),
                                "prune_days": validate.integer(st.get("prune_days"), 7, 365, 30)},
             "todos": self.todo_settings(),
             "persons": [{"id": pid, "name": p["name"], "color": p.get("color"), "calendar": p.get("calendar"),
-                         "aliases": p.get("aliases", []), "image": p.get("image", ""), "school": clean_school(p.get("school"))}
+                         "aliases": p.get("aliases", []), "image": p.get("image", ""), "school": clean_school(p.get("school")),
+                         "order": p.get("order", 0), "role": p.get("role", "kid")}
                         for pid, p in self.persons_sorted()],
             "lists": [{"id": lid, "name": lst["name"], "entity": lst["entity"], "icon": lst.get("icon") or "",
                        "max_categories": lst.get("max_categories", 10), "auto": lst.get("auto", True)}
@@ -791,7 +903,7 @@ class FamilyPlanner:
             patch, flags = settings_spec.vacation(data, self.vacation_settings())
         elif section == "points":
             patch, flags = settings_spec.points(data, self.gamification(), self.points_mode(), st.get("reward_notify") or [],
-                                                self.sizes()["value"], self.sizes()["currency"])
+                                                self.sizes()["value"], self.sizes()["currency"], self.award_settings())
         elif section == "announce":
             patch, flags = settings_spec.announce(data, {**DEFAULT_ANNOUNCE, **(st.get("announce") or {})},
                                                   self.data["persons"])
@@ -907,7 +1019,7 @@ class FamilyPlanner:
             try:
                 await self.hass.services.async_call("notify", "send_message", {"entity_id": ent, "message": msg},
                                                     blocking=True)
-            except Exception as err:  # noqa: BLE001
+            except Exception as err:
                 _LOGGER.warning("Reward notification via %s failed: %s", ent, err)
 
     def points(self) -> dict[str, dict]:
@@ -925,6 +1037,10 @@ class FamilyPlanner:
         fair = self.points_mode() == "fair"
         return {pid: engine.person_stats(self.data["history"], self.data["items"], pid, today, self.reliability_days(), fair)
                 for pid in self.data["persons"]}
+
+    def _awards_view(self, stats: dict[str, dict]) -> dict[str, dict]:
+        per = awards.person_awards(self.data, {p: s["streak"] for p, s in stats.items()})
+        return {pid: {"list": lst, "frame": awards.frame(lst)} for pid, lst in per.items()}
 
     def snapshot(self) -> dict[str, Any]:
         """Everything the dashboard cards need, JSON serializable."""
@@ -949,7 +1065,9 @@ class FamilyPlanner:
                          "idle_seconds": validate.integer(st.get("idle_seconds"), 10, 600, 45),
                          "fullscreen_dblclick": bool(st.get("fullscreen_dblclick", True)),
                          "fullscreen_auto": bool(st.get("fullscreen_auto", False)),
-                         "theme_pin": bool(st.get("theme_pin", False))},
+                         "nav": self.nav(), "nav_title": bool(st.get("nav_title", False)),
+                         "early_time": self.award_settings()["early_time"],
+                         "confetti": self.award_settings()["confetti"]},
             "todos": sorted(({"id": tid, **t} for tid, t in self.data["todos"].items()),
                             key=lambda t: (t.get("done"), t.get("created") or "")),
             "todo_settings": self.todo_settings(),
@@ -964,7 +1082,18 @@ class FamilyPlanner:
             "items": [{"id": iid, **it} for iid, it in self.data["items"].items()],
             "history": {d: v for d, v in self.data["history"].items() if d >= limit},
             "stats": stats,
-            "awards": engine.awards(stats, self.points_mode() == "fair"),
+            "awards": self._awards_view(stats),
+            "open_awards": awards.open_awards(self.data, today, {p: s["streak"] for p, s in stats.items()},
+                                              self.points_mode() == "fair", self.award_settings()),
+            "award_settings": self.award_settings(),
+            "award_points": {aid: awards.points_for(c["size"], self.gamification()["day_points"])
+                             for aid, c in self.award_settings()["items"].items()},
+            "celebrations": [c for c in (self.data.get("awards") or {}).get("celebrations", [])
+                             if (c.get("ts") or "") >= (today - timedelta(days=2)).isoformat()],
+            "counters": {pid: c.get("done", 0) for pid, c in self.data.get("counters", {}).items()},
+            "pace": self.pace(),
+            "status": self.data.get("status", {}),
+            "vacation_review": self.vacation_review,
             "points": self.points(),
             "gamification": {**self.gamification(), "mode": self.points_mode()},
             "rewards": [{"id": rid, **r} for rid, r in sorted(self.data["rewards"].items(), key=lambda x: x[1]["cost"])],
@@ -972,7 +1101,7 @@ class FamilyPlanner:
                                key=lambda q: q["ts"], reverse=True)[:30],
             "ledger": sorted(self.data["ledger"], key=lambda e: e["ts"], reverse=True)[:60],
             "pin_set": bool(st.get("pin_hash")),
-            "theme": st.get("theme") or "loxone",
+            "theme": self.theme()[0], "style": self.theme()[1],
             "lists": [{"id": lid, "name": lst["name"], "entity": lst["entity"], "icon": lst.get("icon"),
                        "max_categories": lst.get("max_categories"), "auto": lst.get("auto", True),
                        "categories": [{"id": c["id"], "name": c["name"], "icon": c.get("icon")} for c in lst["categories"]],

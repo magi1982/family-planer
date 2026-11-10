@@ -3,7 +3,7 @@ from __future__ import annotations
 
 DOMAIN = "family_planer"
 NAME = "Family Planer"
-VERSION = "0.8.1"
+VERSION = "0.9.0"
 STORAGE_VERSION = 1
 
 # modules (can be switched on/off; more will follow)
@@ -37,7 +37,7 @@ DEFAULT_SETTINGS = {
     CONF_SHOW_OWNER: False,
     CONF_OPTIMIZE_TIME: "03:00",
     CONF_AI_TASK: None,
-    "theme": "loxone",
+    "theme": "ha",
     "language": "auto",
     "admin_only_edit": False,
     "panel": {"enabled": True, "title": ""},
@@ -51,7 +51,9 @@ FILES_URL = "/family_planer_files"
 FILES_DIR = "family_planer"
 CARDS_FILE = "family-planer-cards.js"
 PANEL_URL = "family-planer"
-THEMES = ("loxone", "ha", "apple", "google", "light", "nord")
+THEMES = ("ha", "light", "dark", "rainbow", "space")
+STYLES = ("standard", "transparent", "glass")
+THEME_MIGRATE = {"loxone": "dark", "apple": "dark", "google": "dark", "nord": "dark"}
 MAX_IMAGE_BYTES = 1_500_000
 
 DEFAULT_COLORS = ["#C771D6", "#4FA3E0", "#E0A84F", "#E06B9B", "#4FD1C5", "#69C350", "#7A7FE8", "#E06B6B"]

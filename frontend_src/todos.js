@@ -40,8 +40,7 @@
       const pid = this._person || (s.persons[0] && s.persons[0].id);
       const def = this._defSize(s); const size = this._size || def;
       try {
-        if (size !== def) await window.FPPIN.call(this._store, 'family_planer/todo/save', { person_id: pid, title, size }, { lang: this._cfg.lang, host: this });
-        else await this._store.ws('family_planer/todo/save', { person_id: pid, title });
+        await window.FPPIN.call(this._store, 'family_planer/todo/save', { person_id: pid, title, ...(size !== def ? { size } : {}) }, { lang: this._cfg.lang, host: this });
         this._text = ''; this._size = null; this._render();
       } catch (e) { if (e !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(this.T.err); }
     }
@@ -61,11 +60,12 @@
       if (t.closest('[data-yes]') && this._dlg) {
         const d = this._dlg; this._dlg = null;
         if (d.kind === 'done') this._set(d.it, !d.it.done);
-        else { try { await this._store.ws('family_planer/todo/delete', { todo_id: d.it.id }); } catch (er) { this._flash(this.T.err); } }
+        else { try { await window.FPPIN.call(this._store, 'family_planer/todo/delete', { todo_id: d.it.id }, { lang: this._cfg.lang, host: this }); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this.T.err); } }
         this._render(); return;
       }
       if (t.closest('[data-close]') || t.classList.contains('ov')) { this._dlg = null; this._render(); }
     }
+    focusAdd() { const i = this.shadowRoot && this.shadowRoot.querySelector('[data-new]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center' }); } }
     _defSize(s) { const v = s && s.todo_settings && s.todo_settings.size; return ['none', 's', 'm', 'l'].includes(v) ? v : 's'; }
     _pts(s, it) { const sz = (s.sizes && s.sizes.todo) || {}; return it.size ? (sz[it.size] || 0) : (it.points || 0); }
     async _set(it, done) { try { await this._store.ws('family_planer/todo/set', { todo_id: it.id, done }); } catch (e) { this._flash(this.T.err); } }

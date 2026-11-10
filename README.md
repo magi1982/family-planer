@@ -39,6 +39,7 @@ home – and **shopping and to-do lists that sort themselves**. Everything is se
   - [Pictures: avatars or your own photo](#pictures-avatars-or-your-own-photo)
 - [Smart lists module](#smart-lists-module)
 - [Designs](#designs)
+- [Navigation](#navigation)
 - [Settings in the planner](#settings-in-the-planner)
 - [Fullscreen on double tap](#fullscreen-on-double-tap)
 - [Installation](#installation)
@@ -62,7 +63,7 @@ home – and **shopping and to-do lists that sort themselves**. Everything is se
 | **Usage** | Own sidebar entry with navigation *Planner · Lists · Chore plan · Rewards · Settings*; optionally as cards in your own dashboards; fullscreen on double tap |
 | **Setup** | Directly in the planner (*Settings*, protected by the parent PIN) or via *Settings → Devices & services* – no YAML |
 | **Languages** | English and German – automatically like Home Assistant, or fixed to German or English for the planner (e.g. Home Assistant in English, planner in German) |
-| **Designs** | Home Assistant, Loxone, Apple Home, Google Home, Light, Nord |
+| **Designs** | Standard (Home Assistant), Light, Dark, Rainbow, Space – each as Standard, Transparent or Glass |
 | **Dependencies** | None. Calendars, lists, speakers and AI are optional – any matching entity works |
 | **Requirement** | Home Assistant 2026.3 or newer |
 
@@ -139,11 +140,29 @@ Per child (or person, e.g. university/work):
 
 ![Rewards](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/rewards.png)
 
-- **Reliability** in percent (30 days), coloured band per person; newcomers start at 100 % (*starter bonus*).
+- **Reliability** in percent (30 days), coloured band per person.
 - **Fair points** (default): whoever finishes **all** of their chores of the day gets the same number of points (default 30) – whether they have 2 or 6 chores. Every finished chore immediately earns its share; 3 of 6 done = 50 % = 15 points. The points in the chore plan act as weights (a heavy chore with 20 counts twice as much as one with 10). Alternatively *per chore* mode: more chores, more points.
 - **Bonuses**: additionally a **day bonus** for a fully completed day and a **streak bonus** for every 7-day streak. If a chore is reopened, its points are booked back.
 - **10 levels** from *Starter* via *Pro* and *Hero* to *Grandmaster* – with progress bar. Redeemed points never lower the level.
-- **Awards**: 👑 crown of the week, 🏆 trophy of the month, 🐝 busy bee, ⭐ perfect week, 🔥 streak, 🚀 starter bonus – tap to see why.
+- **Awards and trophies** – each one has a period, so nobody collects three trophies a day:
+
+  | Award | Won | Frame / points (default) |
+  |---|---|---|
+  | 🏆 Trophy of the month | best rate of the previous month, on the 1st | **platinum** frame · large |
+  | 👑 Crown of the week | best rate of the previous week, on Monday | **gold** frame · medium |
+  | ⭐ Perfect week | every chore of a whole week done | **silver** frame · medium |
+  | 🐝 Busy bee | most done in a week | **bronze** frame · small |
+  | 🛡️ Weekend hero | Saturday and Sunday everything done | small |
+  | 📈 Climber | at least 15 points better than the week before | medium |
+  | 🌅 Early bird | on 4 days of the week everything done before 12:00 (adjustable) | small |
+  | 💎 Diamond streak | 30 days in a row everything done | giant |
+  | 🏅 Milestones | 100, 500 and 1000 chores in total | medium |
+  | 👪 Family teamwork | the whole family finished everything on one day | small |
+  | 🔥 Streak | days in a row (changes daily, no points) | – |
+
+- The **best award sets a metallic frame** around the picture (platinum, gold, silver, bronze) with a gentle shine; the crown sits straight above the head.
+- **Points per award**: once per win, and again when it is won anew. Sizes: small = ⅓, medium = ⅔, large = 1×, giant = 2× the points for a full day. Every award can be switched off or resized under *Settings → Points*.
+- **Confetti for everyone** (adults too): small confetti with the name when somebody has done all of their chores for the day; medium or large confetti in the trophy colour for trophies. At most one big confetti per person and day; daily changing awards (streak, busy bee, early bird) get none. Can be switched off; respects *reduce motion*.
 - **Fair for percentages and awards, too**: in *Fair* mode, reliability, crown of the week, trophy of the month and busy bee count **every day the same** – no matter if 2 or 6 chores. The rate is the average of the daily rates; the busy bee has the most complete chore days. In *Per chore* mode single chores count as before.
 - **History** per person: chores, bonuses, rewards.
 
@@ -162,7 +181,10 @@ Per child (or person, e.g. university/work):
   | Giant | 5 × large | 5650 | approx. 100 |
 
   When the point settings change, the costs follow automatically. *Own points* is still available for special cases. The **value of a large reward** (e.g. 20 CHF) is adjustable and only meant as a guide.
-- **View**: with nobody selected the page shows **all rewards** – each with the **persons it is for** (picture + name, otherwise "For everyone") – and all pending requests. Tapping a person (or their name on a reward) shows only their rewards and requests and lets them redeem. Tap again to clear the selection.
+- **View**: at the top **still to win** – every trophy nobody holds right now, with how to win it, when it is awarded, its points and who is ahead.
+- Below, a **tile per person** like in the planner: picture with frame, medals, points and level, **what is running** (requests waiting for approval, rewards made for this person or the next goal with progress and *"in about 6 days"*) and a **"+ Reward"** button that creates a reward for exactly this person (parent PIN).
+- Tapping a person shows their awards, their rewards and history; with nobody selected you see all rewards with the persons they are for.
+- **Forecast** in the reward dialog: how many days the family average needs for the chosen cost, and how long each person needs at their current pace.
 - Children redeem on the tablet; points are reserved until the parents decide.
 - Parents approve as **admin** or on the tablet with a **parent PIN** (4–8 digits). Notification in Home Assistant and optionally on the phone.
 - **Give points**: bonus (or deduction) with a reason, e.g. "Room tidied up perfectly" – with the same sizes as to-dos (**Small · Medium · Large**) or a number of your own.
@@ -170,7 +192,8 @@ Per child (or person, e.g. university/work):
 ### Parent PIN
 
 - **Start PIN `123456`** – it must be **changed on first use** (current PIN, new PIN, repeat). Until then, rewards and settings cannot be changed, and Home Assistant shows a repair notice.
-- The PIN protects: **adding/changing rewards**, the **settings page**, approving rewards and giving points (admins may approve and give points without it).
+- **What needs the PIN**: every change – chores and the chore plan, special chores, to-dos (add/delete), persons (name, colour, calendar, role, order), lists, rewards, the design, holiday decisions and the settings page. Approving rewards and giving points as well (admins may do these two without it).
+- **What does not**: ticking off chores and to-dos, redeeming rewards, and **changing a picture** (figure, hair, skin tone, extras, costume) – anyone may change any picture.
 - 4–8 digits, never `123456` again; locked for 5 minutes after 5 wrong attempts; stored only as a PBKDF2 hash.
 - After entering it once, the planner stays unlocked for **10 minutes** (refreshed while you work, *Lock* ends it immediately). The PIN itself is never stored in the browser.
 - Change it any time: *Rewards → Edit → Change PIN* or *Settings → Change parent PIN*. Forgotten? *Settings → Devices & services → Family Planer → Configure → Points & rewards → Reset parent PIN to 123456* (admins only).
@@ -216,7 +239,8 @@ data:
 
 ![Picture selection](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/avatars.png)
 
-- Many **colourful, illustrated avatars**: girls, boys, women, men, grandparents, dressed up (hero, astronaut, pirate, wizard, crown, cat …).
+- **Avatar builder**: figure (child, adult, grandparent), 12 hair styles, 12 hair colours (incl. pink, blue, purple, green), **9 skin tones**, extras that can be combined freely (freckles, beard, headphones, glasses, sunglasses, cap, crown, cat ears, unicorn, bow, headband) and **costumes**: our own heroes *Star Power*, *Sparkwing* and *Moon Fairy*, ninja, knight, astronaut, pirate and wizard. Parts that would clash (e.g. a cap under a knight's helmet) are left out automatically, so every combination looks right – an automated test renders all of them.
+- Plus many ready-made avatars: girls, boys, women, men, grandparents, dressed up.
 - **Upload your own photo**: cropped to a square in the browser and stored only in your Home Assistant.
 - Colour per person and nicknames can be changed directly in the chore plan.
 
@@ -239,20 +263,24 @@ data:
 
 ## Designs
 
-| Home Assistant | Loxone | Apple Home | Google Home | Light | Nord |
-|---|---|---|---|---|---|
-| uses your HA theme (colours, corner radius) | dark, green | black, orange | Material You | white, blue | Nord colours |
+| Standard | Light | Dark | Rainbow | Space |
+|---|---|---|---|---|
+| follows your Home Assistant theme | white, blue | dark, green | dark with a rainbow band and colourful glow | deep blue with stars and nebula |
 
-![Light design](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/theme-light.png)
+Each design comes in three **styles**: *Standard*, *Transparent* and *Glass* (frosted surfaces over the design's background). Older designs (Loxone, Apple, Google, Nord) are switched to *Dark* automatically.
 
-**Switch the design like in an app**: a small colour swatch at the top right of the navigation shows the current design. Tapping it opens a picker with a **mini preview** of every design; one tap switches at once, on every device.
+**Switch the design like in an app**: a small colour swatch at the top right of the navigation shows the current design. Tapping it opens a picker with a **mini preview** of every design and the style; one tap switches at once, on every device. Changing it needs the parent PIN.
 
-![Design picker](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/design-picker.png)
+- Still available under *Settings → General* and *Configure → Design, language & sidebar*. Cards in your own dashboards can override it with `theme:` / `style:`. `theme_picker: false` on the navigation card hides the picker.
+- Your own dashboard can use the design's background with `background: var(--fp-page)` on the view.
 
-- Optionally **parent PIN only** (*Settings → General → Changing the design needs the parent PIN*), so children cannot change the look.
-- Still available under *Configure → Design, language & sidebar*. Cards in your own dashboards can override it with `theme:`. `theme_picker: false` on the navigation card hides the picker.
+## Navigation
 
----
+- One row: **time and date** on the left (or the planner's title), the pages in the middle, on the right the **holiday check** 🌴 and the design picker.
+- **Holiday check**: when the calendars contain holidays, a badge shows how many are undecided. Per holiday you choose *We are away* (chores pause) or *We are at home* (chores go on). Parent PIN.
+- **Order and visible buttons** under *Settings → General*. If a button points to a view your dashboard does not have, it is shown dashed with a hint instead of opening an empty page.
+- **Today**: a red now line separates past and coming events, the next event shows *in 25 min*; ticking off a chore plays a short check animation.
+- **Phone**: the planner shows only today, with ‹ › arrows and swipe for the other days; it returns to today after the idle time.
 
 ## Settings in the planner
 
@@ -260,7 +288,7 @@ data:
 
 Everything that the Home Assistant dialogs offer, in one clear page – also on the tablet: **Settings** in the navigation.
 - Protected by the **parent PIN** (always, also for admins).
-- Tabs: *General* (modules, language, design, fullscreen, sidebar, day change, …), *People & school* (name, colour, calendar, nicknames, school calendar, blocks per weekday, travel time), *Holidays*, *Points*, *To-dos*, *Announcements* (entities picked from lists), *Lists*.
+- Tabs: *General* (modules, language, design and style, navigation order, fullscreen, sidebar, day change, …), *People* (order, role child/adult, picture builder, colour, calendar, nicknames, school calendar, blocks per weekday, travel time), ***Chores*** (the complete chore plan incl. special chores and to-dos – the separate chore-plan page is hidden by default), *Points* (incl. every award with on/off and size, early-bird time, confetti), *To-dos*, *Lists*, *Holidays* (incl. the away / at home decisions), *Announcements*, ***Status*** (last successful sync and last error for every calendar, list and the day change).
 - Every field with a short description; invalid input is refused with a clear message (e.g. announcements without speaker).
 - Changes that need new timers (day change, modules, lists, announcements) reload the integration automatically; the planner reconnects by itself.
 - The dialogs under *Settings → Devices & services → Family Planer → Configure* remain available.
@@ -305,7 +333,8 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Setting | Default | Meaning |
 |---|---|---|
 | Family Planer language | Automatic | *Automatic*: like your profile / Home Assistant · *Deutsch* or *English*: fixed for planner, tablet views, announcements, notifications and level names, independent of the Home Assistant language. The settings pages themselves follow your profile language. |
-| Design | Loxone | Home Assistant, Loxone, Apple Home, Google Home, Light, Nord |
+| Design | Standard | Standard (Home Assistant), Light, Dark, Rainbow, Space |
+| Style | Standard | Standard, Transparent, Glass |
 | Sidebar entry | on | opens the complete planner without a dashboard of your own |
 | Sidebar title | name | text in the sidebar |
 | Return to the start view after | 45 s | a tapped day / person jumps back to today afterwards |
@@ -480,10 +509,11 @@ Not necessary – but possible. The cards are loaded automatically.
 type: vertical-stack
 cards:
   - type: custom:family-planer-nav-card
-    paths: { planer: planer, listen: einkauf, aemtliplan: aemtliplan, belohnungen: belohnungen }
+    paths: { planer: planer, listen: einkauf, belohnungen: belohnungen, einstellungen: einstellungen }
   - type: custom:family-planer-card
     view: week        # week | plan | lists | rewards | settings
-    theme: apple      # optional
+    theme: space      # optional: ha | light | dark | rainbow | space
+    style: glass      # optional: standard | transparent | glass
     language: en      # optional, otherwise the integration setting or the HA language
 ```
 

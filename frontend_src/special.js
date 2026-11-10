@@ -60,6 +60,7 @@
       if (s.type === 'yearly') return T.sum.yearly(s.dates.map((d) => this._fmtMd(d)).join(', '));
       return T.sum.once(s.dates.map((d) => this._fmtDate(d)).join(', '));
     }
+    openAdd() { this._ed = this._new(); this._render(); setTimeout(() => this.scrollIntoView({ block: 'start', behavior: 'smooth' }), 30); }
     _new() { const s = this._snap(); return { id: null, title: '', points: null, persons: s && s.persons[0] ? [s.persons[0].id] : [], rotate: false, window: 7,
       schedule: { type: 'interval', every: 6, unit: 'months', start: todayIso(), mode: 'day', day: 1, nth: 1, weekday: 6, dates: [] } }; }
     _click(e) {
@@ -70,7 +71,7 @@
         schedule: { every: 1, unit: 'months', start: todayIso(), mode: 'day', day: 1, nth: 1, weekday: 6, dates: [], ...c.schedule } }; this._render(); return; }
       const dl = t.closest('[data-del]');
       if (dl) { const id = dl.dataset.del; if (this._confirm !== id) { this._confirm = id; this._render(); return; }
-        this._confirm = null; this._store.ws('family_planer/chore/delete', { chore_id: id }).catch((er) => this._flash(er)); return; }
+        this._confirm = null; this._store.pws('family_planer/chore/delete', { chore_id: id }).catch((er) => { if (er !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(er); }); return; }
       if (!this._ed) return;
       const ty = t.closest('[data-type]'); if (ty) { this._ed.schedule.type = ty.dataset.type; this._render(); return; }
       const pp = t.closest('[data-person]'); if (pp) { const id = pp.dataset.person; const l = this._ed.persons; this._ed.persons = l.includes(id) ? l.filter((x) => x !== id) : [...l, id]; this._render(); return; }
@@ -103,7 +104,7 @@
       const msg = { title: e.title.trim(), assign: {}, schedule: sched, persons: e.persons, rotate: e.rotate && e.persons.length > 1, window: e.window || 1 };
       if (e.id) msg.chore_id = e.id;
       if (typeof e.points === 'number') msg.points = Math.max(0, Math.min(1000, Math.round(e.points)));
-      try { await this._store.ws('family_planer/chore/save', msg); this._ed = null; this._render(); } catch (er) { this._flash(er); }
+      try { await this._store.pws('family_planer/chore/save', msg); this._ed = null; this._render(); } catch (er) { if (er !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(er); }
     }
     _editor(s) {
       const T = this.T; const e = this._ed; const sc = e.schedule;

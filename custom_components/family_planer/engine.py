@@ -131,6 +131,9 @@ def rollover(data: dict, today: date, away: dict | None = None) -> bool:
         rec["total"] += 1
         if it.get("done"):
             rec["done"] += 1
+            at = str(it.get("done_at") or "")[11:16]  # local HH:MM, for the early-bird award
+            if at and at > rec.get("last", ""):
+                rec["last"] = at
         else:
             rec["missed"].append(it.get("title", ""))
         changed = True
@@ -233,7 +236,6 @@ AWARDS = {
     "bee": {"icon": "mdi:bee", "color": "#F5C542"},
     "perfect": {"icon": "mdi:star-four-points", "color": "#69C350"},
     "streak": {"icon": "mdi:fire", "color": "#E06B6B"},
-    "start": {"icon": "mdi:rocket-launch", "color": "#4FA3E0"},
 }
 
 
@@ -269,8 +271,6 @@ def awards(stats: dict[str, dict], fair: bool = False) -> dict[str, list[dict]]:
             res[p].append({"id": "perfect", **AWARDS["perfect"], "value": s["week"][1]})
         if s["streak"] >= 3:
             res[p].append({"id": "streak", **AWARDS["streak"], "value": s["streak"]})
-        if s["start_bonus"]:
-            res[p].append({"id": "start", **AWARDS["start"], "value": 100})
     return res
 
 

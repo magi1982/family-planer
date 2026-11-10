@@ -3,7 +3,7 @@
 // Plan-Beschreibung: "fp1:" + {"z": {"Lea": [1,3]}, "r": {"Lea|1": [2, 0]}}
 //   r: alle n Wochen, aktiv wenn Wochenindex (seit 5.1.1970) % n == offset; fehlt r => jede Woche
 customElements.whenDefined('lox-wochenplaner-card').then(() => {
-  const { FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx } = window.FP;
+  const { FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, avBuilder, avSet, AVB_CSS } = window.FP;
   const rgba = (hex, a) => { const h = (hex || '#888888').replace('#', ''); const n = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; };
   const mondayOfIdx = (idx) => { const u = new Date(Date.UTC(1970, 0, 5) + idx * 604800000); return new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate()); };
   const curIdx = () => weekIdx(new Date());
@@ -103,6 +103,9 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
       const ip = t.closest('[data-ip]');
       if (ip) { this._ip = this._ip === ip.dataset.ip ? null : ip.dataset.ip; this._render(true); return; }
       if (t.closest('[data-ipclose]')) { this._ip = null; this._render(true); return; }
+      const ha = t.closest('[data-hadd]'); if (ha) { this.dispatchEvent(new CustomEvent('fp-plan-add', { bubbles: true, composed: true, detail: { kind: ha.dataset.hadd } })); return; }
+      const ab = t.closest('[data-avb]');
+      if (ab && this._ip) { const [part, val] = ab.dataset.avb.split('|'); const cur = this._curBild(this._ip); this._savePerson(this._ip, { bild: avSet(cur.startsWith('av:') ? cur : 'av:k.kurz.braun.hell.0', part, val) }); return; }
       const bi = t.closest('[data-bild]'); if (bi && this._ip) { this._savePerson(this._ip, { bild: bi.dataset.bild }); return; }
       const co = t.closest('[data-col]'); if (co && this._ip) { this._savePerson(this._ip, { farbe: co.dataset.col }); return; }
       if (t.closest('[data-add]')) { const inp = this.shadowRoot.querySelector('[data-new="t"]'); if (inp) this._new.t = inp.value; this._add(); return; }
@@ -200,6 +203,7 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
       const free = kids.filter((k) => !(k.name in z));
       return lines + (free.length ? `<select class="sel addp" data-addp><option value="" selected>+ Person zuteilen</option>${free.map((k) => `<option value="${esc(k.name)}">${esc(k.name)}</option>`).join('')}</select>` : '');
     }
+    _curBild(name) { const k = this._kids().find((x) => x.name === name) || {}; return k.bild || ''; }
     _savePerson(name, patch) {
       const ps = JSON.parse(JSON.stringify(this._settingsP())); ps[name] = { ...(ps[name] || {}), ...patch };
       const desc = 'fp1:' + JSON.stringify({ p: ps }); const it = this._settingsItem();
@@ -235,6 +239,7 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
         <div class="ips2">Steht einer dieser Namen im Termintitel, erscheint der Termin bei ${esc(k.name)}.</div>
         <div class="ipl">Farbe</div><div class="cols">${COLS.map((c) => `<button class="clr${(k.farbe || '').toLowerCase() === c.toLowerCase() ? ' on' : ''}" data-col="${c}" style="background:${c}"></button>`).join('')}</div>
         <div class="ipl">Eigenes Foto</div><div class="upl">${(k.bild || '').startsWith('img:') ? avatarHtml(k, 56) : ''}<label class="sg up">${this._uploading ? 'Wird hochgeladen …' : 'Foto hochladen'}<input type="file" accept="image/*" data-upload hidden></label><span class="ips2">Wird quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.</span></div>
+        <div class="ipl">Selbst zusammenstellen</div>${avBuilder(cur.startsWith('av:') ? cur : 'av:k.kurz.braun.hell.0', k.farbe)}
         ${AVATARS.map(([title, ids]) => `<div class="ipl">${title}</div><div class="igrid">${ids.map((id) => `<button class="ib${cur === id ? ' on' : ''}" data-bild="${id}">${avatarHtml({ ...k, bild: id }, 44)}</button>`).join('')}</div>`).join('')}
       </div>`;
     }
@@ -259,10 +264,10 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
           <button class="del${this._confirm === r.uid ? ' cf' : ''}" data-del>${this._confirm === r.uid ? 'Löschen?' : '<ha-icon icon="mdi:trash-can-outline"></ha-icon>'}</button>
         </div>`).join('');
       const nw = this._new;
-      this.shadowRoot.innerHTML = `<style>
+      this.shadowRoot.innerHTML = `<style>${AVB_CSS}
         :host{display:block}
         .card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:16px;padding:20px 22px;color:#ececec;font-family:${FONT}}
-        .head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+        .head{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}.hsp{flex:1}.hadd{display:flex;align-items:center;gap:6px;height:42px;padding:0 14px;border-radius:12px;border:1px solid #3a3a3a;background:#262626;color:#ddd;font:inherit;font-size:14px;cursor:pointer}.hadd ha-icon{--mdc-icon-size:18px;color:${G}}
         .badge{width:46px;height:46px;border-radius:12px;background:rgba(105,195,80,.14);color:${G};display:flex;align-items:center;justify-content:center}.badge ha-icon{--mdc-icon-size:26px}
         .title{font-size:20px;font-weight:600}.subt{font-size:13px;color:#8c8c8c;margin-top:3px}
         .sec{font-size:12px;color:${G};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin:18px 0 8px}
@@ -320,7 +325,8 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
       </style>
       <div class="card">
         <div class="head"><div class="badge"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></div>
-          <div><div class="title">${esc(this._cfg.titel)}</div><div class="subt">Tag antippen = zuteilen · nochmals antippen = Zeit zum Erledigen (z. B. Mi bis Sa) und Rhythmus (alle 2–4 Wochen). Änderungen gelten ab sofort.</div></div></div>
+          <div><div class="title">${esc(this._cfg.titel)}</div><div class="subt">Tag antippen = zuteilen · nochmals antippen = Zeit zum Erledigen (z. B. Mi bis Sa) und Rhythmus (alle 2–4 Wochen). Änderungen gelten ab sofort.</div></div><span class="hsp"></span>
+          <button class="hadd" data-hadd="special"><ha-icon icon="mdi:plus"></ha-icon>Besonderes Ämtli</button><button class="hadd" data-hadd="todo"><ha-icon icon="mdi:plus"></ha-icon>To-do</button></div>
         <div class="sec">Personen · Bild & Farbe</div>
         <div class="pers">${kids.map((k) => `<button class="pc${this._ip === k.name ? ' on' : ''}" data-ip="${esc(k.name)}" style="--c:${k.farbe}">${avatarHtml(k, 40)}<span>${esc(k.name)}</span><ha-icon icon="mdi:pencil"></ha-icon></button>`).join('')}</div>
         ${this._ip ? this._iconPicker(kids.find((k) => k.name === this._ip)) : ''}

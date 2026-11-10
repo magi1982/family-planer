@@ -10,7 +10,22 @@ from typing import Any
 
 from . import validate
 
-THEMES = ("ha", "loxone", "apple", "google", "light", "nord")
+THEMES = ("ha", "light", "dark", "rainbow", "space")
+STYLES = ("standard", "transparent", "glass")
+# designs up to 0.8 -> new set (the old dark designs become "dark")
+THEME_MIGRATE = {"loxone": "dark", "apple": "dark", "google": "dark", "nord": "dark"}
+NAV_IDS = ("planer", "listen", "belohnungen", "einstellungen", "aemtliplan")
+NAV_DEFAULT = {"order": ["planer", "listen", "belohnungen", "einstellungen", "aemtliplan"], "hidden": ["aemtliplan"]}
+
+
+def clean_nav(raw) -> dict:
+    """Order and visibility of the navigation buttons; settings can never be hidden (way back in)."""
+    raw = raw if isinstance(raw, dict) else {}
+    order = [x for x in (raw.get("order") or []) if x in NAV_IDS]
+    order = list(dict.fromkeys(order + [x for x in NAV_DEFAULT["order"] if x not in order]))
+    hidden = [x for x in (raw.get("hidden") if isinstance(raw.get("hidden"), list) else NAV_DEFAULT["hidden"])
+              if x in NAV_IDS and x != "einstellungen"]
+    return {"order": order, "hidden": list(dict.fromkeys(hidden))}
 LANGUAGES = ("auto", "de", "en")
 MODES = ("fair", "per_chore")
 MODULES = ("week", "lists")
@@ -36,13 +51,15 @@ def general(data: dict, cur: dict) -> tuple[dict, set[str]]:
     patch = {
         "modules": {m: _bool(data.get("modules") or {}, m, (cur.get("modules") or {}).get(m, True)) for m in MODULES},
         "language": data.get("language") if data.get("language") in LANGUAGES else (cur.get("language") or "auto"),
-        "theme": data.get("theme") if data.get("theme") in THEMES else (cur.get("theme") or "loxone"),
+        "theme": data.get("theme") if data.get("theme") in THEMES else THEME_MIGRATE.get(cur.get("theme"), cur.get("theme") if cur.get("theme") in THEMES else "ha"),
+        "style": data.get("style") if data.get("style") in STYLES else (cur.get("style") if cur.get("style") in STYLES else "standard"),
+        "nav": clean_nav(data["nav"]) if "nav" in data else clean_nav(cur.get("nav")),
+        "nav_title": _bool(data, "nav_title", cur.get("nav_title", False)),
         "panel": {"enabled": _bool(data, "panel", panel.get("enabled", True)),
                   "title": validate.text(data.get("panel_title", panel.get("title", "")), 40)},
         "idle_seconds": validate.integer(data.get("idle_seconds", cur.get("idle_seconds")), 10, 600, 45),
         "fullscreen_dblclick": _bool(data, "fullscreen_dblclick", cur.get("fullscreen_dblclick", True)),
         "fullscreen_auto": _bool(data, "fullscreen_auto", cur.get("fullscreen_auto", False)),
-        "theme_pin": _bool(data, "theme_pin", cur.get("theme_pin", False)),
         "rollover_time": validate.hhmm(data.get("rollover_time"), cur.get("rollover_time") or "00:00"),
         "match_names": _bool(data, "match_names", cur.get("match_names", True)),
         "show_owner": _bool(data, "show_owner", cur.get("show_owner", False)),
@@ -83,13 +100,20 @@ def vacation(data: dict, cur: dict) -> tuple[dict, set[str]]:
 
 
 def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list,
-           cur_value: float = 20, cur_currency: str = "CHF") -> tuple[dict, set[str]]:
+           cur_value: float = 20, cur_currency: str = "CHF", cur_awards: dict | None = None) -> tuple[dict, set[str]]:
     game = {k: validate.integer(data.get(k, v), 0, 1000, v) for k, v in cur_game.items()}
     game["mode"] = data.get("mode") if data.get("mode") in MODES else cur_mode
     notify = validate.entities(data.get("reward_notify", cur_notify), ("notify",))
     value = validate.number(data.get("reward_value", cur_value), 0, 100000, cur_value)
     currency = validate.currency(data.get("currency", cur_currency), cur_currency)
-    return {"gamification": game, "reward_notify": notify, "reward_value": value, "currency": currency}, {"rebook"}
+    from .awards import clean_settings
+    cur_aw = cur_awards or clean_settings(None)
+    raw = data.get("awards") if isinstance(data.get("awards"), dict) else {}
+    aw = clean_settings({"items": {**cur_aw["items"], **(raw.get("items") or {})},
+                         "early_time": raw.get("early_time", cur_aw["early_time"]),
+                         "confetti": raw.get("confetti", cur_aw["confetti"])})
+    return ({"gamification": game, "reward_notify": notify, "reward_value": value, "currency": currency, "awards": aw},
+            {"rebook"})
 
 
 def announce(data: dict, cur: dict, persons: dict) -> tuple[dict, set[str]]:

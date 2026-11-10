@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections import Counter
 from datetime import date, datetime, timedelta
+import hashlib
 import re
 
 DEFAULT_WORDS = ["Ferien", "Urlaub", "Vacation", "Holiday", "Holidays", "Abwesend", "Out of office"]
@@ -84,10 +85,16 @@ def who(title: str, owner: str | None, persons: dict, scope: str) -> list[str]:
     return named or ([owner] if owner else [])
 
 
-def absences(events_by_owner: dict[str | None, list[dict]], persons: dict, words: list[str], scope: str,
-             min_hours: float = 20) -> dict[str, set[str]]:
-    """{person_id: {iso dates}} from calendar events grouped by the calendar owner."""
-    out: dict[str, set[str]] = {}
+def event_key(ev: dict) -> str:
+    """Stable id of a holiday event (title + start + end) for the "away / at home" decision."""
+    raw = f'{ev.get("summary") or ""}|{ev.get("start")}|{ev.get("end")}'
+    return hashlib.sha256(raw.encode()).hexdigest()[:16]
+
+
+def found(events_by_owner: dict[str | None, list[dict]], persons: dict, words: list[str], scope: str,
+          min_hours: float = 20) -> list[dict]:
+    """Holiday events with the persons and days they cover (one entry per event, owners merged)."""
+    out: dict[str, dict] = {}
     for owner, events in events_by_owner.items():
         for ev in events:
             title = ev.get("summary") or ""
@@ -96,8 +103,28 @@ def absences(events_by_owner: dict[str | None, list[dict]], persons: dict, words
             days = covered_days(ev["start"], ev["end"], min_hours)
             if not days:
                 continue
+            key = event_key(ev)
+            entry = out.setdefault(key, {"key": key, "title": title[:120], "start": str(ev["start"])[:25],
+                                         "end": str(ev["end"])[:25], "days": days, "persons": []})
             for pid in who(title, owner, persons, scope):
-                out.setdefault(pid, set()).update(days)
+                if pid not in entry["persons"]:
+                    entry["persons"].append(pid)
+    return sorted(out.values(), key=lambda e: e["days"][0])
+
+
+def absences(events_by_owner: dict[str | None, list[dict]], persons: dict, words: list[str], scope: str,
+             min_hours: float = 20, decisions: dict[str, str] | None = None) -> dict[str, set[str]]:
+    """{person_id: {iso dates}} from calendar events grouped by the calendar owner.
+
+    decisions[key] == "home": the family stays at home – chores go on (the event is ignored).
+    """
+    decisions = decisions or {}
+    out: dict[str, set[str]] = {}
+    for ev in found(events_by_owner, persons, words, scope, min_hours):
+        if decisions.get(ev["key"]) == "home":
+            continue
+        for pid in ev["persons"]:
+            out.setdefault(pid, set()).update(ev["days"])
     return out
 
 
