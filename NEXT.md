@@ -24,6 +24,33 @@
 - Sollen To-dos Punkte geben, und zählen sie für den fairen Tageswert?
 - Sollen To-dos auch als `todo`-Entität in Home Assistant erscheinen?
 
+### 2. Schöne Einstellungs-Oberfläche im Planer
+**Status:** Idee – noch nicht umgesetzt
+
+- Neue Ansicht **„Einstellungen“** direkt im Family Planer (Seitenleiste/Tablet), statt der mühsamen Home-Assistant-Dialoge.
+- Übersichtlich in Kacheln/Tabs: *Personen & Kalender*, *Schule*, *Ferien*, *Punkte & Belohnungen*, *Ansagen*, *Listen*, *Design & Sprache*, *Allgemein*.
+- Direkte Bearbeitung mit Live-Vorschau (z. B. Farbe, Design, Sprache), Personen per Drag & Drop sortieren, Entitäten mit Suche auswählen.
+- Jede Einstellung mit kurzer Beschreibung (DE/EN) direkt daneben.
+- Die bisherigen HA-Optionen bleiben als Fallback bestehen.
+
+**Mögliche Einstellungen / Schutz:**
+- Wer die Einstellungen öffnen darf: nur Admins, oder Eltern-PIN (Standard: Eltern-PIN)
+
+### 3. Belohnungen im Dashboard anlegen und ändern – mit Eltern-PIN
+**Status:** Idee – noch nicht umgesetzt
+
+- In der Ansicht *Belohnungen* Belohnungen **hinzufügen, bearbeiten, löschen** (Titel, Icon, Punkte, Freigabe nötig, nur für, max. pro Woche).
+- **Jede Änderung verlangt die Eltern-PIN** (auch für Admins am Tablet).
+- **Start-PIN 123456**, änderbar im Dashboard (alte PIN + neue PIN) und in den Einstellungen.
+
+**Sicherheit (bei der Umsetzung):**
+- Solange die Start-PIN aktiv ist: deutlicher Hinweis im Dashboard und als Reparaturhinweis in Home Assistant („Bitte Eltern-PIN ändern“), optional Pflicht zur Änderung beim ersten Gebrauch.
+- PIN weiterhin nur gehasht (PBKDF2), Sperre nach 5 Fehlversuchen, PIN-Prüfung serverseitig.
+
+**Offene Fragen:**
+- Soll die Änderung der Start-PIN beim ersten Öffnen erzwungen werden?
+- Gilt dieselbe PIN auch für die neue Einstellungs-Oberfläche (Idee 2)?
+
 ---
 
 ## Release-Checkliste (bei jedem Update)
