@@ -34,7 +34,7 @@
 - Die bisherigen HA-Optionen bleiben als Fallback bestehen.
 
 **Mögliche Einstellungen / Schutz:**
-- Wer die Einstellungen öffnen darf: nur Admins, oder Eltern-PIN (Standard: Eltern-PIN)
+- Zugriff immer mit **Eltern-PIN** (entschieden), optional zusätzlich nur für Admins
 
 ### 3. Belohnungen im Dashboard anlegen und ändern – mit Eltern-PIN
 **Status:** Idee – noch nicht umgesetzt
@@ -47,9 +47,20 @@
 - Solange die Start-PIN aktiv ist: deutlicher Hinweis im Dashboard und als Reparaturhinweis in Home Assistant („Bitte Eltern-PIN ändern“), optional Pflicht zur Änderung beim ersten Gebrauch.
 - PIN weiterhin nur gehasht (PBKDF2), Sperre nach 5 Fehlversuchen, PIN-Prüfung serverseitig.
 
-**Offene Fragen:**
-- Soll die Änderung der Start-PIN beim ersten Öffnen erzwungen werden?
-- Gilt dieselbe PIN auch für die neue Einstellungs-Oberfläche (Idee 2)?
+**Entschieden:**
+- Die Änderung der Start-PIN wird **beim ersten Gebrauch erzwungen** (vorher keine Änderungen an Belohnungen oder Einstellungen möglich).
+- Dieselbe Eltern-PIN schützt auch die **Einstellungs-Oberfläche** (Idee 2).
+
+### 4. Vollbild per Doppelklick
+**Status:** Idee – noch nicht umgesetzt
+
+- **Doppelklick / Doppeltippen** auf den Family Planer schaltet in den **Vollbildmodus** (Kopfzeile und Seitenleiste von Home Assistant verschwinden), nochmals doppeltippen beendet ihn – wie in der früheren lokalen Version.
+- Funktioniert in der Seitenleisten-Ansicht und auf Dashboard-Karten; Doppeltippen auf Ämtli, Knöpfe oder Eingabefelder löst es nicht aus.
+- Fallback, wenn der Browser kein echtes Vollbild erlaubt (z. B. iPhone-Safari): Kopfzeile und Seitenleiste ausblenden.
+
+**Mögliche Einstellungen:**
+- Vollbild per Doppelklick ein/aus (Standard: ein)
+- Beim Öffnen automatisch Vollbild (Standard: aus)
 
 ---
 
