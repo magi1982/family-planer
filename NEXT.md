@@ -132,6 +132,49 @@
 
 **Offene Fragen:**
 - Passt die Zuordnung oben so?
+- Krone und Rahmen zusammen? Michael wünscht inzwischen (siehe Idee 8), dass die kleine Krone **gerade über dem Kopf** bleibt – Vorschlag: Krone der Woche = Krone über dem Kopf **und** Goldrahmen; die Einstellung „Krone zusätzlich anzeigen“ entfällt dann.
+
+### 8. Auszeichnungen: Startbonus weg, Krone gerade, alles cooler, 6 neue Pokale
+**Status:** Idee – noch nicht umgesetzt
+
+**Startbonus entfernen**
+- 🚀 *Startbonus* fällt als Auszeichnung weg (Abzeichen, Regel-Liste, Sensor-Attribut `awards`). Neue Personen starten weiterhin mit 100 % Zuverlässigkeit, aber ohne eigenes Abzeichen.
+
+**Krone genau und gerade über dem Kopf**
+- Heute ist die Krone um −10° gedreht und leicht versetzt (`.crown … rotate(-10deg)`). Neu: **waagrecht und genau mittig** über dem Kopf, auf jeder Bildgrösse (Planer 56 px, Detail 64 px, Belohnungen) gleich.
+
+**Abzeichen cooler und besser sichtbar**
+- Grössere, **metallisch gefüllte Medaillen** statt dünner Ringe: Verlauf, feiner Rand, leichter Glanz; Icon in Weiss bzw. dunkel auf hellem Metall.
+- Gut lesbar auf jedem Design (auch *Hell*), Kontrast geprüft.
+- Kurzer **Schimmer**, wenn eine Auszeichnung neu dazukommt (mit „Bewegung reduzieren“ aus).
+- Auf schmalen Bildschirmen höchstens 3 Abzeichen + „+2“.
+
+**6 neue Pokale** (alle auch im Modus *Fair* sinnvoll, ohne neue Datenerfassung):
+
+| Pokal | Icon | Regel | Daten |
+|---|---|---|---|
+| **Aufsteiger** | 📈 `mdi:trending-up` | grösste Verbesserung der Tagesquote ggü. der Vorwoche (mind. +15 Prozentpunkte) | Verlauf |
+| **Frühaufsteher** | 🌅 `mdi:weather-sunset-up` | an mind. 4 der letzten 7 Tage alle Ämtli **vor 12 Uhr** erledigt | `done_at` der Ämtli |
+| **Wochenend-Held** | 🦸 `mdi:shield-star` | am letzten Wochenende (Sa + So) alle Ämtli erledigt | Verlauf |
+| **Diamant-Serie** | 💎 `mdi:diamond-stone` | 30 Tage am Stück alles erledigt (die 🔥-Serie bleibt für 3+ Tage) | Verlauf |
+| **Meilenstein** | 🏅 `mdi:medal` | 100 / 500 / 1000 erledigte Ämtli insgesamt (Stufen Bronze/Silber/Gold) | Verlauf/Punktebuch |
+| **Familien-Teamwork** | 🤝 `mdi:account-group` | an einem Tag haben **alle** Personen alles erledigt → alle bekommen ihn für diesen Tag | Verlauf |
+
+- Jeder neue Pokal mit Erklärung beim Antippen (DE/EN) und in der Regel-Liste.
+
+**Mögliche Einstellungen** (bei der Umsetzung prüfen, jeweils mit Beschreibung DE/EN):
+- Welche Auszeichnungen angezeigt werden (Häkchen pro Auszeichnung) – Standard: alle
+- Uhrzeit für *Frühaufsteher* (Standard 12:00)
+
+**Offene Fragen:**
+- Sollen neue Pokale **Bonuspunkte** geben (z. B. Diamant-Serie +Gross), oder nur Ehre?
+
+### 9. Handy im Hochformat (gefunden am iPhone-Screenshot)
+**Status:** Fehler – noch nicht behoben
+
+- Auf schmalen Bildschirmen (iPhone hoch) überlappen sich Spalten: Ämtli-Texte werden abgeschnitten („Garderob…“), Zahlen in den schmalen Tagen liegen übereinander („5 4 4 Ämtli“), „SUPER“ läuft in die Nachbarspalte.
+- Lösung: unter ca. 700 px eine eigene Handy-Ansicht – **nur heute + morgen** nebeneinander (oder untereinander), Ämtli einspaltig, die übrigen Tage als kleine Punkte-Leiste; Personenspalte schmaler (Bild + Prozent).
+- Gleiches Verhalten im Dashboard und im Seitenleisten-Panel.
 
 ---
 
