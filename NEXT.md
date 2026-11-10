@@ -75,6 +75,11 @@
 
 - Design-Auswahl oben rechts in der Navigation mit Mini-Vorschau, optional nur mit Eltern-PIN
 
+## Umgesetzt in 0.8.1
+
+- Fair-Modus auch bei Prozent, Krone, Pokal und Fleissbiene (jeder Tag zählt gleich)
+- Belohnungen: Übersicht mit Personen pro Belohnung, Auswahl zeigt nur deren Belohnungen
+
 ## Ideen für die nächste Version
 
 ### 5. „+ Hinzufügen“-Knopf oben rechts im Ämtliplan

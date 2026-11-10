@@ -138,3 +138,32 @@ def test_history_trim():
 def test_validate_chore():
     c = engine.validate_chore({"title": "  X ", "assign": {"p1": {"3": {"every": 0, "window": 99}, "9": {}}, "zz": {"1": {}}}}, PERSONS)
     assert c == {"title": "X", "assign": {"p1": {"3": {"every": 1, "offset": 0, "window": 14}}}}
+
+
+def test_fair_mode_counts_days_not_chores():
+    """Fair mode: 2 of 2 chores per day is as good as 6 of 6; the person with more chores gets no head start."""
+    hist = {}
+    for i in range(1, 8):
+        day = (WED - timedelta(days=i)).isoformat()
+        hist[day] = {"p1": {"done": 2, "total": 2, "missed": []},           # few chores, always all done
+                     "p2": {"done": 6 if i > 1 else 3, "total": 6, "missed": []}}  # many chores, one half day
+    unfair = {p: engine.person_stats(hist, {}, p, WED) for p in PERSONS}
+    fair = {p: engine.person_stats(hist, {}, p, WED, fair=True) for p in PERSONS}
+    # counting chores, p2 is the busy bee (39 vs 14 chores)
+    assert any(a["id"] == "bee" for a in engine.awards(unfair)["p2"])
+    # counting days, p1 has 7 complete days, p2 only 6.5 – p1 gets crown and bee
+    assert fair["p1"]["week_fair"] == [7.0, 7] and fair["p2"]["week_fair"] == [6.5, 7]
+    aw = engine.awards(fair, fair=True)
+    assert {"crown", "bee"} <= {a["id"] for a in aw["p1"]}
+    assert not any(a["id"] in ("crown", "bee") for a in aw["p2"])
+    assert fair["p2"]["reliability"] == 93  # average of the daily rates (6.5 / 7)
+    assert unfair["p2"]["reliability"] == 93  # 39 / 42 – same here, but weighted by chores
+
+
+def test_fair_today_counts_only_when_complete():
+    items = {"a": {"person_id": "p1", "title": "x", "done": True, "start": WED.isoformat(), "due": WED.isoformat()},
+             "b": {"person_id": "p1", "title": "y", "done": False, "start": WED.isoformat(), "due": WED.isoformat()}}
+    s = engine.person_stats({}, items, "p1", WED, fair=True)
+    assert s["week_fair"] == [0.0, 0] and s["reliability"] == 100
+    items["b"]["done"] = True  # day complete -> counts as one full day
+    assert engine.person_stats({}, items, "p1", WED, fair=True)["week_fair"] == [1.0, 1]

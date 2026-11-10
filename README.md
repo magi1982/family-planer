@@ -144,6 +144,7 @@ Per child (or person, e.g. university/work):
 - **Bonuses**: additionally a **day bonus** for a fully completed day and a **streak bonus** for every 7-day streak. If a chore is reopened, its points are booked back.
 - **10 levels** from *Starter* via *Pro* and *Hero* to *Grandmaster* – with progress bar. Redeemed points never lower the level.
 - **Awards**: 👑 crown of the week, 🏆 trophy of the month, 🐝 busy bee, ⭐ perfect week, 🔥 streak, 🚀 starter bonus – tap to see why.
+- **Fair for percentages and awards, too**: in *Fair* mode, reliability, crown of the week, trophy of the month and busy bee count **every day the same** – no matter if 2 or 6 chores. The rate is the average of the daily rates; the busy bee has the most complete chore days. In *Per chore* mode single chores count as before.
 - **History** per person: chores, bonuses, rewards.
 
 ### Real rewards
@@ -161,7 +162,7 @@ Per child (or person, e.g. university/work):
   | Giant | 5 × large | 5650 | approx. 100 |
 
   When the point settings change, the costs follow automatically. *Own points* is still available for special cases. The **value of a large reward** (e.g. 20 CHF) is adjustable and only meant as a guide.
-- **View**: with nobody selected the page shows **all rewards and all pending requests**. Tapping a person shows only their rewards and requests and lets them redeem. Tap again to clear the selection.
+- **View**: with nobody selected the page shows **all rewards** – each with the **persons it is for** (picture + name, otherwise "For everyone") – and all pending requests. Tapping a person (or their name on a reward) shows only their rewards and requests and lets them redeem. Tap again to clear the selection.
 - Children redeem on the tablet; points are reserved until the parents decide.
 - Parents approve as **admin** or on the tablet with a **parent PIN** (4–8 digits). Notification in Home Assistant and optionally on the phone.
 - **Give points**: bonus (or deduction) with a reason, e.g. "Room tidied up perfectly" – with the same sizes as to-dos (**Small · Medium · Large**) or a number of your own.

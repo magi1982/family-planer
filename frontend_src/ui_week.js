@@ -260,13 +260,33 @@ class LoxWochenplanerCard extends FpBase {
     const sum = (n) => { let d = todayDone, t = todayDone; for (let i = 1; i <= n; i++) { const s = (h[ymd(addDays(today, -i))] || { s: {} }).s[kid]; if (s) { d += s[0]; t += s[1]; } } return [d, t]; };
     const w = sum(7), m = sum(30), all = sum(this._cfg.tage_zuverlaessigkeit);
     const done = all[0], tot = all[1];
+    // fair: every day weighs the same – [sum of daily rates, days]; today only counts once it is complete
+    const fsum = (n) => { let f = todayTot && todayDone === todayTot ? 1 : 0, c = f; for (let i = 1; i <= n; i++) { const s = (h[ymd(addDays(today, -i))] || { s: {} }).s[kid]; if (s && s[1]) { f += s[0] / s[1]; c++; } } return [Math.round(f * 1000) / 1000, c]; };
+    const fw = fsum(7), fm = fsum(30), fall = fsum(this._cfg.tage_zuverlaessigkeit);
     let streak = todayTot && todayDone === todayTot ? 1 : 0;
     for (let i = 1; i <= 120; i++) {
       const s = (h[ymd(addDays(today, -i))] || { s: {} }).s[kid];
       if (!s || !s[1]) continue;
       if (s[0] === s[1]) streak++; else break;
     }
-    return { pct: tot ? Math.round((done / tot) * 100) : 100, start: !tot, streak, w, m };
+    const pct = this._cfg.fair ? (fall[1] ? Math.round((fall[0] / fall[1]) * 100) : 100) : (tot ? Math.round((done / tot) * 100) : 100);
+    return { pct, start: !tot, streak, w, m, fw, fm };
+  }
+  // Fair: Tage zählen, nicht die Anzahl Ämtli – wer 2 von 2 macht, steht gleich da wie wer 6 von 6 macht
+  _awardsFair(kids, pre, A, best, rate) {
+    const pf = (x) => Math.round(rate(x) * 100); const d1 = (v) => (Math.round(v * 10) / 10).toString();
+    best('fw', 3).forEach((n) => A[n].push({ id: 'krone', icon: 'mdi:crown', c: '#F5C542', t: 'Krone der Woche', why: `Beste Tagesquote der letzten 7 Tage: Ø ${pf(pre[n].fw)} % an ${pre[n].fw[1]} Tagen.` }));
+    best('fm', 10).forEach((n) => A[n].push({ id: 'pokal', icon: 'mdi:trophy', c: '#E0A84F', t: 'Pokal des Monats', why: `Beste Tagesquote der letzten 30 Tage: Ø ${pf(pre[n].fm)} % an ${pre[n].fm[1]} Tagen.` }));
+    const maxF = Math.max(0, ...kids.map((k) => pre[k.name].fw[0]));
+    const fl = kids.filter((k) => maxF >= 3 && pre[k.name].fw[0] === maxF);
+    if (fl.length === 1) A[fl[0].name].push({ id: 'fleiss', icon: 'mdi:bee', c: '#F5C542', t: 'Fleissbiene', why: `Am meisten ganze Ämtli-Tage: ${d1(maxF)} in den letzten 7 Tagen.` });
+    kids.forEach((k) => {
+      const s = pre[k.name];
+      if (s.w[1] >= 5 && s.w[0] === s.w[1]) A[k.name].push({ id: 'perfekt', icon: 'mdi:star-four-points', c: '#69C350', t: 'Perfekte Woche', why: `Alle ${s.w[1]} Ämtli der letzten 7 Tage erledigt.` });
+      if (s.streak >= 3) A[k.name].push({ id: 'serie', icon: 'mdi:fire', c: '#E06B6B', t: `${s.streak}-Tage-Serie`, why: `${s.streak} Tage am Stück alle Ämtli erledigt.` });
+      if (s.start) A[k.name].push({ id: 'start', icon: 'mdi:rocket-launch', c: '#4FA3E0', t: 'Startbonus', why: 'Noch keine abgeschlossenen Ämtli-Tage – du startest mit 100 %. Halte sie hoch!' });
+    });
+    return A;
   }
   // Auszeichnungen aus dem Verlauf (wandern je nach Leistung zwischen den Personen)
   _awards(kids, pre) {
@@ -277,6 +297,7 @@ class LoxWochenplanerCard extends FpBase {
       const top = Math.max(...c.map((k) => rate(pre[k.name][key]))); const c2 = c.filter((k) => rate(pre[k.name][key]) === top);
       const td = Math.max(...c2.map((k) => pre[k.name][key][0])); return c2.filter((k) => pre[k.name][key][0] === td).map((k) => k.name);
     };
+    if (this._cfg.fair) return this._awardsFair(kids, pre, A, best, rate);
     best('w', 3).forEach((n) => A[n].push({ id: 'krone', icon: 'mdi:crown', c: '#F5C542', t: 'Krone der Woche', why: `Beste Quote der letzten 7 Tage: ${pre[n].w[0]} von ${pre[n].w[1]} Ämtli (${pc(pre[n].w)} %).` }));
     best('m', 10).forEach((n) => A[n].push({ id: 'pokal', icon: 'mdi:trophy', c: '#E0A84F', t: 'Pokal des Monats', why: `Beste Quote der letzten 30 Tage: ${pre[n].m[0]} von ${pre[n].m[1]} Ämtli (${pc(pre[n].m)} %).` }));
     const maxDone = Math.max(0, ...kids.map((k) => pre[k.name].w[0]));
@@ -295,6 +316,7 @@ class LoxWochenplanerCard extends FpBase {
     const s = pre[k.name]; const lv = level(s.pct); const aw = awards[k.name] || [];
     const q = (x) => (x[1] ? `${x[0]} / ${x[1]} <small>(${Math.round((x[0] / x[1]) * 100)} %)</small>` : '<small>noch keine</small>');
     const holders = (id) => kids.filter((x) => (awards[x.name] || []).some((a) => a.id === id)).map((x) => x.name).join(', ') || 'noch niemand';
+    const RULES_FAIR = [['mdi:crown', '#F5C542', 'Krone der Woche', 'Beste Tagesquote der letzten 7 Tage – jeder Tag zählt gleich viel (mind. 3 Tage).', 'krone'], ['mdi:trophy', '#E0A84F', 'Pokal des Monats', 'Beste Tagesquote der letzten 30 Tage – jeder Tag zählt gleich viel (mind. 10 Tage).', 'pokal'], ['mdi:bee', '#F5C542', 'Fleissbiene', 'Am meisten ganze Ämtli-Tage in den letzten 7 Tagen (mind. 3).', 'fleiss']];
     const RULES = [['mdi:crown', '#F5C542', 'Krone der Woche', 'Beste Quote der letzten 7 Tage (mind. 3 Ämtli).', 'krone'], ['mdi:trophy', '#E0A84F', 'Pokal des Monats', 'Beste Quote der letzten 30 Tage (mind. 10 Ämtli).', 'pokal'], ['mdi:bee', '#F5C542', 'Fleissbiene', 'Am meisten Ämtli erledigt in den letzten 7 Tagen (mind. 5).', 'fleiss'], ['mdi:star-four-points', '#69C350', 'Perfekte Woche', 'Alle Ämtli der letzten 7 Tage erledigt (mind. 5).', 'perfekt'], ['mdi:fire', '#E06B6B', 'Serie', 'Mindestens 3 Tage am Stück alles erledigt.', 'serie'], ['mdi:rocket-launch', '#4FA3E0', 'Startbonus', 'Wer neu startet, beginnt mit 100 %.', 'start']];
     return `<div class="ovl" data-close><div class="pnl" data-keep>
       <div class="ph"><div class="ring bigr">${avatarHtml(k, 64)}${aw.some((a) => a.id === 'krone') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}<span class="rib" style="--rc:${lv.c}">${s.pct}%</span></div>
@@ -304,7 +326,7 @@ class LoxWochenplanerCard extends FpBase {
       <div class="sec2">Auszeichnungen</div>
       ${aw.length ? aw.map((a) => `<div class="aw"><span class="md lg" style="--mc:${a.c}"><ha-icon icon="${a.icon}"></ha-icon></span><div><b>${esc(a.t)}</b><div>${esc(a.why)}</div></div></div>`).join('') : '<div class="aw0">Noch keine Auszeichnung – erledige deine Ämtli und hol dir die Krone!</div>'}
       <div class="sec2">So holst du dir Auszeichnungen</div>
-      ${RULES.map(([ic, c, t, d, id]) => `<div class="rl2"><span class="md" style="--mc:${c}"><ha-icon icon="${ic}"></ha-icon></span><b>${t}</b><span>${d}</span>${['krone', 'pokal', 'fleiss'].includes(id) ? `<em>aktuell: ${esc(holders(id))}</em>` : ''}</div>`).join('')}
+      ${(this._cfg.fair ? [...RULES_FAIR, ...RULES.slice(3)] : RULES).map(([ic, c, t, d, id]) => `<div class="rl2"><span class="md" style="--mc:${c}"><ha-icon icon="${ic}"></ha-icon></span><b>${t}</b><span>${d}</span>${['krone', 'pokal', 'fleiss'].includes(id) ? `<em>aktuell: ${esc(holders(id))}</em>` : ''}</div>`).join('')}
     </div></div>`;
   }
   _planFor(kid, date) {

@@ -143,6 +143,7 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 - **Punkte**: zusätzlich **Tagesbonus** für einen ganz erledigten Tag, **Serienbonus** für jede 7-Tage-Serie. Wird ein Ämtli wieder geöffnet, werden die Punkte zurückgebucht.
 - **10 Level** von *Starter* über *Profi* und *Held* bis *Grossmeister* – mit Fortschrittsbalken. Eingelöste Punkte senken das Level nie.
 - **Auszeichnungen**: 👑 Krone der Woche, 🏆 Pokal des Monats, 🐝 Fleissbiene, ⭐ Perfekte Woche, 🔥 Serie, 🚀 Startbonus – antippen zeigt, warum.
+- **Fair auch bei Prozent und Auszeichnungen**: Im Modus *Fair* zählt bei der Zuverlässigkeit, der Krone der Woche, dem Pokal des Monats und der Fleissbiene **jeder Tag gleich viel** – egal ob 2 oder 6 Ämtli. Die Quote ist der Durchschnitt der Tagesquoten; die Fleissbiene hat die meisten ganzen Ämtli-Tage. Im Modus *Pro Ämtli* zählen wie bisher die einzelnen Ämtli.
 - **Verlauf** pro Person: Ämtli, Boni, Belohnungen.
 
 ### Echte Belohnungen
@@ -160,7 +161,7 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
   | Riesig | 5 × Gross | 5650 | ca. 100 |
 
   Ändern sich die Punkte-Einstellungen, passen sich die Kosten automatisch an. Für Spezialfälle gibt es weiterhin *Eigene Punkte*. Der **Gegenwert einer grossen Belohnung** (z. B. 20 CHF) ist einstellbar und dient nur zur Orientierung.
-- **Ansicht**: Ohne Auswahl zeigt die Seite **alle Belohnungen und alle offenen Anfragen**. Tippt man eine Person an, erscheinen nur ihre Belohnungen und Anfragen, und sie kann einlösen. Nochmals antippen hebt die Auswahl auf.
+- **Ansicht**: Ohne Auswahl zeigt die Seite **alle Belohnungen** – jede mit den **Personen, für die sie gilt** (Bild + Name, sonst „Für alle“) – und alle offenen Anfragen. Tippt man eine Person an (oder ihren Namen bei einer Belohnung), erscheinen nur ihre Belohnungen und Anfragen, und sie kann einlösen. Nochmals antippen hebt die Auswahl auf.
 - Kinder lösen am Tablet ein; Punkte werden reserviert, bis die Eltern entscheiden.
 - Eltern geben frei als **Admin** oder am Tablet mit **Eltern-PIN** (4–8 Ziffern). Mitteilung in Home Assistant und optional aufs Handy.
 - **Punkte geben**: Bonus (oder Abzug) mit Grund, z. B. „Zimmer super aufgeräumt“ – mit denselben Grössen wie bei den To-dos (**Klein · Mittel · Gross**) oder einer eigenen Zahl.

@@ -49,7 +49,7 @@ class ReliabilitySensor(PersonEntity, SensorEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         s = self._stats()
         all_stats = self.planner.stats()
-        awards = engine.awards(all_stats).get(self.person_id, [])
+        awards = engine.awards(all_stats, self.planner.points_mode() == "fair").get(self.person_id, [])
         return {
             "open_today": s["open_today"],
             "done_today": s["done_today"],

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.8.1 – 2026-11-10
+
+### Improved
+- **Fair mode is fair everywhere**: reliability percentage, crown of the week, trophy of the month and busy bee now count every day the same (average of the daily rates / most complete chore days) instead of counting single chores. Somebody with 2 chores a day has the same chance as somebody with 6. *Per chore* mode is unchanged. Also applies to the reliability sensor and its award attributes.
+- **Rewards view**: with nobody selected, every reward shows the persons it is for (picture and name, or "For everyone"); tapping a name selects that person.
+
+### Fixed
+- Rewards of one person no longer appear as if they were for everybody in the overview.
+
 ## 0.8.0 – 2026-11-10
 
 ### New

@@ -922,7 +922,8 @@ class FamilyPlanner:
     # ------------------------------------------------------------------ read model
     def stats(self) -> dict[str, dict]:
         today = self.today()
-        return {pid: engine.person_stats(self.data["history"], self.data["items"], pid, today, self.reliability_days())
+        fair = self.points_mode() == "fair"
+        return {pid: engine.person_stats(self.data["history"], self.data["items"], pid, today, self.reliability_days(), fair)
                 for pid in self.data["persons"]}
 
     def snapshot(self) -> dict[str, Any]:
@@ -963,7 +964,7 @@ class FamilyPlanner:
             "items": [{"id": iid, **it} for iid, it in self.data["items"].items()],
             "history": {d: v for d, v in self.data["history"].items() if d >= limit},
             "stats": stats,
-            "awards": engine.awards(stats),
+            "awards": engine.awards(stats, self.points_mode() == "fair"),
             "points": self.points(),
             "gamification": {**self.gamification(), "mode": self.points_mode()},
             "rewards": [{"id": rid, **r} for rid, r in sorted(self.data["rewards"].items(), key=lambda x: x[1]["cost"])],

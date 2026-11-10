@@ -177,9 +177,25 @@ def active_items(items: dict, person_id: str | None, today: date) -> list[tuple[
     return sorted(res, key=lambda x: (x[1].get("title", "").lower(), x[0]))
 
 
-def person_stats(history: dict, items: dict, person_id: str, today: date, days: int = 30) -> dict:
-    """Reliability and streak. Items already done today count immediately; misses only count after their deadline."""
+def person_stats(history: dict, items: dict, person_id: str, today: date, days: int = 30, fair: bool = False) -> dict:
+    """Reliability and streak. Items already done today count immediately; misses only count after their deadline.
+
+    fair=True (points mode "fair"): every day weighs the same, however many chores it had – the rate is the
+    average of the daily completion rates. *_fair windows are [sum of daily rates, number of days].
+    """
     done_today = sum(1 for _, it in active_items(items, person_id, today) if it.get("done"))
+    act_today = active_items(items, person_id, today)
+    today_complete = bool(act_today) and all(it.get("done") for _, it in act_today)
+
+    def window_fair(n: int) -> list:
+        # today only counts once it is complete (an unfinished day is not a miss yet)
+        total, count = (1.0, 1) if today_complete else (0.0, 0)
+        for i in range(1, n + 1):
+            rec = history.get((today - timedelta(days=i)).isoformat(), {}).get(person_id)
+            if rec and rec.get("total"):
+                total += rec.get("done", 0) / rec["total"]
+                count += 1
+        return [round(total, 3), count]
 
     def window(n: int) -> tuple[int, int]:
         d, t = done_today, done_today
@@ -191,6 +207,7 @@ def person_stats(history: dict, items: dict, person_id: str, today: date, days: 
         return d, t
 
     w, m, a = window(7), window(30), window(days)
+    fw, fm, fa = window_fair(7), window_fair(30), window_fair(days)
     act = active_items(items, person_id, today)
     streak = 1 if act and all(it.get("done") for _, it in act) else 0
     for i in range(1, HISTORY_DAYS + 1):
@@ -202,9 +219,9 @@ def person_stats(history: dict, items: dict, person_id: str, today: date, days: 
         else:
             break
     return {
-        "reliability": round(a[0] / a[1] * 100) if a[1] else 100,
+        "reliability": (round(fa[0] / fa[1] * 100) if fa[1] else 100) if fair else (round(a[0] / a[1] * 100) if a[1] else 100),
         "start_bonus": a[1] == 0,
-        "week": list(w), "month": list(m), "streak": streak,
+        "week": list(w), "month": list(m), "week_fair": fw, "month_fair": fm, "fair": fair, "streak": streak,
         "open_today": sum(1 for _, it in act if not it.get("done")),
         "done_today": sum(1 for _, it in act if it.get("done")),
     }
@@ -220,8 +237,13 @@ AWARDS = {
 }
 
 
-def awards(stats: dict[str, dict]) -> dict[str, list[dict]]:
-    """Awards move between persons depending on recent history."""
+def awards(stats: dict[str, dict], fair: bool = False) -> dict[str, list[dict]]:
+    """Awards move between persons depending on recent history.
+
+    fair=True: crown, trophy and busy bee compare days (average daily rate / sum of daily rates), not chore counts,
+    so somebody with 2 chores a day has the same chance as somebody with 6.
+    """
+    wk, mk = ("week_fair", "month_fair") if fair else ("week", "month")
     res: dict[str, list[dict]] = {pid: [] for pid in stats}
     rate = lambda x: x[0] / x[1] if x[1] else -1  # noqa: E731
 
@@ -234,12 +256,12 @@ def awards(stats: dict[str, dict]) -> dict[str, list[dict]]:
         most = max(stats[p][key][0] for p in cand)
         return [p for p in cand if stats[p][key][0] == most]
 
-    for p in best("week", 3):
-        res[p].append({"id": "crown", **AWARDS["crown"], "value": stats[p]["week"]})
-    for p in best("month", 10):
-        res[p].append({"id": "trophy", **AWARDS["trophy"], "value": stats[p]["month"]})
-    most = max([s["week"][0] for s in stats.values()] or [0])
-    bees = [p for p, s in stats.items() if most >= 5 and s["week"][0] == most]
+    for p in best(wk, 3):
+        res[p].append({"id": "crown", **AWARDS["crown"], "value": stats[p][wk]})
+    for p in best(mk, 10):
+        res[p].append({"id": "trophy", **AWARDS["trophy"], "value": stats[p][mk]})
+    most = max([s[wk][0] for s in stats.values()] or [0])
+    bees = [p for p, s in stats.items() if most >= (3 if fair else 5) and s[wk][0] == most]
     if len(bees) == 1:
         res[bees[0]].append({"id": "bee", **AWARDS["bee"], "value": most})
     for p, s in stats.items():

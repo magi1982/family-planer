@@ -4,6 +4,18 @@ Every phrase must occur in the source (build.py checks this), so the list stays 
 """
 
 WEEK = [
+    ("why: `Beste Tagesquote der letzten 7 Tage: Ø ${pf(pre[n].fw)} % an ${pre[n].fw[1]} Tagen.`",
+     "why: `Best daily rate of the last 7 days: avg. ${pf(pre[n].fw)} % over ${pre[n].fw[1]} days.`"),
+    ("why: `Beste Tagesquote der letzten 30 Tage: Ø ${pf(pre[n].fm)} % an ${pre[n].fm[1]} Tagen.`",
+     "why: `Best daily rate of the last 30 days: avg. ${pf(pre[n].fm)} % over ${pre[n].fm[1]} days.`"),
+    ("why: `Am meisten ganze Ämtli-Tage: ${d1(maxF)} in den letzten 7 Tagen.`",
+     "why: `Most complete chore days: ${d1(maxF)} in the last 7 days.`"),
+    ("'Beste Tagesquote der letzten 7 Tage – jeder Tag zählt gleich viel (mind. 3 Tage).'",
+     "'Best daily rate of the last 7 days – every day counts the same (at least 3 days).'"),
+    ("'Beste Tagesquote der letzten 30 Tage – jeder Tag zählt gleich viel (mind. 10 Tage).'",
+     "'Best daily rate of the last 30 days – every day counts the same (at least 10 days).'"),
+    ("'Am meisten ganze Ämtli-Tage in den letzten 7 Tagen (mind. 3).'",
+     "'Most complete chore days in the last 7 days (at least 3).'"),
     ("return short ? 'ganzt.' : 'ganztägig';", "return short ? 'all day' : 'all day';"),
     ("const WD = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];", "const WD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];"),
     ("const WDL = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];",
