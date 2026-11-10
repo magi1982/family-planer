@@ -96,8 +96,7 @@
 - Wer über den Knopf hinzufügen darf: alle, nur Eltern (Eltern-PIN) oder nur Admins
 - Knopf auch in der Wochenansicht (Planer) anzeigen: ja/nein
 
-**Offene Fragen:**
-- Soll der Knopf auch für normale (wiederkehrende) Ämtli gelten oder nur für besondere Ämtli und To-dos?
+**Entschieden (10.11.):** Zwei getrennte Knöpfe oben – **„+ Besonderes Ämtli“** und **„+ To-do“** (wie im Planer). Da der Ämtliplan in die Einstellungen wandert (Idee 16), sitzen die Knöpfe dort im Untermodul *Ämtli*; der Planer bekommt neben „To-dos“ ebenfalls ein „+“.
 
 ### 6. Kleinere Verbesserungen aus der ersten Installation
 **Status:** Idee – noch nicht umgesetzt
@@ -166,15 +165,105 @@
 - Welche Auszeichnungen angezeigt werden (Häkchen pro Auszeichnung) – Standard: alle
 - Uhrzeit für *Frühaufsteher* (Standard 12:00)
 
-**Offene Fragen:**
-- Sollen neue Pokale **Bonuspunkte** geben (z. B. Diamant-Serie +Gross), oder nur Ehre?
+**Entschieden (10.11.):** Alle Pokale und Gamification-Auszeichnungen geben **Punkte**. Vorschlag (Grössen wie bei To-dos, Gross = Tagesmaximum):
+
+| Klein | Mittel | Gross | 2 × Gross |
+|---|---|---|---|
+| 🐝 Fleissbiene, 🦸 Wochenend-Held, 🌅 Frühaufsteher | 👑 Krone, ⭐ Perfekte Woche, 📈 Aufsteiger, 🏅 Meilenstein 100 | 🏆 Pokal des Monats, 🏅 Meilenstein 500, 🤝 Teamwork (pro Tag Klein) | 💎 Diamant-Serie, 🏅 Meilenstein 1000 |
+
+- Punkte gibt es **einmal beim Gewinnen** (nicht jeden Tag, solange man ihn hält); wandert ein Pokal weiter, bleiben die Punkte.
+- Einstellung: Punkte pro Auszeichnung anpassbar bzw. ausschaltbar.
 
 ### 9. Handy im Hochformat (gefunden am iPhone-Screenshot)
 **Status:** Fehler – noch nicht behoben
 
 - Auf schmalen Bildschirmen (iPhone hoch) überlappen sich Spalten: Ämtli-Texte werden abgeschnitten („Garderob…“), Zahlen in den schmalen Tagen liegen übereinander („5 4 4 Ämtli“), „SUPER“ läuft in die Nachbarspalte.
-- Lösung: unter ca. 700 px eine eigene Handy-Ansicht – **nur heute + morgen** nebeneinander (oder untereinander), Ämtli einspaltig, die übrigen Tage als kleine Punkte-Leiste; Personenspalte schmaler (Bild + Prozent).
+- **Entschieden (10.11.):** Unter ca. 700 px eine eigene Handy-Ansicht mit **nur einem Tag (heute)**; oben **‹ und ›** zum Blättern zu früheren/späteren Tagen (und Wischen), „Heute“-Knopf zum Zurückspringen. Ämtli einspaltig, Personenspalte schmal (Bild + Prozent).
 - Gleiches Verhalten im Dashboard und im Seitenleisten-Panel.
+
+### 10. Konfetti 🎉
+**Status:** Idee – noch nicht umgesetzt
+
+- Hat ein Kind **alle Ämtli des Tages** erledigt: **kleiner Konfettiregen** über den ganzen Bildschirm mit dem **Namen** („Super, Lea! 🎉“), in der Farbe der Person.
+- Neuer **Pokal** gewonnen: Konfetti **in der Farbe des Pokals** (Krone gold, Diamant türkis/weiss, Bronze kupfer …), **mittel oder gross je nach Schwierigkeit**:
+  - mittel: 👑 Krone, ⭐ Perfekte Woche, 📈 Aufsteiger, 🦸 Wochenend-Held, 🏅 Meilenstein 100
+  - gross: 🏆 Pokal des Monats, 💎 Diamant-Serie, 🏅 Meilenstein 500/1000, 🤝 Familien-Teamwork
+  - **kein Konfetti** für Auszeichnungen, die sofort oder täglich wechseln (🔥 Serie, 🐝 Fleissbiene, 🌅 Frühaufsteher)
+- Jede Feier nur **einmal pro Gewinn** und **auf jedem Gerät nur einmal** (merken, was schon gefeiert wurde); dauert 2–4 s, blockiert nichts, mit „Bewegung reduzieren“ nur ein kurzer Banner ohne Animation.
+- Einstellungen: Konfetti ein/aus; Lautstärke/Ton optional (Standard aus).
+
+### 11. Planer-Kopfzeile auf einer Ebene
+**Status:** Idee – noch nicht umgesetzt
+
+- Heute zwei Zeilen (Uhrzeit/Datum + Alles/Ämtli/Termine + Tage blättern, darunter To-dos). Neu **eine Zeile**: Alles · Ämtli · Termine | To-dos (+ „+“) | ‹ KW › / Kalender-Sync.
+- **Datum und Uhrzeit** wandern in die **oberste Leiste** (Navigation) – anstelle von „FAMILY PLANER“ (Name optional per Einstellung).
+- Mehr Platz für den Plan, vor allem auf dem Tablet quer.
+
+### 12. Designs überarbeiten + Regenbogen + Stil-Optionen
+**Status:** Idee – noch nicht umgesetzt
+
+- Bestehende Designs **cooler**: feinere Verläufe, bessere Kontraste, schönere Medaillen/Ringe, einheitliche Rundungen.
+- Neues Design **„Regenbogen“**: dunkler Grund, Akzente als Regenbogen-Verlauf (Navigation, aktive Knöpfe, Fortschritt), Personen behalten ihre Farbe.
+- Neue **Stil-Option** pro Design (in der Design-Auswahl als zweite Zeile): **Standard · Transparent · Glas** (wie bei Apple: durchscheinend mit Unschärfe `backdrop-filter`, feiner heller Rand). Fallback ohne Unschärfe, wenn der Browser es nicht kann.
+- Mini-Vorschau zeigt Design **und** Stil.
+
+### 13. Personen sortieren (Kinder oben, Eltern unten)
+**Status:** Idee – noch nicht umgesetzt
+
+- **Reihenfolge der Personen** frei festlegen (Pfeile ↑↓ bzw. Ziehen) im Untermodul *Personen*; gilt in Planer, Belohnungen, To-dos, Auswahllisten.
+- Optional Rolle **Kind / Erwachsener** pro Person (hilft auch bei Konfetti nur für Kinder, Belohnungen).
+
+### 14. Ferien aus dem Kalender bestätigen
+**Status:** Idee – noch nicht umgesetzt
+
+- Erkennt der Planer Ferien/Urlaub im Kalender (Stichwörter aus den Einstellungen), erscheint **oben rechts neben der Design-Auswahl** ein **Prüfen-Symbol** (z. B. `mdi:beach` mit Punkt).
+- Antippen zeigt die gefundenen Ferien mit Datum; pro Eintrag wählen: **„Wir sind weg – Ämtli pausieren“** oder **„Wir sind zu Hause – Ämtli weiterführen“** (optional pro Person).
+- Die Entscheidung wird gespeichert; das Symbol verschwindet, wenn alles bestätigt ist. Unbestätigt gilt die heutige Einstellung.
+
+### 15. Belohnungen: Prognose + Ansicht wie im Planer
+**Status:** Idee – noch nicht umgesetzt
+
+- **Prognose beim Erstellen/Bearbeiten** einer Belohnung: „Im Familienschnitt erreichbar in **ca. 12 Tagen**“ und pro Person „Lea mit ihrem aktuellen Schnitt: **ca. 9 Tage**“ (Schnitt = Punkte der letzten 30 Tage pro Tag inkl. Boni/Pokale; bereits gesparte Punkte werden abgezogen).
+- Auch im Laden pro Belohnung bei der gewählten Person: „noch ca. 5 Tage“.
+- **Belohnungen-Seite neu**:
+  - Oben die **noch nicht vergebenen Pokale** – antippen zeigt, **wie man ihn gewinnt** und wer am nächsten dran ist.
+  - Darunter die **Personen als Karten wie im Planer** (Bild, Prozent, Auszeichnungen); antippen öffnet die **Personendetails wie im Planer** plus Punkte, Verlauf, Belohnungen der Person und Prognosen.
+
+### 16. Navigation & Einstellungen neu ordnen
+**Status:** Idee – noch nicht umgesetzt
+
+- **Reihenfolge der Navigation** (Planer, Listen, Belohnungen, Einstellungen …) in den Einstellungen änderbar, einzelne Bereiche ausblendbar.
+- **Ämtliplan wandert in die Einstellungen.** Einstellungen mit Untermodulen (Kacheln/Tabs links):
+  - **Allgemein** (Sprache, Design-Optionen, Zeiten, Navigation)
+  - **Personen** (Name, Bild, Farbe, Kalender, Spitznamen, Stundenplan, Reihenfolge, Rolle)
+  - **Ämtli** (bisheriger Ämtliplan + „+ Besonderes Ämtli“, „+ To-do“)
+  - **Punkte & Belohnungen**, **To-dos**, **Listen**, **Ferien**, **Ansagen**
+  - **Status / Synchronisierung**: läuft der Kalender-Sync, Einkaufsliste, Ansagen? Zeitpunkt der **letzten erfolgreichen** Synchronisierung je Quelle, letzter Fehler, Knopf „jetzt synchronisieren“.
+- **PIN-Regel**: **Ohne PIN** darf man nur **sein Bild** ändern (Avatar-Baukasten). **Alles andere** braucht die Eltern-PIN (auch Ämtli abhaken bleibt natürlich frei).
+- **Alle Einstellungen überprüfen**: doppelte/veraltete Felder entfernen (z. B. Design-Feld, Startbonus, alte To-do-Punkte), Texte und Standardwerte an die neuen Funktionen anpassen, HA-Optionsdialog angleichen.
+
+### 17. Avatar-Baukasten
+**Status:** Idee – noch nicht umgesetzt
+
+- Statt einer festen Bilderliste ein **Baukasten** mit Live-Vorschau:
+  - **Grundfigur**: Kind (Mädchen/Junge), Erwachsene, Grosseltern
+  - **Frisur** (mehr Auswahl) und **Haarfarbe** (blond, hellbraun, braun, schwarz, rot, grau, bunt …)
+  - **Hautfarbe / Hautton** (mind. 8 Abstufungen von sehr hell bis sehr dunkel, warm/kühl)
+  - **Accessoires** (mehrere kombinierbar): Kopfhörer, Hut, Cap, Mütze, Brille, Sonnenbrille, Schleife, Haarreif, Krone, Ohrringe, Bart, Sommersprossen
+  - **Verkleidungen**: Astronaut, Pirat, Prinzessin, Ritter, Zauberer, Einhorn-Haarreif, Tier-Mützen und **eigene Superhelden-Kostüme** (Umhang, Maske, Emblem in Wunschfarbe)
+- **Jede Kombination muss gut aussehen**: feste Ebenen-Reihenfolge, Accessoires passen sich der Frisur an (z. B. Hut verdeckt hohe Frisuren sauber), unpassende Kombinationen werden ausgegraut statt kaputt gezeichnet; automatischer Test, der alle Kombinationen zeichnet und auf Überlappungsfehler prüft.
+- Ohne PIN änderbar (siehe Idee 16); bestehende Bilder bleiben gültig.
+- **Hinweis:** Echte Marvel- oder andere Marken-Helden (Spider-Man, Iron Man …) kann ich nicht nachzeichnen – sie sind geschützt, und das Repo ist öffentlich. Stattdessen eigene Helden-Kostüme, die man frei einfärben kann.
+
+### 18. Planer allgemein besser (Vorschläge von Claude – bitte bestätigen)
+**Status:** Vorschlag – noch nicht entschieden
+
+- **Jetzt-Linie** und nächster Termin hervorgehoben („in 25 Min: Turnen“).
+- Nach **45 s ohne Berührung** automatisch zurück zu heute/Alles (Einstellung „Ruhezeit“ gibt es schon – auf Planer-Ansicht ausweiten).
+- **Wischen** links/rechts für Tage bzw. Wochen.
+- Grössere Tippflächen für Kinder, Häkchen mit kleiner Animation.
+- Ämtli des Tages nach **noch offen zuerst** sortieren, erledigte darunter.
+
 
 ---
 
