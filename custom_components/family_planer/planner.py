@@ -28,6 +28,7 @@ from homeassistant.util import slugify
 from . import (
     awards,
     engine,
+    levels,
     lists,
     msgqueue,
     rewards,
@@ -336,10 +337,33 @@ class FamilyPlanner:
     @callback
     def _changed(self, save: bool = True) -> None:
         if save:
+            self._eval_levels()
             self._store.async_delay_save(lambda: self.data, 1)
         async_dispatcher_send(self.hass, SIGNAL_UPDATE.format(self.entry.entry_id))
         for cb in list(self._listeners):
             cb()
+
+    def _eval_levels(self) -> None:
+        """Level ups (bonus points, unlocks, celebration). Cheap; runs whenever data changed."""
+        if not self.data.get("persons") or not self.module_on(MODULE_WEEK):
+            return
+        cfg = self.level_settings()
+        ts = dt_util.now().isoformat()
+        ups = levels.evaluate(self.data, self.today(), self.gamification(), cfg["season_start"], ts, rewards._add, cfg["bonus"])
+        if ups:
+            st = awards._state(self.data)
+            for up in ups:
+                c = awards._celebrate(st, up["pid"], "level", "m" if up["level"] in (6, 11, 16, 21) else "s", up["color"],
+                                      ts, self.today(), value=up["level"])
+                if c is not None:
+                    c.update(tier=up["tier"], bonus=up["bonus"], unlocks=up["unlocks"])
+
+    def image_allowed(self, pid: str, image: str) -> bool:
+        """Level extras in a picture only for the person who unlocked them."""
+        if not str(image).startswith("av2:"):
+            return True
+        mine = set(((self.data.get("levels") or {}).get(pid) or {}).get("unlocked") or [])
+        return not ((set(str(image)[4:].split(".")) & levels.UNLOCK_IDS) - mine)
 
     @callback
     def save_soon(self) -> None:
@@ -394,6 +418,9 @@ class FamilyPlanner:
     def gamification(self) -> dict[str, int]:
         g = self.settings.get("gamification") or {}
         return {k: validate.integer(g.get(k, v), 0, 1000, v) for k, v in rewards.DEFAULTS.items()}
+
+    def level_settings(self) -> dict[str, Any]:
+        return settings_spec.clean_levels(self.settings.get("levels"))
 
     def award_settings(self) -> dict[str, Any]:
         return awards.clean_settings(self.settings.get("awards"))
@@ -886,7 +913,7 @@ class FamilyPlanner:
             "points": {**self.gamification(), "mode": self.points_mode(),
                        "reward_notify": validate.entities(st.get("reward_notify"), ("notify",)),
                        "reward_value": self.sizes()["value"], "currency": self.sizes()["currency"],
-                       "awards": self.award_settings()},
+                       "awards": self.award_settings(), "levels": self.level_settings()},
             "announce": {**DEFAULT_ANNOUNCE, **(st.get("announce") or {})},
             "lists_settings": {"optimize_time": st.get(CONF_OPTIMIZE_TIME) or "03:00", "ai_task": st.get(CONF_AI_TASK),
                                "prune_days": validate.integer(st.get("prune_days"), 7, 365, 30)},
@@ -912,7 +939,8 @@ class FamilyPlanner:
             patch, flags = settings_spec.vacation(data, self.vacation_settings())
         elif section == "points":
             patch, flags = settings_spec.points(data, self.gamification(), self.points_mode(), st.get("reward_notify") or [],
-                                                self.sizes()["value"], self.sizes()["currency"], self.award_settings())
+                                                self.sizes()["value"], self.sizes()["currency"], self.award_settings(),
+                                                self.level_settings())
         elif section == "announce":
             patch, flags = settings_spec.announce(data, {**DEFAULT_ANNOUNCE, **(st.get("announce") or {})},
                                                   self.data["persons"])
@@ -1037,7 +1065,8 @@ class FamilyPlanner:
             life = rewards.lifetime(self.data["ledger"], pid)
             out[pid] = {"balance": rewards.balance(self.data["ledger"], pid),
                         "available": rewards.available(self.data, pid),
-                        "lifetime": life, **rewards.level(life, self.lang)}
+                        "lifetime": life,
+                        **levels.view(self.data, pid, self.gamification(), self.today(), self.level_settings()["season_start"], self.lang)}
         return out
 
     # ------------------------------------------------------------------ read model

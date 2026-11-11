@@ -80,4 +80,4 @@ class PointsSensor(PersonEntity, SensorEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         p = self.planner.points()[self.person_id]
         return {"available": p["available"], "lifetime": p["lifetime"], "level": p["level"],
-                "level_name": p["name"], "next_level_at": p["next"]}
+                "level_name": p["name"], "tier": p["tier"], "season_points": p["xp"], "next_level_at": p["next"]}

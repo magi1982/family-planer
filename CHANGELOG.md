@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.10.0 – 2026-11-11
+
+### New
+- **Levels per school year**: 20+ levels in five tiers – bronze, silver, gold, diamond and ruby (21+, with names like *Most Epic Epicness Ever*). Thresholds are counted in full days and follow the point settings: about 80 % reliability reaches diamond in ~10 months, about 95 % ruby. A new season starts every school year (setting, default 1 August); the best level is kept, unlocked extras and points stay.
+- **Level-up bonus**: one full day of points per level, three for a new tier (can be switched off), with a banner and confetti.
+- **Level badge on the avatar** in the tier colour. After a level up it glows; every tap plays the tier's effect (copper sparks, silver stars, golden rain, diamond explosion, ruby eruption with a shaking screen), up to 20 times – the glow fades after the 5th tap.
+- **Unlockable avatar extras** for every level (hats, glasses, buddies, backgrounds, costumes), only for the person who reached the level. Levels 5, 15, 25 … unlock small effects inside the picture, levels 10, 20, 30 … big effects that reach a little beyond it (silver aura, fireflies, golden wings, golden rain, flame aura, comet …). They are always visible in the planner and can be switched in the builder.
+- **To-dos and special chores in the planner**, clearly marked (☑ to-do with a dashed border, ⭐ special chore in gold); to-dos are ticked with two taps when confirmation is on. New view **To-dos & special** next to All / Chores / Events.
+- **Bigger avatars** in the planner (72 px on tablets, 56 px on phones).
+
+### Security
+- The server only accepts level extras in a picture for the person who unlocked them; picture codes stay whitelisted (`av2:` + up to 14 parts of `[a-z0-9]`). See SECURITY.md #24.
+
 ## 0.9.1 – 2026-11-11
 
 ### New

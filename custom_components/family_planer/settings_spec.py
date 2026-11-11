@@ -99,8 +99,23 @@ def vacation(data: dict, cur: dict) -> tuple[dict, set[str]]:
     return {"vacation": new}, flags
 
 
+def clean_levels(raw) -> dict:
+    """{"season_start": "MM-DD" (start of the school year), "bonus": bool (extra points per level)}"""
+    raw = raw if isinstance(raw, dict) else {}
+    md = str(raw.get("season_start") or "08-01")
+    try:
+        m, d = (int(x) for x in md.split("-"))
+        from datetime import date as _d
+        _d(2024, m, d)
+        md = f"{m:02d}-{d:02d}"
+    except (ValueError, TypeError):
+        md = "08-01"
+    return {"season_start": md, "bonus": bool(raw.get("bonus", True))}
+
+
 def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list,
-           cur_value: float = 20, cur_currency: str = "CHF", cur_awards: dict | None = None) -> tuple[dict, set[str]]:
+           cur_value: float = 20, cur_currency: str = "CHF", cur_awards: dict | None = None,
+           cur_levels: dict | None = None) -> tuple[dict, set[str]]:
     game = {k: validate.integer(data.get(k, v), 0, 1000, v) for k, v in cur_game.items()}
     game["mode"] = data.get("mode") if data.get("mode") in MODES else cur_mode
     notify = validate.entities(data.get("reward_notify", cur_notify), ("notify",))
@@ -112,7 +127,11 @@ def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list,
     aw = clean_settings({"items": {**cur_aw["items"], **(raw.get("items") or {})},
                          "early_time": raw.get("early_time", cur_aw["early_time"]),
                          "confetti": raw.get("confetti", cur_aw["confetti"])})
-    return ({"gamification": game, "reward_notify": notify, "reward_value": value, "currency": currency, "awards": aw},
+    cur_lv = clean_levels(cur_levels)
+    raw_lv = data.get("levels") if isinstance(data.get("levels"), dict) else {}
+    lv = clean_levels({**cur_lv, **raw_lv})
+    return ({"gamification": game, "reward_notify": notify, "reward_value": value, "currency": currency, "awards": aw,
+             "levels": lv},
             {"rebook"})
 
 

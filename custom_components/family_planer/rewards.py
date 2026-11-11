@@ -11,11 +11,6 @@ import hashlib
 import hmac
 import secrets
 
-LEVELS = [0, 100, 250, 500, 1000, 2000, 3500, 5000, 7500, 10000]
-LEVEL_NAMES = {
-    "de": ["Starter", "Helfer", "Anpacker", "Profi", "Meister", "Held", "Champion", "Legende", "Superstar", "Grossmeister"],
-    "en": ["Starter", "Helper", "Go-getter", "Pro", "Master", "Hero", "Champion", "Legend", "Superstar", "Grandmaster"],
-}
 DEFAULTS = {"default_points": 10, "day_points": 30, "day_bonus": 5, "streak_bonus": 20}
 MODES = ("fair", "per_chore")
 
@@ -118,14 +113,6 @@ def reserved(requests: dict, pid: str) -> int:
 
 def available(data: dict, pid: str) -> int:
     return balance(data["ledger"], pid) - reserved(data["requests"], pid)
-
-
-def level(points: int, lang: str) -> dict:
-    idx = max(i for i, floor in enumerate(LEVELS) if points >= floor)
-    nxt = LEVELS[idx + 1] if idx + 1 < len(LEVELS) else None
-    names = LEVEL_NAMES["de" if lang == "de" else "en"]
-    return {"level": idx + 1, "name": names[idx], "floor": LEVELS[idx], "next": nxt,
-            "progress": 100 if nxt is None else round((points - LEVELS[idx]) / (nxt - LEVELS[idx]) * 100)}
 
 
 def _has(ledger: list[dict], ref: str) -> bool:

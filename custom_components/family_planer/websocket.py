@@ -225,6 +225,9 @@ async def ws_update_person(hass: HomeAssistant, connection: websocket_api.Active
     # a person's picture may be changed without the PIN; colour and nicknames need it
     if not (_may_edit(connection, msg, planner) if set(patch) <= {"image"} else _change(connection, msg, planner)):
         return
+    if "image" in patch and not planner.image_allowed(msg["person_id"], patch["image"]):
+        connection.send_error(msg["id"], "locked", "This extra is not unlocked for this person")
+        return
     try:
         await planner.async_update_person(msg["person_id"], patch)
     except KeyError:

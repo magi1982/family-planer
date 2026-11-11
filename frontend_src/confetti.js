@@ -8,10 +8,10 @@
 (() => {
   if (window.FPCONFETTI) return;
   const TXT = {
-    de: { day: 'Super, {n}! Alle Ämtli erledigt 🎉', team: 'Familien-Teamwork! Alle haben alles erledigt 🤝', won: '{n}: {a}!',
+    de: { lvl: '{n} ist jetzt Level {v} – {t}! ⬆️', lvlB: ' +{b} Punkte', unl: ' · Neu: {u}', day: 'Super, {n}! Alle Ämtli erledigt 🎉', team: 'Familien-Teamwork! Alle haben alles erledigt 🤝', won: '{n}: {a}!',
       a: { trophy: 'Pokal des Monats 🏆', crown: 'Krone der Woche 👑', perfect: 'Perfekte Woche ⭐', bee: 'Fleissbiene 🐝', weekend: 'Wochenend-Held 🦸',
         climber: 'Aufsteiger 📈', early: 'Frühaufsteher 🌅', diamond: 'Diamant-Serie 💎', milestone: 'Meilenstein {v} 🏅', team: 'Familien-Teamwork 🤝' } },
-    en: { day: 'Well done, {n}! Every chore done 🎉', team: 'Family teamwork! Everybody did everything 🤝', won: '{n}: {a}!',
+    en: { lvl: '{n} is now level {v} – {t}! ⬆️', lvlB: ' +{b} points', unl: ' · New: {u}', day: 'Well done, {n}! Every chore done 🎉', team: 'Family teamwork! Everybody did everything 🤝', won: '{n}: {a}!',
       a: { trophy: 'Trophy of the month 🏆', crown: 'Crown of the week 👑', perfect: 'Perfect week ⭐', bee: 'Busy bee 🐝', weekend: 'Weekend hero 🦸',
         climber: 'Climber 📈', early: 'Early bird 🌅', diamond: 'Diamond streak 💎', milestone: 'Milestone {v} 🏅', team: 'Family teamwork 🤝' } },
   };
@@ -19,6 +19,41 @@
   const MAX_AGE_MIN = 20; // older celebrations (e.g. the tablet was asleep for hours) are not replayed
   const queue = []; let busy = false;
   const fmt = (t, o) => t.replace(/\{(\w)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
+  // level effects when the level badge is tapped: sparks shooting out of the badge in the tier's colours
+  const TIER_COLS = { bronze: ['#CD8A4E', '#E7A46C', '#FFD0A0', '#8A4A22', '#FFE27A'], silver: ['#ffffff', '#C9D1D9', '#A8B1BC', '#E2E6EB'],
+    gold: ['#F5C542', '#FFE27A', '#D4A017', '#FFF4B8'], diamond: ['#7FDBFF', '#ffffff', '#B8F0FF', '#4FA3E0'], ruby: ['#E0115F', '#FF4D6D', '#FFB3C1', '#8B0A32', '#FFA34F'] };
+  function burst(x, y, tier, color, strength) {
+    if (reduce()) return;
+    const cv = document.createElement('canvas');
+    cv.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:99999;pointer-events:none';
+    document.body.appendChild(cv);
+    const ctx = cv.getContext('2d'); const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = cv.width = Math.round(window.innerWidth * dpr); const H = cv.height = Math.round(window.innerHeight * dpr);
+    const cols = TIER_COLS[tier] || [color, '#ffffff']; const big = tier === 'diamond' || tier === 'ruby';
+    const n = Math.round((big ? 150 : 70) * (strength || 1)); const parts = [];
+    // gold: golden rain · diamond: sparkling explosion with a flash · ruby: eruption, flash and the screen shakes
+    if (tier === 'gold') rain('s', '#F5C542');
+    if (big) { const fl = document.createElement('div'); fl.style.cssText = `position:fixed;inset:0;z-index:99998;pointer-events:none;background:radial-gradient(circle at ${x}px ${y}px,${tier === 'ruby' ? 'rgba(255,40,80,.55)' : 'rgba(200,245,255,.6)'},transparent 60%);transition:opacity .6s`;
+      document.body.appendChild(fl); setTimeout(() => { fl.style.opacity = '0'; }, 120); setTimeout(() => fl.remove(), 800); }
+    if (tier === 'ruby' && document.body.animate) { document.body.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(-6px,3px)' }, { transform: 'translate(5px,-4px)' }, { transform: 'translate(-3px,-2px)' }, { transform: 'translate(0,0)' }], { duration: 500, iterations: 2 }); setTimeout(() => rain('m', '#E0115F'), 300); }
+    for (let i = 0; i < n; i += 1) {
+      const a = Math.random() * Math.PI * 2; const v = (2 + Math.random() * 6) * dpr;
+      const sp = big ? 1.7 : 1;
+      parts.push({ x: x * dpr, y: y * dpr, vx: Math.cos(a) * v * sp, vy: Math.sin(a) * v * sp - 2.5 * dpr, life: 0, max: 50 + Math.random() * 40, c: cols[i % cols.length], r: (1.2 + Math.random() * 2.4) * dpr * (big ? 1.3 : 1), star: tier === 'diamond' || Math.random() < 0.3 });
+    }
+    const frame = () => {
+      ctx.clearRect(0, 0, W, H); let alive = 0;
+      for (const p of parts) {
+        if (p.life > p.max) continue; alive += 1; p.life += 1;
+        p.x += p.vx; p.y += p.vy; p.vy += 0.16 * dpr; p.vx *= 0.985;
+        ctx.globalAlpha = Math.max(0, 1 - p.life / p.max); ctx.fillStyle = p.c;
+        if (p.star) { ctx.beginPath(); for (let k = 0; k < 8; k += 1) { const rr = k % 2 ? p.r : p.r * 2.4; const aa = k * Math.PI / 4 + p.life * 0.1; ctx.lineTo(p.x + Math.cos(aa) * rr, p.y + Math.sin(aa) * rr); } ctx.closePath(); ctx.fill(); }
+        else { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill(); }
+      }
+      if (alive) window.requestAnimationFrame(frame); else cv.remove();
+    };
+    window.requestAnimationFrame(frame);
+  }
   const reduce = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const shade = (hex, f) => {
     const m = /^#([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return hex || '#F5C542';
@@ -98,7 +133,10 @@
       const age = (now - Date.parse(c.ts || '')) / 60000;
       if (!(age >= -5 && age <= MAX_AGE_MIN)) continue;
       const person = (s.persons || []).find((p) => p.id === c.pid); const name = person ? person.name : '';
-      const text = c.kind === 'day' ? fmt(T.day, { n: name }) : c.kind === 'team' && !c.pid ? T.team
+      const lvName = c.kind === 'level' ? (((s.points || {})[c.pid] || {}).level === c.value ? ((s.points || {})[c.pid] || {}).name : '') : '';
+      const unl = c.kind === 'level' && (c.unlocks || []).length && window.FPAV ? fmt(T.unl, { u: c.unlocks.map((u) => window.FPAV.label(u, lang)).join(', ') }) : '';
+      const text = c.kind === 'level' ? fmt(T.lvl, { n: name, v: c.value, t: lvName }) + (c.bonus ? fmt(T.lvlB, { b: c.bonus }) : '') + unl
+        : c.kind === 'day' ? fmt(T.day, { n: name }) : c.kind === 'team' && !c.pid ? T.team
         : fmt(T.won, { n: name, a: fmt(T.a[c.kind] || c.kind, { v: c.value }) });
       if (c.kind === 'team' && c.pid) continue; // the family celebration covers everybody
       queue.push({ fx: c.fx || 's', color: c.color || '#F5C542', text, rainbow: s.theme === 'rainbow' || c.kind === 'team' });
@@ -107,5 +145,5 @@
     run();
   }
 
-  window.FPCONFETTI = { check, rain, banner };
+  window.FPCONFETTI = { check, rain, banner, burst };
 })();

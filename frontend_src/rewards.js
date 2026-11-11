@@ -146,7 +146,7 @@
       const medal = (a, big) => `<span class="md${big ? ' big' : ''}" style="--mc:${COLOR(a.color)}" title="${esc(awName(a.id, a.value))}"><ha-icon icon="${esc(a.icon)}"></ha-icon></span>`;
       const ring = (p, size) => { const r = (s.awards || {})[p.id] || {}; const fr = ['platinum', 'gold', 'silver', 'bronze'].includes(r.frame) ? r.frame : '';
         const crown = (r.list || []).some((a) => a.id === 'crown');
-        return `<div class="ring${fr ? ' fr-' + fr : ''}" style="width:${size}px;height:${size}px"><span class="ava" style="width:${size}px;height:${size}px">${av(p, size)}</span>${crown ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>`; };
+        return `<div class="ring${fr ? ' fr-' + fr : ''}" style="width:${size}px;height:${size}px"><span class="ava" style="width:${size}px;height:${size}px">${av(p, size)}</span>${String(p.image || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(p.image) : ''}${crown ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>`; };
       const forP = (r, pid) => !r.persons || !r.persons.length || r.persons.includes(pid);
       const eta = (pid, cost) => { const d = daysTo(s, pid, cost); return d === 0 ? T.ready : d == null ? T.noPace : d === 1 ? T.inDay : fmt(T.inDays, { n: d }); };
       // what is running for a person: requests waiting for approval, rewards made for them, else the next goal
@@ -161,9 +161,9 @@
         const aw = ((s.awards || {})[p.id] || {}).list || [];
         return `<div class="pc${sel && p.id === sel.id ? ' on' : ''}" data-p="${esc(p.id)}" role="button" tabindex="0" style="--c:${COLOR(p.color)}">
           <div class="ph">${ring(p, 56)}
-          <div class="pi"><b>${esc(p.name)}</b><span class="lv">${esc(T.lvl)} ${x.level} · ${esc(x.name)}</span>
+          <div class="pi"><b>${esc(p.name)}</b><span class="lv"><i class="tierdot" style="background:${COLOR(x.tier_color)}"></i>${esc(T.lvl)} ${x.level} · ${esc(x.name)}</span>
           <span class="bar"><i style="width:${Math.max(3, x.progress)}%"></i></span>
-          <span class="nx">${x.next == null ? esc(T.max) : esc(fmt(T.next, { n: x.next - x.lifetime, l: x.level + 1 }))}</span></div>
+          <span class="nx">${x.next == null ? esc(T.max) : esc(fmt(T.next, { n: x.next - (x.xp != null ? x.xp : x.lifetime), l: x.level + 1 }))}</span></div>
           <div class="pt"><strong>${x.balance}</strong><span>${esc(T.pts)}</span>${x.balance !== x.available ? `<em>${esc(fmt(T.reserved, { n: x.balance - x.available }))}</em>` : ''}</div></div>
           ${aw.length ? `<div class="mds">${aw.slice(0, 6).map((a) => medal(a)).join('')}${aw.length > 6 ? `<span class="mdm">+${aw.length - 6}</span>` : ''}</div>` : ''}
           <div class="runs">${running(p)}</div>
@@ -244,7 +244,7 @@
         .fcp{display:flex;flex-wrap:wrap;gap:6px}.fcp em{font-style:normal;display:inline-flex;align-items:center;gap:5px;background:#232323;border-radius:12px;padding:2px 9px 2px 3px}
         .pc.on{border-color:var(--c);background:#262626}
         .pi{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.pi b{font-size:16px}
-        .lv{font-size:12px;color:#aaa}.nx{font-size:11px;color:#777}
+        .lv{font-size:12px;color:#aaa;display:flex;align-items:center;gap:5px}.tierdot{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 4px rgba(255,255,255,.3)}.nx{font-size:11px;color:#777}
         .bar{display:block;height:6px;border-radius:3px;background:#333;overflow:hidden}.bar i{display:block;height:100%;background:${G};border-radius:3px}
         .pt{display:flex;flex-direction:column;align-items:flex-end}.pt strong{font-size:28px;line-height:1;color:${G}}.pt span{font-size:11px;color:#888}.pt em{font-style:normal;font-size:10px;color:#E0A84F}
         .sec{font-size:12px;color:${G};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin:18px 0 8px}

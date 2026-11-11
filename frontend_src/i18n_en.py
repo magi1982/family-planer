@@ -4,6 +4,8 @@ Every phrase must occur in the source (build.py checks this), so the list stays 
 """
 
 WEEK = [
+    ("'Nochmals tippen zum Erledigen'", "'Tap again to finish'"),
+    ('<em class="tag">⭐ Spezial</em>', '<em class="tag">⭐ Special</em>'),
     ("const SOON_T = ['in {n} Min', 'in {n} Std'];", "const SOON_T = ['in {n} min', 'in {n} h'];"),
     ("trophy: ['Pokal des Monats', 'Beste Quote im letzten Monat.'],",
      "trophy: ['Trophy of the month', 'Best rate last month.'],"),
@@ -98,7 +100,7 @@ WEEK = [
     ("<b>${pl.length}</b>Ämtli</div>", "<b>${pl.length}</b>chores</div>"),
     ("${opl.length} offen</div>", "${opl.length} open</div>"),
     ("Noch keine Ämtli geplant – im Tab „Ämtliplan“ anlegen.", "No chores planned yet – add them under \"Chore plan\"."),
-    ("[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['termine', 'Termine'], ['schule', 'Stundenplan']]", "[['alle', 'All'], ['aemtli', 'Chores'], ['termine', 'Events'], ['schule', 'Timetable']]"),
+    ("[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['extra', 'To-dos & Spezial'], ['termine', 'Termine'], ['schule', 'Stundenplan']]", "[['alle', 'All'], ['aemtli', 'Chores'], ['extra', 'To-dos & special'], ['termine', 'Events'], ['schule', 'Timetable']]"),
     ("const schoolC = { farbe: k.farbe, name: 'Schule', schule: true };", "const schoolC = { farbe: k.farbe, name: 'School', schule: true };"),
     ("lessons = spans.map((z) => ({ title: 'Schule', s:", "lessons = spans.map((z) => ({ title: 'School', s:"),
     ("`🎒 los ${hm(new Date(bk.s - wg * 60000))} · zuhause ${hm(new Date(+bk.e + wg * 60000))}` : '🎒 Schule'", "`🎒 leave ${hm(new Date(bk.s - wg * 60000))} · home ${hm(new Date(+bk.e + wg * 60000))}` : '🎒 School'"),

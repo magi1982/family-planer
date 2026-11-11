@@ -74,6 +74,8 @@
       F('reward_value', 'num', 'Gegenwert einer grossen Belohnung', 'Value of a large reward', 'Gross = so viel, wie man in einem Monat mit allen Ämtli inkl. Boni verdient. Klein = ¼, Mittel = ½, Mega = 2×, Riesig = 5×. Nur zur Orientierung.', 'Large = what you earn in a month with every chore done incl. bonuses. Small = ¼, medium = ½, mega = 2×, giant = 5×. Just a guide.', { min: 0, max: 100000, step: 0.5 }),
       F('currency', 'text', 'Währung', 'Currency', 'z. B. CHF oder €.', 'e.g. CHF or €.', { max: 8 }),
       F('awards', 'awards', 'Pokale & Auszeichnungen', 'Trophies & awards', 'Pro Auszeichnung ein/aus und wie viele Punkte sie bringt (beim Gewinnen, und wieder, wenn man sie neu gewinnt). Klein = ⅓, Mittel = ⅔, Gross = 1×, Riesig = 2× der Punkte für einen ganzen Tag.', 'Per award on/off and how many points it gives (when won, and again when won anew). Small = ⅓, medium = ⅔, large = 1×, giant = 2× the points for a full day.'),
+      F('season_start', 'md', 'Neue Level-Saison ab', 'New level season from', 'Jedes Schuljahr starten alle wieder bei Level 1. Freigeschaltete Extras und Punkte zum Einlösen bleiben, der Bestwert wird als Abzeichen gespeichert.', 'Every school year everybody starts again at level 1. Unlocked extras and points to redeem stay; the best level is kept as a badge.'),
+      F('level_bonus', 'bool', 'Bonuspunkte beim Level-Aufstieg', 'Bonus points on level up', 'Ein voller Tag Punkte pro Level, drei bei einer neuen Stufe (Silber, Gold, Diamant, Rubin).', 'One full day of points per level, three for a new tier (silver, gold, diamond, ruby).'),
       F('early_time', 'time', 'Frühaufsteher: alles erledigt vor', 'Early bird: everything done before', 'Zeit für die Auszeichnung „Frühaufsteher“.', 'Time for the "Early bird" award.'),
       F('confetti', 'bool', 'Konfetti', 'Confetti', 'Kleines Konfetti mit Namen, wenn jemand alle Ämtli des Tages erledigt hat; grösseres in der Pokalfarbe bei Pokalen. Höchstens ein grosses pro Person und Tag.', 'Small confetti with the name when someone has done all chores of the day; bigger ones in the trophy colour for trophies. At most one big one per person and day.'),
       F('reward_notify', 'entities', 'Anfragen zusätzlich melden an', 'Also send requests to', 'z. B. die Handy-App – zusätzlich zur Mitteilung in Home Assistant.', 'e.g. the mobile app – in addition to the Home Assistant notification.', { domain: 'notify' }),
@@ -161,7 +163,8 @@
       const d = this._data;
       if (id === 'general') { const g = clone(d.general); g.mod_week = g.modules.week; g.mod_lists = g.modules.lists; return g; }
       if (id === 'lists') return clone(d.lists_settings);
-      if (id === 'points') { const f = clone(d.points); f.early_time = (f.awards || {}).early_time || '12:00'; f.confetti = (f.awards || {}).confetti !== false; return f; }
+      if (id === 'points') { const f = clone(d.points); f.early_time = (f.awards || {}).early_time || '12:00'; f.confetti = (f.awards || {}).confetti !== false;
+        f.season_start = (f.levels || {}).season_start || '08-01'; f.level_bonus = (f.levels || {}).bonus !== false; return f; }
       return clone(d[id]);
     }
     _input(e, isChange) {
@@ -175,6 +178,7 @@
         if (el.type === 'checkbox') f[ds.k] = el.checked;
         else if (el.type === 'number') f[ds.k] = el.value === '' ? '' : Number(el.value);
         else if (ds.type === 'words') f[ds.k] = el.value;
+        else if (ds.type === 'md') { if (/^\d{4}-\d{2}-\d{2}$/.test(el.value)) f[ds.k] = el.value.slice(5); }
         else if (ds.addent !== undefined) { if (isChange && el.value) { const cur = Array.isArray(f[ds.k]) ? f[ds.k] : []; if (!cur.includes(el.value)) cur.push(el.value); f[ds.k] = cur; this._render(); } }
         else f[ds.k] = el.value || (ds.type === 'entity' ? null : el.value);
         if (el.tagName === 'SELECT' && isChange && ds.addent === undefined) this._render();
@@ -196,7 +200,7 @@
       if (t.closest('[data-unlock]')) { this._asked = true; this._load(); return; }
       const ap = t.closest('[data-avp]'); if (ap) { this._avp = ap.dataset.avp; this._render(); return; }
       const at = t.closest('[data-avtab]'); if (at) { this._avtab = at.dataset.avtab; this._render(); return; }
-      if (t.closest('[data-avrnd]')) { const p = this._avPerson(); if (p) this._avSave(p, window.FPAV.random()); return; }
+      if (t.closest('[data-avrnd]')) { const p = this._avPerson(); if (p) { const fx = window.FPAV.parse(this._avCode(p)).fx; this._avSave(p, window.FPAV.set(window.FPAV.random(), 'fx', fx)); } return; }
       const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); this._avSave(p, window.FPAV.set(this._avCode(p), part, val)); } return; }
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
       if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
@@ -229,7 +233,8 @@
     async _saveTab() {
       const id = this._tab; const f = { ...this._forms[id] };
       if (id === 'general') { f.modules = { week: !!f.mod_week, lists: !!f.mod_lists }; delete f.mod_week; delete f.mod_lists; }
-      if (id === 'points') { f.awards = { items: (f.awards || {}).items || {}, early_time: f.early_time, confetti: !!f.confetti }; delete f.early_time; delete f.confetti; }
+      if (id === 'points') { f.awards = { items: (f.awards || {}).items || {}, early_time: f.early_time, confetti: !!f.confetti }; delete f.early_time; delete f.confetti;
+        f.levels = { season_start: f.season_start, bonus: !!f.level_bonus }; delete f.season_start; delete f.level_bonus; }
       if (id === 'vacation' && typeof f.words === 'string') f.words = f.words.split(',').map((x) => x.trim()).filter(Boolean);
       const res = await this._call('family_planer/settings/save', { section: SECTION[id], data: f });
       if (!res) return;
@@ -286,6 +291,7 @@
       let ctl = '';
       if (fd.type === 'bool') return `<label class="row b"><span class="lt"><b>${esc(L(fd.label, lang))}</b>${fd.desc[lang] ? `<small>${esc(L(fd.desc, lang))}</small>` : ''}</span><input type="checkbox" class="sw" ${a} ${v ? 'checked' : ''}></label>`;
       if (fd.type === 'num') ctl = `<span class="nw"><input class="in n" type="number" inputmode="${fd.step && fd.step < 1 ? 'decimal' : 'numeric'}" min="${fd.min}" max="${fd.max}" step="${fd.step || 1}" ${a} value="${esc(v)}">${unit}</span>`;
+      else if (fd.type === 'md') ctl = `<input class="in" style="width:170px" type="date" ${a} value="${esc(new Date().getFullYear() + '-' + String(v || '08-01'))}">`;
       else if (fd.type === 'time') ctl = `<input class="in t" type="time" ${a} value="${esc(String(v || '').slice(0, 5))}">`;
       else if (fd.type === 'text') ctl = `<input class="in" maxlength="${fd.max || 80}" ${a} value="${esc(v)}">`;
       else if (fd.type === 'words') ctl = `<input class="in" maxlength="600" ${a} value="${esc(Array.isArray(v) ? v.join(', ') : v)}">`;
@@ -468,7 +474,7 @@
         return FX.avatarHtml ? FX.avatarHtml({ name: q.name, farbe: COLOR(q.color), ...(/^(av2?:|svg:|img:)/.test(img) ? { bild: img } : {}) }, size) : ''; };
       return `<div class="hint3">${esc(lbl('Jede und jeder darf hier ein Bild zusammenstellen – ohne PIN. Alles andere öffnet die Eltern-PIN oben rechts.', 'Anyone may build a picture here – no PIN needed. Everything else opens with the parent PIN at the top right.'))}</div>
         <div class="avps">${ps.map((q) => `<button class="avpb${q.id === p.id ? ' on' : ''}" style="--c:${COLOR(q.color)}" data-avp="${esc(q.id)}">${pic(q, 40)}<span>${esc(q.name)}</span></button>`).join('')}</div>
-        <div class="avwrap">${A.builder(this._avCode(p), COLOR(p.color), lang, this._avtab)}</div>
+        <div class="avwrap">${A.builder(this._avCode(p), COLOR(p.color), lang, this._avtab, ((s.points || {})[p.id] || {}).unlocked || [])}</div>
         <div class="upl"><label class="sg">${esc(lbl('Eigenes Foto hochladen', 'Upload own photo'))}<input type="file" accept="image/*" data-avup hidden></label><small>${esc(lbl('Wird quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.', 'Cropped to a square and stored only in your Home Assistant.'))}</small></div>`;
     }
     _vacChoice(key) {

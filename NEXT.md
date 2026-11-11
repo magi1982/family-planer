@@ -373,9 +373,15 @@ Aufbau von oben nach unten, mit grosser Live-Vorschau links (auf dem Handy oben)
 - Noch grössere Tippflächen im Handy-Modus prüfen
 - Status-Seite: Quellen, die es nicht mehr gibt (gelöschter Kalender), nach 30 Tagen ausblenden
 
+## Umgesetzt in 0.10.0
+
+- Grössere Avatare im Planer (25), To-dos und besondere Ämtli im Planer gekennzeichnet (26), Ansicht „To-dos & Spezial“ (27)
+- Levels pro Schuljahr mit Bronze bis Rubin, Level-Bonus, Abzeichen mit Leuchten und Effekten beim Antippen, Freischaltungen Level 2–40 mit kleinen und grossen Effekten (28)
+
 ## Ideen für die nächste Version
 
-_Noch keine._
+- README (EN/DE) gesammelt nachführen: Levels, Freischaltungen, Planer-Ansicht „To-dos & Spezial“, Bilder ohne PIN, Ferien-Check v2
+- Release-Checkliste unten an die sparsame Arbeitsweise anpassen (README nur alle paar Releases)
 
 ---
 

@@ -5,7 +5,7 @@ global.window = {};
 require(path.join(__dirname, '../../frontend_src/avatar.js'));
 const A = window.FPAV;
 const L = A.LISTS;
-const SERVER = /^av2:(?:[a-z0-9]{1,14}\.){11}[a-z0-9]{1,14}$/; // same rule as validate.py
+const SERVER = /^av2:(?:[a-z0-9]{1,16}\.){11,13}[a-z0-9]{1,16}$/; // same rule as validate.py
 let n = 0; const errors = [];
 const check = (o) => {
   const c = A.code(o); n += 1;
@@ -44,6 +44,12 @@ for (const old of ['av:k.long.blond.hell.0', 'av:e.kurz.braun.hell.bart', 'av:o.
 for (let i = 0; i < 200; i += 1) check(A.parse(A.random()));
 const html = A.builder(c, '#4FA3E0', 'de', 'cost') + A.builder(c, '#4FA3E0', 'en', 'cloth');
 if (/undefined|NaN/.test(html)) errors.push('builder html has undefined');
+const fs = require('fs');
+const py = fs.readFileSync(path.join(__dirname, '../../custom_components/family_planer/levels.py'), 'utf8');
+const blk = py.slice(py.indexOf('UNLOCKS = {')); const unl = [...blk.slice(0, blk.indexOf('}') + 1).matchAll(/"([a-z0-9]+)"/g)].map((m) => m[1]);
+for (const u of unl) { if (!A.LOCKED.includes(u)) errors.push(`unlock ${u} is not a locked builder item`); if (!Object.values(L).some((l) => l.includes(u))) errors.push(`unlock ${u} missing in the builder`); }
+for (const u of A.LOCKED) if (!unl.includes(u)) errors.push(`locked item ${u} is never unlocked`);
+for (const v of A.FXB) { const h = A.outer(A.set('av2:m.lang.braun.hell.0.0.0.blau.0.0.0.0.0.0', 'fxb', v)); if (!h.includes('<svg') || /undefined|NaN/.test(h)) errors.push(`big effect ${v}`); }
 if (Object.keys(A.SK).length < 8 || L.hair.length < 15) errors.push('too few skin tones or hair styles');
 if (errors.length) { console.error(errors.slice(0, 20).join('\n')); process.exit(1); }
 console.log(`ok ${n} avatars`);

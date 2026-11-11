@@ -42,13 +42,6 @@ def test_chore_points_are_idempotent_and_reversible():
     assert R.balance(d["ledger"], "lea") == 0
 
 
-def test_levels():
-    assert R.level(0, "de")["name"] == "Starter"
-    lv = R.level(300, "en")
-    assert lv["level"] == 3 and lv["next"] == 500 and lv["progress"] == 20
-    assert R.level(99999, "de")["next"] is None
-
-
 def test_redeem_with_approval_reserves_points():
     d = data()
     R.adjust(d, "lea", 120, "Start", TS)

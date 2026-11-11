@@ -1,7 +1,8 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
 // ---------------------------------------------------------------------------
 // Avatar builder v2: layered SVG avatars, code 'av2:' + 12 dot-separated parts (all ids from fixed lists)
-//   fig.hair.hc.sk.head.face.neck.shirt.motif.pet.bg.cost   ('0' = none)
+//   fig.hair.hc.sk.head.face.neck.shirt.motif.pet.bg.cost.fx.fxb   ('0' = none; fx / fxb = small / big effects from levels)
+// Level extras (LOCKED) are offered only to the person who unlocked them (server checks it too).
 // Old 'av:' codes (v1) are converted with FPAV.from1(). Every combination is drawn by tests/js/avatar_combos.js.
 // ---------------------------------------------------------------------------
 (() => {
@@ -19,22 +20,27 @@
   const KID = (f) => f === 'm' || f === 'j';
   const OLD = (f) => f === 'g' || f === 'p';
   const HAIR = ['kurz', 'seite', 'stachel', 'wuschel', 'undercut', 'irokese', 'lockenkurz', 'glatze', 'lang', 'pony', 'zoepfe', 'pferd', 'dutt', 'buns', 'bob', 'locken', 'afro', 'rastas'];
-  const HEAD = ['cap', 'muetze', 'krone', 'blumen', 'katze', 'hase', 'baer', 'einhorn', 'party', 'kopfhoerer', 'stirnband', 'schleife'];
-  const FACE = ['brille', 'eckig', 'sonnenbrille', 'sommersprossen', 'glitzer', 'pflaster', 'tiger', 'schmetterling', 'bart', 'schnauz'];
-  const NECK = ['schal', 'fliege', 'kette'];
+  const HEAD = ['levelcap', 'skaterhelm', 'edelkrone', 'rubinkrone', 'cap', 'muetze', 'krone', 'blumen', 'katze', 'hase', 'baer', 'einhorn', 'party', 'kopfhoerer', 'stirnband', 'schleife'];
+  const FACE = ['goldbrille', 'funkelsprossen', 'diamantbrille', 'rubinmaske', 'brille', 'eckig', 'sonnenbrille', 'sommersprossen', 'glitzer', 'pflaster', 'tiger', 'schmetterling', 'bart', 'schnauz'];
+  const NECK = ['rubinumhang', 'schal', 'fliege', 'kette'];
   const MOTIF = ['stern', 'herz', 'blitz', 'ball', 'rakete'];
-  const PET = ['katze', 'hund', 'hase', 'papagei', 'eidechse', 'affe', 'drache', 'pinguin', 'fuchs', 'roboter', 'eule', 'ballon', 'fussball', 'gitarre', 'zauberstab'];
-  const BG = ['sterne', 'regenbogen', 'herzen', 'konfetti', 'weltall', 'wolken', 'blasen', 'blitze'];
-  const COST = ['astro', 'mars', 'sternenkraft', 'funkenflug', 'mondfee', 'turbo', 'sternschnuppe', 'ninja', 'ritter', 'pirat', 'zauberer', 'prinzessin', 'prinz', 'dino', 'feuerwehr'];
+  const PET = ['hamster', 'babydrache', 'phoenix', 'kristallfuchs', 'rubindrache', 'szepter', 'katze', 'hund', 'hase', 'papagei', 'eidechse', 'affe', 'drache', 'pinguin', 'fuchs', 'roboter', 'eule', 'ballon', 'fussball', 'gitarre', 'zauberstab'];
+  const BG = ['comic', 'sonnenuntergang', 'kristallhoehle', 'lavagalaxie', 'sterne', 'regenbogen', 'herzen', 'konfetti', 'weltall', 'wolken', 'blasen', 'blitze'];
+  const FX = ['sternchen', 'leuchtaugen', 'goldglanz', 'rubinsplitter', 'feuerfunken', 'rubinglanz', 'herzfunken', 'schneeflocken'];
+  const FXB = ['silberaura', 'gluehwuermchen', 'goldfluegel', 'goldregen', 'flammenaura', 'komet', 'blitzgewitter', 'galaxie'];
+  const LOCKED = ['levelcap', 'goldbrille', 'funkelsprossen', 'hamster', 'comic', 'skaterhelm', 'babydrache', 'rennfahrer', 'sonnenuntergang', 'edelkrone',
+    'phoenix', 'goldritter', 'diamantbrille', 'kristallhoehle', 'kristallfuchs', 'eiskoenig', 'rubinkrone', 'rubindrache', 'lavagalaxie', 'feuertitan',
+    'rubinumhang', 'szepter', 'rubinmaske', ...FX, ...FXB];
+  const COST = ['rennfahrer', 'goldritter', 'eiskoenig', 'feuertitan', 'astro', 'mars', 'sternenkraft', 'funkenflug', 'mondfee', 'turbo', 'sternschnuppe', 'ninja', 'ritter', 'pirat', 'zauberer', 'prinzessin', 'prinz', 'dino', 'feuerwehr'];
   // costumes with something on the head hide the head slot; masks hide glasses; full suits hide neck and motif
-  const COST_HAT = ['astro', 'mars', 'ninja', 'ritter', 'pirat', 'zauberer', 'prinzessin', 'prinz', 'dino', 'feuerwehr'];
+  const COST_HAT = ['rennfahrer', 'goldritter', 'eiskoenig', 'feuertitan', 'astro', 'mars', 'ninja', 'ritter', 'pirat', 'zauberer', 'prinzessin', 'prinz', 'dino', 'feuerwehr'];
   const COST_MASK = ['sternenkraft', 'funkenflug', 'mondfee', 'turbo', 'sternschnuppe', 'ninja'];
-  const GLASSES = ['brille', 'eckig', 'sonnenbrille'];
+  const GLASSES = ['brille', 'eckig', 'sonnenbrille', 'goldbrille', 'diamantbrille', 'rubinmaske'];
   const BEARD = ['bart', 'schnauz'];
-  const FIELDS = ['fig', 'hair', 'hc', 'sk', 'head', 'face', 'neck', 'shirt', 'motif', 'pet', 'bg', 'cost'];
-  const LISTS = { fig: FIG, hair: HAIR, hc: Object.keys(HC), sk: Object.keys(SK), head: HEAD, face: FACE, neck: NECK, shirt: Object.keys(SHIRT), motif: MOTIF, pet: PET, bg: BG, cost: COST };
-  const OPTIONAL = ['head', 'face', 'neck', 'motif', 'pet', 'bg', 'cost'];
-  const DEFAULT = { fig: 'm', hair: 'lang', hc: 'braun', sk: 'hell', head: '0', face: '0', neck: '0', shirt: 'blau', motif: '0', pet: '0', bg: '0', cost: '0' };
+  const FIELDS = ['fig', 'hair', 'hc', 'sk', 'head', 'face', 'neck', 'shirt', 'motif', 'pet', 'bg', 'cost', 'fx', 'fxb'];
+  const LISTS = { fig: FIG, hair: HAIR, hc: Object.keys(HC), sk: Object.keys(SK), head: HEAD, face: FACE, neck: NECK, shirt: Object.keys(SHIRT), motif: MOTIF, pet: PET, bg: BG, cost: COST, fx: FX, fxb: FXB };
+  const OPTIONAL = ['head', 'face', 'neck', 'motif', 'pet', 'bg', 'cost', 'fx', 'fxb'];
+  const DEFAULT = { fig: 'm', hair: 'lang', hc: 'braun', sk: 'hell', head: '0', face: '0', neck: '0', shirt: 'blau', motif: '0', pet: '0', bg: '0', cost: '0', fx: '0', fxb: '0' };
 
   // ---------------------------------------------------------------- code
   const parse = (code) => {
@@ -84,17 +90,22 @@
       cost: pick({ held: 'sternenkraft', blitz: 'funkenflug', nacht: 'mondfee', ninja: 'ninja', ritter: 'ritter', astro: 'astro', pirat: 'pirat', zauber: 'zauberer' }) }));
   };
   const random = (fig) => {
-    const r = (a) => a[Math.floor(Math.random() * a.length)];
+    const r = (a0) => { const a = a0.filter((v) => !LOCKED.includes(v)); return a[Math.floor(Math.random() * a.length)]; };
     const o = { fig: fig || r(FIG), hair: r(HAIR), hc: r(Object.keys(HC)), sk: r(Object.keys(SK)), shirt: r(Object.keys(SHIRT)),
       head: Math.random() < 0.5 ? r(HEAD) : '0', face: Math.random() < 0.4 ? r(FACE) : '0', neck: Math.random() < 0.3 ? r(NECK) : '0',
-      motif: Math.random() < 0.5 ? r(MOTIF) : '0', pet: Math.random() < 0.5 ? r(PET) : '0', bg: Math.random() < 0.6 ? r(BG) : '0', cost: Math.random() < 0.2 ? r(COST) : '0' };
+      motif: Math.random() < 0.5 ? r(MOTIF) : '0', pet: Math.random() < 0.5 ? r(PET) : '0', bg: Math.random() < 0.6 ? r(BG) : '0', cost: Math.random() < 0.2 ? r(COST) : '0', fx: '0', fxb: '0' };
     return code(norm(o));
   };
 
   // ---------------------------------------------------------------- drawing (viewBox 0 0 64 64, head centre 32/28)
   const W = '#ffffff';
+  const ray = (n, c, r0, r1, op) => `<g fill="${c}" opacity="${op}">${[...Array(n)].map((_, i) => { const a = (i / n) * Math.PI * 2; const b = a + Math.PI / n;
+    return `<path d="M32 32L${(32 + Math.cos(a) * r1).toFixed(1)} ${(32 + Math.sin(a) * r1).toFixed(1)}L${(32 + Math.cos(b) * r1).toFixed(1)} ${(32 + Math.sin(b) * r1).toFixed(1)}z"/>`; }).join('')}</g>`;
   const bgArt = {
-    sterne: () => `<g fill="${W}" opacity=".55">${[[9, 10, 1.6], [53, 8, 1.2], [56, 26, 1.5], [7, 30, 1.1], [14, 50, 1.3], [50, 52, 1.1], [44, 14, .9], [20, 18, .8]].map(([x, y, r]) => `<path d="M${x} ${y - r * 2}l${r * .6} ${r * 1.4} ${r * 1.4} ${r * .6}-${r * 1.4} ${r * .6}-${r * .6} ${r * 1.4}-${r * .6}-${r * 1.4}-${r * 1.4}-${r * .6} ${r * 1.4}-${r * .6}z"/>`).join('')}</g>`,
+    comic: () => ray(14, '#FFE27A', 0, 50, '.55') + `<g fill="#E05555" opacity=".5">${[[9, 12], [54, 10], [56, 40], [8, 44]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.6"/>`).join('')}</g>`,
+    sonnenuntergang: () => `<rect width="64" height="64" fill="#FFA34F" opacity=".35"/><rect y="20" width="64" height="44" fill="#E06B9B" opacity=".35"/><circle cx="32" cy="46" r="20" fill="#FFD84F" opacity=".55"/><path d="M0 50h64M0 55h64M0 60h64" stroke="#fff" stroke-width="1.4" opacity=".35"/>`,
+    kristallhoehle: () => `<rect width="64" height="64" fill="#1d3f6e" opacity=".45"/><g opacity=".85">${[[6, 64, 5, 20, '#7FDBFF'], [14, 64, 4, 13, '#B8F0FF'], [52, 64, 5, 22, '#7FDBFF'], [59, 64, 4, 14, '#C9B8FF'], [10, 0, 4, -12, '#B8F0FF'], [54, 0, 4, -14, '#7FDBFF']].map(([x, y, w, h, c]) => `<path d="M${x - w} ${y}L${x} ${y - h}L${x + w} ${y}z" fill="${c}"/>`).join('')}</g>`,
+    lavagalaxie: () => `<rect width="64" height="64" fill="#3a0a14" opacity=".6"/><path d="M32 32m-24 0a24 10 -20 1 0 48 0a24 10 -20 1 0-48 0" fill="none" stroke="#FF4D6D" stroke-width="1.4" opacity=".6"/><g fill="#FFA34F">${[[8, 10], [55, 14], [12, 50], [52, 52], [40, 6]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.4"/>`).join('')}</g>`,    sterne: () => `<g fill="${W}" opacity=".55">${[[9, 10, 1.6], [53, 8, 1.2], [56, 26, 1.5], [7, 30, 1.1], [14, 50, 1.3], [50, 52, 1.1], [44, 14, .9], [20, 18, .8]].map(([x, y, r]) => `<path d="M${x} ${y - r * 2}l${r * .6} ${r * 1.4} ${r * 1.4} ${r * .6}-${r * 1.4} ${r * .6}-${r * .6} ${r * 1.4}-${r * .6}-${r * 1.4}-${r * 1.4}-${r * .6} ${r * 1.4}-${r * .6}z"/>`).join('')}</g>`,
     regenbogen: () => `<g fill="none" stroke-width="3" opacity=".55">${['#FF5F6D', '#FFA34F', '#FFD84F', '#4FE08A', '#4FA3E0', '#8F6BFF'].map((c, i) => `<path d="M-4 ${46 + i * 3}A36 36 0 0 1 68 ${46 + i * 3}" stroke="${c}"/>`).join('')}</g>`,
     herzen: () => `<g fill="${W}" opacity=".45">${[[9, 12, 1], [54, 10, .8], [55, 34, 1.1], [8, 38, .9], [47, 18, .6]].map(([x, y, s]) => `<path transform="translate(${x} ${y}) scale(${s})" d="M0 3C-4-1-2.4-4.6 0-2.4 2.4-4.6 4-1 0 3z"/>`).join('')}</g>`,
     konfetti: () => `<g opacity=".8">${[['#F5C542', 8, 10, 20], ['#E06B9B', 52, 9, -30], ['#4FE08A', 56, 30, 45], ['#7C9CFF', 7, 34, -15], ['#FFA34F', 46, 18, 70], ['#fff', 15, 20, 10], ['#F5C542', 12, 52, 60], ['#4FA3E0', 52, 48, -50]].map(([c, x, y, a]) => `<rect x="${x}" y="${y}" width="3.4" height="1.6" rx=".5" fill="${c}" transform="rotate(${a} ${x} ${y})"/>`).join('')}</g>`,
@@ -124,8 +135,16 @@
     afro: [(c) => `<circle cx="32" cy="24" r="16.4" fill="${c}"/>`, (c) => `<path d="M21 26c0-7.6 4.8-12.6 11-12.6S43 18.4 43 26c-2.8-2.4-6.6-3.8-11-3.8S23.8 23.6 21 26z" fill="${c}"/>`],
     rastas: [(c, d) => `<g fill="${c}">${[17.6, 20.8, 43.2, 46.4].map((x, i) => `<rect x="${x - 1.6}" y="${20 + (i % 2) * 2}" width="3.2" height="${22 - (i % 2) * 3}" rx="1.6"/>`).join('')}</g><g stroke="${d}" stroke-width=".6">${[17.6, 20.8, 43.2, 46.4].map((x) => `<path d="M${x - 1.4} 30h2.8M${x - 1.4} 35h2.8"/>`).join('')}</g>`, (c) => `<path d="M21 26.6c-.4-8.8 4.6-14.4 11-14.4s11.4 5.6 11 14.4c-2.4-3.2-6.4-5.4-11-5.4s-8.6 2.2-11 5.4z" fill="${c}"/><g fill="${c}"><rect x="23" y="20" width="3" height="9" rx="1.5"/><rect x="38" y="20" width="3" height="9" rx="1.5"/></g>`],
   };
+  // animations only when the device does not ask for reduced motion
+  const still = () => typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const star4 = (x, y, r) => `M${x} ${y - r * 2}l${r * .6} ${r * 1.4} ${r * 1.4} ${r * .6}-${r * 1.4} ${r * .6}-${r * .6} ${r * 1.4}-${r * .6}-${r * 1.4}-${r * 1.4}-${r * .6} ${r * 1.4}-${r * .6}z`;
+  const blink = (dur, begin) => (still() ? '' : `<animate attributeName="opacity" values="0;1;0" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/>`);
+  const CROWN = (c, g) => `<path d="M22.6 17l1.8-9 4.6 5L32 5.8l3 7.2 4.6-5 1.8 9z" fill="${c}" stroke="#9A6A10" stroke-width=".5"/><rect x="22.6" y="16" width="18.8" height="2.6" rx="1" fill="${c}"/><circle cx="32" cy="11.6" r="1.6" fill="${g}"/><circle cx="26.6" cy="14" r="1.1" fill="${g}"/><circle cx="37.4" cy="14" r="1.1" fill="${g}"/>`;
   const headArt = {
-    cap: () => `<path d="M20.4 22.4c.4-7.4 5.2-12 11.6-12s11.2 4.6 11.6 12z" fill="#3E7CC9"/><path d="M31 21.4c6 0 12 .6 17.4 2.2-.8 1.4-3 1.6-5.6 1.4-4-.6-7.8-.8-11.8-.8z" fill="#2F64A6"/><circle cx="32" cy="10.8" r="1.2" fill="#2F64A6"/>`,
+    skaterhelm: () => `<path d="M19.8 24.6c0-8.6 5.4-14.2 12.2-14.2s12.2 5.6 12.2 14.2z" fill="#4FD1C5"/><path d="M24 12.6c1 3.8 1 8 0 12M32 10.4v14.2M40 12.6c-1 3.8-1 8 0 12" stroke="#2F9A90" stroke-width="1.2" fill="none"/><path d="M20.4 24.4h23.2" stroke="#2E3138" stroke-width="1.4"/>`,
+    edelkrone: () => CROWN('#F5C542', '#4FA3E0') + '<circle cx="29.4" cy="17.3" r=".8" fill="#E06B6B"/><circle cx="34.6" cy="17.3" r=".8" fill="#4FE08A"/>',
+    rubinkrone: () => CROWN('#F5C542', '#E0115F') + `<path d="M32 9.6l1.6 2-1.6 2-1.6-2z" fill="#FF4D6D"/>`,
+    levelcap: () => `<path d="M20.4 22.4c.4-7.4 5.2-12 11.6-12s11.2 4.6 11.6 12z" fill="#CD8A4E"/><path d="M31 21.4c6 0 12 .6 17.4 2.2-.8 1.4-3 1.6-5.6 1.4-4-.6-7.8-.8-11.8-.8z" fill="#9A5E2E"/><path d="M32 12.6l1.5 3 3.3.5-2.4 2.3.6 3.3-3-1.6-3 1.6.6-3.3-2.4-2.3 3.3-.5z" fill="#FFE27A" stroke="#9A5E2E" stroke-width=".4"/>`,    cap: () => `<path d="M20.4 22.4c.4-7.4 5.2-12 11.6-12s11.2 4.6 11.6 12z" fill="#3E7CC9"/><path d="M31 21.4c6 0 12 .6 17.4 2.2-.8 1.4-3 1.6-5.6 1.4-4-.6-7.8-.8-11.8-.8z" fill="#2F64A6"/><circle cx="32" cy="10.8" r="1.2" fill="#2F64A6"/>`,
     muetze: () => `<path d="M20.4 22.6c0-7.6 5-12.4 11.6-12.4s11.6 4.8 11.6 12.4z" fill="#E05555"/><rect x="19.6" y="20.4" width="24.8" height="4.4" rx="2.2" fill="#F4F4F4"/><circle cx="32" cy="9.6" r="3.2" fill="#F4F4F4"/><path d="M26 14l1.4 5M32 12.4v6.6M38 14l-1.4 5" stroke="#C23F3F" stroke-width=".8"/>`,
     krone: () => `<path d="M23.6 16.6l2-7.6 4.2 4.6L32 6.8l2.2 6.8 4.2-4.6 2 7.6z" fill="#F5C542" stroke="#D9A21E" stroke-width=".5"/><circle cx="32" cy="12.4" r="1.2" fill="#E06B6B"/><circle cx="27.4" cy="14.4" r=".8" fill="#4FA3E0"/><circle cx="36.6" cy="14.4" r=".8" fill="#4FA3E0"/>`,
     blumen: () => `<path d="M21.4 21c2.6-5.4 6.6-8 10.6-8s8 2.6 10.6 8" stroke="#5CB85C" stroke-width="1.4" fill="none"/>${[[24, 16.4, '#FF7AA8'], [32, 13, '#F5C542'], [40, 16.4, '#B69CF2']].map(([x, y, c]) => `<g transform="translate(${x} ${y})"><circle r="1.4" cy="-1.6" fill="${c}"/><circle r="1.4" cy="1.6" fill="${c}"/><circle r="1.4" cx="-1.6" fill="${c}"/><circle r="1.4" cx="1.6" fill="${c}"/><circle r="1" fill="#fff"/></g>`).join('')}`,
@@ -139,7 +158,9 @@
     schleife: () => `<path d="M38.6 13.6l5.8-3.4v6.8zM38.6 13.6l-5.8-3.4v6.8z" fill="#FF7AA8"/><circle cx="38.6" cy="13.6" r="1.6" fill="#E0568A"/>`,
   };
   const faceArt = {
-    brille: () => `<g fill="none" stroke="#2b2b2b" stroke-width="1.1"><circle cx="27.8" cy="29.4" r="3.4"/><circle cx="36.2" cy="29.4" r="3.4"/><path d="M31.2 29h1.6M24.4 28.6l-3-1M39.6 28.6l3-1"/></g>`,
+    diamantbrille: () => `<g fill="#B8F0FF" opacity=".55" stroke="#7FDBFF" stroke-width="1"><path d="M23.6 27h7.4l-1 4.4h-5.4z"/><path d="M33 27h7.4l-1 4.4H34z"/></g><path d="M31 28h2M23.6 27.4l-2.4-.8M40.4 27.4l2.4-.8" stroke="#7FDBFF" stroke-width="1"/><path d="M25 28.4l1.6-1.2M34.4 28.4l1.6-1.2" stroke="#fff" stroke-width=".7"/>`,
+    rubinmaske: () => `<path d="M21.4 27.4c3-2 7.2-2.2 10.6-.4 3.4-1.8 7.6-1.6 10.6.4-.6 3.4-2.8 5.2-5.4 5.2-2.2 0-3.8-1-5.2-2.6-1.4 1.6-3 2.6-5.2 2.6-2.6 0-4.8-1.8-5.4-5.2z" fill="#E0115F"/><circle cx="27.6" cy="29.2" r="1.7" fill="#fff"/><circle cx="36.4" cy="29.2" r="1.7" fill="#fff"/><circle cx="27.7" cy="29.3" r=".8" fill="#222"/><circle cx="36.3" cy="29.3" r=".8" fill="#222"/><path d="M42.4 27.2l4-3" stroke="#F5C542" stroke-width="1.2"/>`,    goldbrille: () => `<g fill="#3a2a10" opacity=".85"><rect x="23.4" y="26.4" width="7.8" height="5.6" rx="2.2"/><rect x="32.8" y="26.4" width="7.8" height="5.6" rx="2.2"/></g><g fill="none" stroke="#F5C542" stroke-width="1.1"><rect x="23.4" y="26.4" width="7.8" height="5.6" rx="2.2"/><rect x="32.8" y="26.4" width="7.8" height="5.6" rx="2.2"/><path d="M31.2 28h1.6M23.4 27.6l-2.6-.8M40.6 27.6l2.6-.8"/></g><path d="M24.8 27.8l2.2-.2M34.2 27.8l2.2-.2" stroke="#FFF3C4" stroke-width=".7"/>`,
+    funkelsprossen: () => `<g fill="#B5774F" opacity=".75">${[[24.4, 32.2], [26, 33.4], [23.8, 34], [39.6, 32.2], [38, 33.4], [40.2, 34]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r=".5"/>`).join('')}</g><g fill="#FFE27A">${[[25.2, 32.8, 0], [39, 32.8, 1.3], [24.4, 34.6, 2.1]].map(([x, y, b]) => `<path d="M${x} ${y - 1.4}l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z" opacity="${still() ? 1 : 0}">${blink(2.4, b)}</path>`).join('')}</g>`,    brille: () => `<g fill="none" stroke="#2b2b2b" stroke-width="1.1"><circle cx="27.8" cy="29.4" r="3.4"/><circle cx="36.2" cy="29.4" r="3.4"/><path d="M31.2 29h1.6M24.4 28.6l-3-1M39.6 28.6l3-1"/></g>`,
     eckig: () => `<g fill="none" stroke="#3E7CC9" stroke-width="1.2"><rect x="23.8" y="26.6" width="7.2" height="5.4" rx="1.2"/><rect x="33" y="26.6" width="7.2" height="5.4" rx="1.2"/><path d="M31 28.6h2M23.8 28.4l-2.4-.8M40.2 28.4l2.4-.8"/></g>`,
     sonnenbrille: () => `<g fill="#1d1d24"><rect x="23.4" y="26.4" width="7.8" height="5.6" rx="2.2"/><rect x="32.8" y="26.4" width="7.8" height="5.6" rx="2.2"/></g><path d="M31.2 28h1.6M23.4 27.6l-2.6-.8M40.6 27.6l2.6-.8" stroke="#1d1d24" stroke-width="1.1"/><path d="M24.8 27.8l2.2-.2M34.2 27.8l2.2-.2" stroke="#fff" stroke-width=".7" opacity=".6"/>`,
     sommersprossen: () => `<g fill="#B5774F" opacity=".75">${[[24.4, 32.2], [26, 33.4], [23.8, 34], [39.6, 32.2], [38, 33.4], [40.2, 34]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r=".5"/>`).join('')}</g>`,
@@ -151,7 +172,7 @@
     schnauz: (c) => `<path d="M26.4 33.4c1.6-1.8 3.6-2 5.6-1 2-1 4-.8 5.6 1-1.8.4-3.8.4-5.6-.2-1.8.6-3.8.6-5.6.2z" fill="${c}"/>`,
   };
   const neckArt = {
-    schal: () => `<path d="M22.6 42.6c6 3.4 12.8 3.4 18.8 0l1.4 3.8c-7 3.6-14.6 3.6-21.6 0z" fill="#E05555"/><path d="M37 45.4l1.2 10.4h-4.2l-.6-9.6z" fill="#E05555"/><path d="M34.4 52.6h3.8M34.6 54.6h3.8" stroke="#F4F4F4" stroke-width=".9"/>`,
+    rubinumhang: () => `<path d="M14 64c.6-9 4-15.4 9-18.6L32 49l9-3.6c5 3.2 8.4 9.6 9 18.6z" fill="#B0103E" opacity=".9"/><path d="M23 45.4L32 49l9-3.6" stroke="#F5C542" stroke-width="1.6" fill="none"/><circle cx="32" cy="48.6" r="1.6" fill="#F5C542"/>`,    schal: () => `<path d="M22.6 42.6c6 3.4 12.8 3.4 18.8 0l1.4 3.8c-7 3.6-14.6 3.6-21.6 0z" fill="#E05555"/><path d="M37 45.4l1.2 10.4h-4.2l-.6-9.6z" fill="#E05555"/><path d="M34.4 52.6h3.8M34.6 54.6h3.8" stroke="#F4F4F4" stroke-width=".9"/>`,
     fliege: () => `<path d="M32 44.6l-5-2.8v5.6zM32 44.6l5-2.8v5.6z" fill="#E05555"/><circle cx="32" cy="44.6" r="1.3" fill="#B53D3D"/>`,
     kette: () => `<path d="M26.4 42.4q5.6 5.6 11.2 0" stroke="#F5C542" stroke-width=".9" fill="none"/><path d="M32 45.4l1.6 1.8-1.6 2-1.6-2z" fill="#7FDBFF"/>`,
   };
@@ -163,8 +184,13 @@
     rakete: () => '<path d="M32 50c2.4 1.6 3.4 4.4 3 8.4h-6c-.4-4 .6-6.8 3-8.4z" fill="#F4F4F4"/><circle cx="32" cy="54.4" r="1.2" fill="#4FA3E0"/><path d="M29 56.6l-2 3h2.2zM35 56.6l2 3h-2.2z" fill="#E05555"/><path d="M30.6 58.6l1.4 3 1.4-3z" fill="#FFA34F"/>',
   };
   // companions sit bottom right (animals on the shoulder / in the arm), things bottom left
+  const DRAGON = (c, belly, wing) => `<g transform="translate(46 47)"><path d="M-2 -2l-5.4-3.4 1.8 4.8zM2-2l5.4-3.4-1.8 4.8z" fill="${wing}"/><path d="M-6 6.5c0-5 2.4-8 6-8s6 3 6 8z" fill="${c}"/><circle cy="-3" r="4.6" fill="${c}"/><path d="M-2.4-7l.8-2.6 1 2.2 1-2.2.8 2.6" fill="#F5C542"/><circle cx="-1.6" cy="-3.6" r=".8" fill="#2b2b2b"/><circle cx="1.6" cy="-3.6" r=".8" fill="#2b2b2b"/><path d="M-1.6-1.2q1.6 1 3.2 0" stroke="#2b2b2b" stroke-width=".5" fill="none"/><ellipse cy="3" rx="2.6" ry="2.8" fill="${belly}"/></g>`;
   const petArt = {
-    katze: () => `<g transform="translate(46 47)"><path d="M-6 6.5c0-5 2.4-8 6-8s6 3 6 8z" fill="#F0A04B"/><circle cy="-3" r="5" fill="#F0A04B"/><path d="M-4.6-6l-.4-4.4 3.2 2.6zM4.6-6l.4-4.4-3.2 2.6z" fill="#F0A04B"/><circle cx="-1.8" cy="-3.4" r=".8" fill="#2b2b2b"/><circle cx="1.8" cy="-3.4" r=".8" fill="#2b2b2b"/><path d="M-.6-1.6h1.2L0-.8z" fill="#E07A8A"/><path d="M-3.6-1.4l-2.6-.4M3.6-1.4l2.6-.4" stroke="#7a4a1a" stroke-width=".4"/></g>`,
+    babydrache: () => DRAGON('#F08A3C', '#FFE2B8', '#E05555'),
+    rubindrache: () => DRAGON('#E0115F', '#FFB3C1', '#8B0A32') + '<g transform="translate(46 47)"><path d="M4.4-4.4l3-1.4-1.6 2.8" fill="#FFA34F"/></g>',
+    phoenix: () => `<g transform="translate(47 41)"><path d="M-4 4c-4 3-4 8-1 11M0 5c-1 4 0 8 2 10M3 4c3 3 4 7 2 10" stroke="#FFA34F" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse cy="2.4" rx="3.8" ry="5" fill="#F08A3C"/><circle cy="-3" r="3.4" fill="#E05555"/><path d="M-1-6.4l1-2.6 1 2.6M1.4-6l2-1.8-.6 2.4" stroke="#F5C542" stroke-width=".9" fill="none"/><path d="M2.4-3.4l3 1-2.8 1z" fill="#F5C542"/><circle cx="1" cy="-3.8" r=".7" fill="#2b2b2b"/></g>`,
+    kristallfuchs: () => `<g transform="translate(46 47)"><path d="M-6 6.5c0-5 2.4-8 6-8s6 3 6 8z" fill="#B8F0FF"/><path d="M-5.4-6.6l1.4-3.4 2.6 3zM5.4-6.6l-1.4-3.4-2.6 3z" fill="#7FDBFF"/><path d="M-5.4-6C-5-1 -2 1.4 0 1.4S5-1 5.4-6c-1.4-1-3.4-1.6-5.4-1.6s-4 .6-5.4 1.6z" fill="#B8F0FF"/><path d="M-4.6-3C-3.6 0-1.8 1.4 0 1.4S3.6 0 4.6-3C3-2 1.6-1.6 0-1.6S-3-2-4.6-3z" fill="#fff"/><circle cx="-2" cy="-3.8" r=".7" fill="#1d3f6e"/><circle cx="2" cy="-3.8" r=".7" fill="#1d3f6e"/><circle cy=".8" r=".7" fill="#1d3f6e"/><path d="M-3 4l1.4-2 1.4 2zM1 5l1-1.6 1 1.6z" fill="#7FDBFF"/></g>`,
+    szepter: () => '<path d="M10 62l6-18" stroke="#D4A017" stroke-width="2" stroke-linecap="round"/><circle cx="16.4" cy="42.4" r="2.8" fill="#F5C542"/><path d="M16.4 38.6l2 2.2-2 2.4-2-2.4z" fill="#E0115F"/><g fill="#FFE27A"><circle cx="20.4" cy="39" r=".6"/><circle cx="13" cy="40" r=".5"/></g>',    hamster: () => `<g transform="translate(46 49)"><ellipse cy="2.6" rx="6" ry="5" fill="#E8A65A"/><ellipse cy="3.6" rx="3.8" ry="3.4" fill="#FBE3CF"/><circle cx="-3.6" cy="-1.6" r="1.6" fill="#E8A65A"/><circle cx="3.6" cy="-1.6" r="1.6" fill="#E8A65A"/><circle cx="-3.6" cy="-1.6" r=".8" fill="#F7B6C6"/><circle cx="3.6" cy="-1.6" r=".8" fill="#F7B6C6"/><circle cx="-1.8" cy="1" r=".75" fill="#2b2b2b"/><circle cx="1.8" cy="1" r=".75" fill="#2b2b2b"/><ellipse cy="2.4" rx=".7" ry=".5" fill="#E07A8A"/><circle cx="-3.4" cy="3" r="1.1" fill="#F7B6C6" opacity=".6"/><circle cx="3.4" cy="3" r="1.1" fill="#F7B6C6" opacity=".6"/></g>`,    katze: () => `<g transform="translate(46 47)"><path d="M-6 6.5c0-5 2.4-8 6-8s6 3 6 8z" fill="#F0A04B"/><circle cy="-3" r="5" fill="#F0A04B"/><path d="M-4.6-6l-.4-4.4 3.2 2.6zM4.6-6l.4-4.4-3.2 2.6z" fill="#F0A04B"/><circle cx="-1.8" cy="-3.4" r=".8" fill="#2b2b2b"/><circle cx="1.8" cy="-3.4" r=".8" fill="#2b2b2b"/><path d="M-.6-1.6h1.2L0-.8z" fill="#E07A8A"/><path d="M-3.6-1.4l-2.6-.4M3.6-1.4l2.6-.4" stroke="#7a4a1a" stroke-width=".4"/></g>`,
     hund: () => `<g transform="translate(46 47)"><path d="M-6 6.5c0-5 2.4-8 6-8s6 3 6 8z" fill="#C9935B"/><circle cy="-3" r="5" fill="#C9935B"/><ellipse cx="-4.8" cy="-2.6" rx="1.8" ry="3.4" fill="#8B5A2B"/><ellipse cx="4.8" cy="-2.6" rx="1.8" ry="3.4" fill="#8B5A2B"/><circle cx="-1.8" cy="-3.6" r=".8" fill="#2b2b2b"/><circle cx="1.8" cy="-3.6" r=".8" fill="#2b2b2b"/><ellipse cy="-1.4" rx="1.2" ry=".9" fill="#2b2b2b"/></g>`,
     hase: () => `<g transform="translate(46 48)"><ellipse cy="3" rx="5.6" ry="4.4" fill="#F4F4F4"/><circle cy="-2.4" r="4.4" fill="#F4F4F4"/><ellipse cx="-1.8" cy="-8.6" rx="1.4" ry="3.6" fill="#F4F4F4"/><ellipse cx="1.8" cy="-8.6" rx="1.4" ry="3.6" fill="#F4F4F4"/><ellipse cx="-1.8" cy="-8.4" rx=".6" ry="2.4" fill="#F7B6C6"/><ellipse cx="1.8" cy="-8.4" rx=".6" ry="2.4" fill="#F7B6C6"/><circle cx="-1.5" cy="-2.6" r=".7" fill="#2b2b2b"/><circle cx="1.5" cy="-2.6" r=".7" fill="#2b2b2b"/><circle cy="-1" r=".6" fill="#E07A8A"/></g>`,
     papagei: () => `<g transform="translate(47 40)"><ellipse cy="3" rx="3.6" ry="5.4" fill="#4FBF6B"/><circle cy="-3" r="3.6" fill="#E05555"/><path d="M2.4-3.4l3 1.4-2.8 1z" fill="#F5C542"/><circle cx="1" cy="-3.8" r=".7" fill="#2b2b2b"/><path d="M-2 6l-1.2 5M0 7l0 5" stroke="#3E7CC9" stroke-width="1.6" stroke-linecap="round"/><path d="M-3.4 1.4c-1.4 2-1.4 4.4 0 6" stroke="#2F9A50" stroke-width="1.4" fill="none"/></g>`,
@@ -180,11 +206,41 @@
     gitarre: () => '<g transform="rotate(-35 13 54)"><path d="M13 30v14" stroke="#7A4A22" stroke-width="2"/><rect x="11.4" y="27.6" width="3.2" height="3.4" rx=".6" fill="#5A3518"/><circle cx="13" cy="48" r="4.4" fill="#E0A84F"/><circle cx="13" cy="53.4" r="5.4" fill="#E0A84F"/><circle cx="13" cy="51" r="1.4" fill="#5A3518"/></g>',
     zauberstab: () => '<path d="M8 60l10-14" stroke="#3a2a1a" stroke-width="1.6" stroke-linecap="round"/><path d="M18.6 41.4l1 2.6 2.8.4-2.1 1.9.6 2.8-2.3-1.4-2.4 1.4.6-2.8-2.1-1.9 2.8-.4z" fill="#F5C542"/><g fill="#fff"><circle cx="23" cy="40" r=".6"/><circle cx="14.6" cy="42" r=".5"/><circle cx="21" cy="50" r=".5"/></g>',
   };
+  // level effects (drawn last, inside the picture)
+  const fxArt = {
+    sternchen: () => `<g fill="#FFE27A">${[[9, 14, 1.4, 0], [55, 12, 1.2, .8], [57, 44, 1.3, 1.6], [7, 46, 1.1, 2.3], [32, 4, 1, 3]].map(([x, y, r, b]) => `<path d="${star4(x, y, r)}" opacity="${still() ? .8 : 0}">${blink(3, b)}</path>`).join('')}</g>`,
+    leuchtaugen: () => `<g fill="#FFE27A" opacity="${still() ? .5 : 0}"><circle cx="27.8" cy="29.4" r="3"/><circle cx="36.2" cy="29.4" r="3"/>${blink(2.6, 0)}</g>`,
+    goldglanz: () => `<defs><linearGradient id="gg" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#FFF4B8" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><rect x="-30" y="-10" width="20" height="90" fill="url(#gg)" transform="rotate(25 32 32)">${still() ? '' : '<animate attributeName="x" values="-40;90" dur="3.4s" repeatCount="indefinite"/>'}</rect>`,
+    rubinsplitter: () => `<g>${[0, 120, 240].map((d) => `<path d="M32 4.6l1.6 2.2-1.6 2.2-1.6-2.2z" fill="#FF4D6D" transform="rotate(${d} 32 32)"/>`).join('')}${still() ? '' : '<animateTransform attributeName="transform" type="rotate" from="0 32 32" to="360 32 32" dur="9s" repeatCount="indefinite"/>'}</g>`,
+    feuerfunken: () => `<g fill="#FFA34F">${[[14, 0], [24, .7], [40, 1.4], [50, 2.1], [32, 2.8]].map(([x, b]) => `<circle cx="${x}" cy="60" r="1"${still() ? ' opacity=".6"' : ''}>${still() ? '' : `<animate attributeName="cy" values="64;40" dur="2.8s" begin="${b}s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0" dur="2.8s" begin="${b}s" repeatCount="indefinite"/>`}</circle>`).join('')}</g>`,
+    rubinglanz: () => `<circle cx="32" cy="32" r="30" fill="none" stroke="#FF4D6D" stroke-width="3" opacity=".45">${still() ? '' : '<animate attributeName="opacity" values=".15;.6;.15" dur="2.6s" repeatCount="indefinite"/>'}</circle>`,
+    herzfunken: () => `<g fill="#FF7AA8">${[[10, 18, 0], [54, 16, .9], [52, 48, 1.8], [12, 46, 2.6]].map(([x, y, b]) => `<path transform="translate(${x} ${y})" d="M0 2.4C-3.2-.8-1.9-3.7 0-1.9 1.9-3.7 3.2-.8 0 2.4z" opacity="${still() ? .8 : 0}">${blink(3.2, b)}</path>`).join('')}</g>`,
+    schneeflocken: () => `<g stroke="#fff" stroke-width=".7">${[[12, 0], [26, 1.2], [40, .5], [52, 1.9]].map(([x, b]) => `<g><path d="M${x} -2v4M${x - 1.8} -1l3.6 2M${x - 1.8} 1l3.6-2"/>${still() ? '' : `<animateTransform attributeName="transform" type="translate" values="0 0;0 66" dur="4.4s" begin="${b}s" repeatCount="indefinite"/>`}</g>`).join('')}</g>`,
+  };
+  // big effects: drawn in their own layer that reaches up to ~20 % beyond the round picture (viewBox -6.4 … 70.4)
+  const fxbArt = {
+    silberaura: () => `<circle cx="32" cy="32" r="34.4" fill="none" stroke="#E2E6EB" stroke-width="2.4" opacity=".8">${still() ? '' : '<animate attributeName="r" values="33.6;35.8;33.6" dur="2.4s" repeatCount="indefinite"/><animate attributeName="opacity" values=".9;.35;.9" dur="2.4s" repeatCount="indefinite"/>'}</circle><circle cx="32" cy="32" r="36.6" fill="none" stroke="#fff" stroke-width=".6" stroke-dasharray="2 4" opacity=".7"/>`,
+    gluehwuermchen: () => [0, 1.6, 3.2, 4.8].map((b, i) => `<circle r="1.3" fill="#E9FF7A" opacity=".95" style="filter:drop-shadow(0 0 2px #E9FF7A)" cx="${still() ? 32 + 35 * Math.cos(i * 1.6) : 0}" cy="${still() ? 32 + 35 * Math.sin(i * 1.6) : 0}">${still() ? '' : `<animateMotion dur="${6.4 + i}s" begin="-${b}s" repeatCount="indefinite" path="M32 -2.6a34.6 34.6 0 1 1 -.1 0z"/>`}</circle>`).join(''),
+    goldfluegel: () => { const wing = (dir) => `<g transform="translate(${dir < 0 ? 6 : 58} 34) scale(${dir} 1)"><g>${still() ? '' : '<animateTransform attributeName="transform" type="rotate" values="0;-12;0" dur="1.8s" repeatCount="indefinite"/>'}<path d="M0 0C-4-6-10-10-12.6-9.6-11-6.4-11.6-3.6-12.4-1.6-10.4-1-10.6 1-11.6 3-9.4 3.2-8.6 4.6-8.8 6.6-5 6.4-2 4 0 0z" fill="#F5C542" stroke="#B8860B" stroke-width=".5"/><path d="M-2-.6c-2.6-3-5.6-5-8.6-5.6M-2.4.8c-2.6-1-5.4-1.2-8.2-.8M-2 2.4c-2 .6-4 1.6-5.6 3" stroke="#FFF4B8" stroke-width=".6" fill="none"/></g></g>`; return wing(-1) + wing(1); },
+    goldregen: () => `<g fill="#FFD84F">${[[4, 0], [16, .8], [30, .3], [44, 1.2], [58, .6], [24, 1.6], [50, 2]].map(([x, b]) => `<circle cx="${x}" cy="${still() ? 10 + x : -4}" r="1.1"${still() ? ' opacity=".7"' : ''}>${still() ? '' : `<animate attributeName="cy" values="-6;70" dur="2.6s" begin="${b}s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" dur="2.6s" begin="${b}s" repeatCount="indefinite"/>`}</circle>`).join('')}</g>`,
+    flammenaura: () => `<g>${[...Array(12)].map((_, i) => { const a = i * 30; return `<path d="M32 -3.2c2 2.4 3 4.6 2.4 7-.4 1.6-1.4 2.6-2.4 2.6s-2-1-2.4-2.6c-.6-2.4.4-4.6 2.4-7z" fill="${i % 2 ? '#FF6B1A' : '#FFA34F'}" transform="rotate(${a} 32 32)">${still() ? '' : `<animateTransform attributeName="transform" type="rotate" values="${a} 32 32;${a + 4} 32 32;${a} 32 32" dur="${0.8 + (i % 3) * 0.2}s" repeatCount="indefinite"/>`}</path>`; }).join('')}</g><circle cx="32" cy="32" r="33" fill="none" stroke="#FF4D6D" stroke-width="1.4" opacity=".7"/>`,
+    komet: () => `<g>${still() ? '' : '<animateTransform attributeName="transform" type="rotate" from="0 32 32" to="360 32 32" dur="4.6s" repeatCount="indefinite"/>'}<path d="M32 -3.6a35.6 35.6 0 0 1 22 7.6" stroke="#FFE27A" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".55"/><circle cx="55" cy="4.8" r="2.4" fill="#fff" style="filter:drop-shadow(0 0 3px #FFE27A)"/></g>`,
+    blitzgewitter: () => `<g fill="#FFE27A">${[[-3, 6, 0], [62, 2, .7], [64, 50, 1.4], [-4, 52, 2.1]].map(([x, y, b]) => `<path transform="translate(${x} ${y})" d="M3 0L0 7h3l-1.4 6 5-8.4H3.4L5.4 0z" opacity="${still() ? .8 : 0}">${blink(2.8, b)}</path>`).join('')}</g>`,
+    galaxie: () => `<g>${still() ? '' : '<animateTransform attributeName="transform" type="rotate" from="0 32 32" to="-360 32 32" dur="24s" repeatCount="indefinite"/>'}${[...Array(18)].map((_, i) => { const a = i * 20 * Math.PI / 180; const r = 33 + (i % 3) * 1.6; return `<circle cx="${(32 + Math.cos(a) * r).toFixed(1)}" cy="${(32 + Math.sin(a) * r).toFixed(1)}" r="${i % 3 ? .7 : 1.2}" fill="${['#C9B8FF', '#7FDBFF', '#fff'][i % 3]}"/>`; }).join('')}</g>`,
+  };
   // costumes: [over the body, over the head]
   const MASK = (c, eye) => `<path d="M20.6 26.4c3.2-1.6 7.6-1.6 11.4.4 3.8-2 8.2-2 11.4-.4-.4 3.6-2.6 6-5.4 6-2.4 0-4.2-1.2-6-3-1.8 1.8-3.6 3-6 3-2.8 0-5-2.4-5.4-6z" fill="${c}"/><circle cx="27.6" cy="29.2" r="1.9" fill="#fff"/><circle cx="36.4" cy="29.2" r="1.9" fill="#fff"/><circle cx="27.7" cy="29.3" r=".9" fill="${eye || '#222'}"/><circle cx="36.3" cy="29.3" r=".9" fill="${eye || '#222'}"/>`;
   const SUIT = (body, c) => `<path d="${body}" fill="${c}"/>`;
   const CAPE = (c) => `<path d="M14 64c1-9 4-15 8.6-18.6L32 50l9.4-4.6C46 49 49 55 50 64z" fill="${c}" opacity=".9"/>`;
   const costArt = {
+    rennfahrer: [(b) => SUIT(b, '#E05555') + '<path d="M28 46v18M36 46v18" stroke="#fff" stroke-width="2.2"/><circle cx="32" cy="55" r="3.6" fill="#fff"/><path d="M31 53.4v3.4M33 53.4v3.4" stroke="#2E3138" stroke-width="1"/>',
+      () => '<path d="M18.4 31c-1.2-12.4 5.4-20.4 13.6-20.4S46.8 18.6 45.6 31c-.4 3-2.4 4.4-4.6 4.4H23c-2.2 0-4.2-1.4-4.6-4.4z" fill="#E05555"/><path d="M21.6 25.4h20.8c.4 3.4-.2 6-1.6 7.2H23.2c-1.4-1.2-2-3.8-1.6-7.2z" fill="#2E3138" opacity=".85"/><path d="M23.4 27h7" stroke="#fff" stroke-width="1" opacity=".5"/><path d="M26 12.4c3.6-1.4 8.4-1.4 12 0" stroke="#fff" stroke-width="2"/>'],
+    goldritter: [(b) => SUIT(b, '#D4A017') + '<path d="M32 49v12M27 54h10" stroke="#fff" stroke-width="2.2"/><path d="M20 47.4c7.4 2.6 16.6 2.6 24 0" stroke="#FFE27A" stroke-width="1.6" fill="none"/>',
+      () => '<path d="M18.6 33c-1-13.6 5.4-21.6 13.4-21.6S46.4 19.4 45.4 33l-3.6.8c.4-2.8.4-5 .2-6.6H22c-.2 1.6-.2 3.8.2 6.6z" fill="#F5C542"/><path d="M22 27.2h20M32 11.6v9" stroke="#B8860B" stroke-width="1.2"/><path d="M30.6 6.4c3.8.6 5.8 2.8 5.8 5.2h-5.2z" fill="#4FA3E0"/>'],
+    eiskoenig: [(b) => SUIT(b, '#7FDBFF') + '<path d="M32 46v18" stroke="#fff" stroke-width="2"/><g fill="#fff">' + [[26, 52], [38, 52], [26, 58], [38, 58]].map(([x, y]) => `<path d="M${x} ${y - 1.6}v3.2M${x - 1.4} ${y - .8}l2.8 1.6M${x - 1.4} ${y + .8}l2.8-1.6" stroke="#fff" stroke-width=".6"/>`).join('') + '</g>',
+      () => '<path d="M23 17.6l1-8 3.4 4.2L32 6l4.6 7.8 3.4-4.2 1 8z" fill="#B8F0FF" stroke="#7FDBFF" stroke-width=".6"/><path d="M23 17.6h18" stroke="#7FDBFF" stroke-width="1.6"/><circle cx="32" cy="12" r="1.2" fill="#fff"/>'],
+    feuertitan: [(b) => SUIT(b, '#8B0A32') + '<path d="M22 50c4-2 8 2 10-1 2 3 6-1 10 1-1 6-5 9-10 9s-9-3-10-9z" fill="#FFA34F" opacity=".85"/><path d="M27 52c2-1 4 1 5 0 1 1 3-1 5 0-.6 3-2.4 4.4-5 4.4s-4.4-1.4-5-4.4z" fill="#FFE27A"/>',
+      () => '<path d="M20.6 22c0-3 1.4-5.6 2.6-7.4.4 2 1.2 3 2 3.4.2-4 2-7.6 4-9.6.2 2.4 1.2 4.4 2.8 5.4.8-2.6 2.6-4.6 4.4-5.6-.4 2.6 0 4.6 1.4 6 .8-1.4 1.8-2.2 2.8-2.6-.2 2.2.2 4.2.8 5.8.6 1.2.8 2.6.8 4.6z" fill="#FF6B1A"/><path d="M24.6 21.6c.4-2.4 1.6-4.4 2.8-5.6.4 1.6 1 2.6 1.8 3 .4-2.6 1.6-4.6 2.8-5.8.6 2 1.4 3.4 2.6 4.2.4-1.4 1.2-2.4 2-2.8.2 2.2 1 4.6 1 7z" fill="#FFE27A"/>'],
     astro: [(b) => SUIT(b, '#E8EEF5') + '<rect x="27.4" y="51" width="9.2" height="6" rx="1.2" fill="#4FA3E0"/><circle cx="29.4" cy="54" r=".9" fill="#E06B6B"/><circle cx="32" cy="54" r=".9" fill="#F5C542"/><circle cx="34.6" cy="54" r=".9" fill="#4FE08A"/><path d="M20 47.6c7.4 3 16.6 3 24 0" stroke="#C9D1D9" stroke-width="2" fill="none"/>',
       () => '<circle cx="32" cy="28" r="17" fill="rgba(170,215,255,.2)" stroke="#E8EEF5" stroke-width="3"/><path d="M22 18c2.6-3.4 6.4-5.2 10-5.4" stroke="#fff" stroke-width="1.6" opacity=".7" fill="none" stroke-linecap="round"/><path d="M44 14.4l3.4-4.6" stroke="#E8EEF5" stroke-width="1.4"/><circle cx="47.8" cy="9.4" r="1.6" fill="#E06B6B"/>'],
     mars: [(b) => SUIT(b, '#F08A3C') + '<rect x="27.4" y="51" width="9.2" height="6" rx="1.2" fill="#2E3138"/><path d="M29 54h6" stroke="#4FE08A" stroke-width="1.2"/><path d="M20 47.6c7.4 3 16.6 3 24 0" stroke="#C9D1D9" stroke-width="2.2" fill="none"/>',
@@ -244,16 +300,28 @@
     if (costume) s += costume[1]();
     if (o.head !== '0') s += headArt[o.head]();
     if (o.pet !== '0') s += petArt[o.pet]();
+    if (o.fx !== '0') s += fxArt[o.fx]();
     return `<svg viewBox="${view || '0 0 64 64'}" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
+  };
+  // the big-effect layer around a picture: put it inside a position:relative box of the picture's size
+  const outer = (c) => {
+    const o = norm(parse(c)); if (o.fxb === '0' || !fxbArt[o.fxb]) return '';
+    return `<span class="fpfxb" aria-hidden="true" style="position:absolute;inset:-10%;pointer-events:none;z-index:3"><svg viewBox="-6.4 -6.4 76.8 76.8" width="100%" height="100%" style="overflow:visible">${fxbArt[o.fxb]()}</svg></span>`;
   };
 
   // ---------------------------------------------------------------- builder
   const T = {
     de: { sk: 'Hautfarbe', hc: 'Haarfarbe', fig: 'Person', hair: 'Frisur', rnd: 'Zufall', none: 'Nichts', shirt: 'T-Shirt-Farbe', motif: 'Motiv', neck: 'Am Hals',
       c: { porzellan: 'Porzellan', hell: 'Hell', pfirsich: 'Pfirsich', mittel: 'Mittel', oliv: 'Oliv', karamell: 'Karamell', braun: 'Braun', tief: 'Dunkelbraun', espresso: 'Espresso', platin: 'Platinblond', blond: 'Blond', rotblond: 'Rotblond', hellbraun: 'Hellbraun', schwarz: 'Schwarz', rot: 'Rot', grau: 'Grau', rosa: 'Rosa', blau: 'Blau', lila: 'Lila', gruen: 'Grün', weiss: 'Weiss', orange: 'Orange', gelb: 'Gelb', tuerkis: 'Türkis', pink: 'Pink' },
-      tabs: { head: 'Kopf', face: 'Gesicht', cloth: 'Kleidung', pet: 'Begleiter', bg: 'Hintergrund', cost: 'Verkleidung' },
+      tabs: { head: 'Kopf', face: 'Gesicht', cloth: 'Kleidung', pet: 'Begleiter', bg: 'Hintergrund', cost: 'Verkleidung', fx: '✨ Effekte' }, fxNone: 'Effekte schaltest du mit Levels frei – ab Level 5 geht es los!', small: 'Kleine Effekte', big: 'Grosse Effekte', lock: 'Mit Levels freigeschaltet',
       costHint: 'Verkleidungen liegen über der Person – Hintergrund und Begleiter bleiben.',
-      n: { m: 'Mädchen', j: 'Junge', f: 'Frau', h: 'Mann', g: 'Grosi', p: 'Grosspapi',
+      n: { skaterhelm: 'Skater-Helm', edelkrone: 'Edelstein-Krone', rubinkrone: 'Rubin-Krone', diamantbrille: 'Diamant-Brille', rubinmaske: 'Rubin-Maske', rubinumhang: 'Rubin-Umhang',
+        babydrache: 'Baby-Drache', phoenix: 'Phönix-Küken', kristallfuchs: 'Kristall-Fuchs', rubindrache: 'Rubin-Drache', szepter: 'Szepter', comic: 'Comic-Explosion', sonnenuntergang: 'Sonnenuntergang',
+        kristallhoehle: 'Kristallhöhle', lavagalaxie: 'Lava-Galaxie', rennfahrer: 'Rennfahrer', goldritter: 'Goldritter', eiskoenig: 'Eiskönig', feuertitan: 'Feuer-Titan',
+        leuchtaugen: 'Leuchtende Augen', goldglanz: 'Goldglanz', rubinsplitter: 'Rubin-Splitter', feuerfunken: 'Feuerfunken', rubinglanz: 'Rubin-Glanz', herzfunken: 'Herzfunken', schneeflocken: 'Schneeflocken',
+        silberaura: 'Silber-Aura', gluehwuermchen: 'Glühwürmchen', goldfluegel: 'Goldflügel', goldregen: 'Goldregen', flammenaura: 'Flammen-Aura', komet: 'Mini-Komet', blitzgewitter: 'Blitzgewitter', galaxie: 'Galaxie',
+        levelcap: 'Level-Cap', goldbrille: 'Goldene Sonnenbrille', funkelsprossen: 'Funkelnde Sommersprossen', hamster: 'Hamster', sternchen: 'Funkelsterne', fx: 'Effekte',
+        m: 'Mädchen', j: 'Junge', f: 'Frau', h: 'Mann', g: 'Grosi', p: 'Grosspapi',
         kurz: 'Kurz', seite: 'Seitenscheitel', stachel: 'Stachelig', wuschel: 'Wuschelkopf', undercut: 'Undercut', irokese: 'Irokese', lockenkurz: 'Kurze Locken', glatze: 'Glatze', lang: 'Lang', pony: 'Lang mit Pony', zoepfe: 'Zöpfe', pferd: 'Pferdeschwanz', dutt: 'Dutt', buns: 'Space-Buns', bob: 'Bob', locken: 'Lange Locken', afro: 'Afro', rastas: 'Rastas',
         cap: 'Cap', muetze: 'Bommelmütze', krone: 'Krone', blumen: 'Blumenkranz', katze: 'Katze', hase: 'Hase', baer: 'Bärenohren', einhorn: 'Einhorn', party: 'Partyhut', kopfhoerer: 'Kopfhörer', stirnband: 'Stirnband', schleife: 'Schleife',
         brille: 'Runde Brille', eckig: 'Eckige Brille', sonnenbrille: 'Sonnenbrille', sommersprossen: 'Sommersprossen', glitzer: 'Glitzer', pflaster: 'Pflaster', tiger: 'Tiger-Schminke', schmetterling: 'Schmetterling', bart: 'Bart', schnauz: 'Schnauz',
@@ -263,9 +331,15 @@
         astro: 'Astronaut', mars: 'Mars-Anzug', sternenkraft: 'Held Sternenkraft', funkenflug: 'Held Funkenflug', mondfee: 'Heldin Mondfee', turbo: 'Held Turbo', sternschnuppe: 'Heldin Sternschnuppe', ninja: 'Ninja', ritter: 'Ritter', pirat: 'Pirat', zauberer: 'Zauberer', prinzessin: 'Prinzessin', prinz: 'Prinz', dino: 'Dino', feuerwehr: 'Feuerwehr' } },
     en: { sk: 'Skin tone', hc: 'Hair colour', fig: 'Person', hair: 'Hair', rnd: 'Random', none: 'None', shirt: 'T-shirt colour', motif: 'Motif', neck: 'Around the neck',
       c: { porzellan: 'Porcelain', hell: 'Light', pfirsich: 'Peach', mittel: 'Medium', oliv: 'Olive', karamell: 'Caramel', braun: 'Brown', tief: 'Dark brown', espresso: 'Espresso', platin: 'Platinum blonde', blond: 'Blonde', rotblond: 'Strawberry blonde', hellbraun: 'Light brown', schwarz: 'Black', rot: 'Red', grau: 'Grey', rosa: 'Pink', blau: 'Blue', lila: 'Purple', gruen: 'Green', weiss: 'White', orange: 'Orange', gelb: 'Yellow', tuerkis: 'Turquoise', pink: 'Pink' },
-      tabs: { head: 'Head', face: 'Face', cloth: 'Clothes', pet: 'Buddy', bg: 'Background', cost: 'Costume' },
+      tabs: { head: 'Head', face: 'Face', cloth: 'Clothes', pet: 'Buddy', bg: 'Background', cost: 'Costume', fx: '✨ Effects' }, fxNone: 'Effects are unlocked with levels – it starts at level 5!', small: 'Small effects', big: 'Big effects', lock: 'Unlocked with levels',
       costHint: 'Costumes go over the person – background and buddy stay.',
-      n: { m: 'Girl', j: 'Boy', f: 'Woman', h: 'Man', g: 'Grandma', p: 'Grandpa',
+      n: { skaterhelm: 'Skater helmet', edelkrone: 'Jewel crown', rubinkrone: 'Ruby crown', diamantbrille: 'Diamond glasses', rubinmaske: 'Ruby mask', rubinumhang: 'Ruby cape',
+        babydrache: 'Baby dragon', phoenix: 'Phoenix chick', kristallfuchs: 'Crystal fox', rubindrache: 'Ruby dragon', szepter: 'Sceptre', comic: 'Comic burst', sonnenuntergang: 'Sunset',
+        kristallhoehle: 'Crystal cave', lavagalaxie: 'Lava galaxy', rennfahrer: 'Racing driver', goldritter: 'Golden knight', eiskoenig: 'Ice king', feuertitan: 'Fire titan',
+        leuchtaugen: 'Glowing eyes', goldglanz: 'Golden shine', rubinsplitter: 'Ruby shards', feuerfunken: 'Fire sparks', rubinglanz: 'Ruby glow', herzfunken: 'Heart sparks', schneeflocken: 'Snowflakes',
+        silberaura: 'Silver aura', gluehwuermchen: 'Fireflies', goldfluegel: 'Golden wings', goldregen: 'Golden rain', flammenaura: 'Flame aura', komet: 'Mini comet', blitzgewitter: 'Thunderstorm', galaxie: 'Galaxy',
+        levelcap: 'Level cap', goldbrille: 'Golden sunglasses', funkelsprossen: 'Sparkling freckles', hamster: 'Hamster', sternchen: 'Sparkle stars', fx: 'Effects',
+        m: 'Girl', j: 'Boy', f: 'Woman', h: 'Man', g: 'Grandma', p: 'Grandpa',
         kurz: 'Short', seite: 'Side parting', stachel: 'Spiky', wuschel: 'Messy', undercut: 'Undercut', irokese: 'Mohawk', lockenkurz: 'Short curls', glatze: 'Bald', lang: 'Long', pony: 'Long with fringe', zoepfe: 'Pigtails', pferd: 'Ponytail', dutt: 'Bun', buns: 'Space buns', bob: 'Bob', locken: 'Long curls', afro: 'Afro', rastas: 'Dreadlocks',
         cap: 'Cap', muetze: 'Bobble hat', krone: 'Crown', blumen: 'Flower crown', katze: 'Cat', hase: 'Bunny', baer: 'Bear ears', einhorn: 'Unicorn', party: 'Party hat', kopfhoerer: 'Headphones', stirnband: 'Headband', schleife: 'Bow',
         brille: 'Round glasses', eckig: 'Square glasses', sonnenbrille: 'Sunglasses', sommersprossen: 'Freckles', glitzer: 'Glitter', pflaster: 'Plaster', tiger: 'Tiger face paint', schmetterling: 'Butterfly', bart: 'Beard', schnauz: 'Moustache',
@@ -276,24 +350,27 @@
   };
   Object.assign(T.de.n, { 'head:katze': 'Katzenohren', 'head:hase': 'Hasenohren', 'pet:katze': 'Katze', 'pet:hase': 'Hase', 'pet:fussball': 'Fussball' });
   Object.assign(T.en.n, { 'head:katze': 'Cat ears', 'head:hase': 'Bunny ears', 'pet:katze': 'Cat', 'pet:hase': 'Bunny', 'pet:fussball': 'Football' });
-  const TABS = ['head', 'face', 'cloth', 'pet', 'bg', 'cost'];
+  const TABS = ['head', 'face', 'cloth', 'pet', 'bg', 'cost', 'fx'];
   // builder html: buttons carry data-avb="part|value" (or data-avtab / data-avrnd); the host keeps code and tab
-  const builder = (c, personColor, lang, tab) => {
+  const builder = (c, personColor, lang, tab, unlocked) => {
+    const mine = new Set(unlocked || []); const ok = (v) => !LOCKED.includes(v) || mine.has(v);
     const t = T[lang === 'en' ? 'en' : 'de']; const o = parse(c); const cur = code(norm(o)); const n = norm(o); const tb = TABS.includes(tab) ? tab : 'head';
     const ZOOM = { hair: '10 0 44 44', head: '10 0 44 44', face: '14 10 36 36', neck: '12 30 40 34', motif: '12 36 40 28' };
     const pic = (cc, on, key, attr) => `<button class="avo${on ? ' on' : ''}" data-avb="${attr}" title="${esc(t.n[attr.replace('|', ':')] || t.n[key] || key)}"><span class="avs">${svg(cc, personColor, ZOOM[attr.split('|')[0]])}</span></button>`;
     const dot = (col, on, key, attr) => `<button class="avd${on ? ' on' : ''}" data-avb="${attr}" title="${esc(t.c[key] || key)}" style="background:${col}"></button>`;
     const none = (part) => `<button class="avo txt${n[part] === '0' ? ' on' : ''}" data-avb="${part}|0">${esc(t.none)}</button>`;
     const row = (label, html) => `<div class="avr">${label ? `<b>${esc(label)}</b>` : ''}<div class="avg">${html}</div></div>`;
-    const opts = (part, list) => none(part) + list.map((v) => pic(set(cur, part, v), n[part] === v, v, `${part}|${v}`)).join('');
+    const opts = (part, list) => none(part) + list.filter(ok).map((v) => pic(set(cur, part, v), n[part] === v, v, `${part}|${v}`) .replace('class="avo', LOCKED.includes(v) ? 'class="avo lvx' : 'class="avo')).join('');
     let body = '';
     if (tb === 'head') body = row('', opts('head', HEAD));
     if (tb === 'face') body = row('', opts('face', FACE.filter((f) => !BEARD.includes(f) || n.fig === 'h' || n.fig === 'p')));
     if (tb === 'cloth') body = row(t.shirt, Object.entries(SHIRT).map(([k, col]) => dot(col, n.shirt === k, k, `shirt|${k}`)).join('')) + row(t.motif, opts('motif', MOTIF)) + row(t.neck, opts('neck', NECK));
     if (tb === 'pet') body = row('', opts('pet', PET));
     if (tb === 'bg') body = row('', opts('bg', BG));
+    const bigPic = (v) => `<button class="avo lvx${n.fxb === v ? ' on' : ''}" data-avb="fxb|${v}" title="${esc(t.n[v] || v)}"><span class="fxw"><span class="avs">${svg(cur, personColor)}</span>${outer(set(cur, 'fxb', v))}</span></button>`;
+    if (tb === 'fx') body = FX.some(ok) || FXB.some(ok) ? (FX.some(ok) ? row(t.small, opts('fx', FX)) : '') + (FXB.some(ok) ? row(t.big, `<button class="avo txt${n.fxb === '0' ? ' on' : ''}" data-avb="fxb|0">${esc(t.none)}</button>` + FXB.filter(ok).map(bigPic).join('')) : '') : `<div class="avh">${esc(t.fxNone)}</div>`;
     if (tb === 'cost') body = `<div class="avh">${esc(t.costHint)}</div>` + row('', opts('cost', COST));
-    return `<div class="avb"><div class="avp"><span class="avs big">${svg(cur, personColor)}</span><button class="avrnd" data-avrnd><span aria-hidden="true">🎲</span> ${esc(t.rnd)}</button></div><div class="avc">
+    return `<div class="avb"><div class="avp"><span class="fxw big"><span class="avs big">${svg(cur, personColor)}</span>${outer(cur)}</span><button class="avrnd" data-avrnd><span aria-hidden="true">🎲</span> ${esc(t.rnd)}</button></div><div class="avc">
       ${row(t.sk, Object.entries(SK).map(([k, col]) => dot(col, n.sk === k, k, `sk|${k}`)).join(''))}
       ${row(t.hc, Object.entries(HC).map(([k, col]) => dot(col[0], n.hc === k, k, `hc|${k}`)).join(''))}
       ${row(t.fig, FIG.map((f) => pic(set(cur, 'fig', f), n.fig === f, f, `fig|${f}`)).join(''))}
@@ -310,9 +387,12 @@
 .avd{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0}.avd.on{outline:3px solid var(--fp-accent,#69C350);outline-offset:2px}
 .avt{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;border-top:1px solid var(--fp-line,#333);padding-top:10px}.avt button{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#2b2b2b);color:var(--fp-text2,#ccc);font:inherit;font-size:13px;cursor:pointer}
 .avt button.on{border-color:var(--fp-accent,#69C350);color:var(--fp-accent,#69C350);font-weight:600}
+.fxw{position:relative;display:inline-flex;line-height:0}.avo .fxw .avs,.fxw .avs{display:inline-flex}
+.avo.lvx{border-color:rgba(245,197,66,.55);box-shadow:0 0 8px rgba(245,197,66,.45)}.avo.lvx.on{border-color:var(--fp-accent,#69C350)}
 .avrnd{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#2b2b2b);color:var(--fp-text,#eee);font:inherit;font-size:13px;cursor:pointer}`;
 
-  window.FPAV = { parse, norm, code, set, from1, random, svg, builder, css, FIELDS, LISTS, OPTIONAL, COST_HAT, COST_MASK, GLASSES, BEARD, SK, HC, KID };
+  const label = (id, lang) => T[lang === 'en' ? 'en' : 'de'].n[id] || id;
+  window.FPAV = { outer, FXB, label, LOCKED, parse, norm, code, set, from1, random, svg, builder, css, FIELDS, LISTS, OPTIONAL, COST_HAT, COST_MASK, GLASSES, BEARD, SK, HC, KID };
 })();
 
 (() => {
@@ -412,8 +492,11 @@ const AWCSS = `.crown{position:absolute;top:-13px;left:0;right:0;margin:0 auto;w
 @keyframes fpshine{0%,60%{background-position:150% 0}100%{background-position:-60% 0}}
 @media (prefers-reduced-motion:reduce){.ring[class*=fr-]::after{animation:none;display:none}}
 .md{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 32% 28%,color-mix(in srgb,var(--mc) 55%,#fff) 0%,var(--mc) 45%,color-mix(in srgb,var(--mc) 60%,#000) 100%);border:1px solid color-mix(in srgb,var(--mc) 70%,#fff);color:#1b1b1b;display:inline-flex;align-items:center;justify-content:center;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.45)}.md ha-icon{--mdc-icon-size:13px}
-.ring{position:relative;width:48px;height:48px;flex:none}
-.ring .ava{display:block;width:48px;height:48px;border-radius:50%;overflow:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
+.ring{position:relative;width:48px;height:48px;flex:none}.ring .lvb{position:absolute;right:-4px;bottom:-3px;z-index:4;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;border-radius:11px;border:2px solid var(--fp-bg2,#1e1e1e);background:var(--lc);color:#1b1b1b;font:800 11px/18px -apple-system,Segoe UI,Roboto,sans-serif;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.ring .lvb.t-ruby{color:#fff}.ring .lvb.glow{animation:fplvglow 1.6s ease-in-out infinite;box-shadow:0 0 10px var(--lc),0 0 18px var(--lc)}.ring .lvb.fade{box-shadow:0 0 calc(var(--g) * 14px) var(--lc)}
+@keyframes fplvglow{0%,100%{box-shadow:0 0 6px var(--lc),0 0 10px var(--lc);transform:scale(1)}50%{box-shadow:0 0 14px var(--lc),0 0 26px var(--lc);transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.ring .lvb.glow{animation:none}}
+.ring .ava{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
 .ring .ava > span{width:100%!important;height:100%!important;border-radius:50%}.ring .ava svg{display:block}`;
 const SKIN = '#F3CDA6', HAIR = '#EBC55A', HAIR2 = '#D4A63B';
 const AV_TYPES = ['maedchen-lang', 'maedchen-zoepfe', 'maedchen-dutt', 'frau', 'mann'];
@@ -714,6 +797,27 @@ class LoxWochenplanerCard extends FpBase {
     return { pct, start: !tot, streak, w, m, fw, fm };
   }
   // Auszeichnungen kommen vom Server (vergeben jeden Montag / am Monatsersten / beim Erreichen)
+  // level badge on the avatar; after a level up it glows until it was tapped (each tap plays the tier's effect)
+  _lvState(name) {
+    const s = this.fpStore && this.fpStore.snap; if (!s) return null;
+    const p = (s.persons || []).find((x) => x.name === name); if (!p) return null;
+    const pt = (s.points || {})[p.id]; if (!pt || !pt.level) return null;
+    const up = pt.up && pt.up.level === pt.level && (Date.now() - Date.parse(pt.up.ts || '')) < 14 * 864e5 ? pt.up : null;
+    const key = `fp_lv_${s.entry_id}_${p.id}_${pt.level}_${up ? up.ts : ''}`;
+    let taps = 0; try { taps = Number(localStorage.getItem(key)) || 0; } catch (e) { taps = (this._lvMem || {})[key] || 0; }
+    return { p, pt, up, key, taps };
+  }
+  _lvBadge(name) {
+    const v = this._lvState(name); if (!v) return '';
+    const g = v.up && v.taps < 20 ? (v.taps < 5 ? 'glow' : 'fade') : '';
+    return `<button class="lvb t-${v.pt.tier} ${g}" data-lvtap="${esc(name)}" style="--lc:${v.pt.tier_color};--g:${g === 'fade' ? (20 - v.taps) / 15 : 0}" title="Level ${v.pt.level} · ${esc(v.pt.name)}">${v.pt.level}</button>`;
+  }
+  _lvTap(name, el) {
+    const v = this._lvState(name); if (!v) return;
+    const r = el.getBoundingClientRect();
+    if (window.FPCONFETTI && window.FPCONFETTI.burst) window.FPCONFETTI.burst(r.left + r.width / 2, r.top + r.height / 2, v.pt.tier, v.pt.tier_color, v.up && v.taps < 20 ? 1 : 0.5);
+    if (v.up && v.taps < 20) { try { localStorage.setItem(v.key, String(v.taps + 1)); } catch (e) { this._lvMem = { ...(this._lvMem || {}), [v.key]: v.taps + 1 }; } this._render(); }
+  }
   _srvAwards(kids) {
     const s = this.fpStore && this.fpStore.snap; const A = {}; const F = {}; kids.forEach((k) => { A[k.name] = []; });
     if (!s) return { A, F };
@@ -734,7 +838,7 @@ class LoxWochenplanerCard extends FpBase {
     const q = (x) => (x[1] ? `${x[0]} / ${x[1]} <small>(${Math.round((x[0] / x[1]) * 100)} %)</small>` : '<small>noch keine</small>');
     const holders = (id) => kids.filter((x) => (awards[x.name] || []).some((a) => a.id === id)).map((x) => x.name).join(', ') || 'noch niemand';
     return `<div class="ovl" data-close><div class="pnl" data-keep>
-      <div class="ph"><div class="ring bigr${frames[k.name] ? ' fr-' + frames[k.name] : ''}"><span class="ava">${avatarHtml(k, 64)}</span>${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}<span class="rib" style="--rc:${lv.c}">${s.pct}%</span></div>
+      <div class="ph"><div class="ring bigr${frames[k.name] ? ' fr-' + frames[k.name] : ''}"><span class="ava">${avatarHtml(k, 64)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) : ''}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}<span class="rib" style="--rc:${lv.c}">${s.pct}%</span></div>
         <div class="phn"><div class="pn2">${esc(k.name)}</div><div class="lv" style="color:${lv.c}">${lv.t} · Zuverlässigkeit ${s.pct} %</div></div>
         <button class="nb" data-x><ha-icon icon="mdi:close"></ha-icon></button></div>
       <div class="kp"><div><span>Letzte 7 Tage</span><b>${q(s.w)}</b></div><div><span>Letzte 30 Tage</span><b>${q(s.m)}</b></div><div><span>Serie</span><b>${s.streak} ${s.streak === 1 ? 'Tag' : 'Tage'}</b></div></div>
@@ -754,6 +858,15 @@ class LoxWochenplanerCard extends FpBase {
     if (e.target.closest('[data-x]')) { this._detail = null; this._render(); return; }
     if (e.target.closest('[data-keep]')) return;
     if (e.target.closest('[data-close]')) { this._detail = null; this._render(); return; }
+    const tdb = e.target.closest('[data-todoid]');
+    if (tdb && this.fpStore) {
+      const s = this.fpStore.snap || {}; const t = (s.todos || []).find((x) => x.id === tdb.dataset.todoid); if (!t) return;
+      const confirm = !s.todo_settings || s.todo_settings.confirm !== false;
+      if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
+      this._tdArm = null; if (!t.done) this._pop = { uid: t.id, t: Date.now() };
+      this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).catch(() => this._render()); return;
+    }
+    const lt = e.target.closest('[data-lvtap]'); if (lt) { this._lvTap(lt.dataset.lvtap, lt); return; }
     const pp = e.target.closest('[data-person]');
     if (pp) { this._detail = pp.dataset.person; clearTimeout(this._dT); this._dT = setTimeout(() => { this._detail = null; this._render(); }, (Number(this._cfg.ruhe_sekunden) || 30) * 1000); this._render(); return; }
     const b = e.target.closest('.btn');
@@ -837,13 +950,21 @@ class LoxWochenplanerCard extends FpBase {
     const { A: awards, F: frames } = this._srvAwards(kids);
     // timetable view: only persons with a timetable
     const rowKids = (this._mode || 'alle') === 'schule' ? kids.filter((x) => (this._cfg.schule || {})[x.name]) : kids;
+    // to-dos and special chores (date-based plan) in the planner, clearly marked; own view "To-dos & special"
+    const snapX = (this.fpStore && this.fpStore.snap) || {}; const modeX = this._mode || 'alle';
+    const specIds = new Set((snapX.chores || []).filter((c) => c.schedule).map((c) => c.id));
+    const pidOf = Object.fromEntries((snapX.persons || []).map((p) => [p.name, p.id]));
+    const showTodos = modeX === 'alle' || modeX === 'extra';
     const rows = rowKids.map((k) => {
-      const mine = heute.filter((i) => i.m.k === k.name).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
+      const tds = showTodos ? (snapX.todos || []).filter((t) => t.person_id === pidOf[k.name] && (!t.done || (t.done_at || '').slice(0, 10) === tStr)) : [];
+      const tdBtns = tds.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}</span></button>`).join('');
+      const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
       const tDone = mine.filter((i) => i.status === 'completed').length;
       const st = pre[k.name]; const aw = awards[k.name] || [];
       const lv = level(st.pct); const C = 2 * Math.PI * 24;
+      const AVS = phone ? 56 : 72;
       const label = `<div class="lab" data-person="${esc(k.name)}" style="box-shadow:inset 3px 0 0 ${k.farbe}">
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}"><span class="ava">${avatarHtml(k, 48)}</span>${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:${AVS}px;height:${AVS}px"><span class="ava">${avatarHtml(k, AVS)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) : ''}${this._lvBadge(k.name)}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
           <div class="lt"><div class="nm">${esc(k.name)}</div><div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, phone ? 3 : 6).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}${aw.length > (phone ? 3 : 6) ? `<span class="mdm">+${aw.length - (phone ? 3 : 6)}</span>` : ''}</div>
           </div>
           </div>`;
@@ -877,7 +998,7 @@ class LoxWochenplanerCard extends FpBase {
         const detail = lessons.map((e) => ({ ...e, title: e.loc ? `${e.title} · ${e.loc}` : e.title }));
         const pev = mode0 === 'schule' ? detail : mode0 === 'termine' ? rest : [...blockEvs, ...rest].sort((a, b) => (b.allDay - a.allDay) || (a.s - b.s));
         const mode = mode0 === 'schule' ? 'termine' : mode0;
-        if (mode === 'aemtli') return html;
+        if (mode === 'aemtli' || mode === 'extra') return html;
         const open = (html.match(/^<div[^>]*>/) || [''])[0];
         if (!pev.length) return mode === 'termine' ? open + '<div class="none">–</div></div>' : html;
         if (tr === 's') { const evn = `<div class="evn">${pev.slice(0, 4).map((e) => `<i style="background:${e.c.farbe}"></i>`).join('')}<b>${pev.length}</b></div>`; return mode === 'termine' ? open + evn + '</div>' : html.replace(/^<div[^>]*>/, (m) => m + evn); }
@@ -891,13 +1012,14 @@ class LoxWochenplanerCard extends FpBase {
           return `<div class="c ${ds < tStr ? 'p' : ds === tStr ? 't' : 'f'} vac${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}"><div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon>${T[ds] === 's' ? '' : '<span>Ferien</span>'}</div></div>`;
         }
         if (ds === tStr && ds !== focus) {
-          return mine.length ? `<div class="c t" data-focus="${ds}"><div class="fc"><b>${tDone}/${mine.length}</b></div><div class="bar"><i style="width:${Math.round((tDone / mine.length) * 100)}%;background:${G}"></i></div></div>` : `<div class="c t" data-focus="${ds}"></div>`;
+          return mine.length ? `<div class="c t" data-focus="${ds}"><div class="fc"><b>${tDone}/${mine.length}</b></div><div class="bar"><i style="width:${Math.round((tDone / mine.length) * 100)}%;background:${G}"></i></div>${tds.filter((t) => !t.done).length ? `<div class="tdn2">☑ ${tds.filter((t) => !t.done).length}</div>` : ''}</div>` : `<div class="c t" data-focus="${ds}">${tds.filter((t) => !t.done).length ? `<div class="tdn2">☑ ${tds.filter((t) => !t.done).length}</div>` : ''}</div>`;
         }
         if (ds === tStr) {
-          if (!mine.length) return '<div class="c t"></div>';
+          if (!mine.length && !tds.length) return '<div class="c t"></div>';
+          if (!mine.length) return `<div class="c t"><div class="bg">${tdBtns}</div></div>`;
           const all = tDone === mine.length;
           return `<div class="c t"><div class="prog"><span>${tDone} von ${mine.length} erledigt</span>${all ? '<span class="gr">Super!</span>' : ''}</div><div class="bg">` +
-            mine.map((i) => `<button class="btn${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${esc(i.summary)}${dueTag(i.m, tStr)}</span></button>`).join('') + `</div></div>`;
+            mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? '<em class="tag">⭐ Spezial</em>' : ''}${esc(i.summary)}${dueTag(i.m, tStr)}</span></button>`).join('') + tdBtns + `</div></div>`;
         }
         if (ds < tStr) {
           const s = h[ds] && h[ds].s[k.name];
@@ -907,6 +1029,10 @@ class LoxWochenplanerCard extends FpBase {
           const miss = h[ds].x.filter((x) => x[0] === k.name).map((x) => x[1]);
           return `<div class="c p${ds === focus ? ' fx' : ''}" data-focus="${ds}"><div class="big">${s[0]}<small> / ${s[1]}</small></div><div class="bar"><i style="width:${pct}%;background:${col}"></i></div>` +
             (pct === 100 ? `<div class="ok"><ha-icon icon="mdi:check-circle"></ha-icon>${ds === focus ? 'Alles erledigt' : ''}</div>` : (ds === focus ? miss.map((m) => `<div class="miss">✕ ${esc(m)}</div>`).join('') : `<div class="miss">✕ ${miss.length}</div>`)) + `</div>`;
+        }
+        if (modeX === 'extra' && ds !== tStr) {
+          const sp = alle.filter((i) => i.m.k === k.name && specIds.has(i.m.c) && i.status !== 'completed' && (i.m.d || '') <= ds && (i.m.e || i.m.d || '') >= ds);
+          return `<div class="c ${ds < tStr ? 'p' : 'f'}${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}">${sp.map((i) => `<div class="pl spl">⭐ ${esc(i.summary)}</div>`).join('') || '<div class="none">–</div>'}</div>`;
         }
         const pl = this._planFor(k.name, d);
         const opl = alle.filter((i) => i.m.k === k.name && i.status !== 'completed' && (i.m.d || '') <= tStr && (i.m.e || i.m.d || '') >= ds);
@@ -934,7 +1060,7 @@ class LoxWochenplanerCard extends FpBase {
       .nb{background:var(--fp-bg3,#262626);border:1px solid var(--fp-line,#333);color:var(--fp-text,#ddd);border-radius:10px;height:42px;min-width:42px;padding:0 14px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:inherit;font-size:14px;-webkit-tap-highlight-color:transparent}
       .nb ha-icon{--mdc-icon-size:22px}.nb.td{gap:6px}.tdn{background:${G};color:var(--fp-on-accent,#141414);border-radius:10px;padding:0 7px;font-size:12px;line-height:20px}.nb.g{color:${G};border-color:color-mix(in srgb,var(--fp-accent) 50%,transparent)}
       .wk{font-size:12px;color:var(--fp-text3,#8a8a8a);padding:0 8px;text-align:center;min-width:150px}.wk b{display:block;color:var(--fp-text,#ececec);font-size:15px;font-weight:600}
-      .grid{display:grid;grid-template-columns:${phone ? '104px' : '178px'} ${cols};gap:5px;align-items:stretch}
+      .grid{display:grid;grid-template-columns:${phone ? '104px' : '200px'} ${cols};gap:5px;align-items:stretch}
       .card.phone .lab{flex-direction:column;align-items:flex-start;gap:6px;padding:8px 6px}.card.phone .lt .nm{font-size:13px}.card.phone .corner{visibility:hidden}
       .card.phone .bg{grid-template-columns:1fr}.card.phone .pev .src{display:none}.card.phone .btn{min-height:50px;font-size:15px}.card.phone .btn .cb{width:26px;height:26px}.card.phone .btn.done .cb::after{left:8px;top:3px;width:6px;height:12px}.card.phone .nb{min-width:46px;height:46px}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 9px}
       .dnav{display:flex;align-items:center;gap:6px}.dd{font-size:14px;text-align:center;min-width:120px}.dd b{display:block;font-size:16px}
@@ -1003,6 +1129,11 @@ class LoxWochenplanerCard extends FpBase {
       .btn.done .cb{background:${G};border-color:${G}}
       .btn.done .cb::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid var(--fp-line,#1e1e1e);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
       .btn.done .bt{color:var(--fp-accent)}
+      .btn .tag{display:inline-block;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:7px;margin-right:6px;vertical-align:1px}
+      .btn.spc{border-color:rgba(245,197,66,.65);background:rgba(245,197,66,.08)}.btn.spc .tag{background:rgba(245,197,66,.2);color:#f5c542}
+      .btn.tdo{border:1px dashed rgba(79,163,224,.7);background:rgba(79,163,224,.07)}.btn.tdo .tag{background:rgba(79,163,224,.2);color:#4fa3e0}.btn.tdo .cb{border-radius:6px}
+      .btn.tdo.arm{border-style:solid;border-color:#4fa3e0;background:rgba(79,163,224,.18)}
+      .tdn2{font-size:11px;font-weight:700;color:#4fa3e0;margin-top:4px}.pl.spl{color:#f5c542}
       .btn.pop .cb{animation:fpcheck .5s cubic-bezier(.3,1.6,.5,1)}.btn.pop .cb::before{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid ${G};animation:fpring .6s ease-out forwards}
       @keyframes fpcheck{0%{transform:scale(.55)}60%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes fpring{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.3);opacity:0}}
       @media (prefers-reduced-motion:reduce){.btn.pop .cb,.btn.pop .cb::before{animation:none}}
@@ -1037,7 +1168,7 @@ class LoxWochenplanerCard extends FpBase {
     .card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style>
     <div class="card${phone ? ' phone' : ''}">
       <div class="top">
-        <div class="seg">${[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['termine', 'Termine'], ['schule', 'Stundenplan']].filter(([v]) => v !== 'schule' || Object.keys(this._cfg.schule || {}).length).map(([v, l]) => `<button class="${(this._mode || 'alle') === v ? 'on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
+        <div class="seg">${[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['extra', 'To-dos & Spezial'], ['termine', 'Termine'], ['schule', 'Stundenplan']].filter(([v]) => v !== 'schule' || Object.keys(this._cfg.schule || {}).length).map(([v, l]) => `<button class="${(this._mode || 'alle') === v ? 'on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
         ${this._cfg.todos_knopf ? `<div class="tdg"><button class="nb td${this._cfg.todos_offen ? ' g' : ''}" data-todos title="To-dos"><ha-icon icon="mdi:checkbox-marked-circle-outline"></ha-icon>${phone ? '' : 'To-dos'}${this._cfg.todos_offen ? ` <b class="tdn">${Number(this._cfg.todos_offen)}</b>` : ''}</button><button class="nb" data-todoadd title="To-do hinzufügen"><ha-icon icon="mdi:plus"></ha-icon></button></div>` : ''}
         <div class="nav">
           ${(phone ? (this._dayOff || 0) !== 0 : this._week !== 0) ? `<button class="nb g" data-nav="0">Heute</button>` : ''}
@@ -1438,8 +1569,11 @@ const AWCSS = `.crown{position:absolute;top:-13px;left:0;right:0;margin:0 auto;w
 @keyframes fpshine{0%,60%{background-position:150% 0}100%{background-position:-60% 0}}
 @media (prefers-reduced-motion:reduce){.ring[class*=fr-]::after{animation:none;display:none}}
 .md{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 32% 28%,color-mix(in srgb,var(--mc) 55%,#fff) 0%,var(--mc) 45%,color-mix(in srgb,var(--mc) 60%,#000) 100%);border:1px solid color-mix(in srgb,var(--mc) 70%,#fff);color:#1b1b1b;display:inline-flex;align-items:center;justify-content:center;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.45)}.md ha-icon{--mdc-icon-size:13px}
-.ring{position:relative;width:48px;height:48px;flex:none}
-.ring .ava{display:block;width:48px;height:48px;border-radius:50%;overflow:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
+.ring{position:relative;width:48px;height:48px;flex:none}.ring .lvb{position:absolute;right:-4px;bottom:-3px;z-index:4;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;border-radius:11px;border:2px solid var(--fp-bg2,#1e1e1e);background:var(--lc);color:#1b1b1b;font:800 11px/18px -apple-system,Segoe UI,Roboto,sans-serif;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.ring .lvb.t-ruby{color:#fff}.ring .lvb.glow{animation:fplvglow 1.6s ease-in-out infinite;box-shadow:0 0 10px var(--lc),0 0 18px var(--lc)}.ring .lvb.fade{box-shadow:0 0 calc(var(--g) * 14px) var(--lc)}
+@keyframes fplvglow{0%,100%{box-shadow:0 0 6px var(--lc),0 0 10px var(--lc);transform:scale(1)}50%{box-shadow:0 0 14px var(--lc),0 0 26px var(--lc);transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.ring .lvb.glow{animation:none}}
+.ring .ava{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
 .ring .ava > span{width:100%!important;height:100%!important;border-radius:50%}.ring .ava svg{display:block}`;
 const SKIN = '#F3CDA6', HAIR = '#EBC55A', HAIR2 = '#D4A63B';
 const AV_TYPES = ['maedchen-lang', 'maedchen-zoepfe', 'maedchen-dutt', 'frau', 'mann'];
@@ -1740,6 +1874,27 @@ class LoxWochenplanerCard extends FpBase {
     return { pct, start: !tot, streak, w, m, fw, fm };
   }
   // Auszeichnungen kommen vom Server (vergeben jeden Montag / am Monatsersten / beim Erreichen)
+  // level badge on the avatar; after a level up it glows until it was tapped (each tap plays the tier's effect)
+  _lvState(name) {
+    const s = this.fpStore && this.fpStore.snap; if (!s) return null;
+    const p = (s.persons || []).find((x) => x.name === name); if (!p) return null;
+    const pt = (s.points || {})[p.id]; if (!pt || !pt.level) return null;
+    const up = pt.up && pt.up.level === pt.level && (Date.now() - Date.parse(pt.up.ts || '')) < 14 * 864e5 ? pt.up : null;
+    const key = `fp_lv_${s.entry_id}_${p.id}_${pt.level}_${up ? up.ts : ''}`;
+    let taps = 0; try { taps = Number(localStorage.getItem(key)) || 0; } catch (e) { taps = (this._lvMem || {})[key] || 0; }
+    return { p, pt, up, key, taps };
+  }
+  _lvBadge(name) {
+    const v = this._lvState(name); if (!v) return '';
+    const g = v.up && v.taps < 20 ? (v.taps < 5 ? 'glow' : 'fade') : '';
+    return `<button class="lvb t-${v.pt.tier} ${g}" data-lvtap="${esc(name)}" style="--lc:${v.pt.tier_color};--g:${g === 'fade' ? (20 - v.taps) / 15 : 0}" title="Level ${v.pt.level} · ${esc(v.pt.name)}">${v.pt.level}</button>`;
+  }
+  _lvTap(name, el) {
+    const v = this._lvState(name); if (!v) return;
+    const r = el.getBoundingClientRect();
+    if (window.FPCONFETTI && window.FPCONFETTI.burst) window.FPCONFETTI.burst(r.left + r.width / 2, r.top + r.height / 2, v.pt.tier, v.pt.tier_color, v.up && v.taps < 20 ? 1 : 0.5);
+    if (v.up && v.taps < 20) { try { localStorage.setItem(v.key, String(v.taps + 1)); } catch (e) { this._lvMem = { ...(this._lvMem || {}), [v.key]: v.taps + 1 }; } this._render(); }
+  }
   _srvAwards(kids) {
     const s = this.fpStore && this.fpStore.snap; const A = {}; const F = {}; kids.forEach((k) => { A[k.name] = []; });
     if (!s) return { A, F };
@@ -1760,7 +1915,7 @@ class LoxWochenplanerCard extends FpBase {
     const q = (x) => (x[1] ? `${x[0]} / ${x[1]} <small>(${Math.round((x[0] / x[1]) * 100)} %)</small>` : '<small>none yet</small>');
     const holders = (id) => kids.filter((x) => (awards[x.name] || []).some((a) => a.id === id)).map((x) => x.name).join(', ') || 'nobody yet';
     return `<div class="ovl" data-close><div class="pnl" data-keep>
-      <div class="ph"><div class="ring bigr${frames[k.name] ? ' fr-' + frames[k.name] : ''}"><span class="ava">${avatarHtml(k, 64)}</span>${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}<span class="rib" style="--rc:${lv.c}">${s.pct}%</span></div>
+      <div class="ph"><div class="ring bigr${frames[k.name] ? ' fr-' + frames[k.name] : ''}"><span class="ava">${avatarHtml(k, 64)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) : ''}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}<span class="rib" style="--rc:${lv.c}">${s.pct}%</span></div>
         <div class="phn"><div class="pn2">${esc(k.name)}</div><div class="lv" style="color:${lv.c}">${lv.t} · Reliability ${s.pct} %</div></div>
         <button class="nb" data-x><ha-icon icon="mdi:close"></ha-icon></button></div>
       <div class="kp"><div><span>Last 7 days</span><b>${q(s.w)}</b></div><div><span>Last 30 days</span><b>${q(s.m)}</b></div><div><span>Streak</span><b>${s.streak} ${s.streak === 1 ? 'day' : 'days'}</b></div></div>
@@ -1780,6 +1935,15 @@ class LoxWochenplanerCard extends FpBase {
     if (e.target.closest('[data-x]')) { this._detail = null; this._render(); return; }
     if (e.target.closest('[data-keep]')) return;
     if (e.target.closest('[data-close]')) { this._detail = null; this._render(); return; }
+    const tdb = e.target.closest('[data-todoid]');
+    if (tdb && this.fpStore) {
+      const s = this.fpStore.snap || {}; const t = (s.todos || []).find((x) => x.id === tdb.dataset.todoid); if (!t) return;
+      const confirm = !s.todo_settings || s.todo_settings.confirm !== false;
+      if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
+      this._tdArm = null; if (!t.done) this._pop = { uid: t.id, t: Date.now() };
+      this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).catch(() => this._render()); return;
+    }
+    const lt = e.target.closest('[data-lvtap]'); if (lt) { this._lvTap(lt.dataset.lvtap, lt); return; }
     const pp = e.target.closest('[data-person]');
     if (pp) { this._detail = pp.dataset.person; clearTimeout(this._dT); this._dT = setTimeout(() => { this._detail = null; this._render(); }, (Number(this._cfg.ruhe_sekunden) || 30) * 1000); this._render(); return; }
     const b = e.target.closest('.btn');
@@ -1863,13 +2027,21 @@ class LoxWochenplanerCard extends FpBase {
     const { A: awards, F: frames } = this._srvAwards(kids);
     // timetable view: only persons with a timetable
     const rowKids = (this._mode || 'alle') === 'schule' ? kids.filter((x) => (this._cfg.schule || {})[x.name]) : kids;
+    // to-dos and special chores (date-based plan) in the planner, clearly marked; own view "To-dos & special"
+    const snapX = (this.fpStore && this.fpStore.snap) || {}; const modeX = this._mode || 'alle';
+    const specIds = new Set((snapX.chores || []).filter((c) => c.schedule).map((c) => c.id));
+    const pidOf = Object.fromEntries((snapX.persons || []).map((p) => [p.name, p.id]));
+    const showTodos = modeX === 'alle' || modeX === 'extra';
     const rows = rowKids.map((k) => {
-      const mine = heute.filter((i) => i.m.k === k.name).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
+      const tds = showTodos ? (snapX.todos || []).filter((t) => t.person_id === pidOf[k.name] && (!t.done || (t.done_at || '').slice(0, 10) === tStr)) : [];
+      const tdBtns = tds.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do</em>${esc(this._tdArm === t.id ? 'Tap again to finish' : t.title)}</span></button>`).join('');
+      const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
       const tDone = mine.filter((i) => i.status === 'completed').length;
       const st = pre[k.name]; const aw = awards[k.name] || [];
       const lv = level(st.pct); const C = 2 * Math.PI * 24;
+      const AVS = phone ? 56 : 72;
       const label = `<div class="lab" data-person="${esc(k.name)}" style="box-shadow:inset 3px 0 0 ${k.farbe}">
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}"><span class="ava">${avatarHtml(k, 48)}</span>${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:${AVS}px;height:${AVS}px"><span class="ava">${avatarHtml(k, AVS)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) : ''}${this._lvBadge(k.name)}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
           <div class="lt"><div class="nm">${esc(k.name)}</div><div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, phone ? 3 : 6).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}${aw.length > (phone ? 3 : 6) ? `<span class="mdm">+${aw.length - (phone ? 3 : 6)}</span>` : ''}</div>
           </div>
           </div>`;
@@ -1903,7 +2075,7 @@ class LoxWochenplanerCard extends FpBase {
         const detail = lessons.map((e) => ({ ...e, title: e.loc ? `${e.title} · ${e.loc}` : e.title }));
         const pev = mode0 === 'schule' ? detail : mode0 === 'termine' ? rest : [...blockEvs, ...rest].sort((a, b) => (b.allDay - a.allDay) || (a.s - b.s));
         const mode = mode0 === 'schule' ? 'termine' : mode0;
-        if (mode === 'aemtli') return html;
+        if (mode === 'aemtli' || mode === 'extra') return html;
         const open = (html.match(/^<div[^>]*>/) || [''])[0];
         if (!pev.length) return mode === 'termine' ? open + '<div class="none">–</div></div>' : html;
         if (tr === 's') { const evn = `<div class="evn">${pev.slice(0, 4).map((e) => `<i style="background:${e.c.farbe}"></i>`).join('')}<b>${pev.length}</b></div>`; return mode === 'termine' ? open + evn + '</div>' : html.replace(/^<div[^>]*>/, (m) => m + evn); }
@@ -1917,13 +2089,14 @@ class LoxWochenplanerCard extends FpBase {
           return `<div class="c ${ds < tStr ? 'p' : ds === tStr ? 't' : 'f'} vac${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}"><div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon>${T[ds] === 's' ? '' : '<span>Holiday</span>'}</div></div>`;
         }
         if (ds === tStr && ds !== focus) {
-          return mine.length ? `<div class="c t" data-focus="${ds}"><div class="fc"><b>${tDone}/${mine.length}</b></div><div class="bar"><i style="width:${Math.round((tDone / mine.length) * 100)}%;background:${G}"></i></div></div>` : `<div class="c t" data-focus="${ds}"></div>`;
+          return mine.length ? `<div class="c t" data-focus="${ds}"><div class="fc"><b>${tDone}/${mine.length}</b></div><div class="bar"><i style="width:${Math.round((tDone / mine.length) * 100)}%;background:${G}"></i></div>${tds.filter((t) => !t.done).length ? `<div class="tdn2">☑ ${tds.filter((t) => !t.done).length}</div>` : ''}</div>` : `<div class="c t" data-focus="${ds}">${tds.filter((t) => !t.done).length ? `<div class="tdn2">☑ ${tds.filter((t) => !t.done).length}</div>` : ''}</div>`;
         }
         if (ds === tStr) {
-          if (!mine.length) return '<div class="c t"></div>';
+          if (!mine.length && !tds.length) return '<div class="c t"></div>';
+          if (!mine.length) return `<div class="c t"><div class="bg">${tdBtns}</div></div>`;
           const all = tDone === mine.length;
           return `<div class="c t"><div class="prog"><span>${tDone} of ${mine.length} done</span>${all ? '<span class="gr">Great!</span>' : ''}</div><div class="bg">` +
-            mine.map((i) => `<button class="btn${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${esc(i.summary)}${dueTag(i.m, tStr)}</span></button>`).join('') + `</div></div>`;
+            mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? '<em class="tag">⭐ Special</em>' : ''}${esc(i.summary)}${dueTag(i.m, tStr)}</span></button>`).join('') + tdBtns + `</div></div>`;
         }
         if (ds < tStr) {
           const s = h[ds] && h[ds].s[k.name];
@@ -1933,6 +2106,10 @@ class LoxWochenplanerCard extends FpBase {
           const miss = h[ds].x.filter((x) => x[0] === k.name).map((x) => x[1]);
           return `<div class="c p${ds === focus ? ' fx' : ''}" data-focus="${ds}"><div class="big">${s[0]}<small> / ${s[1]}</small></div><div class="bar"><i style="width:${pct}%;background:${col}"></i></div>` +
             (pct === 100 ? `<div class="ok"><ha-icon icon="mdi:check-circle"></ha-icon>${ds === focus ? 'All done' : ''}</div>` : (ds === focus ? miss.map((m) => `<div class="miss">✕ ${esc(m)}</div>`).join('') : `<div class="miss">✕ ${miss.length}</div>`)) + `</div>`;
+        }
+        if (modeX === 'extra' && ds !== tStr) {
+          const sp = alle.filter((i) => i.m.k === k.name && specIds.has(i.m.c) && i.status !== 'completed' && (i.m.d || '') <= ds && (i.m.e || i.m.d || '') >= ds);
+          return `<div class="c ${ds < tStr ? 'p' : 'f'}${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}">${sp.map((i) => `<div class="pl spl">⭐ ${esc(i.summary)}</div>`).join('') || '<div class="none">–</div>'}</div>`;
         }
         const pl = this._planFor(k.name, d);
         const opl = alle.filter((i) => i.m.k === k.name && i.status !== 'completed' && (i.m.d || '') <= tStr && (i.m.e || i.m.d || '') >= ds);
@@ -1960,7 +2137,7 @@ class LoxWochenplanerCard extends FpBase {
       .nb{background:var(--fp-bg3,#262626);border:1px solid var(--fp-line,#333);color:var(--fp-text,#ddd);border-radius:10px;height:42px;min-width:42px;padding:0 14px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:inherit;font-size:14px;-webkit-tap-highlight-color:transparent}
       .nb ha-icon{--mdc-icon-size:22px}.nb.td{gap:6px}.tdn{background:${G};color:var(--fp-on-accent,#141414);border-radius:10px;padding:0 7px;font-size:12px;line-height:20px}.nb.g{color:${G};border-color:color-mix(in srgb,var(--fp-accent) 50%,transparent)}
       .wk{font-size:12px;color:var(--fp-text3,#8a8a8a);padding:0 8px;text-align:center;min-width:150px}.wk b{display:block;color:var(--fp-text,#ececec);font-size:15px;font-weight:600}
-      .grid{display:grid;grid-template-columns:${phone ? '104px' : '178px'} ${cols};gap:5px;align-items:stretch}
+      .grid{display:grid;grid-template-columns:${phone ? '104px' : '200px'} ${cols};gap:5px;align-items:stretch}
       .card.phone .lab{flex-direction:column;align-items:flex-start;gap:6px;padding:8px 6px}.card.phone .lt .nm{font-size:13px}.card.phone .corner{visibility:hidden}
       .card.phone .bg{grid-template-columns:1fr}.card.phone .pev .src{display:none}.card.phone .btn{min-height:50px;font-size:15px}.card.phone .btn .cb{width:26px;height:26px}.card.phone .btn.done .cb::after{left:8px;top:3px;width:6px;height:12px}.card.phone .nb{min-width:46px;height:46px}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 9px}
       .dnav{display:flex;align-items:center;gap:6px}.dd{font-size:14px;text-align:center;min-width:120px}.dd b{display:block;font-size:16px}
@@ -2029,6 +2206,11 @@ class LoxWochenplanerCard extends FpBase {
       .btn.done .cb{background:${G};border-color:${G}}
       .btn.done .cb::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid var(--fp-line,#1e1e1e);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
       .btn.done .bt{color:var(--fp-accent)}
+      .btn .tag{display:inline-block;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:7px;margin-right:6px;vertical-align:1px}
+      .btn.spc{border-color:rgba(245,197,66,.65);background:rgba(245,197,66,.08)}.btn.spc .tag{background:rgba(245,197,66,.2);color:#f5c542}
+      .btn.tdo{border:1px dashed rgba(79,163,224,.7);background:rgba(79,163,224,.07)}.btn.tdo .tag{background:rgba(79,163,224,.2);color:#4fa3e0}.btn.tdo .cb{border-radius:6px}
+      .btn.tdo.arm{border-style:solid;border-color:#4fa3e0;background:rgba(79,163,224,.18)}
+      .tdn2{font-size:11px;font-weight:700;color:#4fa3e0;margin-top:4px}.pl.spl{color:#f5c542}
       .btn.pop .cb{animation:fpcheck .5s cubic-bezier(.3,1.6,.5,1)}.btn.pop .cb::before{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid ${G};animation:fpring .6s ease-out forwards}
       @keyframes fpcheck{0%{transform:scale(.55)}60%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes fpring{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.3);opacity:0}}
       @media (prefers-reduced-motion:reduce){.btn.pop .cb,.btn.pop .cb::before{animation:none}}
@@ -2063,7 +2245,7 @@ class LoxWochenplanerCard extends FpBase {
     .card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style>
     <div class="card${phone ? ' phone' : ''}">
       <div class="top">
-        <div class="seg">${[['alle', 'All'], ['aemtli', 'Chores'], ['termine', 'Events'], ['schule', 'Timetable']].filter(([v]) => v !== 'schule' || Object.keys(this._cfg.schule || {}).length).map(([v, l]) => `<button class="${(this._mode || 'alle') === v ? 'on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
+        <div class="seg">${[['alle', 'All'], ['aemtli', 'Chores'], ['extra', 'To-dos & special'], ['termine', 'Events'], ['schule', 'Timetable']].filter(([v]) => v !== 'schule' || Object.keys(this._cfg.schule || {}).length).map(([v, l]) => `<button class="${(this._mode || 'alle') === v ? 'on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
         ${this._cfg.todos_knopf ? `<div class="tdg"><button class="nb td${this._cfg.todos_offen ? ' g' : ''}" data-todos title="To-dos"><ha-icon icon="mdi:checkbox-marked-circle-outline"></ha-icon>${phone ? '' : 'To-dos'}${this._cfg.todos_offen ? ` <b class="tdn">${Number(this._cfg.todos_offen)}</b>` : ''}</button><button class="nb" data-todoadd title="Add to-do"><ha-icon icon="mdi:plus"></ha-icon></button></div>` : ''}
         <div class="nav">
           ${(phone ? (this._dayOff || 0) !== 0 : this._week !== 0) ? `<button class="nb g" data-nav="0">Today</button>` : ''}
@@ -2711,7 +2893,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const medal = (a, big) => `<span class="md${big ? ' big' : ''}" style="--mc:${COLOR(a.color)}" title="${esc(awName(a.id, a.value))}"><ha-icon icon="${esc(a.icon)}"></ha-icon></span>`;
       const ring = (p, size) => { const r = (s.awards || {})[p.id] || {}; const fr = ['platinum', 'gold', 'silver', 'bronze'].includes(r.frame) ? r.frame : '';
         const crown = (r.list || []).some((a) => a.id === 'crown');
-        return `<div class="ring${fr ? ' fr-' + fr : ''}" style="width:${size}px;height:${size}px"><span class="ava" style="width:${size}px;height:${size}px">${av(p, size)}</span>${crown ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>`; };
+        return `<div class="ring${fr ? ' fr-' + fr : ''}" style="width:${size}px;height:${size}px"><span class="ava" style="width:${size}px;height:${size}px">${av(p, size)}</span>${String(p.image || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(p.image) : ''}${crown ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>`; };
       const forP = (r, pid) => !r.persons || !r.persons.length || r.persons.includes(pid);
       const eta = (pid, cost) => { const d = daysTo(s, pid, cost); return d === 0 ? T.ready : d == null ? T.noPace : d === 1 ? T.inDay : fmt(T.inDays, { n: d }); };
       // what is running for a person: requests waiting for approval, rewards made for them, else the next goal
@@ -2726,9 +2908,9 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         const aw = ((s.awards || {})[p.id] || {}).list || [];
         return `<div class="pc${sel && p.id === sel.id ? ' on' : ''}" data-p="${esc(p.id)}" role="button" tabindex="0" style="--c:${COLOR(p.color)}">
           <div class="ph">${ring(p, 56)}
-          <div class="pi"><b>${esc(p.name)}</b><span class="lv">${esc(T.lvl)} ${x.level} · ${esc(x.name)}</span>
+          <div class="pi"><b>${esc(p.name)}</b><span class="lv"><i class="tierdot" style="background:${COLOR(x.tier_color)}"></i>${esc(T.lvl)} ${x.level} · ${esc(x.name)}</span>
           <span class="bar"><i style="width:${Math.max(3, x.progress)}%"></i></span>
-          <span class="nx">${x.next == null ? esc(T.max) : esc(fmt(T.next, { n: x.next - x.lifetime, l: x.level + 1 }))}</span></div>
+          <span class="nx">${x.next == null ? esc(T.max) : esc(fmt(T.next, { n: x.next - (x.xp != null ? x.xp : x.lifetime), l: x.level + 1 }))}</span></div>
           <div class="pt"><strong>${x.balance}</strong><span>${esc(T.pts)}</span>${x.balance !== x.available ? `<em>${esc(fmt(T.reserved, { n: x.balance - x.available }))}</em>` : ''}</div></div>
           ${aw.length ? `<div class="mds">${aw.slice(0, 6).map((a) => medal(a)).join('')}${aw.length > 6 ? `<span class="mdm">+${aw.length - 6}</span>` : ''}</div>` : ''}
           <div class="runs">${running(p)}</div>
@@ -2809,7 +2991,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .fcp{display:flex;flex-wrap:wrap;gap:6px}.fcp em{font-style:normal;display:inline-flex;align-items:center;gap:5px;background:var(--fp-bg2,#232323);border-radius:12px;padding:2px 9px 2px 3px}
         .pc.on{border-color:var(--c);background:var(--fp-bg3,#262626)}
         .pi{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.pi b{font-size:16px}
-        .lv{font-size:12px;color:var(--fp-text2,#aaa)}.nx{font-size:11px;color:var(--fp-text3,#777)}
+        .lv{font-size:12px;color:var(--fp-text2,#aaa);display:flex;align-items:center;gap:5px}.tierdot{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 4px rgba(255,255,255,.3)}.nx{font-size:11px;color:var(--fp-text3,#777)}
         .bar{display:block;height:6px;border-radius:3px;background:var(--fp-bg4,#333);overflow:hidden}.bar i{display:block;height:100%;background:${G};border-radius:3px}
         .pt{display:flex;flex-direction:column;align-items:flex-end}.pt strong{font-size:28px;line-height:1;color:${G}}.pt span{font-size:11px;color:var(--fp-text3,#888)}.pt em{font-style:normal;font-size:10px;color:#e0a84f}
         .sec{font-size:12px;color:${G};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin:18px 0 8px}
@@ -3240,6 +3422,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('reward_value', 'num', 'Gegenwert einer grossen Belohnung', 'Value of a large reward', 'Gross = so viel, wie man in einem Monat mit allen Ämtli inkl. Boni verdient. Klein = ¼, Mittel = ½, Mega = 2×, Riesig = 5×. Nur zur Orientierung.', 'Large = what you earn in a month with every chore done incl. bonuses. Small = ¼, medium = ½, mega = 2×, giant = 5×. Just a guide.', { min: 0, max: 100000, step: 0.5 }),
       F('currency', 'text', 'Währung', 'Currency', 'z. B. CHF oder €.', 'e.g. CHF or €.', { max: 8 }),
       F('awards', 'awards', 'Pokale & Auszeichnungen', 'Trophies & awards', 'Pro Auszeichnung ein/aus und wie viele Punkte sie bringt (beim Gewinnen, und wieder, wenn man sie neu gewinnt). Klein = ⅓, Mittel = ⅔, Gross = 1×, Riesig = 2× der Punkte für einen ganzen Tag.', 'Per award on/off and how many points it gives (when won, and again when won anew). Small = ⅓, medium = ⅔, large = 1×, giant = 2× the points for a full day.'),
+      F('season_start', 'md', 'Neue Level-Saison ab', 'New level season from', 'Jedes Schuljahr starten alle wieder bei Level 1. Freigeschaltete Extras und Punkte zum Einlösen bleiben, der Bestwert wird als Abzeichen gespeichert.', 'Every school year everybody starts again at level 1. Unlocked extras and points to redeem stay; the best level is kept as a badge.'),
+      F('level_bonus', 'bool', 'Bonuspunkte beim Level-Aufstieg', 'Bonus points on level up', 'Ein voller Tag Punkte pro Level, drei bei einer neuen Stufe (Silber, Gold, Diamant, Rubin).', 'One full day of points per level, three for a new tier (silver, gold, diamond, ruby).'),
       F('early_time', 'time', 'Frühaufsteher: alles erledigt vor', 'Early bird: everything done before', 'Zeit für die Auszeichnung „Frühaufsteher“.', 'Time for the "Early bird" award.'),
       F('confetti', 'bool', 'Konfetti', 'Confetti', 'Kleines Konfetti mit Namen, wenn jemand alle Ämtli des Tages erledigt hat; grösseres in der Pokalfarbe bei Pokalen. Höchstens ein grosses pro Person und Tag.', 'Small confetti with the name when someone has done all chores of the day; bigger ones in the trophy colour for trophies. At most one big one per person and day.'),
       F('reward_notify', 'entities', 'Anfragen zusätzlich melden an', 'Also send requests to', 'z. B. die Handy-App – zusätzlich zur Mitteilung in Home Assistant.', 'e.g. the mobile app – in addition to the Home Assistant notification.', { domain: 'notify' }),
@@ -3327,7 +3511,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const d = this._data;
       if (id === 'general') { const g = clone(d.general); g.mod_week = g.modules.week; g.mod_lists = g.modules.lists; return g; }
       if (id === 'lists') return clone(d.lists_settings);
-      if (id === 'points') { const f = clone(d.points); f.early_time = (f.awards || {}).early_time || '12:00'; f.confetti = (f.awards || {}).confetti !== false; return f; }
+      if (id === 'points') { const f = clone(d.points); f.early_time = (f.awards || {}).early_time || '12:00'; f.confetti = (f.awards || {}).confetti !== false;
+        f.season_start = (f.levels || {}).season_start || '08-01'; f.level_bonus = (f.levels || {}).bonus !== false; return f; }
       return clone(d[id]);
     }
     _input(e, isChange) {
@@ -3341,6 +3526,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         if (el.type === 'checkbox') f[ds.k] = el.checked;
         else if (el.type === 'number') f[ds.k] = el.value === '' ? '' : Number(el.value);
         else if (ds.type === 'words') f[ds.k] = el.value;
+        else if (ds.type === 'md') { if (/^\d{4}-\d{2}-\d{2}$/.test(el.value)) f[ds.k] = el.value.slice(5); }
         else if (ds.addent !== undefined) { if (isChange && el.value) { const cur = Array.isArray(f[ds.k]) ? f[ds.k] : []; if (!cur.includes(el.value)) cur.push(el.value); f[ds.k] = cur; this._render(); } }
         else f[ds.k] = el.value || (ds.type === 'entity' ? null : el.value);
         if (el.tagName === 'SELECT' && isChange && ds.addent === undefined) this._render();
@@ -3362,7 +3548,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (t.closest('[data-unlock]')) { this._asked = true; this._load(); return; }
       const ap = t.closest('[data-avp]'); if (ap) { this._avp = ap.dataset.avp; this._render(); return; }
       const at = t.closest('[data-avtab]'); if (at) { this._avtab = at.dataset.avtab; this._render(); return; }
-      if (t.closest('[data-avrnd]')) { const p = this._avPerson(); if (p) this._avSave(p, window.FPAV.random()); return; }
+      if (t.closest('[data-avrnd]')) { const p = this._avPerson(); if (p) { const fx = window.FPAV.parse(this._avCode(p)).fx; this._avSave(p, window.FPAV.set(window.FPAV.random(), 'fx', fx)); } return; }
       const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); this._avSave(p, window.FPAV.set(this._avCode(p), part, val)); } return; }
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
       if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
@@ -3395,7 +3581,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     async _saveTab() {
       const id = this._tab; const f = { ...this._forms[id] };
       if (id === 'general') { f.modules = { week: !!f.mod_week, lists: !!f.mod_lists }; delete f.mod_week; delete f.mod_lists; }
-      if (id === 'points') { f.awards = { items: (f.awards || {}).items || {}, early_time: f.early_time, confetti: !!f.confetti }; delete f.early_time; delete f.confetti; }
+      if (id === 'points') { f.awards = { items: (f.awards || {}).items || {}, early_time: f.early_time, confetti: !!f.confetti }; delete f.early_time; delete f.confetti;
+        f.levels = { season_start: f.season_start, bonus: !!f.level_bonus }; delete f.season_start; delete f.level_bonus; }
       if (id === 'vacation' && typeof f.words === 'string') f.words = f.words.split(',').map((x) => x.trim()).filter(Boolean);
       const res = await this._call('family_planer/settings/save', { section: SECTION[id], data: f });
       if (!res) return;
@@ -3452,6 +3639,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       let ctl = '';
       if (fd.type === 'bool') return `<label class="row b"><span class="lt"><b>${esc(L(fd.label, lang))}</b>${fd.desc[lang] ? `<small>${esc(L(fd.desc, lang))}</small>` : ''}</span><input type="checkbox" class="sw" ${a} ${v ? 'checked' : ''}></label>`;
       if (fd.type === 'num') ctl = `<span class="nw"><input class="in n" type="number" inputmode="${fd.step && fd.step < 1 ? 'decimal' : 'numeric'}" min="${fd.min}" max="${fd.max}" step="${fd.step || 1}" ${a} value="${esc(v)}">${unit}</span>`;
+      else if (fd.type === 'md') ctl = `<input class="in" style="width:170px" type="date" ${a} value="${esc(new Date().getFullYear() + '-' + String(v || '08-01'))}">`;
       else if (fd.type === 'time') ctl = `<input class="in t" type="time" ${a} value="${esc(String(v || '').slice(0, 5))}">`;
       else if (fd.type === 'text') ctl = `<input class="in" maxlength="${fd.max || 80}" ${a} value="${esc(v)}">`;
       else if (fd.type === 'words') ctl = `<input class="in" maxlength="600" ${a} value="${esc(Array.isArray(v) ? v.join(', ') : v)}">`;
@@ -3634,7 +3822,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         return FX.avatarHtml ? FX.avatarHtml({ name: q.name, farbe: COLOR(q.color), ...(/^(av2?:|svg:|img:)/.test(img) ? { bild: img } : {}) }, size) : ''; };
       return `<div class="hint3">${esc(lbl('Jede und jeder darf hier ein Bild zusammenstellen – ohne PIN. Alles andere öffnet die Eltern-PIN oben rechts.', 'Anyone may build a picture here – no PIN needed. Everything else opens with the parent PIN at the top right.'))}</div>
         <div class="avps">${ps.map((q) => `<button class="avpb${q.id === p.id ? ' on' : ''}" style="--c:${COLOR(q.color)}" data-avp="${esc(q.id)}">${pic(q, 40)}<span>${esc(q.name)}</span></button>`).join('')}</div>
-        <div class="avwrap">${A.builder(this._avCode(p), COLOR(p.color), lang, this._avtab)}</div>
+        <div class="avwrap">${A.builder(this._avCode(p), COLOR(p.color), lang, this._avtab, ((s.points || {})[p.id] || {}).unlocked || [])}</div>
         <div class="upl"><label class="sg">${esc(lbl('Eigenes Foto hochladen', 'Upload own photo'))}<input type="file" accept="image/*" data-avup hidden></label><small>${esc(lbl('Wird quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.', 'Cropped to a square and stored only in your Home Assistant.'))}</small></div>`;
     }
     _vacChoice(key) {
@@ -3877,10 +4065,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
 (() => {
   if (window.FPCONFETTI) return;
   const TXT = {
-    de: { day: 'Super, {n}! Alle Ämtli erledigt 🎉', team: 'Familien-Teamwork! Alle haben alles erledigt 🤝', won: '{n}: {a}!',
+    de: { lvl: '{n} ist jetzt Level {v} – {t}! ⬆️', lvlB: ' +{b} Punkte', unl: ' · Neu: {u}', day: 'Super, {n}! Alle Ämtli erledigt 🎉', team: 'Familien-Teamwork! Alle haben alles erledigt 🤝', won: '{n}: {a}!',
       a: { trophy: 'Pokal des Monats 🏆', crown: 'Krone der Woche 👑', perfect: 'Perfekte Woche ⭐', bee: 'Fleissbiene 🐝', weekend: 'Wochenend-Held 🦸',
         climber: 'Aufsteiger 📈', early: 'Frühaufsteher 🌅', diamond: 'Diamant-Serie 💎', milestone: 'Meilenstein {v} 🏅', team: 'Familien-Teamwork 🤝' } },
-    en: { day: 'Well done, {n}! Every chore done 🎉', team: 'Family teamwork! Everybody did everything 🤝', won: '{n}: {a}!',
+    en: { lvl: '{n} is now level {v} – {t}! ⬆️', lvlB: ' +{b} points', unl: ' · New: {u}', day: 'Well done, {n}! Every chore done 🎉', team: 'Family teamwork! Everybody did everything 🤝', won: '{n}: {a}!',
       a: { trophy: 'Trophy of the month 🏆', crown: 'Crown of the week 👑', perfect: 'Perfect week ⭐', bee: 'Busy bee 🐝', weekend: 'Weekend hero 🦸',
         climber: 'Climber 📈', early: 'Early bird 🌅', diamond: 'Diamond streak 💎', milestone: 'Milestone {v} 🏅', team: 'Family teamwork 🤝' } },
   };
@@ -3888,6 +4076,41 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const MAX_AGE_MIN = 20; // older celebrations (e.g. the tablet was asleep for hours) are not replayed
   const queue = []; let busy = false;
   const fmt = (t, o) => t.replace(/\{(\w)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
+  // level effects when the level badge is tapped: sparks shooting out of the badge in the tier's colours
+  const TIER_COLS = { bronze: ['#CD8A4E', '#E7A46C', '#FFD0A0', '#8A4A22', '#FFE27A'], silver: ['#ffffff', '#C9D1D9', '#A8B1BC', '#E2E6EB'],
+    gold: ['#F5C542', '#FFE27A', '#D4A017', '#FFF4B8'], diamond: ['#7FDBFF', '#ffffff', '#B8F0FF', '#4FA3E0'], ruby: ['#E0115F', '#FF4D6D', '#FFB3C1', '#8B0A32', '#FFA34F'] };
+  function burst(x, y, tier, color, strength) {
+    if (reduce()) return;
+    const cv = document.createElement('canvas');
+    cv.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:99999;pointer-events:none';
+    document.body.appendChild(cv);
+    const ctx = cv.getContext('2d'); const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = cv.width = Math.round(window.innerWidth * dpr); const H = cv.height = Math.round(window.innerHeight * dpr);
+    const cols = TIER_COLS[tier] || [color, '#ffffff']; const big = tier === 'diamond' || tier === 'ruby';
+    const n = Math.round((big ? 150 : 70) * (strength || 1)); const parts = [];
+    // gold: golden rain · diamond: sparkling explosion with a flash · ruby: eruption, flash and the screen shakes
+    if (tier === 'gold') rain('s', '#F5C542');
+    if (big) { const fl = document.createElement('div'); fl.style.cssText = `position:fixed;inset:0;z-index:99998;pointer-events:none;background:radial-gradient(circle at ${x}px ${y}px,${tier === 'ruby' ? 'rgba(255,40,80,.55)' : 'rgba(200,245,255,.6)'},transparent 60%);transition:opacity .6s`;
+      document.body.appendChild(fl); setTimeout(() => { fl.style.opacity = '0'; }, 120); setTimeout(() => fl.remove(), 800); }
+    if (tier === 'ruby' && document.body.animate) { document.body.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(-6px,3px)' }, { transform: 'translate(5px,-4px)' }, { transform: 'translate(-3px,-2px)' }, { transform: 'translate(0,0)' }], { duration: 500, iterations: 2 }); setTimeout(() => rain('m', '#E0115F'), 300); }
+    for (let i = 0; i < n; i += 1) {
+      const a = Math.random() * Math.PI * 2; const v = (2 + Math.random() * 6) * dpr;
+      const sp = big ? 1.7 : 1;
+      parts.push({ x: x * dpr, y: y * dpr, vx: Math.cos(a) * v * sp, vy: Math.sin(a) * v * sp - 2.5 * dpr, life: 0, max: 50 + Math.random() * 40, c: cols[i % cols.length], r: (1.2 + Math.random() * 2.4) * dpr * (big ? 1.3 : 1), star: tier === 'diamond' || Math.random() < 0.3 });
+    }
+    const frame = () => {
+      ctx.clearRect(0, 0, W, H); let alive = 0;
+      for (const p of parts) {
+        if (p.life > p.max) continue; alive += 1; p.life += 1;
+        p.x += p.vx; p.y += p.vy; p.vy += 0.16 * dpr; p.vx *= 0.985;
+        ctx.globalAlpha = Math.max(0, 1 - p.life / p.max); ctx.fillStyle = p.c;
+        if (p.star) { ctx.beginPath(); for (let k = 0; k < 8; k += 1) { const rr = k % 2 ? p.r : p.r * 2.4; const aa = k * Math.PI / 4 + p.life * 0.1; ctx.lineTo(p.x + Math.cos(aa) * rr, p.y + Math.sin(aa) * rr); } ctx.closePath(); ctx.fill(); }
+        else { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill(); }
+      }
+      if (alive) window.requestAnimationFrame(frame); else cv.remove();
+    };
+    window.requestAnimationFrame(frame);
+  }
   const reduce = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const shade = (hex, f) => {
     const m = /^#([0-9a-f]{6})$/i.exec(hex || ''); if (!m) return hex || '#F5C542';
@@ -3967,7 +4190,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const age = (now - Date.parse(c.ts || '')) / 60000;
       if (!(age >= -5 && age <= MAX_AGE_MIN)) continue;
       const person = (s.persons || []).find((p) => p.id === c.pid); const name = person ? person.name : '';
-      const text = c.kind === 'day' ? fmt(T.day, { n: name }) : c.kind === 'team' && !c.pid ? T.team
+      const lvName = c.kind === 'level' ? (((s.points || {})[c.pid] || {}).level === c.value ? ((s.points || {})[c.pid] || {}).name : '') : '';
+      const unl = c.kind === 'level' && (c.unlocks || []).length && window.FPAV ? fmt(T.unl, { u: c.unlocks.map((u) => window.FPAV.label(u, lang)).join(', ') }) : '';
+      const text = c.kind === 'level' ? fmt(T.lvl, { n: name, v: c.value, t: lvName }) + (c.bonus ? fmt(T.lvlB, { b: c.bonus }) : '') + unl
+        : c.kind === 'day' ? fmt(T.day, { n: name }) : c.kind === 'team' && !c.pid ? T.team
         : fmt(T.won, { n: name, a: fmt(T.a[c.kind] || c.kind, { v: c.value }) });
       if (c.kind === 'team' && c.pid) continue; // the family celebration covers everybody
       queue.push({ fx: c.fx || 's', color: c.color || '#F5C542', text, rainbow: s.theme === 'rainbow' || c.kind === 'team' });
@@ -3976,7 +4202,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     run();
   }
 
-  window.FPCONFETTI = { check, rain, banner };
+  window.FPCONFETTI = { check, rain, banner, burst };
 })();
 
 // ---------------------------------------------------------------------------
