@@ -1,4 +1,320 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
+// ---------------------------------------------------------------------------
+// Avatar builder v2: layered SVG avatars, code 'av2:' + 12 dot-separated parts (all ids from fixed lists)
+//   fig.hair.hc.sk.head.face.neck.shirt.motif.pet.bg.cost   ('0' = none)
+// Old 'av:' codes (v1) are converted with FPAV.from1(). Every combination is drawn by tests/js/avatar_combos.js.
+// ---------------------------------------------------------------------------
+(() => {
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#4FA3E0');
+
+  // ---------------------------------------------------------------- palettes
+  const SK = { porzellan: '#FBE3CF', hell: '#F3CDA6', pfirsich: '#EDBB8F', mittel: '#E3B48A', oliv: '#C99167', karamell: '#B07A52', braun: '#8D5A3B', tief: '#6B4129', espresso: '#4A2C1C' };
+  const HC = { platin: ['#F2E6C2', '#D9C998'], blond: ['#EBC55A', '#D4A63B'], rotblond: ['#E39B4F', '#C47C33'], hellbraun: ['#B5814A', '#94663A'], braun: ['#8B5A2B', '#6E4520'],
+    schwarz: ['#3A3330', '#26211F'], rot: ['#D2662F', '#A9491E'], grau: ['#CDD1D5', '#A9AEB3'], rosa: ['#F49AC1', '#D9779F'], blau: ['#5FA8E8', '#3F86C6'], lila: ['#A98BE8', '#8566C9'], gruen: ['#5CC98A', '#3FA56B'] };
+  const SHIRT = { weiss: '#F4F4F4', grau: '#8A939E', schwarz: '#2E3138', rot: '#E05555', orange: '#F08A3C', gelb: '#F5C542', gruen: '#5CB85C', tuerkis: '#3FC1B0', blau: '#4A7FD6', lila: '#8E6BD6', pink: '#EC6FA8', braun: '#9A6A44' };
+
+  // ---------------------------------------------------------------- parts (ids are the code values)
+  const FIG = ['m', 'j', 'f', 'h', 'g', 'p']; // Mädchen, Junge, Frau, Mann, Grosi, Grosspapi
+  const KID = (f) => f === 'm' || f === 'j';
+  const OLD = (f) => f === 'g' || f === 'p';
+  const HAIR = ['kurz', 'seite', 'stachel', 'wuschel', 'undercut', 'irokese', 'lockenkurz', 'glatze', 'lang', 'pony', 'zoepfe', 'pferd', 'dutt', 'buns', 'bob', 'locken', 'afro', 'rastas'];
+  const HEAD = ['cap', 'muetze', 'krone', 'blumen', 'katze', 'hase', 'baer', 'einhorn', 'party', 'kopfhoerer', 'stirnband', 'schleife'];
+  const FACE = ['brille', 'eckig', 'sonnenbrille', 'sommersprossen', 'glitzer', 'pflaster', 'tiger', 'schmetterling', 'bart', 'schnauz'];
+  const NECK = ['schal', 'fliege', 'kette'];
+  const MOTIF = ['stern', 'herz', 'blitz', 'ball', 'rakete'];
+  const PET = ['katze', 'hund', 'hase', 'papagei', 'eidechse', 'affe', 'drache', 'pinguin', 'fuchs', 'roboter', 'eule', 'ballon', 'fussball', 'gitarre', 'zauberstab'];
+  const BG = ['sterne', 'regenbogen', 'herzen', 'konfetti', 'weltall', 'wolken', 'blasen', 'blitze'];
+  const COST = ['astro', 'mars', 'sternenkraft', 'funkenflug', 'mondfee', 'turbo', 'sternschnuppe', 'ninja', 'ritter', 'pirat', 'zauberer', 'prinzessin', 'prinz', 'dino', 'feuerwehr'];
+  // costumes with something on the head hide the head slot; masks hide glasses; full suits hide neck and motif
+  const COST_HAT = ['astro', 'mars', 'ninja', 'ritter', 'pirat', 'zauberer', 'prinzessin', 'prinz', 'dino', 'feuerwehr'];
+  const COST_MASK = ['sternenkraft', 'funkenflug', 'mondfee', 'turbo', 'sternschnuppe', 'ninja'];
+  const GLASSES = ['brille', 'eckig', 'sonnenbrille'];
+  const BEARD = ['bart', 'schnauz'];
+  const FIELDS = ['fig', 'hair', 'hc', 'sk', 'head', 'face', 'neck', 'shirt', 'motif', 'pet', 'bg', 'cost'];
+  const LISTS = { fig: FIG, hair: HAIR, hc: Object.keys(HC), sk: Object.keys(SK), head: HEAD, face: FACE, neck: NECK, shirt: Object.keys(SHIRT), motif: MOTIF, pet: PET, bg: BG, cost: COST };
+  const OPTIONAL = ['head', 'face', 'neck', 'motif', 'pet', 'bg', 'cost'];
+  const DEFAULT = { fig: 'm', hair: 'lang', hc: 'braun', sk: 'hell', head: '0', face: '0', neck: '0', shirt: 'blau', motif: '0', pet: '0', bg: '0', cost: '0' };
+
+  // ---------------------------------------------------------------- code
+  const parse = (code) => {
+    const raw = String(code || '').replace(/^av2:/, '').split('.');
+    const o = {};
+    FIELDS.forEach((f, i) => { const v = raw[i]; o[f] = (OPTIONAL.includes(f) && v === '0') ? '0' : (LISTS[f].includes(v) ? v : DEFAULT[f]); });
+    return o;
+  };
+  // what is actually drawn: parts that would clash are left out
+  const norm = (o0) => {
+    const o = { ...o0 };
+    if (o.cost !== '0') {
+      if (COST_HAT.includes(o.cost)) o.head = '0';
+      if (COST_MASK.includes(o.cost) && GLASSES.includes(o.face)) o.face = '0';
+      if (o.cost === 'ninja') o.face = '0';
+      o.neck = '0'; o.motif = '0';
+    }
+    if (BEARD.includes(o.face) && !(o.fig === 'h' || o.fig === 'p')) o.face = '0';
+    if (o.hair === 'glatze' && KID(o.fig)) o.hair = 'kurz';
+    return o;
+  };
+  const code = (o) => 'av2:' + FIELDS.map((f) => o[f] || '0').join('.');
+  const set = (c, part, val) => {
+    const o = parse(c);
+    if (!FIELDS.includes(part)) return code(o);
+    if (OPTIONAL.includes(part)) o[part] = (val === '0' || o[part] === val) ? '0' : (LISTS[part].includes(val) ? val : '0');
+    else if (LISTS[part].includes(val)) o[part] = val;
+    // choosing something that a costume would hide takes the costume off, so the tap always shows its effect
+    if (o.cost !== '0' && part !== 'cost' && OPTIONAL.includes(part) && o[part] !== '0') {
+      const n = norm(o); if (n[part] !== o[part]) o.cost = '0';
+    }
+    if (part === 'face' && BEARD.includes(o.face) && !(o.fig === 'h' || o.fig === 'p')) o.fig = 'h';
+    return code(norm(o));
+  };
+  // old v1 codes 'av:k.long.blond.hell.brille+held' -> v2
+  const from1 = (c) => {
+    const [age, st, hc, sk, acc] = String(c || '').replace(/^av:/, '').split('.');
+    const ex = acc && acc !== '0' ? acc.split('+') : [];
+    const girl = ['long', 'ponylang', 'zoepfe', 'dutt', 'bob', 'locken', 'pferd'].includes(st);
+    const fig = age === 'o' ? (girl ? 'g' : 'p') : age === 'e' ? (girl ? 'f' : 'h') : (girl ? 'm' : 'j');
+    const hair = { long: 'lang', ponylang: 'pony', zoepfe: 'zoepfe', dutt: 'dutt', bob: 'bob', locken: 'locken', pferd: 'pferd', kurz: 'kurz', seite: 'seite', stachel: 'stachel', lockenkurz: 'lockenkurz', glatze: 'glatze' }[st] || 'kurz';
+    const pick = (map) => { for (const [k, v] of Object.entries(map)) if (ex.includes(k)) return v; return '0'; };
+    return code(norm({ fig, hair, hc: HC[hc] ? hc : 'braun', sk: SK[sk] ? sk : 'hell',
+      head: pick({ cap: 'cap', krone: 'krone', katze: 'katze', einhorn: 'einhorn', kopfhoerer: 'kopfhoerer', schleife: 'schleife', stirnband: 'stirnband' }),
+      face: pick({ sonnenbrille: 'sonnenbrille', brille: 'brille', bart: 'bart', sommersprossen: 'sommersprossen' }),
+      neck: '0', shirt: 'blau', motif: '0', pet: '0', bg: '0',
+      cost: pick({ held: 'sternenkraft', blitz: 'funkenflug', nacht: 'mondfee', ninja: 'ninja', ritter: 'ritter', astro: 'astro', pirat: 'pirat', zauber: 'zauberer' }) }));
+  };
+  const random = (fig) => {
+    const r = (a) => a[Math.floor(Math.random() * a.length)];
+    const o = { fig: fig || r(FIG), hair: r(HAIR), hc: r(Object.keys(HC)), sk: r(Object.keys(SK)), shirt: r(Object.keys(SHIRT)),
+      head: Math.random() < 0.5 ? r(HEAD) : '0', face: Math.random() < 0.4 ? r(FACE) : '0', neck: Math.random() < 0.3 ? r(NECK) : '0',
+      motif: Math.random() < 0.5 ? r(MOTIF) : '0', pet: Math.random() < 0.5 ? r(PET) : '0', bg: Math.random() < 0.6 ? r(BG) : '0', cost: Math.random() < 0.2 ? r(COST) : '0' };
+    return code(norm(o));
+  };
+
+  // ---------------------------------------------------------------- drawing (viewBox 0 0 64 64, head centre 32/28)
+  const W = '#ffffff';
+  const bgArt = {
+    sterne: () => `<g fill="${W}" opacity=".55">${[[9, 10, 1.6], [53, 8, 1.2], [56, 26, 1.5], [7, 30, 1.1], [14, 50, 1.3], [50, 52, 1.1], [44, 14, .9], [20, 18, .8]].map(([x, y, r]) => `<path d="M${x} ${y - r * 2}l${r * .6} ${r * 1.4} ${r * 1.4} ${r * .6}-${r * 1.4} ${r * .6}-${r * .6} ${r * 1.4}-${r * .6}-${r * 1.4}-${r * 1.4}-${r * .6} ${r * 1.4}-${r * .6}z"/>`).join('')}</g>`,
+    regenbogen: () => `<g fill="none" stroke-width="3" opacity=".55">${['#FF5F6D', '#FFA34F', '#FFD84F', '#4FE08A', '#4FA3E0', '#8F6BFF'].map((c, i) => `<path d="M-4 ${46 + i * 3}A36 36 0 0 1 68 ${46 + i * 3}" stroke="${c}"/>`).join('')}</g>`,
+    herzen: () => `<g fill="${W}" opacity=".45">${[[9, 12, 1], [54, 10, .8], [55, 34, 1.1], [8, 38, .9], [47, 18, .6]].map(([x, y, s]) => `<path transform="translate(${x} ${y}) scale(${s})" d="M0 3C-4-1-2.4-4.6 0-2.4 2.4-4.6 4-1 0 3z"/>`).join('')}</g>`,
+    konfetti: () => `<g opacity=".8">${[['#F5C542', 8, 10, 20], ['#E06B9B', 52, 9, -30], ['#4FE08A', 56, 30, 45], ['#7C9CFF', 7, 34, -15], ['#FFA34F', 46, 18, 70], ['#fff', 15, 20, 10], ['#F5C542', 12, 52, 60], ['#4FA3E0', 52, 48, -50]].map(([c, x, y, a]) => `<rect x="${x}" y="${y}" width="3.4" height="1.6" rx=".5" fill="${c}" transform="rotate(${a} ${x} ${y})"/>`).join('')}</g>`,
+    weltall: () => `<rect width="64" height="64" fill="#141838" opacity=".55"/><circle cx="52" cy="13" r="5" fill="#F5C542" opacity=".9"/><path d="M45.5 14.5c4-2 9.5-3.4 13-2.6" stroke="#E8E3FF" stroke-width="1" fill="none" opacity=".8"/><g fill="#fff">${[[10, 12], [20, 6], [8, 28], [57, 30], [14, 44], [50, 42]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r=".8"/>`).join('')}</g>`,
+    wolken: () => `<g fill="${W}" opacity=".55"><path d="M4 18a4 4 0 0 1 4-4 5 5 0 0 1 9 1 3.5 3.5 0 0 1 1 7H8a4 4 0 0 1-4-4z"/><path d="M44 10a3.4 3.4 0 0 1 3.4-3.4 4.4 4.4 0 0 1 8 .8 3 3 0 0 1 .8 6H47.4A3.4 3.4 0 0 1 44 10z"/><path d="M48 36a3 3 0 0 1 3-3 4 4 0 0 1 7 .8 2.6 2.6 0 0 1 .6 5.2H51a3 3 0 0 1-3-3z"/></g>`,
+    blasen: () => `<g fill="none" stroke="${W}" stroke-width="1" opacity=".6">${[[9, 14, 4], [55, 12, 3], [52, 34, 4.5], [8, 40, 3], [46, 22, 2], [16, 26, 1.6]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}"/><path d="M${x - r * .5} ${y - r * .3}a${r * .6} ${r * .6} 0 0 1 ${r * .4}-${r * .3}" />`).join('')}</g>`,
+    blitze: () => `<g fill="#FFE27A" opacity=".85">${[[8, 8, 1], [52, 6, .8], [54, 32, 1.1], [6, 34, .9]].map(([x, y, s]) => `<path transform="translate(${x} ${y}) scale(${s})" d="M3 0L0 6h2.4L1 11l5-7H3.4L5 0z"/>`).join('')}</g>`,
+  };
+  // hair: [back, front] with c1 = colour, c2 = darker shade
+  const hairArt = {
+    kurz: [null, (c) => `<path d="M21 26c-.7-8.8 4.4-14.6 11-14.6s11.7 5.8 11 14.6c-1-3.2-2.8-5.4-5.2-6.2-3.6 1.6-9.4 1.8-13.2.2-1.6 1.2-2.8 3.2-3.6 6z" fill="${c}"/>`],
+    seite: [null, (c) => `<path d="M20.8 27c-.8-9 4.4-15 11.2-15 7 0 12 5.6 11.2 13.6-3.4-3.6-9-6.4-16.4-6-2 1.4-4.6 4-6 7.4z" fill="${c}"/><path d="M27 19c4-.6 9 .4 13 3.6" stroke="#000" stroke-opacity=".12" stroke-width=".8" fill="none"/>`],
+    stachel: [null, (c) => `<path d="M20.8 25.4l.4-7 2.6 1.8 1-6 2.8 3.2 2.2-6.2 2.4 5.6 3-5.2 1.6 6 3.4-3.4.4 6.4 2.2.8c.6 1.6.4 3 0 4-1.8-3.4-5-5.4-11-5.4s-9.2 2-10.8 5.4z" fill="${c}"/>`],
+    wuschel: [null, (c) => `<g fill="${c}"><circle cx="24" cy="17" r="4.6"/><circle cx="31" cy="14.2" r="5"/><circle cx="38.5" cy="16.4" r="4.6"/><circle cx="21.4" cy="22" r="3.4"/><circle cx="42.6" cy="22" r="3.4"/><circle cx="27.6" cy="19.4" r="3.2"/><circle cx="35.4" cy="19.6" r="3.2"/></g>`],
+    undercut: [null, (c, d) => `<path d="M21.4 26c-.4-3 0-5.4 1-7.4.6 2 .6 4.6-1 7.4zM42.6 26c.4-3 0-5.4-1-7.4-.6 2-.6 4.6 1 7.4z" fill="${d}" opacity=".7"/><path d="M22.6 19.6c1.6-6 5.4-8.8 10.4-8.8 6.4 0 10 3.6 10.4 9.6-2.2-1.8-5.2-2.4-8.4-1.6-2.2-2.6-7.4-2.8-12.4.8z" fill="${c}"/>`],
+    irokese: [null, (c, d) => `<path d="M21.4 25c-.6-3.4.2-6 1.6-7.6M42.6 25c.6-3.4-.2-6-1.6-7.6" stroke="${d}" stroke-width="1.4" opacity=".6" fill="none"/><path d="M28.6 20.6l-.6-6.4 2-1.4-.4-4 2.4 1.6 1-4 1.8 3.8 2.2-2.2-.4 4.2 2.2-.6-1.6 5.4c-2.6-.8-5.6-.6-8.6-.4z" fill="${c}"/>`],
+    lockenkurz: [null, (c) => `<g fill="${c}"><circle cx="24.2" cy="17" r="4.2"/><circle cx="31.8" cy="14.4" r="4.6"/><circle cx="39.4" cy="17" r="4.2"/><circle cx="21.6" cy="22.4" r="3.2"/><circle cx="42.4" cy="22.4" r="3.2"/></g>`],
+    glatze: [null, (c) => `<path d="M21 31c-1.4-3.2-.8-6.6 1.2-8.2.8 2.8.8 5.4-1.2 8.2zM43 31c1.4-3.2.8-6.6-1.2-8.2-.8 2.8-.8 5.4 1.2 8.2z" fill="${c}"/>`],
+    lang: [(c) => `<path d="M19 28c0-11 5.6-17.6 13-17.6S45 17 45 28v17.6c0 2.4-2 4-4.4 4H23.4c-2.4 0-4.4-1.6-4.4-4z" fill="${c}"/>`, (c) => `<path d="M21 28c-.4-9.4 4.6-15.4 11-15.4 6.6 0 11.4 6 11 15.4-3.6-1.2-7.6-4-9.8-7.8-2.6 4.2-7.2 6.8-12.2 7.8z" fill="${c}"/>`],
+    pony: [(c) => `<path d="M19 28c0-11 5.6-17.6 13-17.6S45 17 45 28v17.6c0 2.4-2 4-4.4 4H23.4c-2.4 0-4.4-1.6-4.4-4z" fill="${c}"/>`, (c) => `<path d="M21 26c0-8.4 4.8-13.6 11-13.6S43 17.6 43 26c-1.8-2-3-3-4.4-3.4l-1 2-1.6-2.4-1.8 2.4-1.8-2.4-1.8 2.4-1.6-2.4-1 2c-2 .4-3.4 1.4-5 3.4z" fill="${c}"/>`],
+    zoepfe: [(c) => `<g fill="${c}"><ellipse cx="17.6" cy="36" rx="3.6" ry="7.6"/><ellipse cx="46.4" cy="36" rx="3.6" ry="7.6"/></g><g fill="#FF7AA8"><circle cx="18.4" cy="29" r="1.8"/><circle cx="45.6" cy="29" r="1.8"/></g>`, (c) => `<path d="M21 27c-.4-9 4.4-14.6 11-14.6s11.4 5.6 11 14.6c-1.8-3.6-4.8-6-8.6-7-.8 1.2-1.6 2-2.4 2.6-.8-.6-1.6-1.4-2.4-2.6-3.8 1-6.8 3.4-8.6 7z" fill="${c}"/>`],
+    pferd: [(c) => `<path d="M40.6 17.6c7.6.8 10.4 8.6 9.4 17.6-.6 5.6-3.6 8.8-6 9.6 1.4-5 1.6-11-.4-16z" fill="${c}"/><circle cx="41.6" cy="18.2" r="1.6" fill="#E06B9B"/>`, (c) => `<path d="M21 26.4c-.6-8.6 4.4-14.2 11-14.2 6.8 0 11.6 5.2 11 13.4-3.4-3.4-9.2-6-16.6-5.6-2 1.2-4 3.6-5.4 6.4z" fill="${c}"/>`],
+    dutt: [(c, d) => `<circle cx="32" cy="11.4" r="6" fill="${c}"/><path d="M27 15.4h10" stroke="${d}" stroke-width="1.2"/>`, (c) => `<path d="M21 27c-.4-8.6 4.6-14 11-14s11.4 5.4 11 14c-2-3.4-5.6-6-11-6s-9 2.6-11 6z" fill="${c}"/>`],
+    buns: [(c) => `<g fill="${c}"><circle cx="21" cy="14" r="5.4"/><circle cx="43" cy="14" r="5.4"/></g>`, (c) => `<path d="M21 27c-.4-8.6 4.6-14 11-14s11.4 5.4 11 14c-1.6-3-4-5.2-7-6l-4 2.2-4-2.2c-3 .8-5.4 3-7 6z" fill="${c}"/>`],
+    bob: [(c) => `<path d="M19.4 28c0-10.6 5.6-16.6 12.6-16.6S44.6 17.4 44.6 28v9c0 1.8-1.4 3-3 3H22.4c-1.6 0-3-1.2-3-3z" fill="${c}"/>`, (c) => `<path d="M21 26c0-8.4 4.8-13.6 11-13.6S43 17.6 43 26c-2.4-1.8-6.6-3.6-11-3.6s-8.6 1.8-11 3.6z" fill="${c}"/>`],
+    locken: [(c) => `<g fill="${c}"><circle cx="20" cy="22" r="5"/><circle cx="44" cy="22" r="5"/><circle cx="18.6" cy="30" r="4.8"/><circle cx="45.4" cy="30" r="4.8"/><circle cx="19.4" cy="38" r="4.4"/><circle cx="44.6" cy="38" r="4.4"/><circle cx="21.4" cy="45" r="3.6"/><circle cx="42.6" cy="45" r="3.6"/></g>`, (c) => `<g fill="${c}"><circle cx="24.4" cy="16.6" r="4.6"/><circle cx="32" cy="14" r="5"/><circle cx="39.6" cy="16.6" r="4.6"/><circle cx="21.6" cy="22" r="3.4"/><circle cx="42.4" cy="22" r="3.4"/></g>`],
+    afro: [(c) => `<circle cx="32" cy="24" r="16.4" fill="${c}"/>`, (c) => `<path d="M21 26c0-7.6 4.8-12.6 11-12.6S43 18.4 43 26c-2.8-2.4-6.6-3.8-11-3.8S23.8 23.6 21 26z" fill="${c}"/>`],
+    rastas: [(c, d) => `<g fill="${c}">${[17.6, 20.8, 43.2, 46.4].map((x, i) => `<rect x="${x - 1.6}" y="${20 + (i % 2) * 2}" width="3.2" height="${22 - (i % 2) * 3}" rx="1.6"/>`).join('')}</g><g stroke="${d}" stroke-width=".6">${[17.6, 20.8, 43.2, 46.4].map((x) => `<path d="M${x - 1.4} 30h2.8M${x - 1.4} 35h2.8"/>`).join('')}</g>`, (c) => `<path d="M21 26.6c-.4-8.8 4.6-14.4 11-14.4s11.4 5.6 11 14.4c-2.4-3.2-6.4-5.4-11-5.4s-8.6 2.2-11 5.4z" fill="${c}"/><g fill="${c}"><rect x="23" y="20" width="3" height="9" rx="1.5"/><rect x="38" y="20" width="3" height="9" rx="1.5"/></g>`],
+  };
+  const headArt = {
+    cap: () => `<path d="M20.4 22.4c.4-7.4 5.2-12 11.6-12s11.2 4.6 11.6 12z" fill="#3E7CC9"/><path d="M31 21.4c6 0 12 .6 17.4 2.2-.8 1.4-3 1.6-5.6 1.4-4-.6-7.8-.8-11.8-.8z" fill="#2F64A6"/><circle cx="32" cy="10.8" r="1.2" fill="#2F64A6"/>`,
+    muetze: () => `<path d="M20.4 22.6c0-7.6 5-12.4 11.6-12.4s11.6 4.8 11.6 12.4z" fill="#E05555"/><rect x="19.6" y="20.4" width="24.8" height="4.4" rx="2.2" fill="#F4F4F4"/><circle cx="32" cy="9.6" r="3.2" fill="#F4F4F4"/><path d="M26 14l1.4 5M32 12.4v6.6M38 14l-1.4 5" stroke="#C23F3F" stroke-width=".8"/>`,
+    krone: () => `<path d="M23.6 16.6l2-7.6 4.2 4.6L32 6.8l2.2 6.8 4.2-4.6 2 7.6z" fill="#F5C542" stroke="#D9A21E" stroke-width=".5"/><circle cx="32" cy="12.4" r="1.2" fill="#E06B6B"/><circle cx="27.4" cy="14.4" r=".8" fill="#4FA3E0"/><circle cx="36.6" cy="14.4" r=".8" fill="#4FA3E0"/>`,
+    blumen: () => `<path d="M21.4 21c2.6-5.4 6.6-8 10.6-8s8 2.6 10.6 8" stroke="#5CB85C" stroke-width="1.4" fill="none"/>${[[24, 16.4, '#FF7AA8'], [32, 13, '#F5C542'], [40, 16.4, '#B69CF2']].map(([x, y, c]) => `<g transform="translate(${x} ${y})"><circle r="1.4" cy="-1.6" fill="${c}"/><circle r="1.4" cy="1.6" fill="${c}"/><circle r="1.4" cx="-1.6" fill="${c}"/><circle r="1.4" cx="1.6" fill="${c}"/><circle r="1" fill="#fff"/></g>`).join('')}`,
+    katze: () => `<path d="M20 18l1.6-9.4 6.6 6.2zM44 18l-1.6-9.4-6.6 6.2z" fill="#3a3a3a"/><path d="M21.8 15.6l.8-4.6 3 3zM42.2 15.6l-.8-4.6-3 3z" fill="#F29A9A"/>`,
+    hase: () => `<g fill="#F4F4F4" stroke="#ddd" stroke-width=".4"><ellipse cx="26.6" cy="8" rx="3" ry="8" transform="rotate(-10 26.6 8)"/><ellipse cx="37.4" cy="8" rx="3" ry="8" transform="rotate(10 37.4 8)"/></g><g fill="#F7B6C6"><ellipse cx="26.6" cy="8.6" rx="1.4" ry="5.6" transform="rotate(-10 26.6 8.6)"/><ellipse cx="37.4" cy="8.6" rx="1.4" ry="5.6" transform="rotate(10 37.4 8.6)"/></g>`,
+    baer: () => `<g fill="#8B5A2B"><circle cx="21.6" cy="14" r="4.2"/><circle cx="42.4" cy="14" r="4.2"/></g><g fill="#D9A27A"><circle cx="21.6" cy="14" r="2.2"/><circle cx="42.4" cy="14" r="2.2"/></g>`,
+    einhorn: () => `<path d="M29.8 14.6L32 2.4l2.2 12.2z" fill="#F5C542"/><path d="M30.4 11.6l3.2-1M30.8 8.2l2.4-.8M31.2 5.2l1.6-.5" stroke="#D99A2B" stroke-width=".7"/><circle cx="24.6" cy="15" r="2" fill="#FF7AA8"/><circle cx="39.4" cy="15" r="2" fill="#B69CF2"/>`,
+    party: () => `<path d="M25 17.6L33 1.6l7 15z" fill="#7C9CFF"/><path d="M27.4 12.6l9.8 1.6M29.6 8l5.6.9" stroke="#F5C542" stroke-width="1.4"/><circle cx="33" cy="1.8" r="2" fill="#E06B9B"/><path d="M25 17.6q7.6 2 15 0" stroke="#5B79D9" stroke-width="1" fill="none"/>`,
+    kopfhoerer: () => `<path d="M18.8 29c0-9.4 5.8-15.4 13.2-15.4S45.2 19.6 45.2 29" fill="none" stroke="#333" stroke-width="2.4"/><rect x="16.2" y="25.8" width="5.4" height="8.8" rx="2.4" fill="#E06B6B"/><rect x="42.4" y="25.8" width="5.4" height="8.8" rx="2.4" fill="#E06B6B"/>`,
+    stirnband: () => `<path d="M20.8 20.6c7-2.8 15.4-2.8 22.4 0l-.4 3c-7-2.4-14.6-2.4-21.6 0z" fill="#4FD1C5"/><path d="M21.4 22.2c6.6-2.2 14.6-2.2 21.2 0" stroke="#fff" stroke-width=".5" opacity=".7" fill="none"/>`,
+    schleife: () => `<path d="M38.6 13.6l5.8-3.4v6.8zM38.6 13.6l-5.8-3.4v6.8z" fill="#FF7AA8"/><circle cx="38.6" cy="13.6" r="1.6" fill="#E0568A"/>`,
+  };
+  const faceArt = {
+    brille: () => `<g fill="none" stroke="#2b2b2b" stroke-width="1.1"><circle cx="27.8" cy="29.4" r="3.4"/><circle cx="36.2" cy="29.4" r="3.4"/><path d="M31.2 29h1.6M24.4 28.6l-3-1M39.6 28.6l3-1"/></g>`,
+    eckig: () => `<g fill="none" stroke="#3E7CC9" stroke-width="1.2"><rect x="23.8" y="26.6" width="7.2" height="5.4" rx="1.2"/><rect x="33" y="26.6" width="7.2" height="5.4" rx="1.2"/><path d="M31 28.6h2M23.8 28.4l-2.4-.8M40.2 28.4l2.4-.8"/></g>`,
+    sonnenbrille: () => `<g fill="#1d1d24"><rect x="23.4" y="26.4" width="7.8" height="5.6" rx="2.2"/><rect x="32.8" y="26.4" width="7.8" height="5.6" rx="2.2"/></g><path d="M31.2 28h1.6M23.4 27.6l-2.6-.8M40.6 27.6l2.6-.8" stroke="#1d1d24" stroke-width="1.1"/><path d="M24.8 27.8l2.2-.2M34.2 27.8l2.2-.2" stroke="#fff" stroke-width=".7" opacity=".6"/>`,
+    sommersprossen: () => `<g fill="#B5774F" opacity=".75">${[[24.4, 32.2], [26, 33.4], [23.8, 34], [39.6, 32.2], [38, 33.4], [40.2, 34]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r=".5"/>`).join('')}</g>`,
+    glitzer: () => `<g fill="#F5C542">${[[23.6, 33.2, .9], [40.4, 33.2, .9], [25.4, 35, .6], [38.6, 35, .6]].map(([x, y, r]) => `<path d="M${x} ${y - r * 2}l${r * .5} ${r * 1.5} ${r * 1.5} ${r * .5}-${r * 1.5} ${r * .5}-${r * .5} ${r * 1.5}-${r * .5}-${r * 1.5}-${r * 1.5}-${r * .5} ${r * 1.5}-${r * .5}z"/>`).join('')}</g>`,
+    pflaster: () => `<g transform="rotate(-25 38.6 33.8)"><rect x="35.2" y="32.4" width="7" height="2.8" rx="1.2" fill="#F2C9A0"/><rect x="37.6" y="32.4" width="2.2" height="2.8" fill="#E5B184"/></g>`,
+    tiger: () => `<g fill="#E8822C" opacity=".85"><path d="M21.4 27l4 1.2-4 1.2zM21.6 32l3.6.4-3.4 1.4zM42.6 27l-4 1.2 4 1.2zM42.4 32l-3.6.4 3.4 1.4zM30.6 18.4l1.4 3 1.4-3z"/></g><path d="M30.6 31.8q1.4 1 2.8 0" stroke="#333" stroke-width=".8" fill="none"/><circle cx="32" cy="31.2" r=".9" fill="#333"/>`,
+    schmetterling: () => `<g opacity=".8"><path d="M32 30c-2.4-4.2-7.4-5.6-9-3.4-1.4 2 .8 5.4 4 5.6-2.6 1.2-2.6 4.2-.4 4.6 2.2.4 4.2-2.4 5.4-6.8z" fill="#B69CF2"/><path d="M32 30c2.4-4.2 7.4-5.6 9-3.4 1.4 2-.8 5.4-4 5.6 2.6 1.2 2.6 4.2.4 4.6-2.2.4-4.2-2.4-5.4-6.8z" fill="#FF7AA8"/></g>`,
+    bart: (c) => `<path d="M21.4 30.4c.6 6.6 4.8 10.8 10.6 10.8s10-4.2 10.6-10.8c-2 2.4-4.6 3.6-6.8 3-1.2-.4-2.4-.8-3.8-.8s-2.6.4-3.8.8c-2.2.6-4.8-.6-6.8-3z" fill="${c}"/>`,
+    schnauz: (c) => `<path d="M26.4 33.4c1.6-1.8 3.6-2 5.6-1 2-1 4-.8 5.6 1-1.8.4-3.8.4-5.6-.2-1.8.6-3.8.6-5.6.2z" fill="${c}"/>`,
+  };
+  const neckArt = {
+    schal: () => `<path d="M22.6 42.6c6 3.4 12.8 3.4 18.8 0l1.4 3.8c-7 3.6-14.6 3.6-21.6 0z" fill="#E05555"/><path d="M37 45.4l1.2 10.4h-4.2l-.6-9.6z" fill="#E05555"/><path d="M34.4 52.6h3.8M34.6 54.6h3.8" stroke="#F4F4F4" stroke-width=".9"/>`,
+    fliege: () => `<path d="M32 44.6l-5-2.8v5.6zM32 44.6l5-2.8v5.6z" fill="#E05555"/><circle cx="32" cy="44.6" r="1.3" fill="#B53D3D"/>`,
+    kette: () => `<path d="M26.4 42.4q5.6 5.6 11.2 0" stroke="#F5C542" stroke-width=".9" fill="none"/><path d="M32 45.4l1.6 1.8-1.6 2-1.6-2z" fill="#7FDBFF"/>`,
+  };
+  const motifArt = {
+    stern: () => '<path d="M32 51l1.6 3.4 3.7.5-2.7 2.6.7 3.7-3.3-1.8-3.3 1.8.7-3.7-2.7-2.6 3.7-.5z" fill="#F5C542"/>',
+    herz: () => '<path d="M32 60c-5-3.4-6-6.6-4.4-8.2 1.4-1.4 3.4-.8 4.4.8 1-1.6 3-2.2 4.4-.8 1.6 1.6.6 4.8-4.4 8.2z" fill="#E06B9B"/>',
+    blitz: () => '<path d="M33.4 50.6l-4.2 6h3l-1.4 4.6 5-6.6h-3l1.8-4z" fill="#FFE27A"/>',
+    ball: () => '<circle cx="32" cy="56" r="4.4" fill="#fff"/><path d="M32 53.6l2 1.4-.8 2.4h-2.4l-.8-2.4zM27.8 55.2l2-.4M36.2 55.2l-2-.4M30.8 57.4l-1.2 2.2M33.2 57.4l1.2 2.2" fill="#2b2b2b" stroke="#2b2b2b" stroke-width=".5"/>',
+    rakete: () => '<path d="M32 50c2.4 1.6 3.4 4.4 3 8.4h-6c-.4-4 .6-6.8 3-8.4z" fill="#F4F4F4"/><circle cx="32" cy="54.4" r="1.2" fill="#4FA3E0"/><path d="M29 56.6l-2 3h2.2zM35 56.6l2 3h-2.2z" fill="#E05555"/><path d="M30.6 58.6l1.4 3 1.4-3z" fill="#FFA34F"/>',
+  };
+  // companions sit bottom right (animals on the shoulder / in the arm), things bottom left
+  const petArt = {
+    katze: () => `<g transform="translate(46 47)"><path d="M-6 6.5c0-5 2.4-8 6-8s6 3 6 8z" fill="#F0A04B"/><circle cy="-3" r="5" fill="#F0A04B"/><path d="M-4.6-6l-.4-4.4 3.2 2.6zM4.6-6l.4-4.4-3.2 2.6z" fill="#F0A04B"/><circle cx="-1.8" cy="-3.4" r=".8" fill="#2b2b2b"/><circle cx="1.8" cy="-3.4" r=".8" fill="#2b2b2b"/><path d="M-.6-1.6h1.2L0-.8z" fill="#E07A8A"/><path d="M-3.6-1.4l-2.6-.4M3.6-1.4l2.6-.4" stroke="#7a4a1a" stroke-width=".4"/></g>`,
+    hund: () => `<g transform="translate(46 47)"><path d="M-6 6.5c0-5 2.4-8 6-8s6 3 6 8z" fill="#C9935B"/><circle cy="-3" r="5" fill="#C9935B"/><ellipse cx="-4.8" cy="-2.6" rx="1.8" ry="3.4" fill="#8B5A2B"/><ellipse cx="4.8" cy="-2.6" rx="1.8" ry="3.4" fill="#8B5A2B"/><circle cx="-1.8" cy="-3.6" r=".8" fill="#2b2b2b"/><circle cx="1.8" cy="-3.6" r=".8" fill="#2b2b2b"/><ellipse cy="-1.4" rx="1.2" ry=".9" fill="#2b2b2b"/></g>`,
+    hase: () => `<g transform="translate(46 48)"><ellipse cy="3" rx="5.6" ry="4.4" fill="#F4F4F4"/><circle cy="-2.4" r="4.4" fill="#F4F4F4"/><ellipse cx="-1.8" cy="-8.6" rx="1.4" ry="3.6" fill="#F4F4F4"/><ellipse cx="1.8" cy="-8.6" rx="1.4" ry="3.6" fill="#F4F4F4"/><ellipse cx="-1.8" cy="-8.4" rx=".6" ry="2.4" fill="#F7B6C6"/><ellipse cx="1.8" cy="-8.4" rx=".6" ry="2.4" fill="#F7B6C6"/><circle cx="-1.5" cy="-2.6" r=".7" fill="#2b2b2b"/><circle cx="1.5" cy="-2.6" r=".7" fill="#2b2b2b"/><circle cy="-1" r=".6" fill="#E07A8A"/></g>`,
+    papagei: () => `<g transform="translate(47 40)"><ellipse cy="3" rx="3.6" ry="5.4" fill="#4FBF6B"/><circle cy="-3" r="3.6" fill="#E05555"/><path d="M2.4-3.4l3 1.4-2.8 1z" fill="#F5C542"/><circle cx="1" cy="-3.8" r=".7" fill="#2b2b2b"/><path d="M-2 6l-1.2 5M0 7l0 5" stroke="#3E7CC9" stroke-width="1.6" stroke-linecap="round"/><path d="M-3.4 1.4c-1.4 2-1.4 4.4 0 6" stroke="#2F9A50" stroke-width="1.4" fill="none"/></g>`,
+    eidechse: () => `<g transform="translate(46 50)"><path d="M-7 6c3-1 4.4-3 4.6-5.4L4 -1.4c2.2-.4 3.4.8 3 2.6-.4 1.6-2 2.2-4 2.4L-1 4.6C-3 6.4-5 7-7 6z" fill="#7BC74D"/><circle cx="5.4" cy=".2" r=".7" fill="#2b2b2b"/><path d="M-1 2.4l-1.4 3.4M1.4 1.6l.4 3.6M-.6-.6l-1.6-2.6M2 -1l.8-2.6" stroke="#5DA834" stroke-width="1" stroke-linecap="round"/><g fill="#5DA834"><circle cx="0" cy="1.4" r=".6"/><circle cx="2.4" cy=".8" r=".5"/></g></g>`,
+    affe: () => `<g transform="translate(46 47)"><path d="M-6 6.5c0-5 2.4-8 6-8s6 3 6 8z" fill="#8B5A2B"/><circle cy="-3" r="5" fill="#8B5A2B"/><circle cx="-5.2" cy="-3" r="2" fill="#8B5A2B"/><circle cx="5.2" cy="-3" r="2" fill="#8B5A2B"/><circle cx="-5.2" cy="-3" r="1" fill="#E3B48A"/><circle cx="5.2" cy="-3" r="1" fill="#E3B48A"/><ellipse cy="-1.8" rx="3.4" ry="2.8" fill="#E3B48A"/><circle cx="-1.4" cy="-3.6" r=".7" fill="#2b2b2b"/><circle cx="1.4" cy="-3.6" r=".7" fill="#2b2b2b"/><path d="M-1.2-1q1.2.9 2.4 0" stroke="#5a3a1a" stroke-width=".5" fill="none"/></g>`,
+    drache: () => `<g transform="translate(46 47)"><path d="M-2 -2l-5-3 1.6 4.4zM2-2l5-3-1.6 4.4z" fill="#3FC1B0"/><path d="M-6 6.5c0-5 2.4-8 6-8s6 3 6 8z" fill="#5CC98A"/><circle cy="-3" r="4.6" fill="#5CC98A"/><path d="M-2.4-7l.8-2.6 1 2.2 1-2.2.8 2.6" fill="#F5C542"/><circle cx="-1.6" cy="-3.6" r=".8" fill="#2b2b2b"/><circle cx="1.6" cy="-3.6" r=".8" fill="#2b2b2b"/><path d="M-1.6-1.2q1.6 1 3.2 0" stroke="#2F9A50" stroke-width=".6" fill="none"/><ellipse cy="3" rx="2.6" ry="2.8" fill="#BFF0CF"/></g>`,
+    pinguin: () => `<g transform="translate(46 48)"><ellipse cy="1" rx="5.4" ry="7.4" fill="#2E3138"/><ellipse cy="2.4" rx="3.6" ry="5.4" fill="#F4F4F4"/><circle cx="-1.4" cy="-3" r=".8" fill="#2b2b2b"/><circle cx="1.4" cy="-3" r=".8" fill="#2b2b2b"/><circle cx="-1.2" cy="-3.2" r=".3" fill="#fff"/><path d="M-1.2-1.6h2.4L0 0z" fill="#F5A623"/></g>`,
+    fuchs: () => `<g transform="translate(46 47)"><path d="M-6 6.5c0-5 2.4-8 6-8s6 3 6 8z" fill="#E8822C"/><path d="M-5.4-6.6l1.4-3.4 2.6 3zM5.4-6.6l-1.4-3.4-2.6 3z" fill="#E8822C"/><path d="M-5.4-6C-5-1 -2 1.4 0 1.4S5-1 5.4-6c-1.4-1-3.4-1.6-5.4-1.6s-4 .6-5.4 1.6z" fill="#E8822C"/><path d="M-4.6-3C-3.6 0-1.8 1.4 0 1.4S3.6 0 4.6-3C3-2 1.6-1.6 0-1.6S-3-2-4.6-3z" fill="#fff"/><circle cx="-2" cy="-3.8" r=".7" fill="#2b2b2b"/><circle cx="2" cy="-3.8" r=".7" fill="#2b2b2b"/><circle cy=".8" r=".7" fill="#2b2b2b"/></g>`,
+    roboter: () => `<g transform="translate(46 48)"><rect x="-5" y="-1" width="10" height="8" rx="2" fill="#9AA5B1"/><rect x="-4.4" y="-8.4" width="8.8" height="7" rx="2" fill="#C9D1D9"/><rect x="-3" y="-6.4" width="6" height="2.6" rx="1.2" fill="#2E3138"/><circle cx="-1.4" cy="-5.1" r=".7" fill="#7FDBFF"/><circle cx="1.4" cy="-5.1" r=".7" fill="#7FDBFF"/><path d="M0-8.4v-2" stroke="#9AA5B1" stroke-width=".8"/><circle cy="-10.8" r="1" fill="#E06B6B"/><circle cy="3" r="1.4" fill="#F5C542"/></g>`,
+    eule: () => `<g transform="translate(46 47)"><ellipse cy="2" rx="5.4" ry="7" fill="#9A6A44"/><path d="M-4.6-3.6l-.6-3.4 2.6 2zM4.6-3.6l.6-3.4-2.6 2z" fill="#9A6A44"/><circle cx="-2" cy="-2" r="2.2" fill="#fff"/><circle cx="2" cy="-2" r="2.2" fill="#fff"/><circle cx="-2" cy="-2" r="1.1" fill="#2b2b2b"/><circle cx="2" cy="-2" r="1.1" fill="#2b2b2b"/><path d="M-.8 0h1.6L0 1.4z" fill="#F5A623"/><ellipse cy="5" rx="3" ry="2.6" fill="#D9B48A"/></g>`,
+    ballon: () => '<path d="M12 46q-1.6 6 1 18" stroke="#888" stroke-width=".6" fill="none"/><ellipse cx="11" cy="38" rx="5.4" ry="6.6" fill="#E05555"/><path d="M10 45h2l-1 1.6z" fill="#E05555"/><ellipse cx="9" cy="35.6" rx="1.4" ry="2.2" fill="#fff" opacity=".45"/>',
+    fussball: () => '<circle cx="12" cy="56" r="5.6" fill="#fff" stroke="#ccc" stroke-width=".4"/><path d="M12 53l2.6 1.8-1 3h-3.2l-1-3z" fill="#2b2b2b"/><path d="M6.8 54.4l2.8.4M17.2 54.4l-2.8.4M10.6 57.8l-1.4 3M13.4 57.8l1.4 3" stroke="#2b2b2b" stroke-width=".7"/>',
+    gitarre: () => '<g transform="rotate(-35 13 54)"><path d="M13 30v14" stroke="#7A4A22" stroke-width="2"/><rect x="11.4" y="27.6" width="3.2" height="3.4" rx=".6" fill="#5A3518"/><circle cx="13" cy="48" r="4.4" fill="#E0A84F"/><circle cx="13" cy="53.4" r="5.4" fill="#E0A84F"/><circle cx="13" cy="51" r="1.4" fill="#5A3518"/></g>',
+    zauberstab: () => '<path d="M8 60l10-14" stroke="#3a2a1a" stroke-width="1.6" stroke-linecap="round"/><path d="M18.6 41.4l1 2.6 2.8.4-2.1 1.9.6 2.8-2.3-1.4-2.4 1.4.6-2.8-2.1-1.9 2.8-.4z" fill="#F5C542"/><g fill="#fff"><circle cx="23" cy="40" r=".6"/><circle cx="14.6" cy="42" r=".5"/><circle cx="21" cy="50" r=".5"/></g>',
+  };
+  // costumes: [over the body, over the head]
+  const MASK = (c, eye) => `<path d="M20.6 26.4c3.2-1.6 7.6-1.6 11.4.4 3.8-2 8.2-2 11.4-.4-.4 3.6-2.6 6-5.4 6-2.4 0-4.2-1.2-6-3-1.8 1.8-3.6 3-6 3-2.8 0-5-2.4-5.4-6z" fill="${c}"/><circle cx="27.6" cy="29.2" r="1.9" fill="#fff"/><circle cx="36.4" cy="29.2" r="1.9" fill="#fff"/><circle cx="27.7" cy="29.3" r=".9" fill="${eye || '#222'}"/><circle cx="36.3" cy="29.3" r=".9" fill="${eye || '#222'}"/>`;
+  const SUIT = (body, c) => `<path d="${body}" fill="${c}"/>`;
+  const CAPE = (c) => `<path d="M14 64c1-9 4-15 8.6-18.6L32 50l9.4-4.6C46 49 49 55 50 64z" fill="${c}" opacity=".9"/>`;
+  const costArt = {
+    astro: [(b) => SUIT(b, '#E8EEF5') + '<rect x="27.4" y="51" width="9.2" height="6" rx="1.2" fill="#4FA3E0"/><circle cx="29.4" cy="54" r=".9" fill="#E06B6B"/><circle cx="32" cy="54" r=".9" fill="#F5C542"/><circle cx="34.6" cy="54" r=".9" fill="#4FE08A"/><path d="M20 47.6c7.4 3 16.6 3 24 0" stroke="#C9D1D9" stroke-width="2" fill="none"/>',
+      () => '<circle cx="32" cy="28" r="17" fill="rgba(170,215,255,.2)" stroke="#E8EEF5" stroke-width="3"/><path d="M22 18c2.6-3.4 6.4-5.2 10-5.4" stroke="#fff" stroke-width="1.6" opacity=".7" fill="none" stroke-linecap="round"/><path d="M44 14.4l3.4-4.6" stroke="#E8EEF5" stroke-width="1.4"/><circle cx="47.8" cy="9.4" r="1.6" fill="#E06B6B"/>'],
+    mars: [(b) => SUIT(b, '#F08A3C') + '<rect x="27.4" y="51" width="9.2" height="6" rx="1.2" fill="#2E3138"/><path d="M29 54h6" stroke="#4FE08A" stroke-width="1.2"/><path d="M20 47.6c7.4 3 16.6 3 24 0" stroke="#C9D1D9" stroke-width="2.2" fill="none"/>',
+      () => '<circle cx="32" cy="28" r="17" fill="rgba(255,180,120,.18)" stroke="#C9D1D9" stroke-width="3.2"/><path d="M17 26h3M44 26h3" stroke="#F08A3C" stroke-width="2.4"/><path d="M22 18c2.6-3.4 6.4-5.2 10-5.4" stroke="#fff" stroke-width="1.6" opacity=".7" fill="none" stroke-linecap="round"/>'],
+    sternenkraft: [(b) => CAPE('#F5C542') + SUIT(b, '#D63C3C') + '<path d="M32 49.6l2 4.2 4.6.6-3.4 3.2.9 4.6-4.1-2.3-4.1 2.3.9-4.6-3.4-3.2 4.6-.6z" fill="#F5C542"/>', () => MASK('#D63C3C')],
+    funkenflug: [(b) => SUIT(b, '#2F64A6') + '<path d="M33.4 49.4l-4.6 6.6h3.4l-1.6 5.4 5.6-7.4h-3.4l2-4.6z" fill="#F5C542"/><path d="M20 48l4 3M44 48l-4 3" stroke="#F5C542" stroke-width="1.6"/>', () => MASK('#F5C542', '#1d3f6e')],
+    mondfee: [(b) => '<g fill="#C9B8FF" opacity=".8"><path d="M20 46c-7-6-12-3-11 3 1 4 6 5 11 2z"/><path d="M44 46c7-6 12-3 11 3-1 4-6 5-11 2z"/></g>' + SUIT(b, '#4B3B8F') + '<path d="M33.4 50.4a4 4 0 1 0 1.2 7.4 3.2 3.2 0 1 1-1.2-7.4z" fill="#E8E3FF"/>', () => MASK('#4B3B8F')],
+    turbo: [(b) => SUIT(b, '#2E3138') + '<path d="M18 52h8M16 55.4h9M18 58.8h8" stroke="#4FE08A" stroke-width="1.4" stroke-linecap="round"/><circle cx="34" cy="55" r="4.4" fill="#4FE08A"/><path d="M32.6 52.6h3.6M34.4 52.6v5" stroke="#2E3138" stroke-width="1.4"/>', () => MASK('#4FE08A', '#1d3a26')],
+    sternschnuppe: [(b) => CAPE('#3FC1B0') + SUIT(b, '#EC6FA8') + '<path d="M36 50.4l1.2 2.6 2.8.4-2 2 .5 2.8-2.5-1.4-2.5 1.4.5-2.8-2-2 2.8-.4z" fill="#FFE27A"/><path d="M33 54l-8 4M33.4 55.6l-7 5" stroke="#FFE27A" stroke-width="1" stroke-linecap="round" opacity=".8"/>', () => MASK('#3FC1B0')],
+    ninja: [(b) => SUIT(b, '#2B2F3A') + '<path d="M20 51l24 8" stroke="#D63C3C" stroke-width="2.2"/>',
+      () => '<path d="M19.6 26.6c0-9 5.4-15 12.4-15s12.4 6 12.4 15z" fill="#2B2F3A"/><path d="M20.6 31.6h22.8c-.6 6-5.2 9.6-11.4 9.6s-10.8-3.6-11.4-9.6z" fill="#2B2F3A"/><rect x="19.6" y="21" width="24.8" height="2.4" fill="#D63C3C"/><path d="M44.2 21.4l5.6-2.4-1 3.4 3 1.2-7 .8z" fill="#D63C3C"/>'],
+    ritter: [(b) => SUIT(b, '#9AA5B1') + '<path d="M32 49v12M27 54h10" stroke="#D63C3C" stroke-width="2.2"/><path d="M20 47.4c7.4 2.6 16.6 2.6 24 0" stroke="#C9D1D9" stroke-width="1.6" fill="none"/>',
+      () => '<path d="M18.6 33c-1-13.6 5.4-21.6 13.4-21.6S46.4 19.4 45.4 33l-3.6.8c.4-2.8.4-5 .2-6.6H22c-.2 1.6-.2 3.8.2 6.6z" fill="#B9C3CE"/><path d="M22 27.2h20" stroke="#8A96A3" stroke-width="1.2"/><path d="M32 11.6v9" stroke="#8A96A3" stroke-width="1.2"/><path d="M30.6 6.4c3.8.6 5.8 2.8 5.8 5.2h-5.2z" fill="#D63C3C"/>'],
+    pirat: [(b) => SUIT(b, '#F4F4F4') + '<path d="M16 54h32M14 58h36M13 62h38" stroke="#2F64A6" stroke-width="1.6"/><path d="M26 46.4l6 4 6-4" stroke="#2b2b2b" stroke-width="1" fill="none"/>',
+      () => '<path d="M17.6 21.6c1-7.6 6.8-12.4 14.4-12.4s13.4 4.8 14.4 12.4c-4-2-9-3-14.4-3s-10.4 1-14.4 3z" fill="#2b2b2b"/><path d="M29.4 13.4l2.6 2.6 2.6-2.6M29.4 16l5.2-2.6" stroke="#fff" stroke-width=".8"/><circle cx="32" cy="12.4" r="1.6" fill="#fff"/><path d="M22 22l19.6 8.4" stroke="#1e1e1e" stroke-width=".9"/><ellipse cx="36.2" cy="29.4" rx="3" ry="2.7" fill="#1e1e1e"/>'],
+    zauberer: [(b) => SUIT(b, '#5B4FC4') + '<g fill="#F5C542"><circle cx="24" cy="54" r=".9"/><circle cx="38" cy="56" r=".8"/><circle cx="31" cy="60" r=".7"/><circle cx="41" cy="50.4" r=".6"/></g>',
+      () => '<path d="M14.6 21c7-2.2 27.8-2.2 34.8 0-2.4-1-5-2.4-6.8-2.8L33.6 1.6l-8.4 16.6c-2.2.4-6.2 1.6-10.6 2.8z" fill="#5B4FC4"/><circle cx="29" cy="12" r="1" fill="#F5C542"/><circle cx="35.4" cy="15.4" r=".8" fill="#F5C542"/><circle cx="32.6" cy="7.6" r=".7" fill="#F5C542"/>'],
+    prinzessin: [(b) => SUIT(b, '#EC6FA8') + '<path d="M22 48c6.6 3 13.4 3 20 0" stroke="#FFD1E6" stroke-width="2" fill="none"/><g fill="#FFE27A"><circle cx="32" cy="53" r="1"/><circle cx="28" cy="57" r=".8"/><circle cx="36" cy="57" r=".8"/></g>',
+      () => '<path d="M25 16.4l1.4-4.6 2.8 3L32 9.8l2.8 5 2.8-3 1.4 4.6c-4.4-.8-9.6-.8-14 0z" fill="#F5C542"/><circle cx="32" cy="12.8" r="1" fill="#E06B9B"/>'],
+    prinz: [(b) => CAPE('#8E3BA8') + SUIT(b, '#3E7CC9') + '<path d="M26 46l6 4 6-4" stroke="#F5C542" stroke-width="1.4" fill="none"/><circle cx="32" cy="54" r="1.2" fill="#F5C542"/><circle cx="32" cy="58" r="1.2" fill="#F5C542"/>',
+      () => '<path d="M23.6 16.6l2-7.6 4.2 4.6L32 6.8l2.2 6.8 4.2-4.6 2 7.6z" fill="#F5C542" stroke="#D9A21E" stroke-width=".5"/><circle cx="32" cy="12.4" r="1.2" fill="#E06B6B"/>'],
+    dino: [(b) => SUIT(b, '#5CB85C') + '<ellipse cx="32" cy="57" rx="7" ry="6" fill="#BFF0CF"/>',
+      () => '<path d="M18.2 31c-1.4-12.6 5.2-20.4 13.8-20.4S47.2 18.4 45.8 31c-3.4-5-8.2-7.4-13.8-7.4S21.6 26 18.2 31z" fill="#5CB85C"/><path d="M24 12.6l2-4.4 2 3.4 2-5 2 4.6 2-5 2 5 2-3.4 2 4.4" fill="#F5C542" stroke="#F5C542" stroke-width=".6" stroke-linejoin="round"/><circle cx="26" cy="17.4" r="1.6" fill="#fff"/><circle cx="38" cy="17.4" r="1.6" fill="#fff"/><circle cx="26.3" cy="17.6" r=".8" fill="#2b2b2b"/><circle cx="38.3" cy="17.6" r=".8" fill="#2b2b2b"/>'],
+    feuerwehr: [(b) => SUIT(b, '#2E3138') + '<path d="M16 54.6h32M15 59h34" stroke="#F5C542" stroke-width="2"/><path d="M16 54.6h32M15 59h34" stroke="#C9D1D9" stroke-width=".6"/>',
+      () => '<path d="M17 22.6c.6-7.8 6.6-13 15-13s14.4 5.2 15 13z" fill="#D63C3C"/><path d="M14.6 22.4h34.8c0 1.8-1.4 3-3.2 3H17.8c-1.8 0-3.2-1.2-3.2-3z" fill="#B53030"/><path d="M29.6 12.6h4.8v7h-4.8z" fill="#F5C542"/><path d="M32 10.4v11.6" stroke="#B53030" stroke-width=".8"/>'],
+  };
+
+  const svg = (c, personColor, view) => {
+    const o = norm(parse(c)); const bg = COLOR(personColor);
+    const [h1, h2] = HC[o.hc]; const skin = SK[o.sk]; const kid = KID(o.fig); const old = OLD(o.fig); const fem = o.fig === 'm' || o.fig === 'f' || o.fig === 'g';
+    const dark = ['braun', 'tief', 'espresso'].includes(o.sk);
+    const body = kid ? 'M13 64c0-10.6 8-17.6 19-17.6S51 53.4 51 64z' : 'M7 64c0-12.2 11-19.4 25-19.4S57 51.8 57 64z';
+    const shirt = SHIRT[o.shirt];
+    const costume = o.cost !== '0' ? costArt[o.cost] : null;
+    const hideHair = o.cost === 'ninja' || o.cost === 'ritter' || o.cost === 'dino' || o.cost === 'feuerwehr';
+    const ha = hairArt[o.hair] || hairArt.kurz;
+    let s = `<rect width="64" height="64" fill="${bg}"/>`;
+    if (o.bg !== '0') s += bgArt[o.bg]();
+    if (ha[0] && !hideHair) s += ha[0](h2, h1);
+    // body: shirt (or the costume suit), neck
+    s += costume ? costume[0](body) : `<path d="${body}" fill="${shirt}"/><path d="M26 45.6q6 4 12 0" stroke="#000" stroke-opacity=".15" stroke-width="1" fill="none"/>`;
+    if (!costume && o.motif !== '0') s += motifArt[o.motif]();
+    s += `<path d="M28.4 37h7.2v8.4c-2.2 1.6-5 1.6-7.2 0z" fill="${skin}"/><path d="M28.4 39.4c2.4 1 4.8 1 7.2 0" stroke="#000" stroke-opacity=".12" stroke-width="1.2" fill="none"/>`;
+    if (o.neck !== '0') s += neckArt[o.neck]();
+    // head
+    s += `<circle cx="20.8" cy="29.6" r="2.4" fill="${skin}"/><circle cx="43.2" cy="29.6" r="2.4" fill="${skin}"/>`;
+    s += `<ellipse cx="32" cy="28" rx="${kid ? 11.6 : 11}" ry="${kid ? 11.8 : 12.4}" fill="${skin}"/>`;
+    if (!hideHair) s += ha[1](h1, h2);
+    const eye = dark ? '#1a110b' : '#3b2a1e';
+    s += `<path d="M25.4 25.4q2.4-1.2 4.8 0M33.8 25.4q2.4-1.2 4.8 0" stroke="${h2}" stroke-width="1" fill="none" stroke-linecap="round"/>`;
+    s += `<circle cx="27.8" cy="29.4" r="1.5" fill="${eye}"/><circle cx="36.2" cy="29.4" r="1.5" fill="${eye}"/><circle cx="28.3" cy="28.9" r=".45" fill="#fff"/><circle cx="36.7" cy="28.9" r=".45" fill="#fff"/>`;
+    if (old) s += `<path d="M22.8 30.4l1.2.8M41.2 30.4l-1.2.8M24.6 34.4q-.6 1.2.2 2M39.4 34.4q.6 1.2-.2 2" stroke="${dark ? '#2a1610' : '#b07a5a'}" stroke-width=".6" fill="none"/>`;
+    if (!['bart', 'schnauz'].includes(o.face)) s += `<path d="M28.6 34.2q3.4 2.8 6.8 0" stroke="${dark ? '#2a1610' : fem && !kid ? '#C2546A' : '#b0613a'}" stroke-width="1.2" fill="none" stroke-linecap="round"/>`;
+    else s += '<path d="M29.4 35.8q2.6 1.4 5.2 0" stroke="#7a3b22" stroke-width="1" fill="none" stroke-linecap="round"/>';
+    if (kid || fem) s += `<circle cx="24.4" cy="32.6" r="1.9" fill="#F29A9A" opacity="${dark ? '.3' : '.5'}"/><circle cx="39.6" cy="32.6" r="1.9" fill="#F29A9A" opacity="${dark ? '.3' : '.5'}"/>`;
+    if (o.face !== '0') s += faceArt[o.face](h1);
+    if (costume) s += costume[1]();
+    if (o.head !== '0') s += headArt[o.head]();
+    if (o.pet !== '0') s += petArt[o.pet]();
+    return `<svg viewBox="${view || '0 0 64 64'}" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
+  };
+
+  // ---------------------------------------------------------------- builder
+  const T = {
+    de: { sk: 'Hautfarbe', hc: 'Haarfarbe', fig: 'Person', hair: 'Frisur', rnd: 'Zufall', none: 'Nichts', shirt: 'T-Shirt-Farbe', motif: 'Motiv', neck: 'Am Hals',
+      c: { porzellan: 'Porzellan', hell: 'Hell', pfirsich: 'Pfirsich', mittel: 'Mittel', oliv: 'Oliv', karamell: 'Karamell', braun: 'Braun', tief: 'Dunkelbraun', espresso: 'Espresso', platin: 'Platinblond', blond: 'Blond', rotblond: 'Rotblond', hellbraun: 'Hellbraun', schwarz: 'Schwarz', rot: 'Rot', grau: 'Grau', rosa: 'Rosa', blau: 'Blau', lila: 'Lila', gruen: 'Grün', weiss: 'Weiss', orange: 'Orange', gelb: 'Gelb', tuerkis: 'Türkis', pink: 'Pink' },
+      tabs: { head: 'Kopf', face: 'Gesicht', cloth: 'Kleidung', pet: 'Begleiter', bg: 'Hintergrund', cost: 'Verkleidung' },
+      costHint: 'Verkleidungen liegen über der Person – Hintergrund und Begleiter bleiben.',
+      n: { m: 'Mädchen', j: 'Junge', f: 'Frau', h: 'Mann', g: 'Grosi', p: 'Grosspapi',
+        kurz: 'Kurz', seite: 'Seitenscheitel', stachel: 'Stachelig', wuschel: 'Wuschelkopf', undercut: 'Undercut', irokese: 'Irokese', lockenkurz: 'Kurze Locken', glatze: 'Glatze', lang: 'Lang', pony: 'Lang mit Pony', zoepfe: 'Zöpfe', pferd: 'Pferdeschwanz', dutt: 'Dutt', buns: 'Space-Buns', bob: 'Bob', locken: 'Lange Locken', afro: 'Afro', rastas: 'Rastas',
+        cap: 'Cap', muetze: 'Bommelmütze', krone: 'Krone', blumen: 'Blumenkranz', katze: 'Katze', hase: 'Hase', baer: 'Bärenohren', einhorn: 'Einhorn', party: 'Partyhut', kopfhoerer: 'Kopfhörer', stirnband: 'Stirnband', schleife: 'Schleife',
+        brille: 'Runde Brille', eckig: 'Eckige Brille', sonnenbrille: 'Sonnenbrille', sommersprossen: 'Sommersprossen', glitzer: 'Glitzer', pflaster: 'Pflaster', tiger: 'Tiger-Schminke', schmetterling: 'Schmetterling', bart: 'Bart', schnauz: 'Schnauz',
+        schal: 'Schal', fliege: 'Fliege', kette: 'Kette', stern: 'Stern', herz: 'Herz', blitz: 'Blitz', ball: 'Fussball', rakete: 'Rakete',
+        hund: 'Hund', papagei: 'Papagei', eidechse: 'Eidechse', affe: 'Äffchen', drache: 'Mini-Drache', pinguin: 'Pinguin', fuchs: 'Fuchs', roboter: 'Roboter', eule: 'Eule', ballon: 'Ballon', fussball: 'Fussball', gitarre: 'Gitarre', zauberstab: 'Zauberstab',
+        sterne: 'Sterne', regenbogen: 'Regenbogen', herzen: 'Herzen', konfetti: 'Konfetti', weltall: 'Weltall', wolken: 'Wolken', blasen: 'Blasen', blitze: 'Blitze',
+        astro: 'Astronaut', mars: 'Mars-Anzug', sternenkraft: 'Held Sternenkraft', funkenflug: 'Held Funkenflug', mondfee: 'Heldin Mondfee', turbo: 'Held Turbo', sternschnuppe: 'Heldin Sternschnuppe', ninja: 'Ninja', ritter: 'Ritter', pirat: 'Pirat', zauberer: 'Zauberer', prinzessin: 'Prinzessin', prinz: 'Prinz', dino: 'Dino', feuerwehr: 'Feuerwehr' } },
+    en: { sk: 'Skin tone', hc: 'Hair colour', fig: 'Person', hair: 'Hair', rnd: 'Random', none: 'None', shirt: 'T-shirt colour', motif: 'Motif', neck: 'Around the neck',
+      c: { porzellan: 'Porcelain', hell: 'Light', pfirsich: 'Peach', mittel: 'Medium', oliv: 'Olive', karamell: 'Caramel', braun: 'Brown', tief: 'Dark brown', espresso: 'Espresso', platin: 'Platinum blonde', blond: 'Blonde', rotblond: 'Strawberry blonde', hellbraun: 'Light brown', schwarz: 'Black', rot: 'Red', grau: 'Grey', rosa: 'Pink', blau: 'Blue', lila: 'Purple', gruen: 'Green', weiss: 'White', orange: 'Orange', gelb: 'Yellow', tuerkis: 'Turquoise', pink: 'Pink' },
+      tabs: { head: 'Head', face: 'Face', cloth: 'Clothes', pet: 'Buddy', bg: 'Background', cost: 'Costume' },
+      costHint: 'Costumes go over the person – background and buddy stay.',
+      n: { m: 'Girl', j: 'Boy', f: 'Woman', h: 'Man', g: 'Grandma', p: 'Grandpa',
+        kurz: 'Short', seite: 'Side parting', stachel: 'Spiky', wuschel: 'Messy', undercut: 'Undercut', irokese: 'Mohawk', lockenkurz: 'Short curls', glatze: 'Bald', lang: 'Long', pony: 'Long with fringe', zoepfe: 'Pigtails', pferd: 'Ponytail', dutt: 'Bun', buns: 'Space buns', bob: 'Bob', locken: 'Long curls', afro: 'Afro', rastas: 'Dreadlocks',
+        cap: 'Cap', muetze: 'Bobble hat', krone: 'Crown', blumen: 'Flower crown', katze: 'Cat', hase: 'Bunny', baer: 'Bear ears', einhorn: 'Unicorn', party: 'Party hat', kopfhoerer: 'Headphones', stirnband: 'Headband', schleife: 'Bow',
+        brille: 'Round glasses', eckig: 'Square glasses', sonnenbrille: 'Sunglasses', sommersprossen: 'Freckles', glitzer: 'Glitter', pflaster: 'Plaster', tiger: 'Tiger face paint', schmetterling: 'Butterfly', bart: 'Beard', schnauz: 'Moustache',
+        schal: 'Scarf', fliege: 'Bow tie', kette: 'Necklace', stern: 'Star', herz: 'Heart', blitz: 'Bolt', ball: 'Football', rakete: 'Rocket',
+        hund: 'Dog', papagei: 'Parrot', eidechse: 'Lizard', affe: 'Monkey', drache: 'Mini dragon', pinguin: 'Penguin', fuchs: 'Fox', roboter: 'Robot', eule: 'Owl', ballon: 'Balloon', fussball: 'Football', gitarre: 'Guitar', zauberstab: 'Magic wand',
+        sterne: 'Stars', regenbogen: 'Rainbow', herzen: 'Hearts', konfetti: 'Confetti', weltall: 'Space', wolken: 'Clouds', blasen: 'Bubbles', blitze: 'Bolts',
+        astro: 'Astronaut', mars: 'Mars suit', sternenkraft: 'Hero Star Power', funkenflug: 'Hero Sparkwing', mondfee: 'Hero Moon Fairy', turbo: 'Hero Turbo', sternschnuppe: 'Hero Shooting Star', ninja: 'Ninja', ritter: 'Knight', pirat: 'Pirate', zauberer: 'Wizard', prinzessin: 'Princess', prinz: 'Prince', dino: 'Dino', feuerwehr: 'Firefighter' } },
+  };
+  Object.assign(T.de.n, { 'head:katze': 'Katzenohren', 'head:hase': 'Hasenohren', 'pet:katze': 'Katze', 'pet:hase': 'Hase', 'pet:fussball': 'Fussball' });
+  Object.assign(T.en.n, { 'head:katze': 'Cat ears', 'head:hase': 'Bunny ears', 'pet:katze': 'Cat', 'pet:hase': 'Bunny', 'pet:fussball': 'Football' });
+  const TABS = ['head', 'face', 'cloth', 'pet', 'bg', 'cost'];
+  // builder html: buttons carry data-avb="part|value" (or data-avtab / data-avrnd); the host keeps code and tab
+  const builder = (c, personColor, lang, tab) => {
+    const t = T[lang === 'en' ? 'en' : 'de']; const o = parse(c); const cur = code(norm(o)); const n = norm(o); const tb = TABS.includes(tab) ? tab : 'head';
+    const ZOOM = { hair: '10 0 44 44', head: '10 0 44 44', face: '14 10 36 36', neck: '12 30 40 34', motif: '12 36 40 28' };
+    const pic = (cc, on, key, attr) => `<button class="avo${on ? ' on' : ''}" data-avb="${attr}" title="${esc(t.n[attr.replace('|', ':')] || t.n[key] || key)}"><span class="avs">${svg(cc, personColor, ZOOM[attr.split('|')[0]])}</span></button>`;
+    const dot = (col, on, key, attr) => `<button class="avd${on ? ' on' : ''}" data-avb="${attr}" title="${esc(t.c[key] || key)}" style="background:${col}"></button>`;
+    const none = (part) => `<button class="avo txt${n[part] === '0' ? ' on' : ''}" data-avb="${part}|0">${esc(t.none)}</button>`;
+    const row = (label, html) => `<div class="avr">${label ? `<b>${esc(label)}</b>` : ''}<div class="avg">${html}</div></div>`;
+    const opts = (part, list) => none(part) + list.map((v) => pic(set(cur, part, v), n[part] === v, v, `${part}|${v}`)).join('');
+    let body = '';
+    if (tb === 'head') body = row('', opts('head', HEAD));
+    if (tb === 'face') body = row('', opts('face', FACE.filter((f) => !BEARD.includes(f) || n.fig === 'h' || n.fig === 'p')));
+    if (tb === 'cloth') body = row(t.shirt, Object.entries(SHIRT).map(([k, col]) => dot(col, n.shirt === k, k, `shirt|${k}`)).join('')) + row(t.motif, opts('motif', MOTIF)) + row(t.neck, opts('neck', NECK));
+    if (tb === 'pet') body = row('', opts('pet', PET));
+    if (tb === 'bg') body = row('', opts('bg', BG));
+    if (tb === 'cost') body = `<div class="avh">${esc(t.costHint)}</div>` + row('', opts('cost', COST));
+    return `<div class="avb"><div class="avp"><span class="avs big">${svg(cur, personColor)}</span><button class="avrnd" data-avrnd><span aria-hidden="true">🎲</span> ${esc(t.rnd)}</button></div><div class="avc">
+      ${row(t.sk, Object.entries(SK).map(([k, col]) => dot(col, n.sk === k, k, `sk|${k}`)).join(''))}
+      ${row(t.hc, Object.entries(HC).map(([k, col]) => dot(col[0], n.hc === k, k, `hc|${k}`)).join(''))}
+      ${row(t.fig, FIG.map((f) => pic(set(cur, 'fig', f), n.fig === f, f, `fig|${f}`)).join(''))}
+      ${row(t.hair, HAIR.filter((h) => !(h === 'glatze' && KID(n.fig))).map((h) => pic(set(cur, 'hair', h), n.hair === h, h, `hair|${h}`)).join(''))}
+      <div class="avt">${TABS.map((x) => `<button class="${x === tb ? 'on' : ''}" data-avtab="${x}">${esc(t.tabs[x])}</button>`).join('')}</div>
+      ${body}</div></div>`;
+  };
+  const css = `.avb{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}.avp{flex:none;display:flex;flex-direction:column;align-items:center;gap:10px;position:sticky;top:8px}
+.avs{display:inline-flex;width:44px;height:44px;border-radius:50%;overflow:hidden}.avs.big{width:132px;height:132px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+.avc{flex:1;min-width:260px;display:flex;flex-direction:column;gap:10px}.avr b{display:block;font-size:12px;color:var(--fp-text2,#aaa);font-weight:500;margin-bottom:5px}
+.avg{display:flex;flex-wrap:wrap;gap:6px}.avh{font-size:12px;color:var(--fp-text3,#888)}
+.avo{padding:2px;border-radius:50%;border:2px solid transparent;background:transparent;cursor:pointer;line-height:0}.avo.on{border-color:var(--fp-accent,#69C350)}
+.avo.txt{border-radius:22px;height:48px;padding:0 14px;line-height:1;color:inherit;font:inherit;font-size:13px;border:1px solid var(--fp-line,#444)}.avo.txt.on{border:2px solid var(--fp-accent,#69C350)}
+.avd{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0}.avd.on{outline:3px solid var(--fp-accent,#69C350);outline-offset:2px}
+.avt{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;border-top:1px solid var(--fp-line,#333);padding-top:10px}.avt button{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#2b2b2b);color:var(--fp-text2,#ccc);font:inherit;font-size:13px;cursor:pointer}
+.avt button.on{border-color:var(--fp-accent,#69C350);color:var(--fp-accent,#69C350);font-weight:600}
+.avrnd{height:36px;padding:0 14px;border-radius:18px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#2b2b2b);color:var(--fp-text,#eee);font:inherit;font-size:13px;cursor:pointer}`;
+
+  window.FPAV = { parse, norm, code, set, from1, random, svg, builder, css, FIELDS, LISTS, OPTIONAL, COST_HAT, COST_MASK, GLASSES, BEARD, SK, HC, KID };
+})();
+
 (() => {
 // Familienplaner – Loxone-Style Karten
 //  custom:fp-week-inner   Wochenkalender mit Ämtli (heute abhaken), Verlauf, Zuverlässigkeit, Kalender-Termine
@@ -223,48 +539,6 @@ const avatarGen = (code, bg) => {
   ex.forEach((a) => { if (AV_ACC[a]) s += AV_ACC[a](h2); });
   return `<svg viewBox="0 0 40 40" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
 };
-// Baukasten: Code ändern (Teil = age | st | hc | sk | acc | cost)
-const avParse = (code) => { const [age, st, hc, sk, acc] = String(code || 'k.kurz.braun.hell.0').replace(/^av:/, '').split('.');
-  return { age: ['k', 'e', 'o'].includes(age) ? age : 'k', st: AV_ST[st] ? st : 'kurz', hc: AV_HC[hc] ? hc : 'braun', sk: AV_SK[sk] ? sk : 'hell', ex: acc && acc !== '0' ? acc.split('+').filter((a) => AV_ORDER.includes(a)) : [] }; };
-const avCode = (o) => `av:${o.age}.${o.age === 'k' && o.st === 'glatze' ? 'kurz' : o.st}.${o.hc}.${o.sk}.${avNorm(o.age, o.ex).join('+') || '0'}`;
-const avSet = (code, part, val) => {
-  const o = avParse(code);
-  if (part === 'acc') { o.ex = o.ex.includes(val) ? o.ex.filter((a) => a !== val) : [...o.ex.filter((a) => !(AV_HEAD.includes(val) && AV_HEAD.includes(a)) && !(AV_EYES.includes(val) && AV_EYES.includes(a))), val];
-    const c = o.ex.find((a) => AV_COST.includes(a)); if (c && o.ex.includes(val) && !AV_COST.includes(val)) { if ((AV_HAT_COST.includes(c) && AV_HEAD.includes(val)) || (AV_MASK_COST.includes(c) && AV_EYES.includes(val)) || ((c === 'astro' || c === 'ritter') && val === 'kopfhoerer') || (c === 'ninja' && (val === 'bart' || val === 'sommersprossen'))) o.ex = o.ex.filter((a) => a !== c); } }
-  else if (part === 'cost') { o.ex = o.ex.filter((a) => !AV_COST.includes(a)); if (val !== '0') o.ex.push(val); }
-  else o[part] = val;
-  return avCode(o);
-};
-const AVB_LANG = 'de';
-const AVB_T = { de: { age: 'Figur', st: 'Frisur', hc: 'Haarfarbe', sk: 'Hautfarbe', acc: 'Extras (kombinierbar)', cost: 'Verkleidung', none: 'Keine', ages: { k: 'Kind', e: 'Erwachsen', o: 'Grosseltern' },
-    n: { long: 'Lang', ponylang: 'Lang mit Pony', zoepfe: 'Zöpfe', dutt: 'Dutt', bob: 'Bob', locken: 'Locken', pferd: 'Pferdeschwanz', kurz: 'Kurz', seite: 'Seitenscheitel', stachel: 'Stachelig', lockenkurz: 'Kurze Locken', glatze: 'Glatze',
-      sommersprossen: 'Sommersprossen', bart: 'Bart', kopfhoerer: 'Kopfhörer', brille: 'Brille', sonnenbrille: 'Sonnenbrille', cap: 'Cap', krone: 'Krone', katze: 'Katzenohren', einhorn: 'Einhorn', schleife: 'Schleife', stirnband: 'Stirnband',
-      held: 'Held Sternenkraft', blitz: 'Held Funkenflug', nacht: 'Heldin Mondfee', ninja: 'Ninja', ritter: 'Ritter', astro: 'Astronaut', pirat: 'Pirat', zauber: 'Zauberer' } },
-  en: { age: 'Figure', st: 'Hair', hc: 'Hair colour', sk: 'Skin tone', acc: 'Extras (combine freely)', cost: 'Costume', none: 'None', ages: { k: 'Child', e: 'Adult', o: 'Grandparent' },
-    n: { long: 'Long', ponylang: 'Long with fringe', zoepfe: 'Pigtails', dutt: 'Bun', bob: 'Bob', locken: 'Curls', pferd: 'Ponytail', kurz: 'Short', seite: 'Side parting', stachel: 'Spiky', lockenkurz: 'Short curls', glatze: 'Bald',
-      sommersprossen: 'Freckles', bart: 'Beard', kopfhoerer: 'Headphones', brille: 'Glasses', sonnenbrille: 'Sunglasses', cap: 'Cap', krone: 'Crown', katze: 'Cat ears', einhorn: 'Unicorn', schleife: 'Bow', stirnband: 'Headband',
-      held: 'Hero Star Power', blitz: 'Hero Sparkwing', nacht: 'Hero Moon Fairy', ninja: 'Ninja', ritter: 'Knight', astro: 'Astronaut', pirat: 'Pirate', zauber: 'Wizard' } } };
-// HTML des Baukastens; Knöpfe tragen data-avb="teil|wert" und zeigen jeweils die Vorschau mit dieser Änderung
-const avBuilder = (code, color) => {
-  const T = AVB_T[AVB_LANG] || AVB_T.de; const o = avParse(code); const cur = avCode(o);
-  const pic = (c, on, title, kind) => `<button class="avo${on ? ' on' : ''}" data-avb="${kind}" title="${esc(title)}"><span class="avs" style="width:40px;height:40px;border-radius:50%;overflow:hidden;display:inline-flex">${avatarGen(c.slice(3), color)}</span></button>`;
-  const dot = (c, on, title, kind) => `<button class="avd${on ? ' on' : ''}" data-avb="${kind}" title="${esc(title)}" style="background:${c}"></button>`;
-  const row = (label, html) => `<div class="avr"><b>${esc(label)}</b><div class="avg">${html}</div></div>`;
-  const ex = avNorm(o.age, o.ex); const cost = ex.find((a) => AV_COST.includes(a)) || '0';
-  return `<div class="avb"><div class="avp"><span class="avs" style="width:96px;height:96px;border-radius:50%;overflow:hidden;display:inline-flex">${avatarGen(cur.slice(3), color)}</span></div><div class="avc">
-    ${row(T.age, ['k', 'e', 'o'].map((a) => pic(avSet(cur, 'age', a), o.age === a, T.ages[a], 'age|' + a)).join(''))}
-    ${row(T.st, Object.keys(AV_ST).filter((x) => !(x === 'glatze' && o.age === 'k')).map((x) => pic(avSet(cur, 'st', x), o.st === x, T.n[x] || x, 'st|' + x)).join(''))}
-    ${row(T.hc, Object.entries(AV_HC).map(([k, c]) => dot(c[0], o.hc === k, k, 'hc|' + k)).join(''))}
-    ${row(T.sk, Object.entries(AV_SK).map(([k, c]) => dot(c, o.sk === k, k, 'sk|' + k)).join(''))}
-    ${row(T.acc, [...AV_FACE, ...AV_EYES, ...AV_HEAD].filter((a) => !(a === 'bart' && o.age === 'k')).map((a) => pic(avSet(cur, 'acc', a), ex.includes(a), T.n[a] || a, 'acc|' + a)).join(''))}
-    ${row(T.cost, ['0', ...AV_COST].map((c) => (c === '0' ? `<button class="avo txt${cost === '0' ? ' on' : ''}" data-avb="cost|0">${esc(T.none)}</button>` : pic(avSet(cur, 'cost', c), cost === c, T.n[c] || c, 'cost|' + c))).join(''))}
-  </div></div>`;
-};
-const AVB_CSS = `.avb{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}.avp{flex:none}.avc{flex:1;min-width:260px;display:flex;flex-direction:column;gap:10px}
-.avr b{display:block;font-size:12px;color:#aaa;font-weight:500;margin-bottom:5px}.avg{display:flex;flex-wrap:wrap;gap:6px}
-.avo{padding:2px;border-radius:50%;border:2px solid transparent;background:transparent;cursor:pointer;line-height:0}.avo.on{border-color:var(--fp-accent,#69C350)}
-.avo.txt{border-radius:22px;height:44px;padding:0 14px;line-height:1;color:inherit;font:inherit;font-size:13px;border:1px solid #444}.avo.txt.on{border:2px solid var(--fp-accent,#69C350)}
-.avd{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0}.avd.on{outline:3px solid var(--fp-accent,#69C350);outline-offset:2px}`;
 // Termin-Zeit kurz: "14:30–15:20" bzw. schmal "14:30–15"
 const evRange = (e, short) => {
   if (e.allDay) return short ? 'ganzt.' : 'ganztägig';
@@ -275,6 +549,7 @@ const evRange = (e, short) => {
 const avatarHtml = (k, size) => {
   const b = k.bild || '';
   if (b.startsWith('img:')) return `<img src="${esc(b.slice(4))}" alt="" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex:none;display:inline-block">`;
+  if (b.startsWith('av2:') && window.FPAV) return `<span class="avs" style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;display:inline-flex;flex:none">${window.FPAV.svg(b, k.farbe)}</span>`;
   if (b.startsWith('av:')) return `<span class="avs" style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;display:inline-flex;flex:none">${avatarGen(b.slice(3), k.farbe)}</span>`;
   if (b.startsWith('mdi:')) return `<span style="width:${size}px;height:${size}px;border-radius:50%;background:${k.farbe};display:inline-flex;align-items:center;justify-content:center;flex:none;color:#161616"><ha-icon icon="${esc(b)}" style="--mdc-icon-size:${Math.round(size * 0.6)}px"></ha-icon></span>`;
   if (b.startsWith('svg:')) return avatarBase({ ...k, avatar: b.slice(4) }, size);
@@ -661,7 +936,7 @@ class LoxWochenplanerCard extends FpBase {
       .wk{font-size:12px;color:var(--fp-text3,#8a8a8a);padding:0 8px;text-align:center;min-width:150px}.wk b{display:block;color:var(--fp-text,#ececec);font-size:15px;font-weight:600}
       .grid{display:grid;grid-template-columns:${phone ? '104px' : '178px'} ${cols};gap:5px;align-items:stretch}
       .card.phone .lab{flex-direction:column;align-items:flex-start;gap:6px;padding:8px 6px}.card.phone .lt .nm{font-size:13px}.card.phone .corner{visibility:hidden}
-      .card.phone .bg{grid-template-columns:1fr}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 9px}
+      .card.phone .bg{grid-template-columns:1fr}.card.phone .pev .src{display:none}.card.phone .btn{min-height:50px;font-size:15px}.card.phone .btn .cb{width:26px;height:26px}.card.phone .btn.done .cb::after{left:8px;top:3px;width:6px;height:12px}.card.phone .nb{min-width:46px;height:46px}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 9px}
       .dnav{display:flex;align-items:center;gap:6px}.dd{font-size:14px;text-align:center;min-width:120px}.dd b{display:block;font-size:16px}
       .corner{font-size:10px;color:var(--fp-text3,#555);display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;padding:0 4px 6px}
       .corner .leg{background:none;padding:0;margin:0;gap:4px 10px}.corner .lgi{font-size:12px}
@@ -786,7 +1061,7 @@ const fpNavigate = (p) => {
   history.pushState(null, '', `/${parts[0] || 'family-planer'}/${p}${location.search}`);
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
-window.FPX = { AWT, AWR, AWCSS, avBuilder, avSet, avNorm, avatarGen, AVB_CSS, AV_HC, AV_SK, AV_ST, AV_COST, AV_HEAD, AV_EYES, AV_FACE, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
+window.FPX = { AWT, AWR, AWCSS, avatarGen, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
 customElements.define('fp-week-inner', LoxWochenplanerCard);
 
 })();
@@ -795,7 +1070,7 @@ customElements.define('fp-week-inner', LoxWochenplanerCard);
 // Plan-Beschreibung: "fp1:" + {"z": {"Lea": [1,3]}, "r": {"Lea|1": [2, 0]}}
 //   r: alle n Wochen, aktiv wenn Wochenindex (seit 5.1.1970) % n == offset; fehlt r => jede Woche
 customElements.whenDefined('fp-week-inner').then(() => {
-  const { FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, avBuilder, avSet, AVB_CSS } = window.FPX;
+  const { FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx } = window.FPX;
   const rgba = (hex, a) => { const h = (hex || '#888888').replace('#', ''); const n = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; };
   const mondayOfIdx = (idx) => { const u = new Date(Date.UTC(1970, 0, 5) + idx * 604800000); return new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate()); };
   const curIdx = () => weekIdx(new Date());
@@ -807,27 +1082,6 @@ customElements.whenDefined('fp-week-inner').then(() => {
     if (!anyR) { if (j === '1,2,3,4,5,6,7') return 'täglich'; if (j === '1,2,3,4,5') return 'werktags'; if (j === '6,7') return 'Wochenende'; }
     return s.length ? s.map((d) => dayTxt(p, d, r, f)).join(', ') : 'keine Tage';
   };
-
-  // Bildauswahl pro Person (eigene Portraits + Material-Design-Icons)
-  const ICONS = [
-    ['Mädchen', ['svg:maedchen-lang', 'svg:maedchen-zoepfe', 'svg:maedchen-dutt', 'av:k.long.braun.hell.0', 'av:k.long.schwarz.mittel.0', 'av:k.long.rot.hell.0', 'av:k.ponylang.blond.hell.schleife', 'av:k.ponylang.braun.oliv.0', 'av:k.ponylang.schwarz.hell.brille', 'av:k.zoepfe.braun.mittel.0', 'av:k.zoepfe.schwarz.dunkel.0', 'av:k.zoepfe.rot.hell.0', 'av:k.dutt.braun.oliv.0', 'av:k.bob.blond.hell.0', 'av:k.bob.schwarz.mittel.0', 'av:k.bob.braun.hell.brille', 'av:k.locken.braun.dunkel.0', 'av:k.locken.schwarz.oliv.schleife', 'av:k.locken.rot.hell.0', 'av:k.pferd.blond.hell.0', 'av:k.pferd.braun.mittel.0', 'av:k.long.blond.hell.kopfhoerer']],
-    ['Jungen', ['av:k.kurz.blond.hell.0', 'av:k.kurz.braun.hell.0', 'av:k.kurz.schwarz.mittel.0', 'av:k.kurz.rot.hell.0', 'av:k.stachel.blond.hell.0', 'av:k.stachel.braun.oliv.0', 'av:k.stachel.schwarz.dunkel.0', 'av:k.seite.braun.hell.0', 'av:k.seite.blond.mittel.brille', 'av:k.lockenkurz.schwarz.dunkel.0', 'av:k.lockenkurz.braun.oliv.0', 'av:k.kurz.blond.hell.cap', 'av:k.kurz.braun.mittel.kopfhoerer', 'av:k.seite.rot.hell.cap']],
-    ['Frauen', ['svg:frau', 'av:e.long.braun.mittel.0', 'av:e.long.schwarz.oliv.0', 'av:e.long.rot.hell.0', 'av:e.ponylang.blond.hell.0', 'av:e.ponylang.braun.hell.brille', 'av:e.bob.braun.hell.0', 'av:e.bob.blond.hell.brille', 'av:e.bob.schwarz.dunkel.0', 'av:e.dutt.blond.hell.0', 'av:e.dutt.braun.oliv.brille', 'av:e.locken.braun.dunkel.0', 'av:e.locken.blond.hell.0', 'av:e.pferd.blond.hell.0', 'av:e.pferd.schwarz.mittel.0', 'av:e.pferd.rot.hell.0']],
-    ['Männer', ['svg:mann', 'av:e.kurz.braun.hell.0', 'av:e.kurz.schwarz.oliv.0', 'av:e.kurz.braun.hell.bart', 'av:e.kurz.blond.hell.bart', 'av:e.seite.braun.mittel.brille', 'av:e.seite.schwarz.dunkel.0', 'av:e.seite.blond.hell.0', 'av:e.stachel.blond.hell.0', 'av:e.lockenkurz.schwarz.dunkel.bart', 'av:e.glatze.braun.hell.bart', 'av:e.glatze.schwarz.mittel.brille', 'av:e.kurz.rot.hell.bart+brille', 'av:e.kurz.blond.hell.cap']],
-    ['Grosseltern', ['av:o.dutt.grau.hell.brille', 'av:o.bob.grau.hell.0', 'av:o.locken.grau.mittel.0', 'av:o.long.grau.hell.brille', 'av:o.kurz.grau.hell.brille', 'av:o.glatze.grau.hell.bart+brille', 'av:o.seite.grau.oliv.bart', 'av:o.glatze.grau.dunkel.0']],
-    ['Verkleidet', ['av:k.kurz.blond.hell.held', 'av:k.long.blond.hell.held', 'av:k.zoepfe.braun.hell.held', 'av:k.kurz.braun.hell.astro', 'av:k.zoepfe.blond.hell.astro', 'av:k.kurz.schwarz.mittel.pirat', 'av:k.long.rot.hell.pirat', 'av:k.long.blond.hell.zauber', 'av:k.stachel.braun.hell.zauber', 'av:k.long.blond.hell.krone', 'av:k.kurz.blond.hell.krone', 'av:k.zoepfe.braun.hell.katze', 'av:k.long.blond.hell.katze', 'av:k.long.blond.hell.einhorn', 'av:k.ponylang.braun.mittel.einhorn', 'av:k.dutt.blond.hell.kopfhoerer', 'av:e.kurz.braun.hell.held', 'av:e.long.blond.hell.krone']],
-    ['Symbole & Smileys', ['mdi:face-woman', 'mdi:face-man', 'mdi:baby-face-outline', 'mdi:account-cowboy-hat', 'mdi:emoticon-cool-outline', 'mdi:emoticon-happy-outline', 'mdi:emoticon-excited-outline', 'mdi:emoticon-tongue-outline']],
-    ['Superheld & Abenteuer', ['mdi:shield-star', 'mdi:lightning-bolt', 'mdi:flash', 'mdi:domino-mask', 'mdi:ninja', 'mdi:pirate', 'mdi:sword', 'mdi:shield-crown', 'mdi:crown', 'mdi:castle', 'mdi:wizard-hat', 'mdi:magic-staff', 'mdi:skull-crossbones', 'mdi:treasure-chest']],
-    ['Weltall & Roboter', ['mdi:rocket-launch', 'mdi:ufo', 'mdi:alien', 'mdi:robot', 'mdi:robot-happy', 'mdi:star-shooting', 'mdi:earth', 'mdi:moon-waning-crescent', 'mdi:telescope', 'mdi:atom']],
-    ['Tiere', ['mdi:unicorn', 'mdi:unicorn-variant', 'mdi:cat', 'mdi:dog', 'mdi:dog-side', 'mdi:rabbit', 'mdi:rodent', 'mdi:horse', 'mdi:horse-variant', 'mdi:owl', 'mdi:penguin', 'mdi:panda', 'mdi:koala', 'mdi:elephant', 'mdi:teddy-bear', 'mdi:turtle', 'mdi:fish', 'mdi:dolphin', 'mdi:shark', 'mdi:jellyfish', 'mdi:bee', 'mdi:butterfly', 'mdi:ladybug', 'mdi:snake', 'mdi:spider', 'mdi:duck', 'mdi:bird', 'mdi:pig', 'mdi:cow', 'mdi:sheep', 'mdi:paw', 'mdi:ghost']],
-    ['Sport', ['mdi:soccer', 'mdi:basketball', 'mdi:volleyball', 'mdi:tennis', 'mdi:table-tennis', 'mdi:hockey-sticks', 'mdi:swim', 'mdi:bike', 'mdi:skateboard', 'mdi:ski', 'mdi:karate', 'mdi:run', 'mdi:gymnastics', 'mdi:trophy']],
-    ['Musik & Hobby', ['mdi:guitar-electric', 'mdi:guitar-acoustic', 'mdi:piano', 'mdi:music', 'mdi:microphone-variant', 'mdi:headphones', 'mdi:dance-ballroom', 'mdi:drama-masks', 'mdi:palette', 'mdi:brush', 'mdi:camera', 'mdi:gamepad-variant', 'mdi:controller-classic', 'mdi:puzzle', 'mdi:chess-knight', 'mdi:book-open-variant']],
-    ['Essen', ['mdi:ice-cream', 'mdi:pizza', 'mdi:cupcake', 'mdi:cookie', 'mdi:candy', 'mdi:popcorn', 'mdi:hamburger', 'mdi:food-apple', 'mdi:fruit-watermelon', 'mdi:carrot']],
-    ['Natur & Fahrzeuge', ['mdi:flower', 'mdi:flower-tulip', 'mdi:palm-tree', 'mdi:cactus', 'mdi:mushroom', 'mdi:clover', 'mdi:weather-sunny', 'mdi:weather-night', 'mdi:snowflake', 'mdi:fire', 'mdi:diamond-stone', 'mdi:heart', 'mdi:star', 'mdi:car-sports', 'mdi:airplane', 'mdi:helicopter', 'mdi:train', 'mdi:sail-boat', 'mdi:tractor', 'mdi:motorbike', 'mdi:fire-truck', 'mdi:bus-school']]
-  ];
-  // only the multi-coloured illustrated avatars (no plain one-colour icons)
-  const AVATARS = ICONS.filter(([, ids]) => ids.every((x) => !x.startsWith('mdi:')));
-  const COLS = ['#69C350', '#A8CF45', '#4FD1C5', '#4FA3E0', '#7A7FE8', '#C771D6', '#E06B9B', '#E06B6B', '#E0A84F', '#F5C542', '#9AA5B1'];
 
   class LoxAemtliPlanCard extends FpBase {
     _normalize(c) { return { plan: 'todo.amtli_plan', script: 'script.aemtli_tageswechsel', einstellungen: 'todo.familienplaner_einstellungen', kinder: [], titel: 'Ämtliplan', ...c }; }
@@ -892,14 +1146,7 @@ customElements.whenDefined('fp-week-inner').then(() => {
     _isPick(key, p, d) { const k = this._pick; return !!k && k.key === key && k.p === p && k.d === d; }
     _onClick(e) {
       const t = e.target;
-      const ip = t.closest('[data-ip]');
-      if (ip) { this._ip = this._ip === ip.dataset.ip ? null : ip.dataset.ip; this._render(true); return; }
-      if (t.closest('[data-ipclose]')) { this._ip = null; this._render(true); return; }
       const ha = t.closest('[data-hadd]'); if (ha) { this.dispatchEvent(new CustomEvent('fp-plan-add', { bubbles: true, composed: true, detail: { kind: ha.dataset.hadd } })); return; }
-      const ab = t.closest('[data-avb]');
-      if (ab && this._ip) { const [part, val] = ab.dataset.avb.split('|'); const cur = this._curBild(this._ip); this._savePerson(this._ip, { bild: avSet(cur.startsWith('av:') ? cur : 'av:k.kurz.braun.hell.0', part, val) }); return; }
-      const bi = t.closest('[data-bild]'); if (bi && this._ip) { this._savePerson(this._ip, { bild: bi.dataset.bild }); return; }
-      const co = t.closest('[data-col]'); if (co && this._ip) { this._savePerson(this._ip, { farbe: co.dataset.col }); return; }
       if (t.closest('[data-add]')) { const inp = this.shadowRoot.querySelector('[data-new="t"]'); if (inp) this._new.t = inp.value; this._add(); return; }
       const arw = t.closest('.arw');
       if (arw) {
@@ -939,11 +1186,6 @@ customElements.whenDefined('fp-week-inner').then(() => {
     }
     _onChange(e) {
       const el = e.target;
-      if (el.dataset.upload !== undefined && this._ip && el.files && el.files[0]) { this._upload(this._ip, el.files[0]); return; }
-      if (el.dataset.alias !== undefined && this._ip) {
-        const al = [...new Set(el.value.split(',').map((s) => s.trim()).filter(Boolean))];
-        this._savePerson(this._ip, { alias: al }); this._flash(al.length ? `Spitznamen gespeichert: ${al.join(', ')}` : 'Spitznamen entfernt'); return;
-      }
       if (el.dataset.addp !== undefined) {
         const v = el.value; if (!v) return; const ctx = this._ctx(el); if (!ctx.z) return;
         ctx.z[v] = ctx.z[v] || []; this._apply(ctx); return;
@@ -995,46 +1237,6 @@ customElements.whenDefined('fp-week-inner').then(() => {
       const free = kids.filter((k) => !(k.name in z));
       return lines + (free.length ? `<select class="sel addp" data-addp><option value="" selected>+ Person zuteilen</option>${free.map((k) => `<option value="${esc(k.name)}">${esc(k.name)}</option>`).join('')}</select>` : '');
     }
-    _curBild(name) { const k = this._kids().find((x) => x.name === name) || {}; return k.bild || ''; }
-    _savePerson(name, patch) {
-      const ps = JSON.parse(JSON.stringify(this._settingsP())); ps[name] = { ...(ps[name] || {}), ...patch };
-      const desc = 'fp1:' + JSON.stringify({ p: ps }); const it = this._settingsItem();
-      if (it) it.description = desc; else this._data.settings = [...(this._data.settings || []), { summary: 'Personen', uid: '_neu', description: desc }];
-      this._render(true);
-      const call = it && it.uid !== '_neu'
-        ? this._call('todo', 'update_item', { item: it.uid, description: desc }, this._cfg.einstellungen)
-        : this._call('todo', 'add_item', { item: 'Personen', description: desc }, this._cfg.einstellungen);
-      call.catch((e) => this._flash(`Fehler: ${e.message || e}`, true));
-    }
-    async _upload(name, file) {
-      // centre crop to a 320 px square JPEG in the browser, then store it in Home Assistant
-      if (!this._hass || !this._hass.fpUpload) return this._flash('Hochladen ist hier nicht verfügbar.', true);
-      this._uploading = true; this._render(true);
-      try {
-        const url = URL.createObjectURL(file);
-        const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
-        const s = Math.min(img.naturalWidth, img.naturalHeight); const c = document.createElement('canvas'); c.width = c.height = 320;
-        c.getContext('2d').drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, 320, 320);
-        URL.revokeObjectURL(url);
-        await this._hass.fpUpload(name, c.toDataURL('image/jpeg', 0.86));
-        this._flash('Foto gespeichert');
-      } catch (er) { this._flash(`Fehler: ${(er && er.message) || 'Bild konnte nicht gelesen werden'}`, true); }
-      this._uploading = false; this._render(true);
-    }
-    _iconPicker(k) {
-      if (!k) return '';
-      const cur = k.bild || (k.avatar ? 'svg:' + k.avatar : '');
-      return `<div class="ipk" style="--c:${k.farbe}">
-        <div class="iph">${avatarHtml(k, 60)}<div class="iphn"><b>${esc(k.name)}</b><span>Bild und Farbe antippen – wird sofort überall übernommen</span></div><button class="sg ok" data-ipclose>Fertig</button></div>
-        <div class="ipl">Spitznamen in Terminen</div>
-        <input class="in" data-alias value="${esc(((this._settingsP()[k.name] || {}).alias || []).join(', '))}" placeholder="z. B. Tommy, Mimi – mit Komma trennen" style="max-width:420px">
-        <div class="ips2">Steht einer dieser Namen im Termintitel, erscheint der Termin bei ${esc(k.name)}.</div>
-        <div class="ipl">Farbe</div><div class="cols">${COLS.map((c) => `<button class="clr${(k.farbe || '').toLowerCase() === c.toLowerCase() ? ' on' : ''}" data-col="${c}" style="background:${c}"></button>`).join('')}</div>
-        <div class="ipl">Eigenes Foto</div><div class="upl">${(k.bild || '').startsWith('img:') ? avatarHtml(k, 56) : ''}<label class="sg up">${this._uploading ? 'Wird hochgeladen …' : 'Foto hochladen'}<input type="file" accept="image/*" data-upload hidden></label><span class="ips2">Wird quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.</span></div>
-        <div class="ipl">Selbst zusammenstellen</div>${avBuilder(cur.startsWith('av:') ? cur : 'av:k.kurz.braun.hell.0', k.farbe)}
-        ${AVATARS.map(([title, ids]) => `<div class="ipl">${title}</div><div class="igrid">${ids.map((id) => `<button class="ib${cur === id ? ' on' : ''}" data-bild="${id}">${avatarHtml({ ...k, bild: id }, 44)}</button>`).join('')}</div>`).join('')}
-      </div>`;
-    }
     _render(force) {
       if (!this.shadowRoot || !this._cfg) return;
       if (!force && this._editing()) { this._dirty = true; return; }
@@ -1056,7 +1258,7 @@ customElements.whenDefined('fp-week-inner').then(() => {
           <button class="del${this._confirm === r.uid ? ' cf' : ''}" data-del>${this._confirm === r.uid ? 'Löschen?' : '<ha-icon icon="mdi:trash-can-outline"></ha-icon>'}</button>
         </div>`).join('');
       const nw = this._new;
-      this.shadowRoot.innerHTML = `<style>${AVB_CSS}
+      this.shadowRoot.innerHTML = `<style>
         :host{display:block}
         .card{background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:20px 22px;color:var(--fp-text,#ececec);font-family:var(--fp-font)}
         .head{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}.hsp{flex:1}.hadd{display:flex;align-items:center;gap:6px;height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#262626);color:var(--fp-text,#ddd);font:inherit;font-size:14px;cursor:pointer}.hadd ha-icon{--mdc-icon-size:18px;color:${G}}
@@ -1119,9 +1321,6 @@ customElements.whenDefined('fp-week-inner').then(() => {
         <div class="head"><div class="badge"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></div>
           <div><div class="title">${esc(this._cfg.titel)}</div><div class="subt">Tag antippen = zuteilen · nochmals antippen = Zeit zum Erledigen (z. B. Mi bis Sa) und Rhythmus (alle 2–4 Wochen). Änderungen gelten ab sofort.</div></div><span class="hsp"></span>
           <button class="hadd" data-hadd="special"><ha-icon icon="mdi:plus"></ha-icon>Besonderes Ämtli</button><button class="hadd" data-hadd="todo"><ha-icon icon="mdi:plus"></ha-icon>To-do</button></div>
-        <div class="sec">Personen · Bild & Farbe</div>
-        <div class="pers">${kids.map((k) => `<button class="pc${this._ip === k.name ? ' on' : ''}" data-ip="${esc(k.name)}" style="--c:${k.farbe}">${avatarHtml(k, 40)}<span>${esc(k.name)}</span><ha-icon icon="mdi:pencil"></ha-icon></button>`).join('')}</div>
-        ${this._ip ? this._iconPicker(kids.find((k) => k.name === this._ip)) : ''}
         <div class="sec">Wochenübersicht</div>
         ${overview}
         <div class="sec">Ämtli</div>
@@ -1366,48 +1565,6 @@ const avatarGen = (code, bg) => {
   ex.forEach((a) => { if (AV_ACC[a]) s += AV_ACC[a](h2); });
   return `<svg viewBox="0 0 40 40" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
 };
-// Baukasten: Code ändern (Teil = age | st | hc | sk | acc | cost)
-const avParse = (code) => { const [age, st, hc, sk, acc] = String(code || 'k.kurz.braun.hell.0').replace(/^av:/, '').split('.');
-  return { age: ['k', 'e', 'o'].includes(age) ? age : 'k', st: AV_ST[st] ? st : 'kurz', hc: AV_HC[hc] ? hc : 'braun', sk: AV_SK[sk] ? sk : 'hell', ex: acc && acc !== '0' ? acc.split('+').filter((a) => AV_ORDER.includes(a)) : [] }; };
-const avCode = (o) => `av:${o.age}.${o.age === 'k' && o.st === 'glatze' ? 'kurz' : o.st}.${o.hc}.${o.sk}.${avNorm(o.age, o.ex).join('+') || '0'}`;
-const avSet = (code, part, val) => {
-  const o = avParse(code);
-  if (part === 'acc') { o.ex = o.ex.includes(val) ? o.ex.filter((a) => a !== val) : [...o.ex.filter((a) => !(AV_HEAD.includes(val) && AV_HEAD.includes(a)) && !(AV_EYES.includes(val) && AV_EYES.includes(a))), val];
-    const c = o.ex.find((a) => AV_COST.includes(a)); if (c && o.ex.includes(val) && !AV_COST.includes(val)) { if ((AV_HAT_COST.includes(c) && AV_HEAD.includes(val)) || (AV_MASK_COST.includes(c) && AV_EYES.includes(val)) || ((c === 'astro' || c === 'ritter') && val === 'kopfhoerer') || (c === 'ninja' && (val === 'bart' || val === 'sommersprossen'))) o.ex = o.ex.filter((a) => a !== c); } }
-  else if (part === 'cost') { o.ex = o.ex.filter((a) => !AV_COST.includes(a)); if (val !== '0') o.ex.push(val); }
-  else o[part] = val;
-  return avCode(o);
-};
-const AVB_LANG = 'en';
-const AVB_T = { de: { age: 'Figur', st: 'Frisur', hc: 'Haarfarbe', sk: 'Hautfarbe', acc: 'Extras (kombinierbar)', cost: 'Verkleidung', none: 'Keine', ages: { k: 'Kind', e: 'Erwachsen', o: 'Grosseltern' },
-    n: { long: 'Lang', ponylang: 'Lang mit Pony', zoepfe: 'Zöpfe', dutt: 'Dutt', bob: 'Bob', locken: 'Locken', pferd: 'Pferdeschwanz', kurz: 'Kurz', seite: 'Seitenscheitel', stachel: 'Stachelig', lockenkurz: 'Kurze Locken', glatze: 'Glatze',
-      sommersprossen: 'Sommersprossen', bart: 'Bart', kopfhoerer: 'Kopfhörer', brille: 'Brille', sonnenbrille: 'Sonnenbrille', cap: 'Cap', krone: 'Krone', katze: 'Katzenohren', einhorn: 'Einhorn', schleife: 'Schleife', stirnband: 'Stirnband',
-      held: 'Held Sternenkraft', blitz: 'Held Funkenflug', nacht: 'Heldin Mondfee', ninja: 'Ninja', ritter: 'Ritter', astro: 'Astronaut', pirat: 'Pirat', zauber: 'Zauberer' } },
-  en: { age: 'Figure', st: 'Hair', hc: 'Hair colour', sk: 'Skin tone', acc: 'Extras (combine freely)', cost: 'Costume', none: 'None', ages: { k: 'Child', e: 'Adult', o: 'Grandparent' },
-    n: { long: 'Long', ponylang: 'Long with fringe', zoepfe: 'Pigtails', dutt: 'Bun', bob: 'Bob', locken: 'Curls', pferd: 'Ponytail', kurz: 'Short', seite: 'Side parting', stachel: 'Spiky', lockenkurz: 'Short curls', glatze: 'Bald',
-      sommersprossen: 'Freckles', bart: 'Beard', kopfhoerer: 'Headphones', brille: 'Glasses', sonnenbrille: 'Sunglasses', cap: 'Cap', krone: 'Crown', katze: 'Cat ears', einhorn: 'Unicorn', schleife: 'Bow', stirnband: 'Headband',
-      held: 'Hero Star Power', blitz: 'Hero Sparkwing', nacht: 'Hero Moon Fairy', ninja: 'Ninja', ritter: 'Knight', astro: 'Astronaut', pirat: 'Pirate', zauber: 'Wizard' } } };
-// HTML des Baukastens; Knöpfe tragen data-avb="teil|wert" und zeigen jeweils die Vorschau mit dieser Änderung
-const avBuilder = (code, color) => {
-  const T = AVB_T[AVB_LANG] || AVB_T.de; const o = avParse(code); const cur = avCode(o);
-  const pic = (c, on, title, kind) => `<button class="avo${on ? ' on' : ''}" data-avb="${kind}" title="${esc(title)}"><span class="avs" style="width:40px;height:40px;border-radius:50%;overflow:hidden;display:inline-flex">${avatarGen(c.slice(3), color)}</span></button>`;
-  const dot = (c, on, title, kind) => `<button class="avd${on ? ' on' : ''}" data-avb="${kind}" title="${esc(title)}" style="background:${c}"></button>`;
-  const row = (label, html) => `<div class="avr"><b>${esc(label)}</b><div class="avg">${html}</div></div>`;
-  const ex = avNorm(o.age, o.ex); const cost = ex.find((a) => AV_COST.includes(a)) || '0';
-  return `<div class="avb"><div class="avp"><span class="avs" style="width:96px;height:96px;border-radius:50%;overflow:hidden;display:inline-flex">${avatarGen(cur.slice(3), color)}</span></div><div class="avc">
-    ${row(T.age, ['k', 'e', 'o'].map((a) => pic(avSet(cur, 'age', a), o.age === a, T.ages[a], 'age|' + a)).join(''))}
-    ${row(T.st, Object.keys(AV_ST).filter((x) => !(x === 'glatze' && o.age === 'k')).map((x) => pic(avSet(cur, 'st', x), o.st === x, T.n[x] || x, 'st|' + x)).join(''))}
-    ${row(T.hc, Object.entries(AV_HC).map(([k, c]) => dot(c[0], o.hc === k, k, 'hc|' + k)).join(''))}
-    ${row(T.sk, Object.entries(AV_SK).map(([k, c]) => dot(c, o.sk === k, k, 'sk|' + k)).join(''))}
-    ${row(T.acc, [...AV_FACE, ...AV_EYES, ...AV_HEAD].filter((a) => !(a === 'bart' && o.age === 'k')).map((a) => pic(avSet(cur, 'acc', a), ex.includes(a), T.n[a] || a, 'acc|' + a)).join(''))}
-    ${row(T.cost, ['0', ...AV_COST].map((c) => (c === '0' ? `<button class="avo txt${cost === '0' ? ' on' : ''}" data-avb="cost|0">${esc(T.none)}</button>` : pic(avSet(cur, 'cost', c), cost === c, T.n[c] || c, 'cost|' + c))).join(''))}
-  </div></div>`;
-};
-const AVB_CSS = `.avb{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}.avp{flex:none}.avc{flex:1;min-width:260px;display:flex;flex-direction:column;gap:10px}
-.avr b{display:block;font-size:12px;color:#aaa;font-weight:500;margin-bottom:5px}.avg{display:flex;flex-wrap:wrap;gap:6px}
-.avo{padding:2px;border-radius:50%;border:2px solid transparent;background:transparent;cursor:pointer;line-height:0}.avo.on{border-color:var(--fp-accent,#69C350)}
-.avo.txt{border-radius:22px;height:44px;padding:0 14px;line-height:1;color:inherit;font:inherit;font-size:13px;border:1px solid #444}.avo.txt.on{border:2px solid var(--fp-accent,#69C350)}
-.avd{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0}.avd.on{outline:3px solid var(--fp-accent,#69C350);outline-offset:2px}`;
 // Termin-Zeit kurz: "14:30–15:20" bzw. schmal "14:30–15"
 const evRange = (e, short) => {
   if (e.allDay) return short ? 'all day' : 'all day';
@@ -1418,6 +1575,7 @@ const evRange = (e, short) => {
 const avatarHtml = (k, size) => {
   const b = k.bild || '';
   if (b.startsWith('img:')) return `<img src="${esc(b.slice(4))}" alt="" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex:none;display:inline-block">`;
+  if (b.startsWith('av2:') && window.FPAV) return `<span class="avs" style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;display:inline-flex;flex:none">${window.FPAV.svg(b, k.farbe)}</span>`;
   if (b.startsWith('av:')) return `<span class="avs" style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;display:inline-flex;flex:none">${avatarGen(b.slice(3), k.farbe)}</span>`;
   if (b.startsWith('mdi:')) return `<span style="width:${size}px;height:${size}px;border-radius:50%;background:${k.farbe};display:inline-flex;align-items:center;justify-content:center;flex:none;color:#161616"><ha-icon icon="${esc(b)}" style="--mdc-icon-size:${Math.round(size * 0.6)}px"></ha-icon></span>`;
   if (b.startsWith('svg:')) return avatarBase({ ...k, avatar: b.slice(4) }, size);
@@ -1804,7 +1962,7 @@ class LoxWochenplanerCard extends FpBase {
       .wk{font-size:12px;color:var(--fp-text3,#8a8a8a);padding:0 8px;text-align:center;min-width:150px}.wk b{display:block;color:var(--fp-text,#ececec);font-size:15px;font-weight:600}
       .grid{display:grid;grid-template-columns:${phone ? '104px' : '178px'} ${cols};gap:5px;align-items:stretch}
       .card.phone .lab{flex-direction:column;align-items:flex-start;gap:6px;padding:8px 6px}.card.phone .lt .nm{font-size:13px}.card.phone .corner{visibility:hidden}
-      .card.phone .bg{grid-template-columns:1fr}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 9px}
+      .card.phone .bg{grid-template-columns:1fr}.card.phone .pev .src{display:none}.card.phone .btn{min-height:50px;font-size:15px}.card.phone .btn .cb{width:26px;height:26px}.card.phone .btn.done .cb::after{left:8px;top:3px;width:6px;height:12px}.card.phone .nb{min-width:46px;height:46px}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 9px}
       .dnav{display:flex;align-items:center;gap:6px}.dd{font-size:14px;text-align:center;min-width:120px}.dd b{display:block;font-size:16px}
       .corner{font-size:10px;color:var(--fp-text3,#555);display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;padding:0 4px 6px}
       .corner .leg{background:none;padding:0;margin:0;gap:4px 10px}.corner .lgi{font-size:12px}
@@ -1929,7 +2087,7 @@ const fpNavigate = (p) => {
   history.pushState(null, '', `/${parts[0] || 'family-planer'}/${p}${location.search}`);
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
-window.FPX_EN = { AWT, AWR, AWCSS, avBuilder, avSet, avNorm, avatarGen, AVB_CSS, AV_HC, AV_SK, AV_ST, AV_COST, AV_HEAD, AV_EYES, AV_FACE, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
+window.FPX_EN = { AWT, AWR, AWCSS, avatarGen, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
 customElements.define('fp-week-inner-en', LoxWochenplanerCard);
 
 })();
@@ -1938,7 +2096,7 @@ customElements.define('fp-week-inner-en', LoxWochenplanerCard);
 // Plan-Beschreibung: "fp1:" + {"z": {"Lea": [1,3]}, "r": {"Lea|1": [2, 0]}}
 //   r: alle n Wochen, aktiv wenn Wochenindex (seit 5.1.1970) % n == offset; fehlt r => jede Woche
 customElements.whenDefined('fp-week-inner-en').then(() => {
-  const { FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, avBuilder, avSet, AVB_CSS } = window.FPX_EN;
+  const { FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx } = window.FPX_EN;
   const rgba = (hex, a) => { const h = (hex || '#888888').replace('#', ''); const n = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; };
   const mondayOfIdx = (idx) => { const u = new Date(Date.UTC(1970, 0, 5) + idx * 604800000); return new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate()); };
   const curIdx = () => weekIdx(new Date());
@@ -1951,29 +2109,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     return s.length ? s.map((d) => dayTxt(p, d, r, f)).join(', ') : 'no days';
   };
 
-  // Bildauswahl pro Person (eigene Portraits + Material-Design-Icons)
-  const ICONS = [
-    ['Girls', ['svg:maedchen-lang', 'svg:maedchen-zoepfe', 'svg:maedchen-dutt', 'av:k.long.braun.hell.0', 'av:k.long.schwarz.mittel.0', 'av:k.long.rot.hell.0', 'av:k.ponylang.blond.hell.schleife', 'av:k.ponylang.braun.oliv.0', 'av:k.ponylang.schwarz.hell.brille', 'av:k.zoepfe.braun.mittel.0', 'av:k.zoepfe.schwarz.dunkel.0', 'av:k.zoepfe.rot.hell.0', 'av:k.dutt.braun.oliv.0', 'av:k.bob.blond.hell.0', 'av:k.bob.schwarz.mittel.0', 'av:k.bob.braun.hell.brille', 'av:k.locken.braun.dunkel.0', 'av:k.locken.schwarz.oliv.schleife', 'av:k.locken.rot.hell.0', 'av:k.pferd.blond.hell.0', 'av:k.pferd.braun.mittel.0', 'av:k.long.blond.hell.kopfhoerer']],
-    ['Boys', ['av:k.kurz.blond.hell.0', 'av:k.kurz.braun.hell.0', 'av:k.kurz.schwarz.mittel.0', 'av:k.kurz.rot.hell.0', 'av:k.stachel.blond.hell.0', 'av:k.stachel.braun.oliv.0', 'av:k.stachel.schwarz.dunkel.0', 'av:k.seite.braun.hell.0', 'av:k.seite.blond.mittel.brille', 'av:k.lockenkurz.schwarz.dunkel.0', 'av:k.lockenkurz.braun.oliv.0', 'av:k.kurz.blond.hell.cap', 'av:k.kurz.braun.mittel.kopfhoerer', 'av:k.seite.rot.hell.cap']],
-    ['Women', ['svg:frau', 'av:e.long.braun.mittel.0', 'av:e.long.schwarz.oliv.0', 'av:e.long.rot.hell.0', 'av:e.ponylang.blond.hell.0', 'av:e.ponylang.braun.hell.brille', 'av:e.bob.braun.hell.0', 'av:e.bob.blond.hell.brille', 'av:e.bob.schwarz.dunkel.0', 'av:e.dutt.blond.hell.0', 'av:e.dutt.braun.oliv.brille', 'av:e.locken.braun.dunkel.0', 'av:e.locken.blond.hell.0', 'av:e.pferd.blond.hell.0', 'av:e.pferd.schwarz.mittel.0', 'av:e.pferd.rot.hell.0']],
-    ['Men', ['svg:mann', 'av:e.kurz.braun.hell.0', 'av:e.kurz.schwarz.oliv.0', 'av:e.kurz.braun.hell.bart', 'av:e.kurz.blond.hell.bart', 'av:e.seite.braun.mittel.brille', 'av:e.seite.schwarz.dunkel.0', 'av:e.seite.blond.hell.0', 'av:e.stachel.blond.hell.0', 'av:e.lockenkurz.schwarz.dunkel.bart', 'av:e.glatze.braun.hell.bart', 'av:e.glatze.schwarz.mittel.brille', 'av:e.kurz.rot.hell.bart+brille', 'av:e.kurz.blond.hell.cap']],
-    ['Grandparents', ['av:o.dutt.grau.hell.brille', 'av:o.bob.grau.hell.0', 'av:o.locken.grau.mittel.0', 'av:o.long.grau.hell.brille', 'av:o.kurz.grau.hell.brille', 'av:o.glatze.grau.hell.bart+brille', 'av:o.seite.grau.oliv.bart', 'av:o.glatze.grau.dunkel.0']],
-    ['Dressed up', ['av:k.kurz.blond.hell.held', 'av:k.long.blond.hell.held', 'av:k.zoepfe.braun.hell.held', 'av:k.kurz.braun.hell.astro', 'av:k.zoepfe.blond.hell.astro', 'av:k.kurz.schwarz.mittel.pirat', 'av:k.long.rot.hell.pirat', 'av:k.long.blond.hell.zauber', 'av:k.stachel.braun.hell.zauber', 'av:k.long.blond.hell.krone', 'av:k.kurz.blond.hell.krone', 'av:k.zoepfe.braun.hell.katze', 'av:k.long.blond.hell.katze', 'av:k.long.blond.hell.einhorn', 'av:k.ponylang.braun.mittel.einhorn', 'av:k.dutt.blond.hell.kopfhoerer', 'av:e.kurz.braun.hell.held', 'av:e.long.blond.hell.krone']],
-    ['Symbole & Smileys', ['mdi:face-woman', 'mdi:face-man', 'mdi:baby-face-outline', 'mdi:account-cowboy-hat', 'mdi:emoticon-cool-outline', 'mdi:emoticon-happy-outline', 'mdi:emoticon-excited-outline', 'mdi:emoticon-tongue-outline']],
-    ['Superheld & Abenteuer', ['mdi:shield-star', 'mdi:lightning-bolt', 'mdi:flash', 'mdi:domino-mask', 'mdi:ninja', 'mdi:pirate', 'mdi:sword', 'mdi:shield-crown', 'mdi:crown', 'mdi:castle', 'mdi:wizard-hat', 'mdi:magic-staff', 'mdi:skull-crossbones', 'mdi:treasure-chest']],
-    ['Weltall & Roboter', ['mdi:rocket-launch', 'mdi:ufo', 'mdi:alien', 'mdi:robot', 'mdi:robot-happy', 'mdi:star-shooting', 'mdi:earth', 'mdi:moon-waning-crescent', 'mdi:telescope', 'mdi:atom']],
-    ['Tiere', ['mdi:unicorn', 'mdi:unicorn-variant', 'mdi:cat', 'mdi:dog', 'mdi:dog-side', 'mdi:rabbit', 'mdi:rodent', 'mdi:horse', 'mdi:horse-variant', 'mdi:owl', 'mdi:penguin', 'mdi:panda', 'mdi:koala', 'mdi:elephant', 'mdi:teddy-bear', 'mdi:turtle', 'mdi:fish', 'mdi:dolphin', 'mdi:shark', 'mdi:jellyfish', 'mdi:bee', 'mdi:butterfly', 'mdi:ladybug', 'mdi:snake', 'mdi:spider', 'mdi:duck', 'mdi:bird', 'mdi:pig', 'mdi:cow', 'mdi:sheep', 'mdi:paw', 'mdi:ghost']],
-    ['Sport', ['mdi:soccer', 'mdi:basketball', 'mdi:volleyball', 'mdi:tennis', 'mdi:table-tennis', 'mdi:hockey-sticks', 'mdi:swim', 'mdi:bike', 'mdi:skateboard', 'mdi:ski', 'mdi:karate', 'mdi:run', 'mdi:gymnastics', 'mdi:trophy']],
-    ['Musik & Hobby', ['mdi:guitar-electric', 'mdi:guitar-acoustic', 'mdi:piano', 'mdi:music', 'mdi:microphone-variant', 'mdi:headphones', 'mdi:dance-ballroom', 'mdi:drama-masks', 'mdi:palette', 'mdi:brush', 'mdi:camera', 'mdi:gamepad-variant', 'mdi:controller-classic', 'mdi:puzzle', 'mdi:chess-knight', 'mdi:book-open-variant']],
-    ['Essen', ['mdi:ice-cream', 'mdi:pizza', 'mdi:cupcake', 'mdi:cookie', 'mdi:candy', 'mdi:popcorn', 'mdi:hamburger', 'mdi:food-apple', 'mdi:fruit-watermelon', 'mdi:carrot']],
-    ['Natur & Fahrzeuge', ['mdi:flower', 'mdi:flower-tulip', 'mdi:palm-tree', 'mdi:cactus', 'mdi:mushroom', 'mdi:clover', 'mdi:weather-sunny', 'mdi:weather-night', 'mdi:snowflake', 'mdi:fire', 'mdi:diamond-stone', 'mdi:heart', 'mdi:star', 'mdi:car-sports', 'mdi:airplane', 'mdi:helicopter', 'mdi:train', 'mdi:sail-boat', 'mdi:tractor', 'mdi:motorbike', 'mdi:fire-truck', 'mdi:bus-school']]
-  ];
-  // only the multi-coloured illustrated avatars (no plain one-colour icons)
-  const AVATARS = ICONS.filter(([, ids]) => ids.every((x) => !x.startsWith('mdi:')));
-  const COLS = ['#69C350', '#A8CF45', '#4FD1C5', '#4FA3E0', '#7A7FE8', '#C771D6', '#E06B9B', '#E06B6B', '#E0A84F', '#F5C542', '#9AA5B1'];
-
   class LoxAemtliPlanCard extends FpBase {
-    _normalize(c) { return { plan: 'todo.amtli_plan', script: 'script.aemtli_tageswechsel', einstellungen: 'todo.familienplaner_einstellungen', kinder: [], titel: 'Chore plan', ...c }; }
+    _normalize(c) { return { plan: 'todo.amtli_plan', script: 'script.aemtli_tageswechsel', einstellungen: 'todo.familienplaner_einstellungen', kinder: [], titel: 'Ämtliplan', ...c }; }
     _lists() { return [['plan', this._cfg.plan], ['settings', this._cfg.einstellungen]]; }
     getCardSize() { return 10; }
     _bind() {
@@ -2010,10 +2147,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     _flash(msg, err) { this._msg = msg; this._msgErr = !!err; this._render(true); clearTimeout(this._msgT); this._msgT = setTimeout(() => { this._msg = ''; this._render(); }, 3500); }
     _add() {
       const t = (this._new.t || '').trim();
-      if (!t) return this._flash('Please enter a chore.', true);
-      if (!Object.values(this._new.z).some((v) => v.length)) return this._flash('Please give at least one person a weekday.', true);
+      if (!t) return this._flash('Bitte einen Ämtli-Text eingeben.', true);
+      if (!Object.values(this._new.z).some((v) => v.length)) return this._flash('Bitte mindestens einer Person einen Wochentag zuordnen.', true);
       this._call('todo', 'add_item', { item: t, description: this._desc(this._new.z, this._new.r, this._new.f) }, this._cfg.plan).then(() => {
-        this._new = { t: '', z: {}, r: {}, f: {} }; this._pick = null; this._flash(`"${t}" added`); this._sync();
+        this._new = { t: '', z: {}, r: {}, f: {} }; this._pick = null; this._flash(`„${t}“ hinzugefügt`); this._sync();
       }).catch((e) => this._flash(`Error: ${e.message || e}`, true));
     }
     _ctx(el) {
@@ -2035,14 +2172,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     _isPick(key, p, d) { const k = this._pick; return !!k && k.key === key && k.p === p && k.d === d; }
     _onClick(e) {
       const t = e.target;
-      const ip = t.closest('[data-ip]');
-      if (ip) { this._ip = this._ip === ip.dataset.ip ? null : ip.dataset.ip; this._render(true); return; }
-      if (t.closest('[data-ipclose]')) { this._ip = null; this._render(true); return; }
       const ha = t.closest('[data-hadd]'); if (ha) { this.dispatchEvent(new CustomEvent('fp-plan-add', { bubbles: true, composed: true, detail: { kind: ha.dataset.hadd } })); return; }
-      const ab = t.closest('[data-avb]');
-      if (ab && this._ip) { const [part, val] = ab.dataset.avb.split('|'); const cur = this._curBild(this._ip); this._savePerson(this._ip, { bild: avSet(cur.startsWith('av:') ? cur : 'av:k.kurz.braun.hell.0', part, val) }); return; }
-      const bi = t.closest('[data-bild]'); if (bi && this._ip) { this._savePerson(this._ip, { bild: bi.dataset.bild }); return; }
-      const co = t.closest('[data-col]'); if (co && this._ip) { this._savePerson(this._ip, { farbe: co.dataset.col }); return; }
       if (t.closest('[data-add]')) { const inp = this.shadowRoot.querySelector('[data-new="t"]'); if (inp) this._new.t = inp.value; this._add(); return; }
       const arw = t.closest('.arw');
       if (arw) {
@@ -2082,11 +2212,6 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     _onChange(e) {
       const el = e.target;
-      if (el.dataset.upload !== undefined && this._ip && el.files && el.files[0]) { this._upload(this._ip, el.files[0]); return; }
-      if (el.dataset.alias !== undefined && this._ip) {
-        const al = [...new Set(el.value.split(',').map((s) => s.trim()).filter(Boolean))];
-        this._savePerson(this._ip, { alias: al }); this._flash(al.length ? `Nicknames saved: ${al.join(', ')}` : 'Nicknames removed'); return;
-      }
       if (el.dataset.addp !== undefined) {
         const v = el.value; if (!v) return; const ctx = this._ctx(el); if (!ctx.z) return;
         ctx.z[v] = ctx.z[v] || []; this._apply(ctx); return;
@@ -2138,46 +2263,6 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const free = kids.filter((k) => !(k.name in z));
       return lines + (free.length ? `<select class="sel addp" data-addp><option value="" selected>+ Assign person</option>${free.map((k) => `<option value="${esc(k.name)}">${esc(k.name)}</option>`).join('')}</select>` : '');
     }
-    _curBild(name) { const k = this._kids().find((x) => x.name === name) || {}; return k.bild || ''; }
-    _savePerson(name, patch) {
-      const ps = JSON.parse(JSON.stringify(this._settingsP())); ps[name] = { ...(ps[name] || {}), ...patch };
-      const desc = 'fp1:' + JSON.stringify({ p: ps }); const it = this._settingsItem();
-      if (it) it.description = desc; else this._data.settings = [...(this._data.settings || []), { summary: 'Personen', uid: '_neu', description: desc }];
-      this._render(true);
-      const call = it && it.uid !== '_neu'
-        ? this._call('todo', 'update_item', { item: it.uid, description: desc }, this._cfg.einstellungen)
-        : this._call('todo', 'add_item', { item: 'Personen', description: desc }, this._cfg.einstellungen);
-      call.catch((e) => this._flash(`Error: ${e.message || e}`, true));
-    }
-    async _upload(name, file) {
-      // centre crop to a 320 px square JPEG in the browser, then store it in Home Assistant
-      if (!this._hass || !this._hass.fpUpload) return this._flash('Uploading is not available here.', true);
-      this._uploading = true; this._render(true);
-      try {
-        const url = URL.createObjectURL(file);
-        const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
-        const s = Math.min(img.naturalWidth, img.naturalHeight); const c = document.createElement('canvas'); c.width = c.height = 320;
-        c.getContext('2d').drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, 320, 320);
-        URL.revokeObjectURL(url);
-        await this._hass.fpUpload(name, c.toDataURL('image/jpeg', 0.86));
-        this._flash('Photo saved');
-      } catch (er) { this._flash(`Error: ${(er && er.message) || 'Could not read the picture'}`, true); }
-      this._uploading = false; this._render(true);
-    }
-    _iconPicker(k) {
-      if (!k) return '';
-      const cur = k.bild || (k.avatar ? 'svg:' + k.avatar : '');
-      return `<div class="ipk" style="--c:${k.farbe}">
-        <div class="iph">${avatarHtml(k, 60)}<div class="iphn"><b>${esc(k.name)}</b><span>Tap a picture and colour – applied everywhere right away</span></div><button class="sg ok" data-ipclose>Done</button></div>
-        <div class="ipl">Nicknames in events</div>
-        <input class="in" data-alias value="${esc(((this._settingsP()[k.name] || {}).alias || []).join(', '))}" placeholder="e.g. Tommy, Mikey – separate with commas" style="max-width:420px">
-        <div class="ips2">If one of these names is in an event title, the event is shown at ${esc(k.name)}.</div>
-        <div class="ipl">Colour</div><div class="cols">${COLS.map((c) => `<button class="clr${(k.farbe || '').toLowerCase() === c.toLowerCase() ? ' on' : ''}" data-col="${c}" style="background:${c}"></button>`).join('')}</div>
-        <div class="ipl">Own photo</div><div class="upl">${(k.bild || '').startsWith('img:') ? avatarHtml(k, 56) : ''}<label class="sg up">${this._uploading ? 'Uploading …' : 'Upload photo'}<input type="file" accept="image/*" data-upload hidden></label><span class="ips2">Cropped to a square and stored only in your Home Assistant.</span></div>
-        <div class="ipl">Build your own</div>${avBuilder(cur.startsWith('av:') ? cur : 'av:k.kurz.braun.hell.0', k.farbe)}
-        ${AVATARS.map(([title, ids]) => `<div class="ipl">${title}</div><div class="igrid">${ids.map((id) => `<button class="ib${cur === id ? ' on' : ''}" data-bild="${id}">${avatarHtml({ ...k, bild: id }, 44)}</button>`).join('')}</div>`).join('')}
-      </div>`;
-    }
     _render(force) {
       if (!this.shadowRoot || !this._cfg) return;
       if (!force && this._editing()) { this._dirty = true; return; }
@@ -2199,7 +2284,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           <button class="del${this._confirm === r.uid ? ' cf' : ''}" data-del>${this._confirm === r.uid ? 'Delete?' : '<ha-icon icon="mdi:trash-can-outline"></ha-icon>'}</button>
         </div>`).join('');
       const nw = this._new;
-      this.shadowRoot.innerHTML = `<style>${AVB_CSS}
+      this.shadowRoot.innerHTML = `<style>
         :host{display:block}
         .card{background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:20px 22px;color:var(--fp-text,#ececec);font-family:var(--fp-font)}
         .head{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}.hsp{flex:1}.hadd{display:flex;align-items:center;gap:6px;height:42px;padding:0 14px;border-radius:12px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#262626);color:var(--fp-text,#ddd);font:inherit;font-size:14px;cursor:pointer}.hadd ha-icon{--mdc-icon-size:18px;color:${G}}
@@ -2262,9 +2347,6 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         <div class="head"><div class="badge"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></div>
           <div><div class="title">${esc(this._cfg.titel)}</div><div class="subt">Tap a day = assign · tap again = time to do it (e.g. Wed to Sat) and rhythm (every 2–4 weeks). Changes apply right away.</div></div><span class="hsp"></span>
           <button class="hadd" data-hadd="special"><ha-icon icon="mdi:plus"></ha-icon>Special chore</button><button class="hadd" data-hadd="todo"><ha-icon icon="mdi:plus"></ha-icon>To-do</button></div>
-        <div class="sec">People · picture & colour</div>
-        <div class="pers">${kids.map((k) => `<button class="pc${this._ip === k.name ? ' on' : ''}" data-ip="${esc(k.name)}" style="--c:${k.farbe}">${avatarHtml(k, 40)}<span>${esc(k.name)}</span><ha-icon icon="mdi:pencil"></ha-icon></button>`).join('')}</div>
-        ${this._ip ? this._iconPicker(kids.find((k) => k.name === this._ip)) : ''}
         <div class="sec">Week overview</div>
         ${overview}
         <div class="sec">Chores</div>
@@ -2482,7 +2564,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
 })();
 
 // ---------------------------------------------------------------------------
-// Points & rewards card: levels, reward shop, parent approval (admin or PIN), bonus points, history
+// Points & rewards card: levels, trophies, reward shop per person, parent approval (admin or PIN), history
 // rendered inside custom:family-planer-card (view: rewards)
 // ---------------------------------------------------------------------------
 (() => {
@@ -2492,12 +2574,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const TXT = {
     de: { title: 'Punkte & Belohnungen', pts: 'Punkte', lvl: 'Level', next: 'noch {n} bis Level {l}', max: 'Höchstes Level erreicht!',
       shop: 'Belohnungen für {name}', shopAll: 'Alle Belohnungen', forAll: 'Für alle', pickHint: 'Person antippen, um ihre Belohnungen zu sehen und einzulösen.', forOnly: 'nur für {n}', redeem: 'Einlösen', missing: 'noch {n} Punkte', approval: 'mit Freigabe', noapproval: 'sofort',
-      week: 'max. {n}× pro Woche', none: 'Noch keine Belohnungen. Eltern legen sie hier mit „Bearbeiten“ an (Eltern-PIN).',
+      week: 'max. {n}× pro Woche', none: 'Noch keine Belohnungen. Mit „+ Belohnung“ auf einer Person anlegen (Eltern-PIN); ohne Auswahl im Dialog gilt sie für alle.',
       pending: 'Wartet auf Freigabe', approve: 'Freigeben', deny: 'Ablehnen', history: 'Verlauf', bonus: 'Punkte geben',
       pin: 'Eltern-PIN', ok: 'OK', cancel: 'Abbrechen', reason: 'Grund (optional)', give: 'Vergeben',
       sent: '„{t}“ angefragt – die Eltern werden benachrichtigt.', done: '„{t}“ eingelöst. Viel Spass!', approved: 'Freigegeben', denied: 'Abgelehnt',
       reserved: '{n} reserviert', err: { not_enough_points: 'Nicht genug Punkte.', weekly_limit: 'Diese Woche schon so oft eingelöst.', not_allowed: 'Diese Belohnung ist nicht für dich.', unauthorized: 'Falsche PIN oder keine Berechtigung.', pin_wrong: 'Falsche PIN.', pin_locked: 'Zu viele Fehlversuche – bitte 5 Minuten warten.' },
-      kinds: { chore: 'Ämtli', bonus: 'Tagesbonus', streak: 'Serienbonus', adjust: 'Bonus', reward: 'Belohnung', carry: 'Übertrag', todo: 'To-do' },
+      kinds: { chore: 'Ämtli', bonus: 'Tagesbonus', streak: 'Serienbonus', adjust: 'Bonus', reward: 'Belohnung', carry: 'Übertrag', todo: 'To-do', award: 'Auszeichnung' },
       edit: 'Bearbeiten', editDone: 'Fertig', add: 'Neue Belohnung', changePin: 'PIN ändern', del: 'Löschen', save: 'Speichern',
       rTitle: 'Belohnung', rIcon: 'Icon', rCost: 'Kosten in Punkten', rApproval: 'Eltern müssen freigeben', rPersons: 'Nur für (leer = alle)', rWeek: 'Höchstens pro Woche (0 = unbegrenzt)',
       delAsk: '„{t}“ wirklich löschen? Offene Anfragen dafür werden abgelehnt.', saved: 'Gespeichert.', pinChanged: 'Eltern-PIN geändert.',
@@ -2511,12 +2593,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       fc: 'Prognose', fcFam: 'Familienschnitt ({p} Punkte/Tag): ca. {n} Tage', fcNow: 'jetzt', awards: 'Auszeichnungen', noAw: 'Noch keine – siehe oben, was es zu gewinnen gibt.' },
     en: { title: 'Points & rewards', pts: 'points', lvl: 'Level', next: '{n} more to level {l}', max: 'Highest level reached!',
       shop: 'Rewards for {name}', shopAll: 'All rewards', forAll: 'For everyone', pickHint: 'Tap a person to see and redeem their rewards.', forOnly: 'only for {n}', redeem: 'Redeem', missing: '{n} points to go', approval: 'needs approval', noapproval: 'instant',
-      week: 'max. {n}× per week', none: 'No rewards yet. Parents add them here with "Edit" (parent PIN).',
+      week: 'max. {n}× per week', none: 'No rewards yet. Add one with "+ Reward" on a person (parent PIN); with nobody chosen in the dialog it is for everyone.',
       pending: 'Waiting for approval', approve: 'Approve', deny: 'Decline', history: 'History', bonus: 'Give points',
       pin: 'Parent PIN', ok: 'OK', cancel: 'Cancel', reason: 'Reason (optional)', give: 'Give',
       sent: '"{t}" requested – the parents are notified.', done: '"{t}" redeemed. Have fun!', approved: 'Approved', denied: 'Declined',
       reserved: '{n} reserved', err: { not_enough_points: 'Not enough points.', weekly_limit: 'Already redeemed that often this week.', not_allowed: 'This reward is not for you.', unauthorized: 'Wrong PIN or not allowed.', pin_wrong: 'Wrong PIN.', pin_locked: 'Too many wrong tries – please wait 5 minutes.' },
-      kinds: { chore: 'Chore', bonus: 'Day bonus', streak: 'Streak bonus', adjust: 'Bonus', reward: 'Reward', carry: 'Carried over', todo: 'To-do' },
+      kinds: { chore: 'Chore', bonus: 'Day bonus', streak: 'Streak bonus', adjust: 'Bonus', reward: 'Reward', carry: 'Carried over', todo: 'To-do', award: 'Award' },
       edit: 'Edit', editDone: 'Done', add: 'New reward', changePin: 'Change PIN', del: 'Delete', save: 'Save',
       rTitle: 'Reward', rIcon: 'Icon', rCost: 'Cost in points', rApproval: 'Parents must approve', rPersons: 'Only for (empty = everyone)', rWeek: 'At most per week (0 = unlimited)',
       delAsk: 'Really delete "{t}"? Pending requests for it are declined.', saved: 'Saved.', pinChanged: 'Parent PIN changed.',
@@ -2539,7 +2621,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     const v = (pace.persons || {})[pid] || pace.family || 0; return v > 0 ? Math.ceil((cost - have) / v) : null; };
   const money = (s, k) => { const z = s.sizes || {}; const v = (z.values || {})[k]; return v ? `${Number(v).toLocaleString('de-CH', { maximumFractionDigits: 2 })} ${z.currency || ''}`.trim() : ''; };
   const av = (p, size) => (window.FPX && window.FPX.avatarHtml
-    ? window.FPX.avatarHtml({ name: p.name, farbe: COLOR(p.color), bild: /^(av:[a-z0-9.+]+|svg:[a-z-]+|img:\/family_planer_files\/avatars\/[a-z0-9_]+\.(jpg|png|webp))$/.test(p.image || '') ? p.image : '' }, size)
+    ? window.FPX.avatarHtml({ name: p.name, farbe: COLOR(p.color), bild: /^(av:[a-z0-9.+]+|av2:[a-z0-9.]+|svg:[a-z-]+|img:\/family_planer_files\/avatars\/[a-z0-9_]+\.(jpg|png|webp))$/.test(p.image || '') ? p.image : '' }, size)
     : `<span style="width:${size}px;height:${size}px;border-radius:50%;background:${p.color};display:inline-block"></span>`);
 
   class FpRewardsInner extends HTMLElement {
@@ -2573,6 +2655,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     async _click(e) {
       const t = e.target; const s = this._snap(); if (!s) return;
+      const er0 = t.closest('[data-redit]');
+      if (er0) { const r = s.rewards.find((x) => x.id === er0.dataset.redit); if (r) { this._dlg = { kind: 'reward', id: r.id, r: { ...r, size: r.size || 'custom', persons: [...(r.persons || [])] } }; this._render(); } return; }
       const ra = t.closest('[data-radd]');
       if (ra) { const r = { title: '', icon: 'mdi:gift-outline', size: 's', cost: ((s.sizes || {}).reward || {}).s || 100, approval: true, persons: [ra.dataset.radd], per_week: 0 };
         this._dlg = { kind: 'reward', id: null, r }; this._render(); return; }
@@ -2585,22 +2669,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       }
       const dc = t.closest('[data-decide]');
       if (dc) { const id = dc.dataset.decide; const approve = dc.dataset.ok === '1'; this._parent((extra) => this._store.ws('family_planer/reward/decide', { request_id: id, approve, ...extra }).then(() => this._flash(approve ? this.T.approved : this.T.denied)).catch((er) => this._flash(this._errText(er), true))); return; }
-      if (t.closest('[data-bonus]')) { this._dlg = { kind: 'bonus', points: String(((s.sizes || {}).todo || {}).s || 10), reason: '', person: this._sel || (s.persons[0] && s.persons[0].id) }; this._render(); return; }
-      const bz = t.closest('[data-bsize]'); if (bz && this._dlg && this._dlg.kind === 'bonus') { const n = ((s.sizes || {}).todo || {})[bz.dataset.bsize] || 0; this._dlg.points = String(this._dlg.neg ? -n : n); this._render(); return; }
-      if (t.closest('[data-bneg]') && this._dlg && this._dlg.kind === 'bonus') { this._dlg.neg = !this._dlg.neg; this._dlg.points = String(-(Number(this._dlg.points) || 0)); this._render(); return; }
-      const bp = t.closest('[data-bperson]'); if (bp && this._dlg) { this._dlg.person = bp.dataset.bperson; this._render(); return; }
-      if (t.closest('[data-give]') && this._dlg) {
-        const d = this._dlg; const pts = Math.round(Number(d.points) || 0); if (!pts) return;
-        this._parent((extra) => this._store.ws('family_planer/points/adjust', { person_id: d.person, points: pts, reason: d.reason || '', ...extra }).then(() => { this._dlg = null; this._render(); }).catch((er) => this._flash(this._errText(er), true)));
-        return;
-      }
       if (t.closest('[data-chpin]')) {
         try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); }
-        return;
-      }
-      if (t.closest('[data-edit]')) {
-        if (this._edit) { this._edit = false; this._render(); return; }
-        try { await window.FPPIN.ensure(this._store, this._ctx()); this._edit = true; this._render(); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); }
         return;
       }
       const er = t.closest('[data-redit]');
@@ -2649,7 +2719,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         const wait = s.requests.filter((q) => q.status === 'pending' && q.pid === p.id).map((q) => `<div class="run w"><ha-icon icon="mdi:timer-sand"></ha-icon><span><b>${esc(q.title)}</b><em>${esc(T.waiting)}</em></span></div>`);
         let goals = s.rewards.filter((r) => r.persons && r.persons.includes(p.id));
         if (!goals.length) goals = s.rewards.filter((r) => forP(r, p.id) && r.cost > have).sort((u, v) => u.cost - v.cost).slice(0, 1);
-        const g = goals.slice(0, 3 - Math.min(wait.length, 2)).map((r) => `<div class="run"><ha-icon icon="${esc(r.icon)}"></ha-icon><span><b>${esc(r.title)}</b>
+        const g = goals.slice(0, 3 - Math.min(wait.length, 2)).map((r) => `<div class="run" data-redit="${esc(r.id)}" role="button"><ha-icon icon="${esc(r.icon)}"></ha-icon><span><b>${esc(r.title)}</b>
           <i class="bar"><i style="width:${Math.min(100, Math.round((have / Math.max(1, r.cost)) * 100))}%"></i></i><em>${Math.min(have, r.cost)} / ${r.cost} · ${esc(eta(p.id, r.cost))}</em></span></div>`);
         const all = [...wait, ...g]; return all.length ? all.join('') : `<div class="run none">${esc(T.nothing)}</div>`; };
       const cards = persons.map((p) => { const x = pts[p.id] || { balance: 0, available: 0, level: 1, name: '', progress: 0, next: null, lifetime: 0 };
@@ -2675,22 +2745,17 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           const f = (x) => String(x).replace(/\{n\}/g, a.value == null ? '' : a.value).replace('{t}', et);
           return `<div class="oa won" style="--mc:${COLOR(a.color)}">${medal(a, true)}<div class="ot"><b>${esc(f(tx[0]))}</b><span>${esc(f(tx[1]))}</span>${a.since ? `<span class="om"><em>${esc(String(a.since).slice(0, 10).split('-').reverse().join('.'))}</em></span>` : ''}</div></div>`; }).join('')}</div>` : `<div class="hint2">${esc(T.noAw)}</div>`}` : '';
       const avail = sel ? (pts[sel.id] || {}).available || 0 : 0;
-      const rw = this._edit || !sel ? s.rewards : s.rewards.filter((r) => !r.persons || !r.persons.length || r.persons.includes(sel.id));
-      const edit = this._edit && window.FPPIN.unlocked(this._store);
-      if (this._edit && !edit) this._edit = false;
-      const shop = edit ? `<div class="shop">${rw.map((r) => `<div class="rw"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
-          <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}${r.persons && r.persons.length ? ' · ' + esc(r.persons.map((pid) => (persons.find((p) => p.id === pid) || {}).name).filter(Boolean).join(', ')) : ''}</span></div>
-          <button class="tb" data-redit="${esc(r.id)}"><ha-icon icon="mdi:pencil"></ha-icon></button></div>`).join('')}
-          <button class="rw add" data-redit=""><ha-icon icon="mdi:plus"></ha-icon>${esc(T.add)}</button></div>`
-        : !s.rewards.length ? `<div class="empty">${esc(T.none)}</div>` : !sel ? `<div class="hint2">${esc(T.pickHint)}</div><div class="shop">${rw.map((r) => { const who = (r.persons && r.persons.length ? persons.filter((p) => r.persons.includes(p.id)) : []);
+      const rw = !sel ? s.rewards : s.rewards.filter((r) => !r.persons || !r.persons.length || r.persons.includes(sel.id));
+      const pen = (r) => `<button class="pen" data-redit="${esc(r.id)}" title="${esc(T.edit)}" aria-label="${esc(T.edit)}"><ha-icon icon="mdi:pencil-outline"></ha-icon></button>`;
+      const shop = !s.rewards.length ? `<div class="empty">${esc(T.none)}</div>` : !sel ? `<div class="hint2">${esc(T.pickHint)}</div><div class="shop">${rw.map((r) => { const who = (r.persons && r.persons.length ? persons.filter((p) => r.persons.includes(p.id)) : []);
           return `<div class="rw"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
           <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}</span>
-          <span class="who">${who.length ? who.map((p) => `<button class="wp" data-p="${esc(p.id)}" style="--c:${COLOR(p.color)}">${av(p, 20)}${esc(p.name)}</button>`).join('') : `<em class="wa">${esc(T.forAll)}</em>`}</span></div></div>`; }).join('')}</div>`
+          <span class="who">${who.length ? who.map((p) => `<button class="wp" data-p="${esc(p.id)}" style="--c:${COLOR(p.color)}">${av(p, 20)}${esc(p.name)}</button>`).join('') : `<em class="wa">${esc(T.forAll)}</em>`}</span></div>${pen(r)}</div>`; }).join('')}</div>`
         : `<div class="shop">${rw.map((r) => { const ok = avail >= r.cost;
         return `<div class="rw${ok ? '' : ' lock'}"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
           <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}</span>
           ${ok ? '' : `<span class="ms"><span class="bar"><i style="width:${Math.round((avail / r.cost) * 100)}%"></i></span>${esc(fmt(T.missing, { n: r.cost - avail }))}</span>`}</div>
-          <button class="rb" data-redeem="${esc(r.id)}" ${ok ? '' : 'disabled'}>${esc(T.redeem)}</button></div>`; }).join('')}</div>`;
+          ${pen(r)}<button class="rb" data-redeem="${esc(r.id)}" ${ok ? '' : 'disabled'}>${esc(T.redeem)}</button></div>`; }).join('')}</div>`;
       const name = (pid) => (persons.find((p) => p.id === pid) || {}).name || '?';
       const pend = s.requests.filter((q) => q.status === 'pending' && (!sel || q.pid === sel.id));
       const pending = pend.length ? `<div class="sec">${esc(T.pending)}</div><div class="pend">${pend.map((q) => `<div class="pq"><b>${esc(name(q.pid))}</b><span>${esc(q.title)} · ${q.cost} ${esc(T.pts)}</span>
@@ -2717,13 +2782,6 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           <div class="ea">${d.id ? `<button class="sg del" data-rdel>${esc(T.del)}</button>` : ''}<span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg ok" data-rsave>${esc(T.save)}</button></div></div></div>`; }
       if (d && d.kind === 'confirm') dlg = `<div class="ov"><div class="dlg"><div class="dh">${esc(fmt(T.delAsk, { t: d.title }))}</div>
           <div class="ea"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg del" data-ryes>${esc(T.del)}</button></div></div></div>`;
-      if (d && d.kind === 'bonus') dlg = `<div class="ov"><div class="dlg"><div class="dh">${esc(T.bonus)}</div>
-          <div class="bps">${persons.map((p) => `<button class="chip${p.id === d.person ? ' on' : ''}" data-bperson="${esc(p.id)}">${av(p, 22)}${esc(p.name)}</button>`).join('')}</div>
-          <div class="cats">${['s', 'm', 'l'].map((k) => { const n = ((s.sizes || {}).todo || {})[k] || 0; const on = Math.abs(Number(d.points)) === n;
-            return `<button class="cat${on ? ' on' : ''}" data-bsize="${k}"><b>${esc(T.sizes[k])}</b><span>${d.neg ? '−' : '+'}${n} ${esc(T.pts)}</span></button>`; }).join('')}
-            <button class="cat${d.neg ? ' on neg' : ''}" data-bneg><b>${esc(T.minus)}</b><span>−</span></button></div>
-          <div class="br"><input class="in num" data-bp type="number" value="${esc(d.points)}" inputmode="numeric"><input class="in" data-br placeholder="${esc(T.reason)}" value="${esc(d.reason || '')}" maxlength="80"></div>
-          <div class="ea"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg ok" data-give>${esc(T.give)}</button></div></div></div>`;
       this.shadowRoot.innerHTML = `<style>
         :host{display:block}
         ${(window.FPX || {}).AWCSS || ''}
@@ -2760,6 +2818,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .ri{width:48px;height:48px;border-radius:12px;background:color-mix(in srgb,var(--fp-accent) 1600%,transparent);color:${G};display:flex;align-items:center;justify-content:center;flex:none}.ri ha-icon{--mdc-icon-size:26px}
         .rw.lock .ri{background:var(--fp-bg4,#2e2e2e);color:var(--fp-text3,#777)}
         .rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.rt b{font-size:15px}.rt span{font-size:12px;color:var(--fp-text2,#999)}.ms{display:flex;flex-direction:column;gap:3px}
+        .pen{width:36px;height:36px;flex:none;border-radius:10px;border:1px solid var(--fp-line,#333);background:transparent;color:var(--fp-text2,#999);cursor:pointer;display:flex;align-items:center;justify-content:center}.pen ha-icon{--mdc-icon-size:18px}
+        .run[data-redit]{cursor:pointer}
         .rb{height:40px;padding:0 16px;border-radius:10px;border:none;background:${G};color:var(--fp-on-accent,#141414);font:inherit;font-weight:600;cursor:pointer}
         .rb[disabled]{background:var(--fp-bg4,#333);color:var(--fp-text3,#777);cursor:default}
         .pend,.hist{display:flex;flex-direction:column;gap:6px}.hint2{font-size:13px;color:var(--fp-text2,#999);margin:0 2px 8px}
@@ -2793,14 +2853,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .dlg{max-height:calc(100% - 70px);overflow:auto}
       .card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style>
       <div class="card">
-        <div class="top"><h2>${esc(T.title)}</h2>${edit ? `<button class="tb" data-chpin><ha-icon icon="mdi:form-textbox-password"></ha-icon>${esc(T.changePin)}</button>` : ''}
-          <button class="tb" data-edit><ha-icon icon="${edit ? 'mdi:check' : 'mdi:pencil-outline'}"></ha-icon>${esc(edit ? T.editDone : T.edit)}</button>
-          <button class="tb" data-bonus><ha-icon icon="mdi:star-plus-outline"></ha-icon>${esc(T.bonus)}</button></div>
+        <div class="top"><h2>${esc(T.title)}</h2></div>
         ${s.pin_default ? `<div class="warn"><ha-icon icon="mdi:shield-alert-outline"></ha-icon><span>${esc(T.startPin)}</span><button class="sg ok" data-chpin>${esc(T.changePin)}</button></div>` : ''}
-        ${openAw}
-        <div class="sec">${esc(T.fam)}</div>
         <div class="people">${cards}</div>
         ${detail}
+        ${openAw}
         ${pending}
         <div class="sec">${esc(sel ? fmt(T.shop, { name: sel.name }) : T.shopAll)}</div>${shop}
         ${history}
@@ -2891,7 +2948,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const pp = t.closest('[data-person]'); if (pp) { const id = pp.dataset.person; const l = this._ed.persons; this._ed.persons = l.includes(id) ? l.filter((x) => x !== id) : [...l, id]; this._render(); return; }
       if (t.closest('[data-rotate]')) { this._ed.rotate = !this._ed.rotate; this._render(); return; }
       const rd = t.closest('[data-rmdate]'); if (rd) { this._ed.schedule.dates = this._ed.schedule.dates.filter((x) => x !== rd.dataset.rmdate); this._render(); return; }
-      if (t.closest('[data-cancel]')) { this._ed = null; this._render(); return; }
+      if (t.closest('[data-cancel]')) { this._ed = null; this._render(); if (this._cfg.dialog) this.dispatchEvent(new CustomEvent('fp-dialog-close', { bubbles: true, composed: true })); return; }
       if (t.closest('[data-save]')) this._save();
     }
     _change(e) {
@@ -2918,7 +2975,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const msg = { title: e.title.trim(), assign: {}, schedule: sched, persons: e.persons, rotate: e.rotate && e.persons.length > 1, window: e.window || 1 };
       if (e.id) msg.chore_id = e.id;
       if (typeof e.points === 'number') msg.points = Math.max(0, Math.min(1000, Math.round(e.points)));
-      try { await this._store.pws('family_planer/chore/save', msg); this._ed = null; this._render(); } catch (er) { if (er !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(er); }
+      try { await this._store.pws('family_planer/chore/save', msg); this._ed = null; this._render(); if (this._cfg.dialog) this.dispatchEvent(new CustomEvent('fp-dialog-close', { bubbles: true, composed: true })); } catch (er) { if (er !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(er); }
     }
     _editor(s) {
       const T = this.T; const e = this._ed; const sc = e.schedule;
@@ -2975,11 +3032,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .dchip button{border:none;background:none;color:var(--fp-text2,#999);cursor:pointer;font-size:12px}.adl{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--fp-text2,#999)}
         .sg{height:38px;border-radius:19px;background:var(--fp-bg4,#2e2e2e);border:1px solid var(--fp-line,#3a3a3a);color:var(--fp-text2,#ccc);font:inherit;font-size:13px;padding:0 16px;cursor:pointer}.sg.ok{background:${G};border-color:${G};color:var(--fp-on-accent,#141414);font-weight:600}
         .msg{color:#e06b6b;font-size:13px;margin-top:8px}
-      .card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style><div class="card"><h2>${esc(T.title)}</h2><div class="sub">${esc(T.sub)}</div>
+      .card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style>${this._cfg.dialog ? `<div class="card"><h2>${esc(T.add.replace(/^\+\s*/, ""))}</h2>${this._ed ? this._editor(s) : ''}${this._msg ? `<div class="msg">${esc(this._msg)}</div>` : ''}</div>` : `<div class="card"><h2>${esc(T.title)}</h2><div class="sub">${esc(T.sub)}</div>
         ${this._ed ? this._editor(s) : ''}
         ${rows || (this._ed ? '' : `<div class="none">${esc(T.none)}</div>`)}
         ${this._ed ? '' : `<button class="add" data-add>${esc(T.add)}</button>`}
-        ${this._msg ? `<div class="msg">${esc(this._msg)}</div>` : ''}</div>`;
+        ${this._msg ? `<div class="msg">${esc(this._msg)}</div>` : ''}</div>`}`;
     }
   }
   if (!customElements.get('fp-special-inner')) customElements.define('fp-special-inner', FpSpecialInner);
@@ -2995,11 +3052,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
   const TXT = {
-    de: { title: 'To-dos', sub: 'Ohne Datum – bleiben stehen, bis sie erledigt sind.', none: 'Keine offenen To-dos.', ph: 'Neues To-do …', add: 'Hinzufügen',
+    de: { title: 'To-dos', sub: 'Ohne Datum – bleiben stehen, bis sie erledigt sind.', none: 'Keine offenen To-dos.', ph: 'Neues To-do …', add: 'Hinzufügen', neu: 'Neues To-do',
       ask: '„{t}“ als erledigt markieren?', reopen: '„{t}“ wieder öffnen?', yes: 'Erledigt', yesOpen: 'Wieder öffnen', cancel: 'Abbrechen', del: 'Löschen',
       delAsk: '„{t}“ löschen?', pts: 'Punkte', sizeHint: 'Grösse ändern braucht die Eltern-PIN', err: 'Konnte nicht gespeichert werden.',
       sizes: { none: 'Ohne Punkte', s: 'Klein', m: 'Mittel', l: 'Gross' }, open: 'To-dos', openN: 'To-dos ({n})', close: 'Schliessen' },
-    en: { title: 'To-dos', sub: 'No date – they stay until they are done.', none: 'No open to-dos.', ph: 'New to-do …', add: 'Add',
+    en: { title: 'To-dos', sub: 'No date – they stay until they are done.', none: 'No open to-dos.', ph: 'New to-do …', add: 'Add', neu: 'New to-do',
       ask: 'Mark "{t}" as done?', reopen: 'Reopen "{t}"?', yes: 'Done', yesOpen: 'Reopen', cancel: 'Cancel', del: 'Delete',
       delAsk: 'Delete "{t}"?', pts: 'points', sizeHint: 'Changing the size needs the parent PIN', err: 'Could not be saved.',
       sizes: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large' }, open: 'To-dos', openN: 'To-dos ({n})', close: 'Close' },
@@ -3028,7 +3085,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const def = this._defSize(s); const size = this._size || def;
       try {
         await window.FPPIN.call(this._store, 'family_planer/todo/save', { person_id: pid, title, ...(size !== def ? { size } : {}) }, { lang: this._cfg.lang, host: this });
-        this._text = ''; this._size = null; this._render();
+        this._text = ''; this._size = null; this._render(); if (this._cfg.dialog) this.dispatchEvent(new CustomEvent('fp-dialog-close', { bubbles: true, composed: true }));
       } catch (e) { if (e !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(this.T.err); }
     }
     async _click(e) {
@@ -3078,7 +3135,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .tt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}.pt{font-size:11px;color:${G}}
         .x{width:30px;height:30px;border-radius:8px;border:none;background:transparent;color:var(--fp-text3,#777);cursor:pointer;flex:none}.x:hover{color:#e06b6b;background:var(--fp-bg4,#2e2e2e)}
         .row{display:flex}.empty{color:var(--fp-text3,#888);font-size:14px;padding:4px 2px 10px}
-        .add{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+        .add{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}.add.dlgm .in{flex-basis:100%}
         .chip{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:18px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#2b2b2b);color:var(--fp-text2,#ccc);font:inherit;font-size:13px;cursor:pointer}.chip.on{border-color:var(--c);color:var(--c)}
         .chip i{width:10px;height:10px;border-radius:50%;background:var(--c)}
         .in{flex:1;min-width:180px;height:42px;border-radius:10px;border:1px solid var(--fp-line,#333);background:var(--fp-bg0,#141414);color:var(--fp-text,#eee);font:inherit;font-size:15px;padding:0 12px;outline:none}
@@ -3091,11 +3148,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .ea{display:flex;gap:8px}.sp{flex:1}
         .msg{position:absolute;right:14px;top:12px;background:#3a2626;border:1px solid #e06b6b;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px}
       .card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style><div class="card">
-        <h3>${esc(T.title)}</h3><div class="sub">${esc(T.sub)}</div>
-        ${groups.length ? `<div class="grid">${groups.map(({ p, list }) => `<div class="g" style="--c:${COLOR(p.color)}"><div class="gn">${esc(p.name)}</div>
+        <h3>${esc(this._cfg.dialog ? T.neu : T.title)}</h3>${this._cfg.dialog ? '' : `<div class="sub">${esc(T.sub)}</div>`}
+        ${this._cfg.dialog ? '' : groups.length ? `<div class="grid">${groups.map(({ p, list }) => `<div class="g" style="--c:${COLOR(p.color)}"><div class="gn">${esc(p.name)}</div>
           ${list.map((x) => `<div class="row"><button class="t${x.done ? ' done' : ''}" data-todo="${esc(x.id)}"><span class="box">${x.done ? '✓' : ''}</span><span class="tt">${esc(x.title)}</span>${this._pts(s, x) ? `<span class="pt">+${this._pts(s, x)}</span>` : ''}</button>
             <button class="x" data-del="${esc(x.id)}" aria-label="${esc(T.del)}">✕</button></div>`).join('')}</div>`).join('')}</div>` : `<div class="empty">${esc(T.none)}</div>`}
-        <div class="add">${persons.map((p) => `<button class="chip${sel && p.id === sel.id ? ' on' : ''}" style="--c:${COLOR(p.color)}" data-person="${esc(p.id)}"><i></i>${esc(p.name)}</button>`).join('')}
+        <div class="add${this._cfg.dialog ? ' dlgm' : ''}">${persons.map((p) => `<button class="chip${sel && p.id === sel.id ? ' on' : ''}" style="--c:${COLOR(p.color)}" data-person="${esc(p.id)}"><i></i>${esc(p.name)}</button>`).join('')}
           <input class="in" data-new maxlength="80" placeholder="${esc(T.ph)}" value="${esc(this._text || '')}">
           <span class="sizes" title="${esc(T.sizeHint)}">${['none', 's', 'm', 'l'].map((k) => { const n = ((s.sizes && s.sizes.todo) || {})[k] || 0; const on = (this._size || this._defSize(s)) === k;
             return `<button class="sz${on ? ' on' : ''}" data-size="${k}">${esc(T.sizes[k])}${k !== 'none' ? ` <b>+${n}</b>` : ''}</button>`; }).join('')}</span>
@@ -3122,13 +3179,13 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const UI = {
     de: { title: 'Einstellungen', locked: 'Die Einstellungen sind mit der Eltern-PIN geschützt.', unlock: 'Entsperren', save: 'Speichern', saved: 'Gespeichert.',
       reloading: 'Gespeichert – der Planer lädt die neuen Einstellungen …', cancel: 'Abbrechen', del: 'Löschen', add: 'Hinzufügen', none: '–', pin: 'Eltern-PIN ändern',
-      pinChanged: 'Eltern-PIN geändert.', lock: 'Sperren', newPerson: '+ Person', newList: '+ Liste', delAsk: '„{t}“ wirklich löschen?', search: 'Entität wählen …',
+      pinChanged: 'Eltern-PIN geändert.', lock: 'Sperren', parent: 'Eltern-PIN', newPerson: '+ Person', newList: '+ Liste', delAsk: '„{t}“ wirklich löschen?', search: 'Entität wählen …',
       errors: { no_target: 'Bitte Alexa-Benachrichtigung oder TTS mit Lautsprechern wählen.', no_motion: 'Bitte mindestens einen Bewegungsmelder wählen.', no_modules: 'Mindestens ein Modul muss aktiv sein.',
         bad_times: 'Zeiten prüfen: Beginn vor Ende, Blöcke ohne Überschneidung.', name: 'Bitte einen (eindeutigen) Namen angeben.', last_person: 'Die letzte Person kann nicht entfernt werden.', list: 'Bitte Name und To-do-Liste angeben.' },
       days: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'], block: 'Block', from: 'von', to: 'bis' },
     en: { title: 'Settings', locked: 'The settings are protected by the parent PIN.', unlock: 'Unlock', save: 'Save', saved: 'Saved.',
       reloading: 'Saved – the planner is loading the new settings …', cancel: 'Cancel', del: 'Delete', add: 'Add', none: '–', pin: 'Change parent PIN',
-      pinChanged: 'Parent PIN changed.', lock: 'Lock', newPerson: '+ Person', newList: '+ List', delAsk: 'Really delete "{t}"?', search: 'Choose entity …',
+      pinChanged: 'Parent PIN changed.', lock: 'Lock', parent: 'Parent PIN', newPerson: '+ Person', newList: '+ List', delAsk: 'Really delete "{t}"?', search: 'Choose entity …',
       errors: { no_target: 'Please choose an Alexa notify entity or TTS with speakers.', no_motion: 'Please choose at least one motion sensor.', no_modules: 'At least one module must be active.',
         bad_times: 'Check the times: start before end, blocks must not overlap.', name: 'Please enter a (unique) name.', last_person: 'The last person cannot be removed.', list: 'Please enter a name and a to-do list.' },
       days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], block: 'Block', from: 'from', to: 'to' },
@@ -3137,6 +3194,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   // field: [key, type, {de, en} label, {de, en} description, extra]
   const F = (k, type, de, en, dde, den, x) => ({ k, type, label: { de, en }, desc: { de: dde, en: den }, ...(x || {}) });
   const TABS = [
+    { id: 'pics', icon: 'mdi:face-man-shimmer-outline', label: { de: 'Bilder', en: 'Pictures' } },
     { id: 'general', icon: 'mdi:tune-variant', label: { de: 'Allgemein', en: 'General' }, fields: [
       F('mod_week', 'bool', 'Modul Wochenplan', 'Week plan module', 'Ämtli, Termine, Schule, Ferien, Punkte, Belohnungen und Ansagen.', 'Chores, events, school, holidays, points, rewards and announcements.'),
       F('mod_lists', 'bool', 'Modul Smarte Listen', 'Smart lists module', 'Einkaufs- und To-do-Listen, die sich selbst sortieren.', 'Shopping and to-do lists that sort themselves.'),
@@ -3219,7 +3277,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     { id: 'status', icon: 'mdi:heart-pulse', label: { de: 'Status', en: 'Status' } },
   ];
   // tab order on the page
-  const ORDER = ['general', 'persons', 'chores', 'points', 'todos', 'lists', 'vacation', 'announce', 'status'];
+  const ORDER = ['pics', 'general', 'persons', 'chores', 'points', 'todos', 'lists', 'vacation', 'announce', 'status'];
   const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', early: 'Frühaufsteher', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', early: 'Early bird', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
@@ -3240,8 +3298,9 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     set store(s) { this._store = s; }
     set hass(h) { this._hass = h; if (this._plan) this._plan.hass = h; }
-    update() { if (!this._data && window.FPPIN && window.FPPIN.unlocked(this._store)) this._load(); }
-    connectedCallback() { if (!this._data && !this._asked) { this._asked = true; setTimeout(() => this._load(), 50); } }
+    // without the parent PIN only the pictures are shown; "Parent PIN" at the top right opens everything else
+    update() { if (!this._data && window.FPPIN && window.FPPIN.unlocked(this._store) && !this._asked) { this._asked = true; this._load(); } else this._render(); }
+    connectedCallback() { if (!this._data && window.FPPIN && this._store && window.FPPIN.unlocked(this._store) && !this._asked) { this._asked = true; setTimeout(() => this._load(), 30); } else this._render(); }
     _ctx() { return { lang: this._lang, host: this }; }
     _flash(m, err) { this._msg = m; this._err = !!err; this._render(); clearTimeout(this._mt); this._mt = setTimeout(() => { this._msg = ''; this._render(); }, 4500); }
     _errText(e) {
@@ -3273,6 +3332,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     _input(e, isChange) {
       const el = e.target; const ds = el.dataset;
+      if (ds.avup !== undefined && isChange && el.files && el.files[0]) { const p = this._avPerson(); if (p) this._avUpload(p, el.files[0]); return; }
       if (ds.navtg) { const n = this._forms.general.nav; n.hidden = el.checked ? n.hidden.filter((x) => x !== ds.navtg) : [...n.hidden, ds.navtg]; return; }
       if (ds.awon || ds.awsz) { const it = this._forms.points.awards.items; const id = ds.awon || ds.awsz; it[id] = { ...(it[id] || {}) }; if (ds.awon) it[id].on = el.checked; else it[id].size = el.value; return; }
       if (ds.pk === 'role') { const p = this._persons[Number(ds.pi)]; if (p) p.role = el.value; return; }
@@ -3299,10 +3359,14 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     async _click(e) {
       const t = e.target;
-      if (t.closest('[data-unlock]')) { this._load(); return; }
+      if (t.closest('[data-unlock]')) { this._asked = true; this._load(); return; }
+      const ap = t.closest('[data-avp]'); if (ap) { this._avp = ap.dataset.avp; this._render(); return; }
+      const at = t.closest('[data-avtab]'); if (at) { this._avtab = at.dataset.avtab; this._render(); return; }
+      if (t.closest('[data-avrnd]')) { const p = this._avPerson(); if (p) this._avSave(p, window.FPAV.random()); return; }
+      const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); this._avSave(p, window.FPAV.set(this._avCode(p), part, val)); } return; }
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
       if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
-      if (t.closest('[data-lock]')) { window.FPPIN.lock(this._store); this._data = null; this._render(); return; }
+      if (t.closest('[data-lock]')) { window.FPPIN.lock(this._store); this._data = null; this._asked = false; this._tab = 'pics'; this._render(); return; }
       const rm = t.closest('[data-rment]');
       if (rm) { const f = this._forms[rm.dataset.tab]; f[rm.dataset.k] = (f[rm.dataset.k] || []).filter((x) => x !== rm.dataset.rment); this._render(); return; }
       const pc = t.closest('[data-pchip]');
@@ -3313,12 +3377,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const pm = t.closest('[data-pmv]');
       if (pm) { const [i0, d] = pm.dataset.pmv.split('|').map(Number); const j = i0 + d; const ps = this._persons; if (j < 0 || j >= ps.length) return; [ps[i0], ps[j]] = [ps[j], ps[i0]]; this._render();
         const ids = ps.filter((p) => p.id).map((p) => p.id); const res = await this._call('family_planer/person/order', { order: ids }); if (res !== null) this._flash(this.T.saved); return; }
-      const pa = t.closest('[data-pav]'); if (pa) { const p = this._persons[Number(pa.dataset.pav)]; p.av = !p.av; this._render(); return; }
-      const ab = t.closest('[data-avb]');
-      if (ab) { const p = this._persons[Number(ab.closest('[data-avi]').dataset.avi)]; const [part, val] = ab.dataset.avb.split('|'); const FX = this._fx();
-        p.image = FX.avSet(String(p.image || '').startsWith('av:') ? p.image : 'av:k.kurz.braun.hell.0', part, val); this._render(); return; }
       const vd = t.closest('[data-vdec]');
-      if (vd) { const [key, decision] = vd.dataset.vdec.split('|'); const res = await this._call('family_planer/vacation/decide', { key, decision }); if (res !== null) this._flash(this.T.saved); return; }
+      const vfm = t.closest('[data-vfam]'); if (vfm) { const c = this._vacChoice(vfm.dataset.vfam); c.family = !c.family; this._render(); return; }
+      const vpr = t.closest('[data-vper]'); if (vpr) { const c = this._vacChoice(vpr.dataset.vkey); c.family = false; const i = c.persons.indexOf(vpr.dataset.vper); if (i >= 0) c.persons.splice(i, 1); else c.persons.push(vpr.dataset.vper); this._render(); return; }
+      if (vd) { const [key, dec] = vd.dataset.vdec.split('|'); const c = this._vacChoice(key);
+        const res = await this._call('family_planer/vacation/decide', { key, decision: dec || null, family: !!c.family, persons: c.family ? [] : c.persons }); if (res !== null) { delete this._vc[key]; this._flash(this.T.saved); } return; }
       const sp = t.closest('[data-psave]'); if (sp) { this._savePerson(Number(sp.dataset.psave)); return; }
       const dp = t.closest('[data-pdel]'); if (dp) { const p = this._persons[Number(dp.dataset.pdel)]; this._dlg = { kind: 'person', i: Number(dp.dataset.pdel), title: p.name }; this._render(); return; }
       if (t.closest('[data-padd]')) { this._persons.push({ id: null, name: '', color: '#4FA3E0', role: 'kid', image: '', calendar: null, aliases: [], school: { calendar: null, times: {}, travel: 0 }, open: true }); this._render(); return; }
@@ -3346,7 +3409,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         if (spans.some((s) => s && ((s[0] && !s[1]) || (!s[0] && s[1])))) { this._flash(this.T.errors.bad_times, true); return; }
         if (ok.length) times[day] = ok;
       }
-      const data = { name: p.name, color: p.color, role: p.role === 'adult' ? 'adult' : 'kid', ...(p.image ? { image: p.image } : {}), calendar: p.calendar, aliases: p.aliases || [], school: { calendar: p.school.calendar, times, travel: p.school.travel || 0 } };
+      const data = { name: p.name, color: p.color, role: p.role === 'adult' ? 'adult' : 'kid', calendar: p.calendar, aliases: p.aliases || [], school: { calendar: p.school.calendar, times, travel: p.school.travel || 0 } };
       const res = await this._call('family_planer/settings/person', { ...(p.id ? { person_id: p.id } : {}), data });
       if (!res) return; p.id = res.person_id; p.open = false; this._flash(res.reload ? this.T.reloading : this.T.saved);
     }
@@ -3418,8 +3481,6 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           ${p.open ? `<div class="pb">
             <div class="row"><span class="lt"><b>${lbl('Name', 'Name')}</b></span><span class="ctl"><input class="in" maxlength="40" data-pk="name" data-pi="${i}" value="${esc(p.name)}"></span></div>
             <div class="row"><span class="lt"><b>${lbl('Rolle', 'Role')}</b><small>${lbl('Kinder stehen oben im Planer und zählen für die Prognosen. Erwachsene können trotzdem Ämtli und Pokale haben.', 'Children are listed first in the planner and count for the forecasts. Adults can still have chores and trophies.')}</small></span><span class="ctl"><select class="in" data-pk="role" data-pi="${i}"><option value="kid" ${p.role !== 'adult' ? 'selected' : ''}>${lbl('Kind', 'Child')}</option><option value="adult" ${p.role === 'adult' ? 'selected' : ''}>${lbl('Erwachsen', 'Adult')}</option></select></span></div>
-            <div class="row"><span class="lt"><b>${lbl('Bild', 'Picture')}</b><small>${lbl('Figur, Frisur, Haut, Extras und Verkleidung frei kombinieren. Das Bild darf jeder auch ohne PIN im Ämtliplan ändern.', 'Combine figure, hair, skin, extras and costume freely. Anyone may also change the picture without the PIN in the chore plan.')}</small></span><span class="ctl"><button class="sg" data-pav="${i}">${p.av ? lbl('Baukasten schliessen', 'Close builder') : lbl('Bild zusammenstellen', 'Build picture')}</button></span></div>
-            ${p.av && FX.avBuilder ? `<div class="avwrap" data-avi="${i}">${FX.avBuilder(String(p.image || '').startsWith('av:') ? p.image : 'av:k.kurz.braun.hell.0', COLOR(p.color))}</div>` : ''}
             <div class="row"><span class="lt"><b>${lbl('Farbe', 'Colour')}</b><small>${lbl('Gilt auch für den Kalender der Person.', 'Also used for the person\'s calendar.')}</small></span><span class="ctl"><input class="col" type="color" data-pk="color" data-pi="${i}" value="${esc(COLOR(p.color))}"></span></div>
             <div class="row"><span class="lt"><b>${lbl('Kalender', 'Calendar')}</b><small>${lbl('Termine dieser Person.', 'Events of this person.')}</small></span><span class="ctl">${this._entSelect(`data-pk="calendar" data-pi="${i}"`, 'calendar', null, p.calendar)}</span></div>
             <div class="row"><span class="lt"><b>${lbl('Spitznamen', 'Nicknames')}</b><small>${lbl('Mit Komma getrennt – Termine mit diesem Namen erscheinen bei der Person.', 'Comma separated – events with this name appear at the person.')}</small></span><span class="ctl"><input class="in" maxlength="300" data-pk="aliases" data-pi="${i}" value="${esc((p.aliases || []).join(', '))}"></span></div>
@@ -3495,21 +3556,27 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .nn{flex:1;font-size:14px}.ar{width:34px;height:34px;border-radius:9px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg3,#2b2b2b);color:var(--fp-text2,#ccc);cursor:pointer;font-size:11px}.ar[disabled]{opacity:.3;cursor:default}
         .in.sz{width:140px;height:36px}.awr .u{min-width:44px;text-align:right}
         .phw{display:flex;align-items:center;gap:6px;padding-right:10px}.phw .ph{flex:1}.rl{font-style:normal;font-size:12px;color:var(--fp-text3,#888);border:1px solid var(--fp-line,#3a3a3a);border-radius:10px;padding:1px 8px}
-        .avwrap{padding:10px 4px 6px;border-bottom:1px solid var(--fp-line,#262626)}${(window.FPX || {}).AVB_CSS || ''}
+                .avwrap{padding:10px 4px 6px}${(window.FPAV || {}).css || ''}
+        .avps{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}.avpb{display:flex;align-items:center;gap:8px;height:52px;padding:0 14px 0 6px;border-radius:26px;border:1px solid var(--fp-line,#2a2a2a);background:var(--fp-bg2,#232323);color:inherit;font:inherit;font-size:14px;cursor:pointer}
+        .avpb.on{border-color:var(--c);box-shadow:0 0 0 1px var(--c)}
+        .upl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}.upl label{display:inline-flex;align-items:center}.upl small{font-size:12px;color:var(--fp-text3,#8a8a8a)}
+        .tb.pin{color:${G};border-color:${G}}
         .hint3{font-size:13px;color:var(--fp-text2,#999);margin:0 2px 10px;max-width:980px}
+        .vch{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.vch .chip{height:30px;font-size:12px}.vbt{display:flex;gap:6px;flex-wrap:wrap}
         .vrl,.stl{display:flex;flex-direction:column;gap:8px;max-width:980px;margin-bottom:8px}.vr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:var(--fp-bg2,#232323);border:1px solid var(--fp-line,#2a2a2a)}.vr .lt{flex:1;min-width:200px}
         .str{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:var(--fp-bg2,#232323);border:1px solid var(--fp-line,#2a2a2a)}.str ha-icon{color:${G}}.str.bad{border-color:#e06b6b}.str.bad ha-icon{color:#e06b6b}
         @media (max-width:700px){.row{grid-template-columns:1fr}.lcard{grid-template-columns:1fr}}
       .card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style>`;
       const msg = this._msg ? `<div class="msg${this._err ? ' e' : ''}">${esc(this._msg)}</div>` : '';
       if (!this._data) {
-        this.shadowRoot.innerHTML = `${style}<div class="card"><div class="top"><h2>${esc(T.title)}</h2></div>
-          <div class="lockd"><ha-icon icon="mdi:shield-lock-outline"></ha-icon><div>${esc(T.locked)}</div><button class="sg ok" data-unlock>${esc(T.unlock)}</button></div>${msg}</div>`;
+        this.shadowRoot.innerHTML = `${style}<div class="card"><div class="top"><h2>${esc(T.title)}</h2><button class="tb pin" data-unlock><ha-icon icon="mdi:shield-key-outline"></ha-icon>${esc(T.parent)}</button></div>
+          ${this._picsView()}${msg}</div>`;
         return;
       }
       const tab = TABS.find((x) => x.id === this._tab) || TABS[0];
       let body = '';
-      if (tab.id === 'persons') body = this._personsTab();
+      if (tab.id === 'pics') body = this._picsView();
+      else if (tab.id === 'persons') body = this._personsTab();
       else if (tab.id === 'chores') body = `<div class="hint3">${esc(lang === 'en' ? 'Tap a day to assign a chore. Special chores and to-dos: buttons at the top of the chore plan.' : 'Tag antippen, um ein Ämtli zuzuteilen. Besondere Ämtli und To-dos: Knöpfe oben im Ämtliplan.')}</div><div class="planhost"></div>`;
       else if (tab.id === 'status') body = this._statusTab();
       else {
@@ -3534,13 +3601,59 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!this._plan) { this._plan = document.createElement('family-planer-card'); this._plan.setConfig({ view: 'plan', ...(this._snap().entry_id ? { entry_id: this._snap().entry_id } : {}) }); }
       host.appendChild(this._plan); this._plan.hass = this._hass;
     }
+    _avPerson() { const ps = this._snap().persons || []; return ps.find((p) => p.id === this._avp) || ps[0] || null; }
+    _avCode(p) {
+      const A = window.FPAV; const loc = (this._avLocal || {})[p.id]; const img = loc || p.image || '';
+      if (img.startsWith('av2:')) return img;
+      if (img.startsWith('av:')) return A.from1(img);
+      return A.code({ ...A.parse(''), fig: p.role === 'adult' ? 'f' : 'm' });
+    }
+    async _avSave(p, code) {
+      this._avLocal = { ...(this._avLocal || {}), [p.id]: code }; this._render();
+      try { await this._store.ws('family_planer/person/update', { person_id: p.id, image: code }); } catch (er) { this._flash(this._errText(er), true); }
+    }
+    async _avUpload(p, file) {
+      // centre crop to a 320 px square JPEG in the browser, then store it in Home Assistant
+      const lbl = (de, en) => (this._lang === 'en' ? en : de);
+      try {
+        const url = URL.createObjectURL(file);
+        const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
+        const sq = Math.min(img.naturalWidth, img.naturalHeight); const c = document.createElement('canvas'); c.width = c.height = 320;
+        c.getContext('2d').drawImage(img, (img.naturalWidth - sq) / 2, (img.naturalHeight - sq) / 2, sq, sq, 0, 0, 320, 320);
+        URL.revokeObjectURL(url);
+        await this._store.ws('family_planer/person/upload_image', { person_id: p.id, data: c.toDataURL('image/jpeg', 0.86) });
+        if (this._avLocal) delete this._avLocal[p.id];
+        this._flash(lbl('Foto gespeichert.', 'Photo saved.'));
+      } catch (er) { this._flash(lbl('Bild konnte nicht gelesen werden.', 'The picture could not be read.'), true); }
+    }
+    _picsView() {
+      const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de); const s = this._snap(); const ps = s.persons || [];
+      const A = window.FPAV; const FX = this._fx(); const p = this._avPerson();
+      if (!p || !A) return '';
+      const pic = (q, size) => { const loc = (this._avLocal || {})[q.id]; const img = loc || q.image || '';
+        return FX.avatarHtml ? FX.avatarHtml({ name: q.name, farbe: COLOR(q.color), ...(/^(av2?:|svg:|img:)/.test(img) ? { bild: img } : {}) }, size) : ''; };
+      return `<div class="hint3">${esc(lbl('Jede und jeder darf hier ein Bild zusammenstellen – ohne PIN. Alles andere öffnet die Eltern-PIN oben rechts.', 'Anyone may build a picture here – no PIN needed. Everything else opens with the parent PIN at the top right.'))}</div>
+        <div class="avps">${ps.map((q) => `<button class="avpb${q.id === p.id ? ' on' : ''}" style="--c:${COLOR(q.color)}" data-avp="${esc(q.id)}">${pic(q, 40)}<span>${esc(q.name)}</span></button>`).join('')}</div>
+        <div class="avwrap">${A.builder(this._avCode(p), COLOR(p.color), lang, this._avtab)}</div>
+        <div class="upl"><label class="sg">${esc(lbl('Eigenes Foto hochladen', 'Upload own photo'))}<input type="file" accept="image/*" data-avup hidden></label><small>${esc(lbl('Wird quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.', 'Cropped to a square and stored only in your Home Assistant.'))}</small></div>`;
+    }
+    _vacChoice(key) {
+      this._vc = this._vc || {}; if (this._vc[key]) return this._vc[key];
+      const v = (this._snap().vacation_review || []).find((x) => x.key === key) || {};
+      this._vc[key] = { family: !!v.family, persons: [...((v.chosen && v.chosen.length ? v.chosen : v.persons) || [])] }; return this._vc[key];
+    }
     _vacReview() {
       const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de); const s = this._snap(); const rv = s.vacation_review || [];
-      if (!rv.length) return '';
-      const nm = (pid) => ((s.persons || []).find((p) => p.id === pid) || {}).name || '';
       const d = (x) => String(x || '').slice(0, 10).split('-').reverse().slice(0, 2).join('.') + '.';
-      return `<div class="sec2">${lbl('Ferien im Kalender', 'Holidays in the calendar')}</div><div class="vrl">${rv.map((v) => `<div class="vr"><span class="lt"><b>${esc(v.title)}</b><small>${esc(d((v.days || [])[0] || v.start))} – ${esc(d((v.days || []).slice(-1)[0] || v.end))}${(v.persons || []).length ? ' · ' + esc(v.persons.map(nm).filter(Boolean).join(', ')) : ''}</small></span>
-        <button class="sg${v.decision === 'away' ? ' ok' : ''}" data-vdec="${esc(v.key)}|away">${lbl('Weg – Ämtli pausieren', 'Away – pause chores')}</button><button class="sg${v.decision === 'home' ? ' ok' : ''}" data-vdec="${esc(v.key)}|home">${lbl('Zu Hause – Ämtli laufen', 'At home – chores go on')}</button></div>`).join('')}</div>`;
+      const head = `<div class="sec2">${lbl('Ferien-Check', 'Holiday check')}</div><div class="hint3">${esc(lbl('Ferien und lange Termine der nächsten zwei Wochen. Entschiedene bleiben hier noch 4 Wochen und lassen sich ändern.', 'Holidays and long events of the next two weeks. Decided ones stay here for 4 more weeks and can be changed.'))}</div>`;
+      if (!rv.length) return head + `<div class="hint3">${esc(lbl('Gerade nichts zu prüfen.', 'Nothing to check right now.'))}</div>`;
+      const item = (v) => { const c = this._vacChoice(v.key);
+        const state = v.decision === 'away' ? lbl('Entschieden: weg', 'Decided: away') : v.decision === 'home' ? lbl('Entschieden: hier', 'Decided: here') : lbl('Offen', 'Open');
+        return `<div class="vr"><span class="lt"><b>${esc(v.title)}</b><small>${esc(d((v.days || [])[0] || v.start))} – ${esc(d((v.days || []).slice(-1)[0] || v.end))} · ${esc(state)}</small>
+          <span class="vch"><button class="chip${c.family ? ' on' : ''}" style="--c:${G}" data-vfam="${esc(v.key)}"><i></i>${esc(lbl('Ganze Familie', 'Whole family'))}</button>${(s.persons || []).map((p) => `<button class="chip${!c.family && c.persons.includes(p.id) ? ' on' : ''}" style="--c:${COLOR(p.color)}" data-vper="${esc(p.id)}" data-vkey="${esc(v.key)}"><i></i>${esc(p.name)}</button>`).join('')}</span></span>
+          <span class="vbt"><button class="sg${v.decision === 'away' ? ' ok' : ''}" data-vdec="${esc(v.key)}|away">${lbl('Weg – pausieren', 'Away – pause')}</button><button class="sg${v.decision === 'home' ? ' ok' : ''}" data-vdec="${esc(v.key)}|home">${lbl('Hier – weiterlaufen', 'Here – go on')}</button>${v.decision ? `<button class="sg" data-vdec="${esc(v.key)}|">${lbl('Zurücksetzen', 'Reset')}</button>` : ''}</span></div>`; };
+      const hol = rv.filter((v) => (v.kind || 'holiday') === 'holiday'); const lng = rv.filter((v) => v.kind === 'long');
+      return head + `<div class="vrl">${hol.map(item).join('')}</div>${lng.length ? `<div class="sec2">${lbl('Optional – lange Termine', 'Optional – long events')}</div><div class="vrl">${lng.map(item).join('')}</div>` : ''}`;
     }
     _statusTab() {
       const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de); const s = this._snap(); const st = s.status || {};
@@ -3876,7 +3989,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
 (() => {
   const VIRT = { plan: 'family_planer.plan', heute: 'family_planer.heute', verlauf: 'family_planer.verlauf', settings: 'family_planer.settings', script: 'family_planer.rollover' };
   const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
-  const IMAGE = (i) => (/^(av:[a-z0-9.+]{1,80}|svg:[a-z-]{1,30}|img:\/family_planer_files\/avatars\/[a-z0-9_]{1,120}\.(jpg|png|webp))$/.test(i || '') ? i : '');
+  const IMAGE = (i) => (/^(av:[a-z0-9.+]{1,80}|av2:[a-z0-9.]{1,200}|svg:[a-z-]{1,30}|img:\/family_planer_files\/avatars\/[a-z0-9_]{1,120}\.(jpg|png|webp))$/.test(i || '') ? i : '');
   const isVirt = (e) => typeof e === 'string' && e.startsWith('family_planer.');
   const enc = (o) => 'fp1:' + JSON.stringify(o);
   const dec = (s) => { if (!s || !String(s).startsWith('fp1:')) return {}; try { return JSON.parse(String(s).slice(4)) || {}; } catch (e) { return {}; } };
@@ -4077,7 +4190,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     return `<span class="sw" style="background:${t.bg1};border-color:${t.line}"><i style="background:${t.grad}"></i><i style="background:${t.bg4}"></i><i style="background:${t.text2}"></i></span>`; };
   const applyTheme = (el, name, style) => {
     const n = themeName(name); const t = THEMES[n]; const st = STYLES.includes(style) ? style : 'standard'; const f = surfaces(t, st);
-    Object.entries({ band: 'none', ...t, ...f }).forEach(([k, v]) => el.style.setProperty(`--fp-${k}`, v));
+    Object.entries({ band: 'none', ...t, pop: t.bg1, ...f }).forEach(([k, v]) => el.style.setProperty(`--fp-${k}`, v));
     el.dataset.fpTheme = n; el.dataset.fpStyle = st;
     // the page background is also offered globally, so a dashboard view can use background: var(--fp-page)
     document.documentElement.style.setProperty('--fp-page', t.page);
@@ -4113,6 +4226,23 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && this._win && this._win.style.display !== 'none') this._showTodos(false); });
       }
       return this._winBox;
+    }
+    // "+ Special chore" / "+ To-do" of the chore plan: the form opens in a window of its own
+    _addDialog(kind, lang) {
+      if (kind !== 'special' && kind !== 'todo') return;
+      const ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:20;display:flex;align-items:flex-start;justify-content:center;background:rgba(10,10,10,.72);padding:6vh 3vw;overflow:auto;box-sizing:border-box';
+      const box = document.createElement('div'); box.style.cssText = 'position:relative;width:min(760px,100%)';
+      const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕'; x.setAttribute('aria-label', lang === 'en' ? 'Close' : 'Schliessen');
+      x.style.cssText = 'position:absolute;right:10px;top:12px;z-index:5;width:40px;height:40px;border-radius:20px;border:1px solid #3a3a3a;background:#2b2b2b;color:#ddd;font-size:18px;cursor:pointer';
+      const el = document.createElement(kind === 'special' ? 'fp-special-inner' : 'fp-todos-inner'); el.store = this._store; el.setConfig({ lang, dialog: true });
+      const close = () => { ov.remove(); document.removeEventListener('keydown', esc); };
+      const esc = (e) => { if (e.key === 'Escape') close(); };
+      x.addEventListener('click', close); ov.addEventListener('click', (e) => { if (e.target === ov) close(); }); el.addEventListener('fp-dialog-close', close);
+      document.addEventListener('keydown', esc);
+      box.append(x, el); ov.appendChild(box); document.body.appendChild(ov);  // on body: a glass card above must not clip it
+      const sn = this._store.snap; if (sn) applyTheme(ov, this._cfg.theme || sn.theme, this._cfg.style || sn.style);
+      if (kind === 'special') el.openAdd(); else setTimeout(() => el.focusAdd && el.focusAdd(), 50);
     }
     _showTodos(on, add) { if (this._win) this._win.style.display = on ? 'flex' : 'none'; if (on && this._todos) { this._todos.update(); if (add && this._todos.focusAdd) setTimeout(() => this._todos.focusAdd(), 50); } }
     getCardSize() { return this._cfg && this._cfg.view === 'plan' ? 10 : 12; }
@@ -4168,7 +4298,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!this._todos || this._todos.parentNode !== host) { if (this._todos) this._todos.remove(); this._todos = document.createElement('fp-todos-inner'); this._todos.store = this._store; this._todos.setConfig({ lang }); host.appendChild(this._todos); }
       else this._todos.update();
       if (view === 'plan') {
-        if (!this._planEv) { this._planEv = true; this.addEventListener('fp-plan-add', (e) => { const k = e.detail && e.detail.kind; if (k === 'special' && this._special) this._special.openAdd(); if (k === 'todo' && this._todos) this._todos.focusAdd(); }); }
+        if (!this._planEv) { this._planEv = true; this.addEventListener('fp-plan-add', (e) => this._addDialog(e.detail && e.detail.kind, lang)); }
         if (!this._special || this._special.parentNode !== this) { this._special = document.createElement('fp-special-inner'); this._special.store = this._store; this._special.setConfig({ lang }); this.insertBefore(this._special, this._todos); }
         else this._special.update();
       }
@@ -4183,13 +4313,31 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', einstellungen: 'settings' };
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-      design: 'Design', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'Im Kalender stehen Ferien. Seid ihr weg (Ämtli pausieren) oder zu Hause (Ämtli laufen weiter)?',
-      away: 'Wir sind weg', home: 'Wir sind zu Hause', close: 'Schliessen', open: 'offen', all: 'alle',
+      design: 'Design', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?',
+      away: 'Weg – Ämtli pausieren', home: 'Hier – Ämtli laufen weiter', close: 'Schliessen', open: 'offen', all: 'alle', fam: 'Ganze Familie', opt: 'Optional – lange Termine', optHint: 'Keine Ferien-Wörter, aber länger als die eingestellte Stundenzahl. Ohne Entscheid laufen die Ämtli weiter.',
       miss: 'Ansicht „{p}“ fehlt in diesem Dashboard. Ansicht mit diesem Pfad anlegen oder in der Navigationskarte unter paths: anpassen.' },
     en: { wd: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], mon: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-      design: 'Design', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays. Are you away (pause chores) or at home (chores go on)?',
-      away: 'We are away', home: 'We are at home', close: 'Close', open: 'open', all: 'all',
+      design: 'Design', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays in the next two weeks. Who do they apply to, and are you away or here?',
+      away: 'Away – pause chores', home: 'Here – chores go on', close: 'Close', open: 'open', all: 'all', fam: 'Whole family', opt: 'Optional – long events', optHint: 'No holiday words, but longer than the set number of hours. Without a decision chores go on.',
       miss: 'View "{p}" is missing in this dashboard. Add a view with this path or change it under paths: in the navigation card.' } };
+  const NAV_POPCSS = `
+        button{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--fp-line);background:var(--fp-bg3);color:var(--fp-text2);font:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+        button ha-icon{--mdc-icon-size:20px}button.on{border-color:color-mix(in srgb,var(--fp-accent) 60%,transparent);color:var(--fp-accent)}
+        .sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
+        .vs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.vs button{height:32px;padding:0 12px;border-radius:16px;font-size:12px}
+        .oh{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:14px 2px 4px}.oh2{font-size:12px;color:var(--fp-text3);margin:0 2px 8px}
+        .pop{width:min(620px,calc(100vw - 16px));box-sizing:border-box;max-height:calc(100vh - 90px);overflow:auto;background:var(--fp-pop,var(--fp-bg1));color:var(--fp-text);font-family:var(--fp-font);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);box-shadow:0 14px 40px rgba(0,0,0,.45);padding:14px;-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none)}
+        .ph{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 10px;display:flex;align-items:center;gap:6px}.ph .x{margin-left:auto;height:30px;padding:0 10px}
+        .tg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+        .tg button,.sg button{height:auto;flex-direction:column;align-items:stretch;padding:7px;gap:6px;border-radius:12px;font-size:12px;color:var(--fp-text)}
+        .tg button.on,.sg button.on{border-width:2px}
+        .tn{display:flex;align-items:center;justify-content:center;gap:4px}.tn ha-icon{--mdc-icon-size:14px}
+        .mini{display:block;padding:5px;box-sizing:border-box}.mini b{display:block}
+        .vl{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto}.vi{border:1px solid var(--fp-line);border-radius:12px;padding:10px 12px;background:var(--fp-bg2)}
+        .vt{font-weight:600}.vd{font-size:12px;color:var(--fp-text3);margin:2px 0 8px}.vb{display:flex;gap:8px;flex-wrap:wrap}.vb button{height:36px;font-size:13px}
+        .vb button.on.away{background:rgba(79,163,224,.18);border-color:#4FA3E0;color:#4FA3E0}.vb button.on.home{background:color-mix(in srgb,var(--fp-accent) 18%,transparent)}
+        .hint{font-size:13px;color:var(--fp-text2);margin:0 2px 10px}
+`;
   const escN = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   class FamilyPlanerNavCard extends HTMLElement {
     setConfig(c) {
@@ -4198,7 +4346,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
       if (!this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
-        this.shadowRoot.addEventListener('click', (e) => {
+        this._onClick = (e) => {
           if (e.target.closest('[data-menu]')) { this.dispatchEvent(new Event('hass-toggle-menu', { bubbles: true, composed: true })); return; }
           const b = e.target.closest('[data-go]');
           if (b && this._views && !this._views.has(b.dataset.go)) { this._flash(NAV_T[this._lang()].miss.replace('{p}', b.dataset.go)); return; }
@@ -4208,10 +4356,13 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           if (e.target.closest('[data-x]')) { this._open = null; this._render(); return; }
           const th = e.target.closest('[data-theme]'); if (th) { this._save({ theme: th.dataset.theme }); return; }
           const sy = e.target.closest('[data-style]'); if (sy) { this._save({ style: sy.dataset.style }); return; }
+          const vf = e.target.closest('[data-vfam]'); if (vf) { const c = this._vacChoice(vf.dataset.key); c.family = !c.family; this._render(); return; }
+          const vp = e.target.closest('[data-vper]'); if (vp) { const c = this._vacChoice(vp.dataset.key); c.family = false; const i = c.persons.indexOf(vp.dataset.vper); if (i >= 0) c.persons.splice(i, 1); else c.persons.push(vp.dataset.vper); this._render(); return; }
           const vd = e.target.closest('[data-decide]'); if (vd) this._decide(vd.dataset.key, vd.dataset.decide);
-        });
+        };
+        this.shadowRoot.addEventListener('click', this._onClick);
         // a tap outside a popup closes it
-        this._outside = (e) => { if (this.isConnected && this._open && !e.composedPath().includes(this)) { this._open = null; this._render(); } };
+        this._outside = (e) => { const path = e.composedPath(); if (this.isConnected && this._open && !path.includes(this) && !path.includes(this._layer)) { this._open = null; this._render(); } };
         window.addEventListener('pointerdown', this._outside, true);
         window.addEventListener('location-changed', () => this._render());
         this._tick = setInterval(() => this._clock(), 15000);
@@ -4229,8 +4380,27 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         this._render();
       } catch (e) { this._views = null; }
     }
-    disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } }
+    disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } }
     getCardSize() { return 1; }
+    // who a holiday applies to, as picked in the popup (default: the persons found in the calendar)
+    _vacChoice(key) {
+      this._vc = this._vc || {}; if (this._vc[key]) return this._vc[key];
+      const v = (((this._store && this._store.snap) || {}).vacation_review || []).find((x) => x.key === key) || {};
+      this._vc[key] = { family: !!v.family, persons: [...((v.chosen && v.chosen.length ? v.chosen : v.persons) || [])] }; return this._vc[key];
+    }
+    // popups live in their own layer on top of the page, so cards below (glass style, own stacking) can never cover them
+    _popLayer(html, css) {
+      if (!html) { if (this._layer) this._layer.style.display = 'none'; return; }
+      if (!this._layer) {
+        this._layer = document.createElement('div'); this._layer.attachShadow({ mode: 'open' });
+        this._layer.shadowRoot.addEventListener('click', (e) => this._onClick(e));
+        document.body.appendChild(this._layer);
+      }
+      const bar = this.shadowRoot.querySelector('.bar'); const r = bar ? bar.getBoundingClientRect() : { bottom: 60, right: window.innerWidth - 8 };
+      this._layer.style.cssText = `display:block;position:fixed;z-index:9999;top:${Math.round(r.bottom + 6)}px;right:${Math.max(8, Math.round(window.innerWidth - r.right))}px`;
+      const s = this._store && this._store.snap; if (s) applyTheme(this._layer, this._cfg.theme || s.theme, this._cfg.style || s.style);
+      this._layer.shadowRoot.innerHTML = `<style>${css}</style>${html}`;
+    }
     getGridOptions() { return { columns: 'full', rows: 1 }; }
     _lang() { return LANG(this._hass, this._cfg, this._store); }
     _flash(msg) { this._err = msg; clearTimeout(this._et); this._et = setTimeout(() => { this._err = ''; this._render(); }, 3500); this._render(); }
@@ -4241,7 +4411,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
     async _decide(key, decision) {
-      try { await window.FPPIN.call(this._store, 'family_planer/vacation/decide', { key, decision }, { lang: this._lang(), host: this }); }
+      const c = this._vacChoice(key);
+      try { await window.FPPIN.call(this._store, 'family_planer/vacation/decide', { key, decision, family: !!c.family, persons: c.family ? [] : c.persons }, { lang: this._lang(), host: this }); delete this._vc[key]; }
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
     _clock() {
@@ -4262,7 +4433,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const title = this._cfg.titel || this._cfg.title || (s && s.title) || 'Family Planer';
       const showTitle = !!(s && s.settings && s.settings.nav_title);
       const n = new Date(); const p2 = (x) => String(x).padStart(2, '0');
-      const review = ((s && s.vacation_review) || []); const pending = review.filter((v) => !v.decision).length;
+      const review = ((s && s.vacation_review) || []).filter((v) => !v.decision); const pending = review.length;
       this.shadowRoot.innerHTML = `<style>
         :host{display:block;margin-bottom:8px}
         .bar::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}.bar{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);padding:6px 10px 6px 14px;font-family:var(--fp-font);color:var(--fp-text);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
@@ -4278,41 +4449,33 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .rt{display:flex;justify-content:flex-end;gap:8px;position:relative}
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
         button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
-        .pop{position:absolute;right:0;top:48px;z-index:30;width:min(620px,92vw);background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);box-shadow:0 14px 40px rgba(0,0,0,.45);padding:14px;-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none)}
-        .pop:not(.glass){background:var(--fp-bg1)}
-        .ph{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 10px;display:flex;align-items:center;gap:6px}.ph .x{margin-left:auto;height:30px;padding:0 10px}
-        .tg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-        .tg button,.sg button{height:auto;flex-direction:column;align-items:stretch;padding:7px;gap:6px;border-radius:12px;font-size:12px;color:var(--fp-text)}
-        .tg button.on,.sg button.on{border-width:2px}
-        .tn{display:flex;align-items:center;justify-content:center;gap:4px}.tn ha-icon{--mdc-icon-size:14px}
-        .mini{display:block;padding:5px;box-sizing:border-box}.mini b{display:block}
-        .vl{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto}.vi{border:1px solid var(--fp-line);border-radius:12px;padding:10px 12px;background:var(--fp-bg2)}
-        .vt{font-weight:600}.vd{font-size:12px;color:var(--fp-text3);margin:2px 0 8px}.vb{display:flex;gap:8px;flex-wrap:wrap}.vb button{height:36px;font-size:13px}
-        .vb button.on.away{background:rgba(79,163,224,.18);border-color:#4FA3E0;color:#4FA3E0}.vb button.on.home{background:color-mix(in srgb,var(--fp-accent) 18%,transparent)}
-        .hint{font-size:13px;color:var(--fp-text2);margin:0 2px 10px}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
         @media (max-width:700px){.mid button span.l{display:none}.mid button{padding:0 12px}.clk span{display:none}.bar{grid-template-columns:auto 1fr auto}}
       </style><div class="bar"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span>${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span></span></span>
         <div class="mid">${btns.map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div>
         ${this._right(s, lang, review, pending)}</div>`;
+      this._popLayer(this._popHtml, NAV_POPCSS);
     }
     _right(s, lang, review, pending) {
       if (!s) return '<span></span>';
       const T = NAV_T[lang]; const cur = themeName(s.theme); const sty = STYLES.includes(s.style) ? s.style : 'standard';
       const nm = (k) => THEME_NAMES[k][lang === 'en' ? 'en' : 'de']; const sn = (k) => STYLE_NAMES[k][lang === 'en' ? 'en' : 'de'];
       const fmtD = (d) => { const x = new Date(d + 'T00:00'); return `${x.getDate()}.${x.getMonth() + 1}.`; };
-      const pname = (pid) => ((s.persons || []).find((p) => p.id === pid) || {}).name || pid;
-      const vac = review.length ? `<button class="ic vac${this._open === 'vac' ? ' on' : ''}" data-vac title="${escN(T.vac)}"><ha-icon icon="mdi:beach"></ha-icon>${pending ? `<b class="dot">${pending}</b>` : ''}</button>` : '';
+      const vac = pending ? `<button class="ic vac${this._open === 'vac' ? ' on' : ''}" data-vac title="${escN(T.vac)}"><ha-icon icon="mdi:beach"></ha-icon>${pending ? `<b class="dot">${pending}</b>` : ''}</button>` : '';
       const pop = this._open === 'theme' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:palette-outline"></ha-icon>${T.design}<button class="x" data-x>✕</button></div>
           <div class="tg">${Object.keys(THEMES).map((k) => `<button class="${k === cur ? 'on' : ''}" data-theme="${k}">${themeMini(k, sty)}<span class="tn">${k === cur ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${nm(k)}</span></button>`).join('')}</div>
           <div class="ph" style="margin-top:14px"><ha-icon icon="mdi:layers-outline"></ha-icon>${T.style}</div>
           <div class="sg">${STYLES.map((k) => `<button class="${k === sty ? 'on' : ''}" data-style="${k}">${themeMini(cur, k)}<span class="tn">${k === sty ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${sn(k)}</span></button>`).join('')}</div></div>`
-        : this._open === 'vac' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:beach"></ha-icon>${T.vac}<button class="x" data-x>✕</button></div><div class="hint">${T.vacHint}</div>
-          <div class="vl">${review.map((v) => `<div class="vi"><div class="vt">${escN(v.title)}</div><div class="vd">${fmtD(v.days[0])} – ${fmtD(v.days[v.days.length - 1])} · ${v.persons.map(pname).map(escN).join(', ') || T.all}</div>
-            <div class="vb"><button class="away${v.decision === 'away' ? ' on' : ''}" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
-            <button class="home${v.decision === 'home' ? ' on' : ''}" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`).join('')}</div></div>` : '';
+        : this._open === 'vac' && pending ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:beach"></ha-icon>${T.vac}<button class="x" data-x>✕</button></div><div class="hint">${T.vacHint}</div>
+          <div class="vl">${['holiday', 'long'].map((kind) => { const list = review.filter((v) => (v.kind || 'holiday') === kind); if (!list.length) return '';
+            return (kind === 'long' ? `<div class="oh">${T.opt}</div><div class="oh2">${T.optHint}</div>` : '') + list.map((v) => { const c = this._vacChoice(v.key);
+              return `<div class="vi"><div class="vt">${escN(v.title)}</div><div class="vd">${fmtD(v.days[0])} – ${fmtD(v.days[v.days.length - 1])}</div>
+              <div class="vs"><button class="${c.family ? 'on' : ''}" data-vfam data-key="${escN(v.key)}"><ha-icon icon="mdi:account-group"></ha-icon>${T.fam}</button>${(s.persons || []).map((p) => `<button class="${!c.family && c.persons.includes(p.id) ? 'on' : ''}" data-vper="${escN(p.id)}" data-key="${escN(v.key)}">${escN(p.name)}</button>`).join('')}</div>
+              <div class="vb"><button class="away" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
+              <button class="home" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`; }).join(''); }).join('')}</div></div>` : '';
+      this._popHtml = pop;
       return `<span class="rt">${vac}${this._cfg.theme_picker === false ? '' : `<button class="ic${this._open === 'theme' ? ' on' : ''}" data-themes title="${T.design}" aria-expanded="${this._open === 'theme'}">${themeSwatch(cur)}<ha-icon icon="mdi:palette-outline"></ha-icon></button>`}
-        ${pop}${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;
+        ${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;
     }
   }
   if (!customElements.get('family-planer-nav-card')) customElements.define('family-planer-nav-card', FamilyPlanerNavCard);

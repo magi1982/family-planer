@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.9.1 – 2026-11-11
+
+### New
+- **Avatar builder rebuilt**: skin tone (9) and hair colour (12) first, then the person (girl, boy, woman, man, grandma, grandpa), **18 hair styles** chosen separately, and tabs full of extras – head, face, clothes (T-shirt colour and motif), **buddies** (incl. lizard, monkey, mini dragon, penguin, fox, robot, owl), **8 backgrounds** over the person's colour, and **costumes** as a layer over the person (space suits, our own superheroes, ninja, knight, pirate, wizard, princess, prince, dino, firefighter). 🎲 *Random* button. Old pictures are converted automatically; a test draws over 30 000 combinations.
+- **Settings without the PIN show only the pictures** – anyone may change any picture or upload a photo. *Parent PIN* at the top right opens all other tabs.
+- **Holiday check reworked**: entries appear two weeks before they start, past ones are ignored; per entry *away – pause chores* or *here – chores go on*, for the whole family or chosen persons. **Long events without a holiday word** appear as *Optional* (they pause nothing without a decision). Decided entries leave the navigation popup and stay under *Settings → Holidays* for 4 weeks.
+- *+ Special chore* and *+ To-do* in the chore plan open the form in a **popup**.
+
+### Changed
+- Rewards: tiles first, *still to win* below them. The *Edit* and *Give points* buttons are gone – rewards are added with *+ Reward* on a tile and changed with the pencil next to them; extra points are given with a to-do. *Change parent PIN* lives under Settings.
+- The picture picker left the chore plan; colour and nicknames are under *Settings → People*.
+- Bigger tap targets on the phone; the status page drops sources that have been silent for 30 days.
+
+### Fixed
+- With the styles *Glass* and *Transparent*, the design picker and the holiday check were hidden behind the planner. Popups of the navigation now always lie on top.
+
+### Security
+- Picture codes of the new builder are whitelisted on the server (`av2:` + 12 parts of `[a-z0-9]`); the holiday decision accepts only known person ids. See SECURITY.md #22–23.
+
 ## 0.9.0 – 2026-11-11
 
 ### New

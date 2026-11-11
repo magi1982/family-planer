@@ -13,13 +13,13 @@
   const UI = {
     de: { title: 'Einstellungen', locked: 'Die Einstellungen sind mit der Eltern-PIN geschützt.', unlock: 'Entsperren', save: 'Speichern', saved: 'Gespeichert.',
       reloading: 'Gespeichert – der Planer lädt die neuen Einstellungen …', cancel: 'Abbrechen', del: 'Löschen', add: 'Hinzufügen', none: '–', pin: 'Eltern-PIN ändern',
-      pinChanged: 'Eltern-PIN geändert.', lock: 'Sperren', newPerson: '+ Person', newList: '+ Liste', delAsk: '„{t}“ wirklich löschen?', search: 'Entität wählen …',
+      pinChanged: 'Eltern-PIN geändert.', lock: 'Sperren', parent: 'Eltern-PIN', newPerson: '+ Person', newList: '+ Liste', delAsk: '„{t}“ wirklich löschen?', search: 'Entität wählen …',
       errors: { no_target: 'Bitte Alexa-Benachrichtigung oder TTS mit Lautsprechern wählen.', no_motion: 'Bitte mindestens einen Bewegungsmelder wählen.', no_modules: 'Mindestens ein Modul muss aktiv sein.',
         bad_times: 'Zeiten prüfen: Beginn vor Ende, Blöcke ohne Überschneidung.', name: 'Bitte einen (eindeutigen) Namen angeben.', last_person: 'Die letzte Person kann nicht entfernt werden.', list: 'Bitte Name und To-do-Liste angeben.' },
       days: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'], block: 'Block', from: 'von', to: 'bis' },
     en: { title: 'Settings', locked: 'The settings are protected by the parent PIN.', unlock: 'Unlock', save: 'Save', saved: 'Saved.',
       reloading: 'Saved – the planner is loading the new settings …', cancel: 'Cancel', del: 'Delete', add: 'Add', none: '–', pin: 'Change parent PIN',
-      pinChanged: 'Parent PIN changed.', lock: 'Lock', newPerson: '+ Person', newList: '+ List', delAsk: 'Really delete "{t}"?', search: 'Choose entity …',
+      pinChanged: 'Parent PIN changed.', lock: 'Lock', parent: 'Parent PIN', newPerson: '+ Person', newList: '+ List', delAsk: 'Really delete "{t}"?', search: 'Choose entity …',
       errors: { no_target: 'Please choose an Alexa notify entity or TTS with speakers.', no_motion: 'Please choose at least one motion sensor.', no_modules: 'At least one module must be active.',
         bad_times: 'Check the times: start before end, blocks must not overlap.', name: 'Please enter a (unique) name.', last_person: 'The last person cannot be removed.', list: 'Please enter a name and a to-do list.' },
       days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], block: 'Block', from: 'from', to: 'to' },
@@ -28,6 +28,7 @@
   // field: [key, type, {de, en} label, {de, en} description, extra]
   const F = (k, type, de, en, dde, den, x) => ({ k, type, label: { de, en }, desc: { de: dde, en: den }, ...(x || {}) });
   const TABS = [
+    { id: 'pics', icon: 'mdi:face-man-shimmer-outline', label: { de: 'Bilder', en: 'Pictures' } },
     { id: 'general', icon: 'mdi:tune-variant', label: { de: 'Allgemein', en: 'General' }, fields: [
       F('mod_week', 'bool', 'Modul Wochenplan', 'Week plan module', 'Ämtli, Termine, Schule, Ferien, Punkte, Belohnungen und Ansagen.', 'Chores, events, school, holidays, points, rewards and announcements.'),
       F('mod_lists', 'bool', 'Modul Smarte Listen', 'Smart lists module', 'Einkaufs- und To-do-Listen, die sich selbst sortieren.', 'Shopping and to-do lists that sort themselves.'),
@@ -110,7 +111,7 @@
     { id: 'status', icon: 'mdi:heart-pulse', label: { de: 'Status', en: 'Status' } },
   ];
   // tab order on the page
-  const ORDER = ['general', 'persons', 'chores', 'points', 'todos', 'lists', 'vacation', 'announce', 'status'];
+  const ORDER = ['pics', 'general', 'persons', 'chores', 'points', 'todos', 'lists', 'vacation', 'announce', 'status'];
   const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', early: 'Frühaufsteher', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', early: 'Early bird', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
@@ -131,8 +132,9 @@
     }
     set store(s) { this._store = s; }
     set hass(h) { this._hass = h; if (this._plan) this._plan.hass = h; }
-    update() { if (!this._data && window.FPPIN && window.FPPIN.unlocked(this._store)) this._load(); }
-    connectedCallback() { if (!this._data && !this._asked) { this._asked = true; setTimeout(() => this._load(), 50); } }
+    // without the parent PIN only the pictures are shown; "Parent PIN" at the top right opens everything else
+    update() { if (!this._data && window.FPPIN && window.FPPIN.unlocked(this._store) && !this._asked) { this._asked = true; this._load(); } else this._render(); }
+    connectedCallback() { if (!this._data && window.FPPIN && this._store && window.FPPIN.unlocked(this._store) && !this._asked) { this._asked = true; setTimeout(() => this._load(), 30); } else this._render(); }
     _ctx() { return { lang: this._lang, host: this }; }
     _flash(m, err) { this._msg = m; this._err = !!err; this._render(); clearTimeout(this._mt); this._mt = setTimeout(() => { this._msg = ''; this._render(); }, 4500); }
     _errText(e) {
@@ -164,6 +166,7 @@
     }
     _input(e, isChange) {
       const el = e.target; const ds = el.dataset;
+      if (ds.avup !== undefined && isChange && el.files && el.files[0]) { const p = this._avPerson(); if (p) this._avUpload(p, el.files[0]); return; }
       if (ds.navtg) { const n = this._forms.general.nav; n.hidden = el.checked ? n.hidden.filter((x) => x !== ds.navtg) : [...n.hidden, ds.navtg]; return; }
       if (ds.awon || ds.awsz) { const it = this._forms.points.awards.items; const id = ds.awon || ds.awsz; it[id] = { ...(it[id] || {}) }; if (ds.awon) it[id].on = el.checked; else it[id].size = el.value; return; }
       if (ds.pk === 'role') { const p = this._persons[Number(ds.pi)]; if (p) p.role = el.value; return; }
@@ -190,10 +193,14 @@
     }
     async _click(e) {
       const t = e.target;
-      if (t.closest('[data-unlock]')) { this._load(); return; }
+      if (t.closest('[data-unlock]')) { this._asked = true; this._load(); return; }
+      const ap = t.closest('[data-avp]'); if (ap) { this._avp = ap.dataset.avp; this._render(); return; }
+      const at = t.closest('[data-avtab]'); if (at) { this._avtab = at.dataset.avtab; this._render(); return; }
+      if (t.closest('[data-avrnd]')) { const p = this._avPerson(); if (p) this._avSave(p, window.FPAV.random()); return; }
+      const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); this._avSave(p, window.FPAV.set(this._avCode(p), part, val)); } return; }
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
       if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
-      if (t.closest('[data-lock]')) { window.FPPIN.lock(this._store); this._data = null; this._render(); return; }
+      if (t.closest('[data-lock]')) { window.FPPIN.lock(this._store); this._data = null; this._asked = false; this._tab = 'pics'; this._render(); return; }
       const rm = t.closest('[data-rment]');
       if (rm) { const f = this._forms[rm.dataset.tab]; f[rm.dataset.k] = (f[rm.dataset.k] || []).filter((x) => x !== rm.dataset.rment); this._render(); return; }
       const pc = t.closest('[data-pchip]');
@@ -204,12 +211,11 @@
       const pm = t.closest('[data-pmv]');
       if (pm) { const [i0, d] = pm.dataset.pmv.split('|').map(Number); const j = i0 + d; const ps = this._persons; if (j < 0 || j >= ps.length) return; [ps[i0], ps[j]] = [ps[j], ps[i0]]; this._render();
         const ids = ps.filter((p) => p.id).map((p) => p.id); const res = await this._call('family_planer/person/order', { order: ids }); if (res !== null) this._flash(this.T.saved); return; }
-      const pa = t.closest('[data-pav]'); if (pa) { const p = this._persons[Number(pa.dataset.pav)]; p.av = !p.av; this._render(); return; }
-      const ab = t.closest('[data-avb]');
-      if (ab) { const p = this._persons[Number(ab.closest('[data-avi]').dataset.avi)]; const [part, val] = ab.dataset.avb.split('|'); const FX = this._fx();
-        p.image = FX.avSet(String(p.image || '').startsWith('av:') ? p.image : 'av:k.kurz.braun.hell.0', part, val); this._render(); return; }
       const vd = t.closest('[data-vdec]');
-      if (vd) { const [key, decision] = vd.dataset.vdec.split('|'); const res = await this._call('family_planer/vacation/decide', { key, decision }); if (res !== null) this._flash(this.T.saved); return; }
+      const vfm = t.closest('[data-vfam]'); if (vfm) { const c = this._vacChoice(vfm.dataset.vfam); c.family = !c.family; this._render(); return; }
+      const vpr = t.closest('[data-vper]'); if (vpr) { const c = this._vacChoice(vpr.dataset.vkey); c.family = false; const i = c.persons.indexOf(vpr.dataset.vper); if (i >= 0) c.persons.splice(i, 1); else c.persons.push(vpr.dataset.vper); this._render(); return; }
+      if (vd) { const [key, dec] = vd.dataset.vdec.split('|'); const c = this._vacChoice(key);
+        const res = await this._call('family_planer/vacation/decide', { key, decision: dec || null, family: !!c.family, persons: c.family ? [] : c.persons }); if (res !== null) { delete this._vc[key]; this._flash(this.T.saved); } return; }
       const sp = t.closest('[data-psave]'); if (sp) { this._savePerson(Number(sp.dataset.psave)); return; }
       const dp = t.closest('[data-pdel]'); if (dp) { const p = this._persons[Number(dp.dataset.pdel)]; this._dlg = { kind: 'person', i: Number(dp.dataset.pdel), title: p.name }; this._render(); return; }
       if (t.closest('[data-padd]')) { this._persons.push({ id: null, name: '', color: '#4FA3E0', role: 'kid', image: '', calendar: null, aliases: [], school: { calendar: null, times: {}, travel: 0 }, open: true }); this._render(); return; }
@@ -237,7 +243,7 @@
         if (spans.some((s) => s && ((s[0] && !s[1]) || (!s[0] && s[1])))) { this._flash(this.T.errors.bad_times, true); return; }
         if (ok.length) times[day] = ok;
       }
-      const data = { name: p.name, color: p.color, role: p.role === 'adult' ? 'adult' : 'kid', ...(p.image ? { image: p.image } : {}), calendar: p.calendar, aliases: p.aliases || [], school: { calendar: p.school.calendar, times, travel: p.school.travel || 0 } };
+      const data = { name: p.name, color: p.color, role: p.role === 'adult' ? 'adult' : 'kid', calendar: p.calendar, aliases: p.aliases || [], school: { calendar: p.school.calendar, times, travel: p.school.travel || 0 } };
       const res = await this._call('family_planer/settings/person', { ...(p.id ? { person_id: p.id } : {}), data });
       if (!res) return; p.id = res.person_id; p.open = false; this._flash(res.reload ? this.T.reloading : this.T.saved);
     }
@@ -309,8 +315,6 @@
           ${p.open ? `<div class="pb">
             <div class="row"><span class="lt"><b>${lbl('Name', 'Name')}</b></span><span class="ctl"><input class="in" maxlength="40" data-pk="name" data-pi="${i}" value="${esc(p.name)}"></span></div>
             <div class="row"><span class="lt"><b>${lbl('Rolle', 'Role')}</b><small>${lbl('Kinder stehen oben im Planer und zählen für die Prognosen. Erwachsene können trotzdem Ämtli und Pokale haben.', 'Children are listed first in the planner and count for the forecasts. Adults can still have chores and trophies.')}</small></span><span class="ctl"><select class="in" data-pk="role" data-pi="${i}"><option value="kid" ${p.role !== 'adult' ? 'selected' : ''}>${lbl('Kind', 'Child')}</option><option value="adult" ${p.role === 'adult' ? 'selected' : ''}>${lbl('Erwachsen', 'Adult')}</option></select></span></div>
-            <div class="row"><span class="lt"><b>${lbl('Bild', 'Picture')}</b><small>${lbl('Figur, Frisur, Haut, Extras und Verkleidung frei kombinieren. Das Bild darf jeder auch ohne PIN im Ämtliplan ändern.', 'Combine figure, hair, skin, extras and costume freely. Anyone may also change the picture without the PIN in the chore plan.')}</small></span><span class="ctl"><button class="sg" data-pav="${i}">${p.av ? lbl('Baukasten schliessen', 'Close builder') : lbl('Bild zusammenstellen', 'Build picture')}</button></span></div>
-            ${p.av && FX.avBuilder ? `<div class="avwrap" data-avi="${i}">${FX.avBuilder(String(p.image || '').startsWith('av:') ? p.image : 'av:k.kurz.braun.hell.0', COLOR(p.color))}</div>` : ''}
             <div class="row"><span class="lt"><b>${lbl('Farbe', 'Colour')}</b><small>${lbl('Gilt auch für den Kalender der Person.', 'Also used for the person\'s calendar.')}</small></span><span class="ctl"><input class="col" type="color" data-pk="color" data-pi="${i}" value="${esc(COLOR(p.color))}"></span></div>
             <div class="row"><span class="lt"><b>${lbl('Kalender', 'Calendar')}</b><small>${lbl('Termine dieser Person.', 'Events of this person.')}</small></span><span class="ctl">${this._entSelect(`data-pk="calendar" data-pi="${i}"`, 'calendar', null, p.calendar)}</span></div>
             <div class="row"><span class="lt"><b>${lbl('Spitznamen', 'Nicknames')}</b><small>${lbl('Mit Komma getrennt – Termine mit diesem Namen erscheinen bei der Person.', 'Comma separated – events with this name appear at the person.')}</small></span><span class="ctl"><input class="in" maxlength="300" data-pk="aliases" data-pi="${i}" value="${esc((p.aliases || []).join(', '))}"></span></div>
@@ -386,21 +390,27 @@
         .nn{flex:1;font-size:14px}.ar{width:34px;height:34px;border-radius:9px;border:1px solid #3a3a3a;background:#2b2b2b;color:#ccc;cursor:pointer;font-size:11px}.ar[disabled]{opacity:.3;cursor:default}
         .in.sz{width:140px;height:36px}.awr .u{min-width:44px;text-align:right}
         .phw{display:flex;align-items:center;gap:6px;padding-right:10px}.phw .ph{flex:1}.rl{font-style:normal;font-size:12px;color:#888;border:1px solid #3a3a3a;border-radius:10px;padding:1px 8px}
-        .avwrap{padding:10px 4px 6px;border-bottom:1px solid #262626}${(window.FPX || {}).AVB_CSS || ''}
+                .avwrap{padding:10px 4px 6px}${(window.FPAV || {}).css || ''}
+        .avps{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}.avpb{display:flex;align-items:center;gap:8px;height:52px;padding:0 14px 0 6px;border-radius:26px;border:1px solid #2a2a2a;background:#232323;color:inherit;font:inherit;font-size:14px;cursor:pointer}
+        .avpb.on{border-color:var(--c);box-shadow:0 0 0 1px var(--c)}
+        .upl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}.upl label{display:inline-flex;align-items:center}.upl small{font-size:12px;color:#8a8a8a}
+        .tb.pin{color:${G};border-color:${G}}
         .hint3{font-size:13px;color:#999;margin:0 2px 10px;max-width:980px}
+        .vch{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.vch .chip{height:30px;font-size:12px}.vbt{display:flex;gap:6px;flex-wrap:wrap}
         .vrl,.stl{display:flex;flex-direction:column;gap:8px;max-width:980px;margin-bottom:8px}.vr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:#232323;border:1px solid #2a2a2a}.vr .lt{flex:1;min-width:200px}
         .str{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:#232323;border:1px solid #2a2a2a}.str ha-icon{color:${G}}.str.bad{border-color:#E06B6B}.str.bad ha-icon{color:#E06B6B}
         @media (max-width:700px){.row{grid-template-columns:1fr}.lcard{grid-template-columns:1fr}}
       </style>`;
       const msg = this._msg ? `<div class="msg${this._err ? ' e' : ''}">${esc(this._msg)}</div>` : '';
       if (!this._data) {
-        this.shadowRoot.innerHTML = `${style}<div class="card"><div class="top"><h2>${esc(T.title)}</h2></div>
-          <div class="lockd"><ha-icon icon="mdi:shield-lock-outline"></ha-icon><div>${esc(T.locked)}</div><button class="sg ok" data-unlock>${esc(T.unlock)}</button></div>${msg}</div>`;
+        this.shadowRoot.innerHTML = `${style}<div class="card"><div class="top"><h2>${esc(T.title)}</h2><button class="tb pin" data-unlock><ha-icon icon="mdi:shield-key-outline"></ha-icon>${esc(T.parent)}</button></div>
+          ${this._picsView()}${msg}</div>`;
         return;
       }
       const tab = TABS.find((x) => x.id === this._tab) || TABS[0];
       let body = '';
-      if (tab.id === 'persons') body = this._personsTab();
+      if (tab.id === 'pics') body = this._picsView();
+      else if (tab.id === 'persons') body = this._personsTab();
       else if (tab.id === 'chores') body = `<div class="hint3">${esc(lang === 'en' ? 'Tap a day to assign a chore. Special chores and to-dos: buttons at the top of the chore plan.' : 'Tag antippen, um ein Ämtli zuzuteilen. Besondere Ämtli und To-dos: Knöpfe oben im Ämtliplan.')}</div><div class="planhost"></div>`;
       else if (tab.id === 'status') body = this._statusTab();
       else {
@@ -425,13 +435,59 @@
       if (!this._plan) { this._plan = document.createElement('family-planer-card'); this._plan.setConfig({ view: 'plan', ...(this._snap().entry_id ? { entry_id: this._snap().entry_id } : {}) }); }
       host.appendChild(this._plan); this._plan.hass = this._hass;
     }
+    _avPerson() { const ps = this._snap().persons || []; return ps.find((p) => p.id === this._avp) || ps[0] || null; }
+    _avCode(p) {
+      const A = window.FPAV; const loc = (this._avLocal || {})[p.id]; const img = loc || p.image || '';
+      if (img.startsWith('av2:')) return img;
+      if (img.startsWith('av:')) return A.from1(img);
+      return A.code({ ...A.parse(''), fig: p.role === 'adult' ? 'f' : 'm' });
+    }
+    async _avSave(p, code) {
+      this._avLocal = { ...(this._avLocal || {}), [p.id]: code }; this._render();
+      try { await this._store.ws('family_planer/person/update', { person_id: p.id, image: code }); } catch (er) { this._flash(this._errText(er), true); }
+    }
+    async _avUpload(p, file) {
+      // centre crop to a 320 px square JPEG in the browser, then store it in Home Assistant
+      const lbl = (de, en) => (this._lang === 'en' ? en : de);
+      try {
+        const url = URL.createObjectURL(file);
+        const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
+        const sq = Math.min(img.naturalWidth, img.naturalHeight); const c = document.createElement('canvas'); c.width = c.height = 320;
+        c.getContext('2d').drawImage(img, (img.naturalWidth - sq) / 2, (img.naturalHeight - sq) / 2, sq, sq, 0, 0, 320, 320);
+        URL.revokeObjectURL(url);
+        await this._store.ws('family_planer/person/upload_image', { person_id: p.id, data: c.toDataURL('image/jpeg', 0.86) });
+        if (this._avLocal) delete this._avLocal[p.id];
+        this._flash(lbl('Foto gespeichert.', 'Photo saved.'));
+      } catch (er) { this._flash(lbl('Bild konnte nicht gelesen werden.', 'The picture could not be read.'), true); }
+    }
+    _picsView() {
+      const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de); const s = this._snap(); const ps = s.persons || [];
+      const A = window.FPAV; const FX = this._fx(); const p = this._avPerson();
+      if (!p || !A) return '';
+      const pic = (q, size) => { const loc = (this._avLocal || {})[q.id]; const img = loc || q.image || '';
+        return FX.avatarHtml ? FX.avatarHtml({ name: q.name, farbe: COLOR(q.color), ...(/^(av2?:|svg:|img:)/.test(img) ? { bild: img } : {}) }, size) : ''; };
+      return `<div class="hint3">${esc(lbl('Jede und jeder darf hier ein Bild zusammenstellen – ohne PIN. Alles andere öffnet die Eltern-PIN oben rechts.', 'Anyone may build a picture here – no PIN needed. Everything else opens with the parent PIN at the top right.'))}</div>
+        <div class="avps">${ps.map((q) => `<button class="avpb${q.id === p.id ? ' on' : ''}" style="--c:${COLOR(q.color)}" data-avp="${esc(q.id)}">${pic(q, 40)}<span>${esc(q.name)}</span></button>`).join('')}</div>
+        <div class="avwrap">${A.builder(this._avCode(p), COLOR(p.color), lang, this._avtab)}</div>
+        <div class="upl"><label class="sg">${esc(lbl('Eigenes Foto hochladen', 'Upload own photo'))}<input type="file" accept="image/*" data-avup hidden></label><small>${esc(lbl('Wird quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.', 'Cropped to a square and stored only in your Home Assistant.'))}</small></div>`;
+    }
+    _vacChoice(key) {
+      this._vc = this._vc || {}; if (this._vc[key]) return this._vc[key];
+      const v = (this._snap().vacation_review || []).find((x) => x.key === key) || {};
+      this._vc[key] = { family: !!v.family, persons: [...((v.chosen && v.chosen.length ? v.chosen : v.persons) || [])] }; return this._vc[key];
+    }
     _vacReview() {
       const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de); const s = this._snap(); const rv = s.vacation_review || [];
-      if (!rv.length) return '';
-      const nm = (pid) => ((s.persons || []).find((p) => p.id === pid) || {}).name || '';
       const d = (x) => String(x || '').slice(0, 10).split('-').reverse().slice(0, 2).join('.') + '.';
-      return `<div class="sec2">${lbl('Ferien im Kalender', 'Holidays in the calendar')}</div><div class="vrl">${rv.map((v) => `<div class="vr"><span class="lt"><b>${esc(v.title)}</b><small>${esc(d((v.days || [])[0] || v.start))} – ${esc(d((v.days || []).slice(-1)[0] || v.end))}${(v.persons || []).length ? ' · ' + esc(v.persons.map(nm).filter(Boolean).join(', ')) : ''}</small></span>
-        <button class="sg${v.decision === 'away' ? ' ok' : ''}" data-vdec="${esc(v.key)}|away">${lbl('Weg – Ämtli pausieren', 'Away – pause chores')}</button><button class="sg${v.decision === 'home' ? ' ok' : ''}" data-vdec="${esc(v.key)}|home">${lbl('Zu Hause – Ämtli laufen', 'At home – chores go on')}</button></div>`).join('')}</div>`;
+      const head = `<div class="sec2">${lbl('Ferien-Check', 'Holiday check')}</div><div class="hint3">${esc(lbl('Ferien und lange Termine der nächsten zwei Wochen. Entschiedene bleiben hier noch 4 Wochen und lassen sich ändern.', 'Holidays and long events of the next two weeks. Decided ones stay here for 4 more weeks and can be changed.'))}</div>`;
+      if (!rv.length) return head + `<div class="hint3">${esc(lbl('Gerade nichts zu prüfen.', 'Nothing to check right now.'))}</div>`;
+      const item = (v) => { const c = this._vacChoice(v.key);
+        const state = v.decision === 'away' ? lbl('Entschieden: weg', 'Decided: away') : v.decision === 'home' ? lbl('Entschieden: hier', 'Decided: here') : lbl('Offen', 'Open');
+        return `<div class="vr"><span class="lt"><b>${esc(v.title)}</b><small>${esc(d((v.days || [])[0] || v.start))} – ${esc(d((v.days || []).slice(-1)[0] || v.end))} · ${esc(state)}</small>
+          <span class="vch"><button class="chip${c.family ? ' on' : ''}" style="--c:${G}" data-vfam="${esc(v.key)}"><i></i>${esc(lbl('Ganze Familie', 'Whole family'))}</button>${(s.persons || []).map((p) => `<button class="chip${!c.family && c.persons.includes(p.id) ? ' on' : ''}" style="--c:${COLOR(p.color)}" data-vper="${esc(p.id)}" data-vkey="${esc(v.key)}"><i></i>${esc(p.name)}</button>`).join('')}</span></span>
+          <span class="vbt"><button class="sg${v.decision === 'away' ? ' ok' : ''}" data-vdec="${esc(v.key)}|away">${lbl('Weg – pausieren', 'Away – pause')}</button><button class="sg${v.decision === 'home' ? ' ok' : ''}" data-vdec="${esc(v.key)}|home">${lbl('Hier – weiterlaufen', 'Here – go on')}</button>${v.decision ? `<button class="sg" data-vdec="${esc(v.key)}|">${lbl('Zurücksetzen', 'Reset')}</button>` : ''}</span></div>`; };
+      const hol = rv.filter((v) => (v.kind || 'holiday') === 'holiday'); const lng = rv.filter((v) => v.kind === 'long');
+      return head + `<div class="vrl">${hol.map(item).join('')}</div>${lng.length ? `<div class="sec2">${lbl('Optional – lange Termine', 'Optional – long events')}</div><div class="vrl">${lng.map(item).join('')}</div>` : ''}`;
     }
     _statusTab() {
       const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de); const s = this._snap(); const st = s.status || {};

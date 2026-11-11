@@ -113,6 +113,8 @@ def test_validation():
     assert V.color("#AbCdEf", "#000000") == "#AbCdEf"
     assert V.color("red;background:url(x)", "#000000") == "#000000"
     assert V.image("av:k.long.blond.hell.0") and V.image("svg:frau")
+    assert V.image("av2:m.lang.braun.hell.0.0.0.blau.0.0.0.0") and V.image("av2:p.glatze.grau.espresso.krone.bart.schal.rot.stern.eidechse.weltall.0")
+    assert V.image("av2:m.lang.braun") == "" and V.image("av2:m.lang.braun.hell.0.0.0.blau.0.0.0.<b>") == ""
     assert V.image("img:/family_planer_files/avatars/lea_" + "a" * 24 + ".jpg")
     assert V.image("img:https://evil.example/x.png") == ""
     assert V.image("img:/family_planer_files/avatars/../../secrets.yaml") == ""

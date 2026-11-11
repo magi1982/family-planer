@@ -77,7 +77,7 @@
       const pp = t.closest('[data-person]'); if (pp) { const id = pp.dataset.person; const l = this._ed.persons; this._ed.persons = l.includes(id) ? l.filter((x) => x !== id) : [...l, id]; this._render(); return; }
       if (t.closest('[data-rotate]')) { this._ed.rotate = !this._ed.rotate; this._render(); return; }
       const rd = t.closest('[data-rmdate]'); if (rd) { this._ed.schedule.dates = this._ed.schedule.dates.filter((x) => x !== rd.dataset.rmdate); this._render(); return; }
-      if (t.closest('[data-cancel]')) { this._ed = null; this._render(); return; }
+      if (t.closest('[data-cancel]')) { this._ed = null; this._render(); if (this._cfg.dialog) this.dispatchEvent(new CustomEvent('fp-dialog-close', { bubbles: true, composed: true })); return; }
       if (t.closest('[data-save]')) this._save();
     }
     _change(e) {
@@ -104,7 +104,7 @@
       const msg = { title: e.title.trim(), assign: {}, schedule: sched, persons: e.persons, rotate: e.rotate && e.persons.length > 1, window: e.window || 1 };
       if (e.id) msg.chore_id = e.id;
       if (typeof e.points === 'number') msg.points = Math.max(0, Math.min(1000, Math.round(e.points)));
-      try { await this._store.pws('family_planer/chore/save', msg); this._ed = null; this._render(); } catch (er) { if (er !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(er); }
+      try { await this._store.pws('family_planer/chore/save', msg); this._ed = null; this._render(); if (this._cfg.dialog) this.dispatchEvent(new CustomEvent('fp-dialog-close', { bubbles: true, composed: true })); } catch (er) { if (er !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(er); }
     }
     _editor(s) {
       const T = this.T; const e = this._ed; const sc = e.schedule;
@@ -161,11 +161,11 @@
         .dchip button{border:none;background:none;color:#999;cursor:pointer;font-size:12px}.adl{display:flex;align-items:center;gap:6px;font-size:13px;color:#999}
         .sg{height:38px;border-radius:19px;background:#2e2e2e;border:1px solid #3a3a3a;color:#ccc;font:inherit;font-size:13px;padding:0 16px;cursor:pointer}.sg.ok{background:${G};border-color:${G};color:#141414;font-weight:600}
         .msg{color:#E06B6B;font-size:13px;margin-top:8px}
-      </style><div class="card"><h2>${esc(T.title)}</h2><div class="sub">${esc(T.sub)}</div>
+      </style>${this._cfg.dialog ? `<div class="card"><h2>${esc(T.add.replace(/^\+\s*/, ""))}</h2>${this._ed ? this._editor(s) : ''}${this._msg ? `<div class="msg">${esc(this._msg)}</div>` : ''}</div>` : `<div class="card"><h2>${esc(T.title)}</h2><div class="sub">${esc(T.sub)}</div>
         ${this._ed ? this._editor(s) : ''}
         ${rows || (this._ed ? '' : `<div class="none">${esc(T.none)}</div>`)}
         ${this._ed ? '' : `<button class="add" data-add>${esc(T.add)}</button>`}
-        ${this._msg ? `<div class="msg">${esc(this._msg)}</div>` : ''}</div>`;
+        ${this._msg ? `<div class="msg">${esc(this._msg)}</div>` : ''}</div>`}`;
     }
   }
   if (!customElements.get('fp-special-inner')) customElements.define('fp-special-inner', FpSpecialInner);

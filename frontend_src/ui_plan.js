@@ -3,7 +3,7 @@
 // Plan-Beschreibung: "fp1:" + {"z": {"Lea": [1,3]}, "r": {"Lea|1": [2, 0]}}
 //   r: alle n Wochen, aktiv wenn Wochenindex (seit 5.1.1970) % n == offset; fehlt r => jede Woche
 customElements.whenDefined('lox-wochenplaner-card').then(() => {
-  const { FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, avBuilder, avSet, AVB_CSS } = window.FP;
+  const { FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx } = window.FP;
   const rgba = (hex, a) => { const h = (hex || '#888888').replace('#', ''); const n = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; };
   const mondayOfIdx = (idx) => { const u = new Date(Date.UTC(1970, 0, 5) + idx * 604800000); return new Date(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate()); };
   const curIdx = () => weekIdx(new Date());
@@ -15,27 +15,6 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
     if (!anyR) { if (j === '1,2,3,4,5,6,7') return 'täglich'; if (j === '1,2,3,4,5') return 'werktags'; if (j === '6,7') return 'Wochenende'; }
     return s.length ? s.map((d) => dayTxt(p, d, r, f)).join(', ') : 'keine Tage';
   };
-
-  // Bildauswahl pro Person (eigene Portraits + Material-Design-Icons)
-  const ICONS = [
-    ['Mädchen', ['svg:maedchen-lang', 'svg:maedchen-zoepfe', 'svg:maedchen-dutt', 'av:k.long.braun.hell.0', 'av:k.long.schwarz.mittel.0', 'av:k.long.rot.hell.0', 'av:k.ponylang.blond.hell.schleife', 'av:k.ponylang.braun.oliv.0', 'av:k.ponylang.schwarz.hell.brille', 'av:k.zoepfe.braun.mittel.0', 'av:k.zoepfe.schwarz.dunkel.0', 'av:k.zoepfe.rot.hell.0', 'av:k.dutt.braun.oliv.0', 'av:k.bob.blond.hell.0', 'av:k.bob.schwarz.mittel.0', 'av:k.bob.braun.hell.brille', 'av:k.locken.braun.dunkel.0', 'av:k.locken.schwarz.oliv.schleife', 'av:k.locken.rot.hell.0', 'av:k.pferd.blond.hell.0', 'av:k.pferd.braun.mittel.0', 'av:k.long.blond.hell.kopfhoerer']],
-    ['Jungen', ['av:k.kurz.blond.hell.0', 'av:k.kurz.braun.hell.0', 'av:k.kurz.schwarz.mittel.0', 'av:k.kurz.rot.hell.0', 'av:k.stachel.blond.hell.0', 'av:k.stachel.braun.oliv.0', 'av:k.stachel.schwarz.dunkel.0', 'av:k.seite.braun.hell.0', 'av:k.seite.blond.mittel.brille', 'av:k.lockenkurz.schwarz.dunkel.0', 'av:k.lockenkurz.braun.oliv.0', 'av:k.kurz.blond.hell.cap', 'av:k.kurz.braun.mittel.kopfhoerer', 'av:k.seite.rot.hell.cap']],
-    ['Frauen', ['svg:frau', 'av:e.long.braun.mittel.0', 'av:e.long.schwarz.oliv.0', 'av:e.long.rot.hell.0', 'av:e.ponylang.blond.hell.0', 'av:e.ponylang.braun.hell.brille', 'av:e.bob.braun.hell.0', 'av:e.bob.blond.hell.brille', 'av:e.bob.schwarz.dunkel.0', 'av:e.dutt.blond.hell.0', 'av:e.dutt.braun.oliv.brille', 'av:e.locken.braun.dunkel.0', 'av:e.locken.blond.hell.0', 'av:e.pferd.blond.hell.0', 'av:e.pferd.schwarz.mittel.0', 'av:e.pferd.rot.hell.0']],
-    ['Männer', ['svg:mann', 'av:e.kurz.braun.hell.0', 'av:e.kurz.schwarz.oliv.0', 'av:e.kurz.braun.hell.bart', 'av:e.kurz.blond.hell.bart', 'av:e.seite.braun.mittel.brille', 'av:e.seite.schwarz.dunkel.0', 'av:e.seite.blond.hell.0', 'av:e.stachel.blond.hell.0', 'av:e.lockenkurz.schwarz.dunkel.bart', 'av:e.glatze.braun.hell.bart', 'av:e.glatze.schwarz.mittel.brille', 'av:e.kurz.rot.hell.bart+brille', 'av:e.kurz.blond.hell.cap']],
-    ['Grosseltern', ['av:o.dutt.grau.hell.brille', 'av:o.bob.grau.hell.0', 'av:o.locken.grau.mittel.0', 'av:o.long.grau.hell.brille', 'av:o.kurz.grau.hell.brille', 'av:o.glatze.grau.hell.bart+brille', 'av:o.seite.grau.oliv.bart', 'av:o.glatze.grau.dunkel.0']],
-    ['Verkleidet', ['av:k.kurz.blond.hell.held', 'av:k.long.blond.hell.held', 'av:k.zoepfe.braun.hell.held', 'av:k.kurz.braun.hell.astro', 'av:k.zoepfe.blond.hell.astro', 'av:k.kurz.schwarz.mittel.pirat', 'av:k.long.rot.hell.pirat', 'av:k.long.blond.hell.zauber', 'av:k.stachel.braun.hell.zauber', 'av:k.long.blond.hell.krone', 'av:k.kurz.blond.hell.krone', 'av:k.zoepfe.braun.hell.katze', 'av:k.long.blond.hell.katze', 'av:k.long.blond.hell.einhorn', 'av:k.ponylang.braun.mittel.einhorn', 'av:k.dutt.blond.hell.kopfhoerer', 'av:e.kurz.braun.hell.held', 'av:e.long.blond.hell.krone']],
-    ['Symbole & Smileys', ['mdi:face-woman', 'mdi:face-man', 'mdi:baby-face-outline', 'mdi:account-cowboy-hat', 'mdi:emoticon-cool-outline', 'mdi:emoticon-happy-outline', 'mdi:emoticon-excited-outline', 'mdi:emoticon-tongue-outline']],
-    ['Superheld & Abenteuer', ['mdi:shield-star', 'mdi:lightning-bolt', 'mdi:flash', 'mdi:domino-mask', 'mdi:ninja', 'mdi:pirate', 'mdi:sword', 'mdi:shield-crown', 'mdi:crown', 'mdi:castle', 'mdi:wizard-hat', 'mdi:magic-staff', 'mdi:skull-crossbones', 'mdi:treasure-chest']],
-    ['Weltall & Roboter', ['mdi:rocket-launch', 'mdi:ufo', 'mdi:alien', 'mdi:robot', 'mdi:robot-happy', 'mdi:star-shooting', 'mdi:earth', 'mdi:moon-waning-crescent', 'mdi:telescope', 'mdi:atom']],
-    ['Tiere', ['mdi:unicorn', 'mdi:unicorn-variant', 'mdi:cat', 'mdi:dog', 'mdi:dog-side', 'mdi:rabbit', 'mdi:rodent', 'mdi:horse', 'mdi:horse-variant', 'mdi:owl', 'mdi:penguin', 'mdi:panda', 'mdi:koala', 'mdi:elephant', 'mdi:teddy-bear', 'mdi:turtle', 'mdi:fish', 'mdi:dolphin', 'mdi:shark', 'mdi:jellyfish', 'mdi:bee', 'mdi:butterfly', 'mdi:ladybug', 'mdi:snake', 'mdi:spider', 'mdi:duck', 'mdi:bird', 'mdi:pig', 'mdi:cow', 'mdi:sheep', 'mdi:paw', 'mdi:ghost']],
-    ['Sport', ['mdi:soccer', 'mdi:basketball', 'mdi:volleyball', 'mdi:tennis', 'mdi:table-tennis', 'mdi:hockey-sticks', 'mdi:swim', 'mdi:bike', 'mdi:skateboard', 'mdi:ski', 'mdi:karate', 'mdi:run', 'mdi:gymnastics', 'mdi:trophy']],
-    ['Musik & Hobby', ['mdi:guitar-electric', 'mdi:guitar-acoustic', 'mdi:piano', 'mdi:music', 'mdi:microphone-variant', 'mdi:headphones', 'mdi:dance-ballroom', 'mdi:drama-masks', 'mdi:palette', 'mdi:brush', 'mdi:camera', 'mdi:gamepad-variant', 'mdi:controller-classic', 'mdi:puzzle', 'mdi:chess-knight', 'mdi:book-open-variant']],
-    ['Essen', ['mdi:ice-cream', 'mdi:pizza', 'mdi:cupcake', 'mdi:cookie', 'mdi:candy', 'mdi:popcorn', 'mdi:hamburger', 'mdi:food-apple', 'mdi:fruit-watermelon', 'mdi:carrot']],
-    ['Natur & Fahrzeuge', ['mdi:flower', 'mdi:flower-tulip', 'mdi:palm-tree', 'mdi:cactus', 'mdi:mushroom', 'mdi:clover', 'mdi:weather-sunny', 'mdi:weather-night', 'mdi:snowflake', 'mdi:fire', 'mdi:diamond-stone', 'mdi:heart', 'mdi:star', 'mdi:car-sports', 'mdi:airplane', 'mdi:helicopter', 'mdi:train', 'mdi:sail-boat', 'mdi:tractor', 'mdi:motorbike', 'mdi:fire-truck', 'mdi:bus-school']]
-  ];
-  // only the multi-coloured illustrated avatars (no plain one-colour icons)
-  const AVATARS = ICONS.filter(([, ids]) => ids.every((x) => !x.startsWith('mdi:')));
-  const COLS = ['#69C350', '#A8CF45', '#4FD1C5', '#4FA3E0', '#7A7FE8', '#C771D6', '#E06B9B', '#E06B6B', '#E0A84F', '#F5C542', '#9AA5B1'];
 
   class LoxAemtliPlanCard extends FpBase {
     _normalize(c) { return { plan: 'todo.amtli_plan', script: 'script.aemtli_tageswechsel', einstellungen: 'todo.familienplaner_einstellungen', kinder: [], titel: 'Ämtliplan', ...c }; }
@@ -100,14 +79,7 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
     _isPick(key, p, d) { const k = this._pick; return !!k && k.key === key && k.p === p && k.d === d; }
     _onClick(e) {
       const t = e.target;
-      const ip = t.closest('[data-ip]');
-      if (ip) { this._ip = this._ip === ip.dataset.ip ? null : ip.dataset.ip; this._render(true); return; }
-      if (t.closest('[data-ipclose]')) { this._ip = null; this._render(true); return; }
       const ha = t.closest('[data-hadd]'); if (ha) { this.dispatchEvent(new CustomEvent('fp-plan-add', { bubbles: true, composed: true, detail: { kind: ha.dataset.hadd } })); return; }
-      const ab = t.closest('[data-avb]');
-      if (ab && this._ip) { const [part, val] = ab.dataset.avb.split('|'); const cur = this._curBild(this._ip); this._savePerson(this._ip, { bild: avSet(cur.startsWith('av:') ? cur : 'av:k.kurz.braun.hell.0', part, val) }); return; }
-      const bi = t.closest('[data-bild]'); if (bi && this._ip) { this._savePerson(this._ip, { bild: bi.dataset.bild }); return; }
-      const co = t.closest('[data-col]'); if (co && this._ip) { this._savePerson(this._ip, { farbe: co.dataset.col }); return; }
       if (t.closest('[data-add]')) { const inp = this.shadowRoot.querySelector('[data-new="t"]'); if (inp) this._new.t = inp.value; this._add(); return; }
       const arw = t.closest('.arw');
       if (arw) {
@@ -147,11 +119,6 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
     }
     _onChange(e) {
       const el = e.target;
-      if (el.dataset.upload !== undefined && this._ip && el.files && el.files[0]) { this._upload(this._ip, el.files[0]); return; }
-      if (el.dataset.alias !== undefined && this._ip) {
-        const al = [...new Set(el.value.split(',').map((s) => s.trim()).filter(Boolean))];
-        this._savePerson(this._ip, { alias: al }); this._flash(al.length ? `Spitznamen gespeichert: ${al.join(', ')}` : 'Spitznamen entfernt'); return;
-      }
       if (el.dataset.addp !== undefined) {
         const v = el.value; if (!v) return; const ctx = this._ctx(el); if (!ctx.z) return;
         ctx.z[v] = ctx.z[v] || []; this._apply(ctx); return;
@@ -203,46 +170,6 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
       const free = kids.filter((k) => !(k.name in z));
       return lines + (free.length ? `<select class="sel addp" data-addp><option value="" selected>+ Person zuteilen</option>${free.map((k) => `<option value="${esc(k.name)}">${esc(k.name)}</option>`).join('')}</select>` : '');
     }
-    _curBild(name) { const k = this._kids().find((x) => x.name === name) || {}; return k.bild || ''; }
-    _savePerson(name, patch) {
-      const ps = JSON.parse(JSON.stringify(this._settingsP())); ps[name] = { ...(ps[name] || {}), ...patch };
-      const desc = 'fp1:' + JSON.stringify({ p: ps }); const it = this._settingsItem();
-      if (it) it.description = desc; else this._data.settings = [...(this._data.settings || []), { summary: 'Personen', uid: '_neu', description: desc }];
-      this._render(true);
-      const call = it && it.uid !== '_neu'
-        ? this._call('todo', 'update_item', { item: it.uid, description: desc }, this._cfg.einstellungen)
-        : this._call('todo', 'add_item', { item: 'Personen', description: desc }, this._cfg.einstellungen);
-      call.catch((e) => this._flash(`Fehler: ${e.message || e}`, true));
-    }
-    async _upload(name, file) {
-      // centre crop to a 320 px square JPEG in the browser, then store it in Home Assistant
-      if (!this._hass || !this._hass.fpUpload) return this._flash('Hochladen ist hier nicht verfügbar.', true);
-      this._uploading = true; this._render(true);
-      try {
-        const url = URL.createObjectURL(file);
-        const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
-        const s = Math.min(img.naturalWidth, img.naturalHeight); const c = document.createElement('canvas'); c.width = c.height = 320;
-        c.getContext('2d').drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, 320, 320);
-        URL.revokeObjectURL(url);
-        await this._hass.fpUpload(name, c.toDataURL('image/jpeg', 0.86));
-        this._flash('Foto gespeichert');
-      } catch (er) { this._flash(`Fehler: ${(er && er.message) || 'Bild konnte nicht gelesen werden'}`, true); }
-      this._uploading = false; this._render(true);
-    }
-    _iconPicker(k) {
-      if (!k) return '';
-      const cur = k.bild || (k.avatar ? 'svg:' + k.avatar : '');
-      return `<div class="ipk" style="--c:${k.farbe}">
-        <div class="iph">${avatarHtml(k, 60)}<div class="iphn"><b>${esc(k.name)}</b><span>Bild und Farbe antippen – wird sofort überall übernommen</span></div><button class="sg ok" data-ipclose>Fertig</button></div>
-        <div class="ipl">Spitznamen in Terminen</div>
-        <input class="in" data-alias value="${esc(((this._settingsP()[k.name] || {}).alias || []).join(', '))}" placeholder="z. B. Tommy, Mimi – mit Komma trennen" style="max-width:420px">
-        <div class="ips2">Steht einer dieser Namen im Termintitel, erscheint der Termin bei ${esc(k.name)}.</div>
-        <div class="ipl">Farbe</div><div class="cols">${COLS.map((c) => `<button class="clr${(k.farbe || '').toLowerCase() === c.toLowerCase() ? ' on' : ''}" data-col="${c}" style="background:${c}"></button>`).join('')}</div>
-        <div class="ipl">Eigenes Foto</div><div class="upl">${(k.bild || '').startsWith('img:') ? avatarHtml(k, 56) : ''}<label class="sg up">${this._uploading ? 'Wird hochgeladen …' : 'Foto hochladen'}<input type="file" accept="image/*" data-upload hidden></label><span class="ips2">Wird quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.</span></div>
-        <div class="ipl">Selbst zusammenstellen</div>${avBuilder(cur.startsWith('av:') ? cur : 'av:k.kurz.braun.hell.0', k.farbe)}
-        ${AVATARS.map(([title, ids]) => `<div class="ipl">${title}</div><div class="igrid">${ids.map((id) => `<button class="ib${cur === id ? ' on' : ''}" data-bild="${id}">${avatarHtml({ ...k, bild: id }, 44)}</button>`).join('')}</div>`).join('')}
-      </div>`;
-    }
     _render(force) {
       if (!this.shadowRoot || !this._cfg) return;
       if (!force && this._editing()) { this._dirty = true; return; }
@@ -264,7 +191,7 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
           <button class="del${this._confirm === r.uid ? ' cf' : ''}" data-del>${this._confirm === r.uid ? 'Löschen?' : '<ha-icon icon="mdi:trash-can-outline"></ha-icon>'}</button>
         </div>`).join('');
       const nw = this._new;
-      this.shadowRoot.innerHTML = `<style>${AVB_CSS}
+      this.shadowRoot.innerHTML = `<style>
         :host{display:block}
         .card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:16px;padding:20px 22px;color:#ececec;font-family:${FONT}}
         .head{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}.hsp{flex:1}.hadd{display:flex;align-items:center;gap:6px;height:42px;padding:0 14px;border-radius:12px;border:1px solid #3a3a3a;background:#262626;color:#ddd;font:inherit;font-size:14px;cursor:pointer}.hadd ha-icon{--mdc-icon-size:18px;color:${G}}
@@ -327,9 +254,6 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
         <div class="head"><div class="badge"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></div>
           <div><div class="title">${esc(this._cfg.titel)}</div><div class="subt">Tag antippen = zuteilen · nochmals antippen = Zeit zum Erledigen (z. B. Mi bis Sa) und Rhythmus (alle 2–4 Wochen). Änderungen gelten ab sofort.</div></div><span class="hsp"></span>
           <button class="hadd" data-hadd="special"><ha-icon icon="mdi:plus"></ha-icon>Besonderes Ämtli</button><button class="hadd" data-hadd="todo"><ha-icon icon="mdi:plus"></ha-icon>To-do</button></div>
-        <div class="sec">Personen · Bild & Farbe</div>
-        <div class="pers">${kids.map((k) => `<button class="pc${this._ip === k.name ? ' on' : ''}" data-ip="${esc(k.name)}" style="--c:${k.farbe}">${avatarHtml(k, 40)}<span>${esc(k.name)}</span><ha-icon icon="mdi:pencil"></ha-icon></button>`).join('')}</div>
-        ${this._ip ? this._iconPicker(kids.find((k) => k.name === this._ip)) : ''}
         <div class="sec">Wochenübersicht</div>
         ${overview}
         <div class="sec">Ämtli</div>

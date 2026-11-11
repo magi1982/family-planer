@@ -20,6 +20,7 @@ KNOWN_STEMS = ["ferien", "urlaub", "vacation", "holiday", "holidays", "vacances"
 # stems that are too generic to pause chores on their own unless the user confirms them
 WEAK = {"reise", "trip", "lager", "away", "off", "frei", "leave"}
 FULL_DAY_SECONDS = 20 * 3600
+LONG_DAY_HOURS = 6  # a long event counts for every day it takes at least this many hours of
 
 
 def _tokens(text: str) -> list[str]:
@@ -91,20 +92,41 @@ def event_key(ev: dict) -> str:
     return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
 
+def _long(ev: dict, min_hours: float) -> bool:
+    """A long event without a holiday word: timed and at least min_hours, or all-day over several days."""
+    try:
+        s, all_day = _parse(ev["start"])
+        e, _ = _parse(ev["end"])
+    except (KeyError, ValueError):
+        return False
+    if all_day:
+        return (e - s).days >= 2
+    return (e - s).total_seconds() >= min_hours * 3600
+
+
 def found(events_by_owner: dict[str | None, list[dict]], persons: dict, words: list[str], scope: str,
-          min_hours: float = 20) -> list[dict]:
-    """Holiday events with the persons and days they cover (one entry per event, owners merged)."""
+          min_hours: float = 20, long_events: bool = False) -> list[dict]:
+    """Holiday events with the persons and days they cover (one entry per event, owners merged).
+
+    kind "holiday": the title has a holiday word; kind "long" (only with long_events): a long event without one.
+    """
     out: dict[str, dict] = {}
     for owner, events in events_by_owner.items():
         for ev in events:
             title = ev.get("summary") or ""
-            if not matches(title, words):
+            if matches(title, words):
+                kind = "holiday"
+            elif long_events and _long(ev, min_hours):
+                kind = "long"
+            else:
                 continue
             days = covered_days(ev["start"], ev["end"], min_hours)
+            if not days and kind == "long":
+                days = covered_days(ev["start"], ev["end"], LONG_DAY_HOURS)  # e.g. a 26 h trip over two days
             if not days:
                 continue
             key = event_key(ev)
-            entry = out.setdefault(key, {"key": key, "title": title[:120], "start": str(ev["start"])[:25],
+            entry = out.setdefault(key, {"key": key, "kind": kind, "title": title[:120], "start": str(ev["start"])[:25],
                                          "end": str(ev["end"])[:25], "days": days, "persons": []})
             for pid in who(title, owner, persons, scope):
                 if pid not in entry["persons"]:
@@ -112,20 +134,50 @@ def found(events_by_owner: dict[str | None, list[dict]], persons: dict, words: l
     return sorted(out.values(), key=lambda e: e["days"][0])
 
 
+def decision(raw) -> dict:
+    """Stored decision -> {"d": "away" | "home", "family": bool, "persons": [ids], "at": iso date}."""
+    if isinstance(raw, str):
+        return {"d": raw, "family": False, "persons": [], "at": ""}
+    if not isinstance(raw, dict) or raw.get("d") not in ("away", "home"):
+        return {}
+    return {"d": raw["d"], "family": bool(raw.get("family")), "persons": [p for p in raw.get("persons") or [] if isinstance(p, str)][:30],
+            "at": str(raw.get("at") or "")[:10]}
+
+
 def absences(events_by_owner: dict[str | None, list[dict]], persons: dict, words: list[str], scope: str,
-             min_hours: float = 20, decisions: dict[str, str] | None = None) -> dict[str, set[str]]:
+             min_hours: float = 20, decisions: dict | None = None) -> dict[str, set[str]]:
     """{person_id: {iso dates}} from calendar events grouped by the calendar owner.
 
-    decisions[key] == "home": the family stays at home – chores go on (the event is ignored).
+    Holiday events pause chores unless decided "home"; long events without a holiday word only when decided "away".
+    A decision can name the whole family or single persons instead of the detected ones.
     """
     decisions = decisions or {}
     out: dict[str, set[str]] = {}
-    for ev in found(events_by_owner, persons, words, scope, min_hours):
-        if decisions.get(ev["key"]) == "home":
+    for ev in found(events_by_owner, persons, words, scope, min_hours, long_events=True):
+        dec = decision(decisions.get(ev["key"]))
+        if dec.get("d") == "home" or (ev["kind"] == "long" and dec.get("d") != "away"):
             continue
-        for pid in ev["persons"]:
+        who_ = list(persons) if dec.get("family") else [p for p in dec.get("persons", []) if p in persons] or ev["persons"]
+        for pid in who_:
             out.setdefault(pid, set()).update(ev["days"])
     return out
+
+
+def review(entries: list[dict], decisions: dict, today: date, ahead_days: int = 14, keep_days: int = 28) -> list[dict]:
+    """Events to confirm: not over yet, starting within ahead_days; decided ones stay keep_days after the decision."""
+    t = today.isoformat()
+    soon = (today + timedelta(days=ahead_days)).isoformat()
+    old = (today - timedelta(days=keep_days)).isoformat()
+    out = []
+    for e in entries:
+        if e["days"][-1] < t or e["days"][0] > soon:
+            continue
+        dec = decision(decisions.get(e["key"]))
+        if dec and dec["at"] and dec["at"] < old:
+            continue
+        out.append({**e, "decision": dec.get("d"), "family": dec.get("family", False), "chosen": dec.get("persons", []),
+                    "decided_at": dec.get("at", "")})
+    return out[:30]
 
 
 def discover(events: list[dict]) -> list[str]:

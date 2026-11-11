@@ -221,48 +221,6 @@ const avatarGen = (code, bg) => {
   ex.forEach((a) => { if (AV_ACC[a]) s += AV_ACC[a](h2); });
   return `<svg viewBox="0 0 40 40" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
 };
-// Baukasten: Code ändern (Teil = age | st | hc | sk | acc | cost)
-const avParse = (code) => { const [age, st, hc, sk, acc] = String(code || 'k.kurz.braun.hell.0').replace(/^av:/, '').split('.');
-  return { age: ['k', 'e', 'o'].includes(age) ? age : 'k', st: AV_ST[st] ? st : 'kurz', hc: AV_HC[hc] ? hc : 'braun', sk: AV_SK[sk] ? sk : 'hell', ex: acc && acc !== '0' ? acc.split('+').filter((a) => AV_ORDER.includes(a)) : [] }; };
-const avCode = (o) => `av:${o.age}.${o.age === 'k' && o.st === 'glatze' ? 'kurz' : o.st}.${o.hc}.${o.sk}.${avNorm(o.age, o.ex).join('+') || '0'}`;
-const avSet = (code, part, val) => {
-  const o = avParse(code);
-  if (part === 'acc') { o.ex = o.ex.includes(val) ? o.ex.filter((a) => a !== val) : [...o.ex.filter((a) => !(AV_HEAD.includes(val) && AV_HEAD.includes(a)) && !(AV_EYES.includes(val) && AV_EYES.includes(a))), val];
-    const c = o.ex.find((a) => AV_COST.includes(a)); if (c && o.ex.includes(val) && !AV_COST.includes(val)) { if ((AV_HAT_COST.includes(c) && AV_HEAD.includes(val)) || (AV_MASK_COST.includes(c) && AV_EYES.includes(val)) || ((c === 'astro' || c === 'ritter') && val === 'kopfhoerer') || (c === 'ninja' && (val === 'bart' || val === 'sommersprossen'))) o.ex = o.ex.filter((a) => a !== c); } }
-  else if (part === 'cost') { o.ex = o.ex.filter((a) => !AV_COST.includes(a)); if (val !== '0') o.ex.push(val); }
-  else o[part] = val;
-  return avCode(o);
-};
-const AVB_LANG = 'de';
-const AVB_T = { de: { age: 'Figur', st: 'Frisur', hc: 'Haarfarbe', sk: 'Hautfarbe', acc: 'Extras (kombinierbar)', cost: 'Verkleidung', none: 'Keine', ages: { k: 'Kind', e: 'Erwachsen', o: 'Grosseltern' },
-    n: { long: 'Lang', ponylang: 'Lang mit Pony', zoepfe: 'Zöpfe', dutt: 'Dutt', bob: 'Bob', locken: 'Locken', pferd: 'Pferdeschwanz', kurz: 'Kurz', seite: 'Seitenscheitel', stachel: 'Stachelig', lockenkurz: 'Kurze Locken', glatze: 'Glatze',
-      sommersprossen: 'Sommersprossen', bart: 'Bart', kopfhoerer: 'Kopfhörer', brille: 'Brille', sonnenbrille: 'Sonnenbrille', cap: 'Cap', krone: 'Krone', katze: 'Katzenohren', einhorn: 'Einhorn', schleife: 'Schleife', stirnband: 'Stirnband',
-      held: 'Held Sternenkraft', blitz: 'Held Funkenflug', nacht: 'Heldin Mondfee', ninja: 'Ninja', ritter: 'Ritter', astro: 'Astronaut', pirat: 'Pirat', zauber: 'Zauberer' } },
-  en: { age: 'Figure', st: 'Hair', hc: 'Hair colour', sk: 'Skin tone', acc: 'Extras (combine freely)', cost: 'Costume', none: 'None', ages: { k: 'Child', e: 'Adult', o: 'Grandparent' },
-    n: { long: 'Long', ponylang: 'Long with fringe', zoepfe: 'Pigtails', dutt: 'Bun', bob: 'Bob', locken: 'Curls', pferd: 'Ponytail', kurz: 'Short', seite: 'Side parting', stachel: 'Spiky', lockenkurz: 'Short curls', glatze: 'Bald',
-      sommersprossen: 'Freckles', bart: 'Beard', kopfhoerer: 'Headphones', brille: 'Glasses', sonnenbrille: 'Sunglasses', cap: 'Cap', krone: 'Crown', katze: 'Cat ears', einhorn: 'Unicorn', schleife: 'Bow', stirnband: 'Headband',
-      held: 'Hero Star Power', blitz: 'Hero Sparkwing', nacht: 'Hero Moon Fairy', ninja: 'Ninja', ritter: 'Knight', astro: 'Astronaut', pirat: 'Pirate', zauber: 'Wizard' } } };
-// HTML des Baukastens; Knöpfe tragen data-avb="teil|wert" und zeigen jeweils die Vorschau mit dieser Änderung
-const avBuilder = (code, color) => {
-  const T = AVB_T[AVB_LANG] || AVB_T.de; const o = avParse(code); const cur = avCode(o);
-  const pic = (c, on, title, kind) => `<button class="avo${on ? ' on' : ''}" data-avb="${kind}" title="${esc(title)}"><span class="avs" style="width:40px;height:40px;border-radius:50%;overflow:hidden;display:inline-flex">${avatarGen(c.slice(3), color)}</span></button>`;
-  const dot = (c, on, title, kind) => `<button class="avd${on ? ' on' : ''}" data-avb="${kind}" title="${esc(title)}" style="background:${c}"></button>`;
-  const row = (label, html) => `<div class="avr"><b>${esc(label)}</b><div class="avg">${html}</div></div>`;
-  const ex = avNorm(o.age, o.ex); const cost = ex.find((a) => AV_COST.includes(a)) || '0';
-  return `<div class="avb"><div class="avp"><span class="avs" style="width:96px;height:96px;border-radius:50%;overflow:hidden;display:inline-flex">${avatarGen(cur.slice(3), color)}</span></div><div class="avc">
-    ${row(T.age, ['k', 'e', 'o'].map((a) => pic(avSet(cur, 'age', a), o.age === a, T.ages[a], 'age|' + a)).join(''))}
-    ${row(T.st, Object.keys(AV_ST).filter((x) => !(x === 'glatze' && o.age === 'k')).map((x) => pic(avSet(cur, 'st', x), o.st === x, T.n[x] || x, 'st|' + x)).join(''))}
-    ${row(T.hc, Object.entries(AV_HC).map(([k, c]) => dot(c[0], o.hc === k, k, 'hc|' + k)).join(''))}
-    ${row(T.sk, Object.entries(AV_SK).map(([k, c]) => dot(c, o.sk === k, k, 'sk|' + k)).join(''))}
-    ${row(T.acc, [...AV_FACE, ...AV_EYES, ...AV_HEAD].filter((a) => !(a === 'bart' && o.age === 'k')).map((a) => pic(avSet(cur, 'acc', a), ex.includes(a), T.n[a] || a, 'acc|' + a)).join(''))}
-    ${row(T.cost, ['0', ...AV_COST].map((c) => (c === '0' ? `<button class="avo txt${cost === '0' ? ' on' : ''}" data-avb="cost|0">${esc(T.none)}</button>` : pic(avSet(cur, 'cost', c), cost === c, T.n[c] || c, 'cost|' + c))).join(''))}
-  </div></div>`;
-};
-const AVB_CSS = `.avb{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}.avp{flex:none}.avc{flex:1;min-width:260px;display:flex;flex-direction:column;gap:10px}
-.avr b{display:block;font-size:12px;color:#aaa;font-weight:500;margin-bottom:5px}.avg{display:flex;flex-wrap:wrap;gap:6px}
-.avo{padding:2px;border-radius:50%;border:2px solid transparent;background:transparent;cursor:pointer;line-height:0}.avo.on{border-color:var(--fp-accent,#69C350)}
-.avo.txt{border-radius:22px;height:44px;padding:0 14px;line-height:1;color:inherit;font:inherit;font-size:13px;border:1px solid #444}.avo.txt.on{border:2px solid var(--fp-accent,#69C350)}
-.avd{width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;padding:0}.avd.on{outline:3px solid var(--fp-accent,#69C350);outline-offset:2px}`;
 // Termin-Zeit kurz: "14:30–15:20" bzw. schmal "14:30–15"
 const evRange = (e, short) => {
   if (e.allDay) return short ? 'ganzt.' : 'ganztägig';
@@ -273,6 +231,7 @@ const evRange = (e, short) => {
 const avatarHtml = (k, size) => {
   const b = k.bild || '';
   if (b.startsWith('img:')) return `<img src="${esc(b.slice(4))}" alt="" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex:none;display:inline-block">`;
+  if (b.startsWith('av2:') && window.FPAV) return `<span class="avs" style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;display:inline-flex;flex:none">${window.FPAV.svg(b, k.farbe)}</span>`;
   if (b.startsWith('av:')) return `<span class="avs" style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;display:inline-flex;flex:none">${avatarGen(b.slice(3), k.farbe)}</span>`;
   if (b.startsWith('mdi:')) return `<span style="width:${size}px;height:${size}px;border-radius:50%;background:${k.farbe};display:inline-flex;align-items:center;justify-content:center;flex:none;color:#161616"><ha-icon icon="${esc(b)}" style="--mdc-icon-size:${Math.round(size * 0.6)}px"></ha-icon></span>`;
   if (b.startsWith('svg:')) return avatarBase({ ...k, avatar: b.slice(4) }, size);
@@ -659,7 +618,7 @@ class LoxWochenplanerCard extends FpBase {
       .wk{font-size:12px;color:#8a8a8a;padding:0 8px;text-align:center;min-width:150px}.wk b{display:block;color:#ececec;font-size:15px;font-weight:600}
       .grid{display:grid;grid-template-columns:${phone ? '104px' : '178px'} ${cols};gap:5px;align-items:stretch}
       .card.phone .lab{flex-direction:column;align-items:flex-start;gap:6px;padding:8px 6px}.card.phone .lt .nm{font-size:13px}.card.phone .corner{visibility:hidden}
-      .card.phone .bg{grid-template-columns:1fr}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 9px}
+      .card.phone .bg{grid-template-columns:1fr}.card.phone .pev .src{display:none}.card.phone .btn{min-height:50px;font-size:15px}.card.phone .btn .cb{width:26px;height:26px}.card.phone .btn.done .cb::after{left:8px;top:3px;width:6px;height:12px}.card.phone .nb{min-width:46px;height:46px}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 9px}
       .dnav{display:flex;align-items:center;gap:6px}.dd{font-size:14px;text-align:center;min-width:120px}.dd b{display:block;font-size:16px}
       .corner{font-size:10px;color:#555;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;padding:0 4px 6px}
       .corner .leg{background:none;padding:0;margin:0;gap:4px 10px}.corner .lgi{font-size:12px}
@@ -784,5 +743,5 @@ const fpNavigate = (p) => {
   history.pushState(null, '', `/${parts[0] || 'family-planer'}/${p}${location.search}`);
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
-window.FP = { AWT, AWR, AWCSS, avBuilder, avSet, avNorm, avatarGen, AVB_CSS, AV_HC, AV_SK, AV_ST, AV_COST, AV_HEAD, AV_EYES, AV_FACE, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
+window.FP = { AWT, AWR, AWCSS, avatarGen, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
 customElements.define('lox-wochenplaner-card', LoxWochenplanerCard);

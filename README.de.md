@@ -133,6 +133,9 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 - **Automatische Erkennung**: Beim ersten Sync eines Kalenders wird ein Jahr zurück und voraus gesucht, wie ihr Ferien nennt (z. B. *Ferien, Urlaub, OOO*). Die Wörter landen im Einstellungsfeld (änderbar) und du bekommst eine Mitteilung.
 - Gilt wahlweise für die **Person des Kalenders bzw. die im Titel genannten Personen** oder für die **ganze Familie**.
 - Wird ein Ferien-Termin während des Tages eingetragen, verschwinden offene Ämtli sofort (Kalender werden alle 30 Minuten gelesen).
+- **Ferien-Check**: Ab **zwei Wochen vor** den Ferien fragt der 🌴-Knopf in der Navigation: **Weg – Ämtli pausieren** oder **Hier – Ämtli laufen weiter**, und für wen: die **ganze Familie** oder einzelne Personen. Vergangene Ferien werden nicht mehr berücksichtigt.
+- **Lange Termine ohne Ferien-Wort** (länger als die eingestellte Stundenzahl, z. B. ein Lager oder eine Reise) erscheinen darunter als **Optional**; ohne Entscheid pausieren sie nichts.
+- Einmal entschieden, verschwindet ein Eintrag aus dem Popup. Unter *Einstellungen → Ferien* bleibt er noch **4 Wochen** und lässt sich ändern oder zurücksetzen.
 - Im Planer erscheint 🌴 *Ferien*. Schulferien im Schulkalender pausieren bewusst **nicht** (wer daheim ist, macht Ämtli).
 
 ### Zuverlässigkeit, Punkte, Level & Auszeichnungen
@@ -167,7 +170,7 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 
 ### Echte Belohnungen
 
-- Eltern legen Belohnungen **direkt in der Ansicht *Belohnungen*** mit *Bearbeiten* an und ändern sie (immer mit Eltern-PIN): z. B. *Glace = 30 Punkte*, *30 Min Gamen = 50*, *5 Fr. Taschengeld = 250*, *Kino = 400*.
+- Eltern legen Belohnungen **direkt in der Ansicht *Belohnungen*** mit **„+ Belohnung“** auf der Kachel einer Person an und ändern oder löschen sie über den Stift neben einer Belohnung (immer mit Eltern-PIN): z. B. *Glace = 30 Punkte*, *30 Min Gamen = 50*, *5 Fr. Taschengeld = 250*, *Kino = 400*. Ist im Dialog niemand gewählt, gilt die Belohnung für alle.
 - Pro Belohnung: Icon, **Kategorie**, **Freigabe nötig** ja/nein, **nur für** bestimmte Personen, **höchstens x-mal pro Woche**.
 - **Kategorien statt Punkte ausrechnen**:
 
@@ -186,7 +189,7 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 - **Prognose** im Belohnungs-Dialog: wie viele Tage der Familienschnitt für die gewählten Kosten braucht, und wie lange jede Person mit ihrem aktuellen Tempo braucht.
 - Kinder lösen am Tablet ein; Punkte werden reserviert, bis die Eltern entscheiden.
 - Eltern geben frei als **Admin** oder am Tablet mit **Eltern-PIN** (4–8 Ziffern). Mitteilung in Home Assistant und optional aufs Handy.
-- **Punkte geben**: Bonus (oder Abzug) mit Grund, z. B. „Zimmer super aufgeräumt“ – mit denselben Grössen wie bei den To-dos (**Klein · Mittel · Gross**) oder einer eigenen Zahl.
+- **Zusätzliche Punkte** gibt man mit einem To-do in passender Grösse (Klein · Mittel · Gross); die Aktion `family_planer.add_points` bleibt für Automationen.
 
 ### Eltern-PIN
 
@@ -195,7 +198,7 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 - **Was ohne PIN geht**: Ämtli und To-dos abhaken, Belohnungen einlösen und **Bilder ändern** (Figur, Frisur, Hautfarbe, Extras, Verkleidung) – jeder darf jedes Bild ändern.
 - 4–8 Ziffern, nie wieder `123456`; nach 5 Fehlversuchen 5 Minuten gesperrt; gespeichert nur als PBKDF2-Hash.
 - Nach einmaliger Eingabe bleibt der Planer **10 Minuten** entsperrt (verlängert sich beim Arbeiten, *Sperren* beendet es sofort). Die PIN selbst wird nie im Browser gespeichert.
-- Ändern jederzeit: *Belohnungen → Bearbeiten → PIN ändern* oder *Einstellungen → Eltern-PIN ändern*. Vergessen? *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren → Punkte & Belohnungen → Eltern-PIN auf 123456 zurücksetzen* (nur Admins).
+- Ändern jederzeit: *Einstellungen → Eltern-PIN → Eltern-PIN ändern*. Vergessen? *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren → Punkte & Belohnungen → Eltern-PIN auf 123456 zurücksetzen* (nur Admins).
 
 ### To-dos ohne Datum
 
@@ -238,10 +241,16 @@ data:
 
 ![Bildauswahl](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/avatars.png)
 
-- **Avatar-Baukasten**: Figur (Kind, Erwachsen, Grosseltern), 12 Frisuren, 12 Haarfarben (auch Rosa, Blau, Lila, Grün), **9 Hautfarben**, frei kombinierbare Extras (Sommersprossen, Bart, Kopfhörer, Brille, Sonnenbrille, Cap, Krone, Katzenohren, Einhorn, Schleife, Stirnband) und **Verkleidungen**: unsere eigenen Helden *Sternenkraft*, *Funkenflug* und *Mondfee*, Ninja, Ritter, Astronaut, Pirat und Zauberer. Teile, die sich beissen würden (z. B. ein Cap unter dem Ritterhelm), werden automatisch weggelassen – so sieht jede Kombination gut aus; ein automatischer Test zeichnet alle durch.
+- **Avatar-Baukasten** unter *Einstellungen* – **ohne PIN**, jeder darf jedes Bild ändern:
+  1. **Hautfarbe** (9) und **Haarfarbe** (12, auch Rosa, Blau, Lila, Grün)
+  2. **Person**: Mädchen, Junge, Frau, Mann, Grosi, Grosspapi
+  3. **Frisur**, separat wählbar: 18 Frisuren – kurz, Seitenscheitel, stachelig, Wuschelkopf, Undercut, Irokese, kurze Locken, Glatze, lang, lang mit Pony, Zöpfe, Pferdeschwanz, Dutt, Space-Buns, Bob, lange Locken, Afro, Rastas
+  4. Register mit vielen Extras: **Kopf** (Cap, Bommelmütze, Krone, Blumenkranz, Katzen-/Hasen-/Bärenohren, Einhorn, Partyhut, Kopfhörer, Stirnband, Schleife), **Gesicht** (Brillen, Sonnenbrille, Sommersprossen, Glitzer, Pflaster, Tiger- oder Schmetterlings-Schminke, Bart, Schnauz), **Kleidung** (T-Shirt-Farbe, Motiv, Schal, Fliege, Kette), **Begleiter** (Katze, Hund, Hase, Papagei, Eidechse, Äffchen, Mini-Drache, Pinguin, Fuchs, Roboter, Eule, Ballon, Fussball, Gitarre, Zauberstab), **Hintergrund** (8 Muster über der Farbe der Person, die immer bleibt)
+  5. **Verkleidungen** als Ebene über der Person: Astronaut, Mars-Anzug, unsere eigenen Helden *Sternenkraft*, *Funkenflug*, *Mondfee*, *Turbo* und *Sternschnuppe*, Ninja, Ritter, Pirat, Zauberer, Prinzessin, Prinz, Dino, Feuerwehr – Hintergrund und Begleiter bleiben
+- 🎲 **Zufall** für eine Überraschung. Teile, die sich beissen würden (z. B. ein Cap unter dem Helm), werden automatisch weggelassen; ein automatischer Test zeichnet über 30 000 Kombinationen.
 - Dazu viele fertige Avatare: Mädchen, Jungen, Frauen, Männer, Grosseltern, Verkleidete.
 - **Eigenes Foto hochladen**: wird im Browser quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.
-- Farbe pro Person und Spitznamen direkt im Ämtliplan änderbar.
+- Farbe, Spitznamen und alles Weitere einer Person: *Einstellungen → Personen* (Eltern-PIN).
 
 ---
 
@@ -276,7 +285,7 @@ Jedes Design gibt es in drei **Stilen**: *Standard*, *Transparent* und *Glas* (M
 ## Navigation
 
 - Eine Zeile: links **Uhrzeit und Datum** (oder der Titel des Planers), in der Mitte die Seiten, rechts der **Ferien-Check** 🌴 und die Design-Auswahl.
-- **Ferien-Check**: Stehen Ferien im Kalender, zeigt ein Zähler, wie viele noch offen sind. Pro Ferien wählt man *Wir sind weg* (Ämtli pausieren) oder *Wir sind zu Hause* (Ämtli laufen weiter). Eltern-PIN.
+- **Ferien-Check** 🌴: Ein Zähler zeigt, wie viele Ferien und lange Termine der nächsten zwei Wochen noch offen sind (Details unter *Ferien pausieren Ämtli*). Eltern-PIN.
 - **Reihenfolge und sichtbare Knöpfe** unter *Einstellungen → Allgemein*. Zeigt ein Knopf auf eine Ansicht, die es im Dashboard nicht gibt, erscheint er gestrichelt mit Hinweis statt einer leeren Seite.
 - **Heute**: Eine rote Jetzt-Linie trennt vergangene und kommende Termine, beim nächsten steht *in 25 Min*; beim Abhaken gibt es eine kleine Häkchen-Animation.
 - **Handy**: Der Planer zeigt nur heute, mit ‹ › Pfeilen und Wischen für die anderen Tage; nach der Ruhezeit springt er zurück auf heute.
@@ -287,7 +296,7 @@ Jedes Design gibt es in drei **Stilen**: *Standard*, *Transparent* und *Glas* (M
 
 Alles, was die Home-Assistant-Dialoge bieten, auf einer übersichtlichen Seite – auch am Tablet: **Einstellungen** in der Navigation.
 - Geschützt mit der **Eltern-PIN** (immer, auch für Admins).
-- Register: *Allgemein* (Module, Sprache, Design und Stil, Reihenfolge der Navigation, Vollbild, Seitenleiste, Tageswechsel …), *Personen* (Reihenfolge, Rolle Kind/Erwachsen, Bild-Baukasten, Farbe, Kalender, Spitznamen, Schulkalender, Blöcke pro Wochentag, Schulweg), ***Ämtli*** (der ganze Ämtliplan inkl. besondere Ämtli und To-dos – die eigene Ämtliplan-Seite ist standardmässig ausgeblendet), *Punkte* (inkl. jeder Auszeichnung mit ein/aus und Grösse, Frühaufsteher-Zeit, Konfetti), *To-dos*, *Listen*, *Ferien* (inkl. Entscheid weg / zu Hause), *Ansagen*, ***Status*** (letzter erfolgreicher Abgleich und letzter Fehler pro Kalender, Liste und Tageswechsel).
+- **Ohne PIN** zeigt die Seite nur die **Bilder** (Avatar-Baukasten und Foto hochladen). **„Eltern-PIN“** oben rechts öffnet alle Register: *Bilder*, *Allgemein* (Module, Sprache, Design und Stil, Reihenfolge der Navigation, Vollbild, Seitenleiste, Tageswechsel …), *Personen* (Reihenfolge, Rolle Kind/Erwachsen, Farbe, Kalender, Spitznamen, Schulkalender, Blöcke pro Wochentag, Schulweg), ***Ämtli*** (der ganze Ämtliplan – **„+ Besonderes Ämtli“** und **„+ To-do“** öffnen ein Formular im Popup; die eigene Ämtliplan-Seite ist standardmässig ausgeblendet), *Punkte* (inkl. jeder Auszeichnung mit ein/aus und Grösse, Frühaufsteher-Zeit, Konfetti), *To-dos*, *Listen*, *Ferien* (Ferien-Check), *Ansagen*, ***Status*** (letzter erfolgreicher Abgleich und letzter Fehler pro Kalender, Liste und Tageswechsel; Quellen ohne Meldung seit 30 Tagen verschwinden).
 - Jedes Feld mit kurzer Beschreibung; ungültige Eingaben werden mit klarer Meldung abgelehnt (z. B. Ansagen ohne Lautsprecher).
 - Änderungen, die neue Zeitpläne brauchen (Tageswechsel, Module, Listen, Ansagen), laden die Integration automatisch neu; der Planer verbindet sich selbst wieder.
 - Die Dialoge unter *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren* bleiben verfügbar.
@@ -451,13 +460,13 @@ Die Navigation ist auf allen Seiten oben in der Mitte an derselben Stelle.
 
 **Listen** – Tabs pro Liste, Hinzufügen-Feld, Kategorien als Kacheln, *Kategorien* und *Optimieren*.
 
-**Ämtliplan** – Personen mit Bild & Farbe, Wochenübersicht, Ämtli nach Wochentag, darunter **Besondere Ämtli** und **To-dos**.
+**Ämtliplan** – Wochenübersicht, Ämtli nach Wochentag, **besondere Ämtli** und **To-dos** darunter; *+ Besonderes Ämtli* und *+ To-do* oben öffnen ein Popup.
 
 Im Planer: Knopf **„To-dos“** oben rechts → eigenes Fenster mit den To-dos jeder Person (antippen → bestätigen → erledigt).
 
-**Belohnungen** – Punkte, Level, offene Freigaben, Belohnungen pro Person, Verlauf, *Punkte geben*, *Bearbeiten* (Belohnungen anlegen/ändern/löschen, PIN ändern – Eltern-PIN).
+**Belohnungen** – eine Kachel pro Person (Punkte, Level, Rahmen, laufende Belohnungen, *+ Belohnung*), offene Freigaben, alle Belohnungen (Stift = ändern, Eltern-PIN), noch zu gewinnende Pokale, Verlauf.
 
-**Einstellungen** – alle Einstellungen mit Beschreibung, geschützt mit der Eltern-PIN (siehe oben).
+**Einstellungen** – Bilder für alle; alle weiteren Einstellungen mit Beschreibung hinter der Eltern-PIN (siehe oben).
 
 ---
 

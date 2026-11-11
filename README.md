@@ -134,6 +134,9 @@ Per child (or person, e.g. university/work):
 - **Automatic detection**: on the first sync of a calendar, one year back and ahead is searched for how you name holidays (e.g. *Vacation, Holiday, OOO*). The words end up in the settings field (editable) and you get a notification.
 - Applies either to the **calendar's person or the persons named in the title**, or to the **whole family**.
 - If a holiday event is added during the day, open chores disappear immediately (calendars are read every 30 minutes).
+- **Holiday check**: from **two weeks before** a holiday, the 🌴 button in the navigation asks: **Away – pause chores** or **Here – chores go on**, and for whom: the **whole family** or single persons. Past holidays are ignored.
+- **Long events without a holiday word** (longer than the set number of hours, e.g. a camp or a trip) appear below as **Optional**; without a decision they pause nothing.
+- Once decided, an entry disappears from the popup. Under *Settings → Holidays* it stays for **4 weeks** and can still be changed or reset.
 - The planner shows 🌴 *Holiday*. School holidays in the school calendar deliberately do **not** pause chores (whoever is at home does chores).
 
 ### Reliability, points, levels & awards
@@ -168,7 +171,7 @@ Per child (or person, e.g. university/work):
 
 ### Real rewards
 
-- Parents create and change rewards **directly in the *Rewards* view** with *Edit* (always with the parent PIN): e.g. *ice cream = 30 points*, *30 min gaming = 50*, *5 CHF pocket money = 250*, *cinema = 400*.
+- Parents create rewards **directly in the *Rewards* view** with **"+ Reward"** on a person's tile, and change or delete them by tapping the pencil next to a reward (always with the parent PIN): e.g. *ice cream = 30 points*, *30 min gaming = 50*, *5 CHF pocket money = 250*, *cinema = 400*. With nobody chosen in the dialog the reward is for everyone.
 - Per reward: icon, **category**, **approval required** yes/no, **only for** certain persons, **at most x times per week**.
 - **Categories instead of doing the maths**:
 
@@ -187,7 +190,7 @@ Per child (or person, e.g. university/work):
 - **Forecast** in the reward dialog: how many days the family average needs for the chosen cost, and how long each person needs at their current pace.
 - Children redeem on the tablet; points are reserved until the parents decide.
 - Parents approve as **admin** or on the tablet with a **parent PIN** (4–8 digits). Notification in Home Assistant and optionally on the phone.
-- **Give points**: bonus (or deduction) with a reason, e.g. "Room tidied up perfectly" – with the same sizes as to-dos (**Small · Medium · Large**) or a number of your own.
+- **Extra points** are given with a to-do of the right size (Small · Medium · Large); the action `family_planer.add_points` stays available for automations.
 
 ### Parent PIN
 
@@ -196,7 +199,7 @@ Per child (or person, e.g. university/work):
 - **What does not**: ticking off chores and to-dos, redeeming rewards, and **changing a picture** (figure, hair, skin tone, extras, costume) – anyone may change any picture.
 - 4–8 digits, never `123456` again; locked for 5 minutes after 5 wrong attempts; stored only as a PBKDF2 hash.
 - After entering it once, the planner stays unlocked for **10 minutes** (refreshed while you work, *Lock* ends it immediately). The PIN itself is never stored in the browser.
-- Change it any time: *Rewards → Edit → Change PIN* or *Settings → Change parent PIN*. Forgotten? *Settings → Devices & services → Family Planer → Configure → Points & rewards → Reset parent PIN to 123456* (admins only).
+- Change it any time: *Settings → Parent PIN → Change parent PIN*. Forgotten? *Settings → Devices & services → Family Planer → Configure → Points & rewards → Reset parent PIN to 123456* (admins only).
 
 ### To-dos without a date
 
@@ -239,10 +242,16 @@ data:
 
 ![Picture selection](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/avatars.png)
 
-- **Avatar builder**: figure (child, adult, grandparent), 12 hair styles, 12 hair colours (incl. pink, blue, purple, green), **9 skin tones**, extras that can be combined freely (freckles, beard, headphones, glasses, sunglasses, cap, crown, cat ears, unicorn, bow, headband) and **costumes**: our own heroes *Star Power*, *Sparkwing* and *Moon Fairy*, ninja, knight, astronaut, pirate and wizard. Parts that would clash (e.g. a cap under a knight's helmet) are left out automatically, so every combination looks right – an automated test renders all of them.
+- **Avatar builder** under *Settings* – **without the PIN**, anyone may change any picture:
+  1. **Skin tone** (9) and **hair colour** (12, incl. pink, blue, purple, green)
+  2. **Person**: girl, boy, woman, man, grandma, grandpa
+  3. **Hair**, chosen separately: 18 styles – short, side parting, spiky, messy, undercut, mohawk, short curls, bald, long, long with fringe, pigtails, ponytail, bun, space buns, bob, long curls, afro, dreadlocks
+  4. Tabs with lots of extras: **Head** (cap, bobble hat, crown, flower crown, cat / bunny / bear ears, unicorn, party hat, headphones, headband, bow), **Face** (glasses, sunglasses, freckles, glitter, plaster, tiger or butterfly face paint, beard, moustache), **Clothes** (T-shirt colour, motif, scarf, bow tie, necklace), **Buddy** (cat, dog, bunny, parrot, lizard, monkey, mini dragon, penguin, fox, robot, owl, balloon, football, guitar, magic wand), **Background** (8 patterns over the person's colour, which always stays)
+  5. **Costumes** as a layer over the person: astronaut, Mars suit, our own heroes *Star Power*, *Sparkwing*, *Moon Fairy*, *Turbo* and *Shooting Star*, ninja, knight, pirate, wizard, princess, prince, dino, firefighter – background and buddy stay
+- 🎲 **Random** for a surprise. Parts that would clash (e.g. a cap under a helmet) are left out automatically; an automated test draws over 30 000 combinations.
 - Plus many ready-made avatars: girls, boys, women, men, grandparents, dressed up.
 - **Upload your own photo**: cropped to a square in the browser and stored only in your Home Assistant.
-- Colour per person and nicknames can be changed directly in the chore plan.
+- Colour, nicknames and everything else of a person: *Settings → People* (parent PIN).
 
 ---
 
@@ -277,7 +286,7 @@ Each design comes in three **styles**: *Standard*, *Transparent* and *Glass* (fr
 ## Navigation
 
 - One row: **time and date** on the left (or the planner's title), the pages in the middle, on the right the **holiday check** 🌴 and the design picker.
-- **Holiday check**: when the calendars contain holidays, a badge shows how many are undecided. Per holiday you choose *We are away* (chores pause) or *We are at home* (chores go on). Parent PIN.
+- **Holiday check** 🌴: a badge shows how many holidays and long events of the next two weeks are undecided (details under *Holidays pause chores*). Parent PIN.
 - **Order and visible buttons** under *Settings → General*. If a button points to a view your dashboard does not have, it is shown dashed with a hint instead of opening an empty page.
 - **Today**: a red now line separates past and coming events, the next event shows *in 25 min*; ticking off a chore plays a short check animation.
 - **Phone**: the planner shows only today, with ‹ › arrows and swipe for the other days; it returns to today after the idle time.
@@ -288,7 +297,7 @@ Each design comes in three **styles**: *Standard*, *Transparent* and *Glass* (fr
 
 Everything that the Home Assistant dialogs offer, in one clear page – also on the tablet: **Settings** in the navigation.
 - Protected by the **parent PIN** (always, also for admins).
-- Tabs: *General* (modules, language, design and style, navigation order, fullscreen, sidebar, day change, …), *People* (order, role child/adult, picture builder, colour, calendar, nicknames, school calendar, blocks per weekday, travel time), ***Chores*** (the complete chore plan incl. special chores and to-dos – the separate chore-plan page is hidden by default), *Points* (incl. every award with on/off and size, early-bird time, confetti), *To-dos*, *Lists*, *Holidays* (incl. the away / at home decisions), *Announcements*, ***Status*** (last successful sync and last error for every calendar, list and the day change).
+- **Without the PIN** the page shows only the **pictures** (avatar builder and photo upload). **"Parent PIN"** at the top right opens every tab: *Pictures*, *General* (modules, language, design and style, navigation order, fullscreen, sidebar, day change, …), *People* (order, role child/adult, colour, calendar, nicknames, school calendar, blocks per weekday, travel time), ***Chores*** (the complete chore plan – **"+ Special chore"** and **"+ To-do"** open a form in a popup; the separate chore-plan page is hidden by default), *Points* (incl. every award with on/off and size, early-bird time, confetti), *To-dos*, *Lists*, *Holidays* (holiday check), *Announcements*, ***Status*** (last successful sync and last error for every calendar, list and the day change; sources silent for 30 days disappear).
 - Every field with a short description; invalid input is refused with a clear message (e.g. announcements without speaker).
 - Changes that need new timers (day change, modules, lists, announcements) reload the integration automatically; the planner reconnects by itself.
 - The dialogs under *Settings → Devices & services → Family Planer → Configure* remain available.
@@ -452,13 +461,13 @@ The navigation is in the same place at the top centre on every page.
 
 **Lists** – tabs per list, add field, categories as tiles, *Categories* and *Optimise*.
 
-**Chore plan** – persons with picture & colour, week overview, chores by weekday, **special chores** and **to-dos** below.
+**Chore plan** – week overview, chores by weekday, **special chores** and **to-dos** below; *+ Special chore* and *+ To-do* at the top open a popup.
 
 In the planner: **"To-dos"** button at the top right → a window with every person's to-dos (tap → confirm → done).
 
-**Rewards** – points, levels, pending approvals, rewards per person, history, *Give points*, *Edit* (add/change/delete rewards, change PIN – parent PIN).
+**Rewards** – a tile per person (points, level, frame, running rewards, *+ Reward*), pending approvals, all rewards (pencil = change, parent PIN), still-to-win trophies, history.
 
-**Settings** – all settings with descriptions, protected by the parent PIN (see above).
+**Settings** – pictures for everyone; all other settings with descriptions behind the parent PIN (see above).
 
 ---
 

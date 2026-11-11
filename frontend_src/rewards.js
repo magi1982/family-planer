@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Points & rewards card: levels, reward shop, parent approval (admin or PIN), bonus points, history
+// Points & rewards card: levels, trophies, reward shop per person, parent approval (admin or PIN), history
 // rendered inside custom:family-planer-card (view: rewards)
 // ---------------------------------------------------------------------------
 (() => {
@@ -9,12 +9,12 @@
   const TXT = {
     de: { title: 'Punkte & Belohnungen', pts: 'Punkte', lvl: 'Level', next: 'noch {n} bis Level {l}', max: 'Höchstes Level erreicht!',
       shop: 'Belohnungen für {name}', shopAll: 'Alle Belohnungen', forAll: 'Für alle', pickHint: 'Person antippen, um ihre Belohnungen zu sehen und einzulösen.', forOnly: 'nur für {n}', redeem: 'Einlösen', missing: 'noch {n} Punkte', approval: 'mit Freigabe', noapproval: 'sofort',
-      week: 'max. {n}× pro Woche', none: 'Noch keine Belohnungen. Eltern legen sie hier mit „Bearbeiten“ an (Eltern-PIN).',
+      week: 'max. {n}× pro Woche', none: 'Noch keine Belohnungen. Mit „+ Belohnung“ auf einer Person anlegen (Eltern-PIN); ohne Auswahl im Dialog gilt sie für alle.',
       pending: 'Wartet auf Freigabe', approve: 'Freigeben', deny: 'Ablehnen', history: 'Verlauf', bonus: 'Punkte geben',
       pin: 'Eltern-PIN', ok: 'OK', cancel: 'Abbrechen', reason: 'Grund (optional)', give: 'Vergeben',
       sent: '„{t}“ angefragt – die Eltern werden benachrichtigt.', done: '„{t}“ eingelöst. Viel Spass!', approved: 'Freigegeben', denied: 'Abgelehnt',
       reserved: '{n} reserviert', err: { not_enough_points: 'Nicht genug Punkte.', weekly_limit: 'Diese Woche schon so oft eingelöst.', not_allowed: 'Diese Belohnung ist nicht für dich.', unauthorized: 'Falsche PIN oder keine Berechtigung.', pin_wrong: 'Falsche PIN.', pin_locked: 'Zu viele Fehlversuche – bitte 5 Minuten warten.' },
-      kinds: { chore: 'Ämtli', bonus: 'Tagesbonus', streak: 'Serienbonus', adjust: 'Bonus', reward: 'Belohnung', carry: 'Übertrag', todo: 'To-do' },
+      kinds: { chore: 'Ämtli', bonus: 'Tagesbonus', streak: 'Serienbonus', adjust: 'Bonus', reward: 'Belohnung', carry: 'Übertrag', todo: 'To-do', award: 'Auszeichnung' },
       edit: 'Bearbeiten', editDone: 'Fertig', add: 'Neue Belohnung', changePin: 'PIN ändern', del: 'Löschen', save: 'Speichern',
       rTitle: 'Belohnung', rIcon: 'Icon', rCost: 'Kosten in Punkten', rApproval: 'Eltern müssen freigeben', rPersons: 'Nur für (leer = alle)', rWeek: 'Höchstens pro Woche (0 = unbegrenzt)',
       delAsk: '„{t}“ wirklich löschen? Offene Anfragen dafür werden abgelehnt.', saved: 'Gespeichert.', pinChanged: 'Eltern-PIN geändert.',
@@ -28,12 +28,12 @@
       fc: 'Prognose', fcFam: 'Familienschnitt ({p} Punkte/Tag): ca. {n} Tage', fcNow: 'jetzt', awards: 'Auszeichnungen', noAw: 'Noch keine – siehe oben, was es zu gewinnen gibt.' },
     en: { title: 'Points & rewards', pts: 'points', lvl: 'Level', next: '{n} more to level {l}', max: 'Highest level reached!',
       shop: 'Rewards for {name}', shopAll: 'All rewards', forAll: 'For everyone', pickHint: 'Tap a person to see and redeem their rewards.', forOnly: 'only for {n}', redeem: 'Redeem', missing: '{n} points to go', approval: 'needs approval', noapproval: 'instant',
-      week: 'max. {n}× per week', none: 'No rewards yet. Parents add them here with "Edit" (parent PIN).',
+      week: 'max. {n}× per week', none: 'No rewards yet. Add one with "+ Reward" on a person (parent PIN); with nobody chosen in the dialog it is for everyone.',
       pending: 'Waiting for approval', approve: 'Approve', deny: 'Decline', history: 'History', bonus: 'Give points',
       pin: 'Parent PIN', ok: 'OK', cancel: 'Cancel', reason: 'Reason (optional)', give: 'Give',
       sent: '"{t}" requested – the parents are notified.', done: '"{t}" redeemed. Have fun!', approved: 'Approved', denied: 'Declined',
       reserved: '{n} reserved', err: { not_enough_points: 'Not enough points.', weekly_limit: 'Already redeemed that often this week.', not_allowed: 'This reward is not for you.', unauthorized: 'Wrong PIN or not allowed.', pin_wrong: 'Wrong PIN.', pin_locked: 'Too many wrong tries – please wait 5 minutes.' },
-      kinds: { chore: 'Chore', bonus: 'Day bonus', streak: 'Streak bonus', adjust: 'Bonus', reward: 'Reward', carry: 'Carried over', todo: 'To-do' },
+      kinds: { chore: 'Chore', bonus: 'Day bonus', streak: 'Streak bonus', adjust: 'Bonus', reward: 'Reward', carry: 'Carried over', todo: 'To-do', award: 'Award' },
       edit: 'Edit', editDone: 'Done', add: 'New reward', changePin: 'Change PIN', del: 'Delete', save: 'Save',
       rTitle: 'Reward', rIcon: 'Icon', rCost: 'Cost in points', rApproval: 'Parents must approve', rPersons: 'Only for (empty = everyone)', rWeek: 'At most per week (0 = unlimited)',
       delAsk: 'Really delete "{t}"? Pending requests for it are declined.', saved: 'Saved.', pinChanged: 'Parent PIN changed.',
@@ -56,7 +56,7 @@
     const v = (pace.persons || {})[pid] || pace.family || 0; return v > 0 ? Math.ceil((cost - have) / v) : null; };
   const money = (s, k) => { const z = s.sizes || {}; const v = (z.values || {})[k]; return v ? `${Number(v).toLocaleString('de-CH', { maximumFractionDigits: 2 })} ${z.currency || ''}`.trim() : ''; };
   const av = (p, size) => (window.FPX && window.FPX.avatarHtml
-    ? window.FPX.avatarHtml({ name: p.name, farbe: COLOR(p.color), bild: /^(av:[a-z0-9.+]+|svg:[a-z-]+|img:\/family_planer_files\/avatars\/[a-z0-9_]+\.(jpg|png|webp))$/.test(p.image || '') ? p.image : '' }, size)
+    ? window.FPX.avatarHtml({ name: p.name, farbe: COLOR(p.color), bild: /^(av:[a-z0-9.+]+|av2:[a-z0-9.]+|svg:[a-z-]+|img:\/family_planer_files\/avatars\/[a-z0-9_]+\.(jpg|png|webp))$/.test(p.image || '') ? p.image : '' }, size)
     : `<span style="width:${size}px;height:${size}px;border-radius:50%;background:${p.color};display:inline-block"></span>`);
 
   class FpRewardsInner extends HTMLElement {
@@ -90,6 +90,8 @@
     }
     async _click(e) {
       const t = e.target; const s = this._snap(); if (!s) return;
+      const er0 = t.closest('[data-redit]');
+      if (er0) { const r = s.rewards.find((x) => x.id === er0.dataset.redit); if (r) { this._dlg = { kind: 'reward', id: r.id, r: { ...r, size: r.size || 'custom', persons: [...(r.persons || [])] } }; this._render(); } return; }
       const ra = t.closest('[data-radd]');
       if (ra) { const r = { title: '', icon: 'mdi:gift-outline', size: 's', cost: ((s.sizes || {}).reward || {}).s || 100, approval: true, persons: [ra.dataset.radd], per_week: 0 };
         this._dlg = { kind: 'reward', id: null, r }; this._render(); return; }
@@ -102,22 +104,8 @@
       }
       const dc = t.closest('[data-decide]');
       if (dc) { const id = dc.dataset.decide; const approve = dc.dataset.ok === '1'; this._parent((extra) => this._store.ws('family_planer/reward/decide', { request_id: id, approve, ...extra }).then(() => this._flash(approve ? this.T.approved : this.T.denied)).catch((er) => this._flash(this._errText(er), true))); return; }
-      if (t.closest('[data-bonus]')) { this._dlg = { kind: 'bonus', points: String(((s.sizes || {}).todo || {}).s || 10), reason: '', person: this._sel || (s.persons[0] && s.persons[0].id) }; this._render(); return; }
-      const bz = t.closest('[data-bsize]'); if (bz && this._dlg && this._dlg.kind === 'bonus') { const n = ((s.sizes || {}).todo || {})[bz.dataset.bsize] || 0; this._dlg.points = String(this._dlg.neg ? -n : n); this._render(); return; }
-      if (t.closest('[data-bneg]') && this._dlg && this._dlg.kind === 'bonus') { this._dlg.neg = !this._dlg.neg; this._dlg.points = String(-(Number(this._dlg.points) || 0)); this._render(); return; }
-      const bp = t.closest('[data-bperson]'); if (bp && this._dlg) { this._dlg.person = bp.dataset.bperson; this._render(); return; }
-      if (t.closest('[data-give]') && this._dlg) {
-        const d = this._dlg; const pts = Math.round(Number(d.points) || 0); if (!pts) return;
-        this._parent((extra) => this._store.ws('family_planer/points/adjust', { person_id: d.person, points: pts, reason: d.reason || '', ...extra }).then(() => { this._dlg = null; this._render(); }).catch((er) => this._flash(this._errText(er), true)));
-        return;
-      }
       if (t.closest('[data-chpin]')) {
         try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); }
-        return;
-      }
-      if (t.closest('[data-edit]')) {
-        if (this._edit) { this._edit = false; this._render(); return; }
-        try { await window.FPPIN.ensure(this._store, this._ctx()); this._edit = true; this._render(); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); }
         return;
       }
       const er = t.closest('[data-redit]');
@@ -166,7 +154,7 @@
         const wait = s.requests.filter((q) => q.status === 'pending' && q.pid === p.id).map((q) => `<div class="run w"><ha-icon icon="mdi:timer-sand"></ha-icon><span><b>${esc(q.title)}</b><em>${esc(T.waiting)}</em></span></div>`);
         let goals = s.rewards.filter((r) => r.persons && r.persons.includes(p.id));
         if (!goals.length) goals = s.rewards.filter((r) => forP(r, p.id) && r.cost > have).sort((u, v) => u.cost - v.cost).slice(0, 1);
-        const g = goals.slice(0, 3 - Math.min(wait.length, 2)).map((r) => `<div class="run"><ha-icon icon="${esc(r.icon)}"></ha-icon><span><b>${esc(r.title)}</b>
+        const g = goals.slice(0, 3 - Math.min(wait.length, 2)).map((r) => `<div class="run" data-redit="${esc(r.id)}" role="button"><ha-icon icon="${esc(r.icon)}"></ha-icon><span><b>${esc(r.title)}</b>
           <i class="bar"><i style="width:${Math.min(100, Math.round((have / Math.max(1, r.cost)) * 100))}%"></i></i><em>${Math.min(have, r.cost)} / ${r.cost} · ${esc(eta(p.id, r.cost))}</em></span></div>`);
         const all = [...wait, ...g]; return all.length ? all.join('') : `<div class="run none">${esc(T.nothing)}</div>`; };
       const cards = persons.map((p) => { const x = pts[p.id] || { balance: 0, available: 0, level: 1, name: '', progress: 0, next: null, lifetime: 0 };
@@ -192,22 +180,17 @@
           const f = (x) => String(x).replace(/\{n\}/g, a.value == null ? '' : a.value).replace('{t}', et);
           return `<div class="oa won" style="--mc:${COLOR(a.color)}">${medal(a, true)}<div class="ot"><b>${esc(f(tx[0]))}</b><span>${esc(f(tx[1]))}</span>${a.since ? `<span class="om"><em>${esc(String(a.since).slice(0, 10).split('-').reverse().join('.'))}</em></span>` : ''}</div></div>`; }).join('')}</div>` : `<div class="hint2">${esc(T.noAw)}</div>`}` : '';
       const avail = sel ? (pts[sel.id] || {}).available || 0 : 0;
-      const rw = this._edit || !sel ? s.rewards : s.rewards.filter((r) => !r.persons || !r.persons.length || r.persons.includes(sel.id));
-      const edit = this._edit && window.FPPIN.unlocked(this._store);
-      if (this._edit && !edit) this._edit = false;
-      const shop = edit ? `<div class="shop">${rw.map((r) => `<div class="rw"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
-          <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}${r.persons && r.persons.length ? ' · ' + esc(r.persons.map((pid) => (persons.find((p) => p.id === pid) || {}).name).filter(Boolean).join(', ')) : ''}</span></div>
-          <button class="tb" data-redit="${esc(r.id)}"><ha-icon icon="mdi:pencil"></ha-icon></button></div>`).join('')}
-          <button class="rw add" data-redit=""><ha-icon icon="mdi:plus"></ha-icon>${esc(T.add)}</button></div>`
-        : !s.rewards.length ? `<div class="empty">${esc(T.none)}</div>` : !sel ? `<div class="hint2">${esc(T.pickHint)}</div><div class="shop">${rw.map((r) => { const who = (r.persons && r.persons.length ? persons.filter((p) => r.persons.includes(p.id)) : []);
+      const rw = !sel ? s.rewards : s.rewards.filter((r) => !r.persons || !r.persons.length || r.persons.includes(sel.id));
+      const pen = (r) => `<button class="pen" data-redit="${esc(r.id)}" title="${esc(T.edit)}" aria-label="${esc(T.edit)}"><ha-icon icon="mdi:pencil-outline"></ha-icon></button>`;
+      const shop = !s.rewards.length ? `<div class="empty">${esc(T.none)}</div>` : !sel ? `<div class="hint2">${esc(T.pickHint)}</div><div class="shop">${rw.map((r) => { const who = (r.persons && r.persons.length ? persons.filter((p) => r.persons.includes(p.id)) : []);
           return `<div class="rw"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
           <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}</span>
-          <span class="who">${who.length ? who.map((p) => `<button class="wp" data-p="${esc(p.id)}" style="--c:${COLOR(p.color)}">${av(p, 20)}${esc(p.name)}</button>`).join('') : `<em class="wa">${esc(T.forAll)}</em>`}</span></div></div>`; }).join('')}</div>`
+          <span class="who">${who.length ? who.map((p) => `<button class="wp" data-p="${esc(p.id)}" style="--c:${COLOR(p.color)}">${av(p, 20)}${esc(p.name)}</button>`).join('') : `<em class="wa">${esc(T.forAll)}</em>`}</span></div>${pen(r)}</div>`; }).join('')}</div>`
         : `<div class="shop">${rw.map((r) => { const ok = avail >= r.cost;
         return `<div class="rw${ok ? '' : ' lock'}"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
           <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}</span>
           ${ok ? '' : `<span class="ms"><span class="bar"><i style="width:${Math.round((avail / r.cost) * 100)}%"></i></span>${esc(fmt(T.missing, { n: r.cost - avail }))}</span>`}</div>
-          <button class="rb" data-redeem="${esc(r.id)}" ${ok ? '' : 'disabled'}>${esc(T.redeem)}</button></div>`; }).join('')}</div>`;
+          ${pen(r)}<button class="rb" data-redeem="${esc(r.id)}" ${ok ? '' : 'disabled'}>${esc(T.redeem)}</button></div>`; }).join('')}</div>`;
       const name = (pid) => (persons.find((p) => p.id === pid) || {}).name || '?';
       const pend = s.requests.filter((q) => q.status === 'pending' && (!sel || q.pid === sel.id));
       const pending = pend.length ? `<div class="sec">${esc(T.pending)}</div><div class="pend">${pend.map((q) => `<div class="pq"><b>${esc(name(q.pid))}</b><span>${esc(q.title)} · ${q.cost} ${esc(T.pts)}</span>
@@ -234,13 +217,6 @@
           <div class="ea">${d.id ? `<button class="sg del" data-rdel>${esc(T.del)}</button>` : ''}<span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg ok" data-rsave>${esc(T.save)}</button></div></div></div>`; }
       if (d && d.kind === 'confirm') dlg = `<div class="ov"><div class="dlg"><div class="dh">${esc(fmt(T.delAsk, { t: d.title }))}</div>
           <div class="ea"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg del" data-ryes>${esc(T.del)}</button></div></div></div>`;
-      if (d && d.kind === 'bonus') dlg = `<div class="ov"><div class="dlg"><div class="dh">${esc(T.bonus)}</div>
-          <div class="bps">${persons.map((p) => `<button class="chip${p.id === d.person ? ' on' : ''}" data-bperson="${esc(p.id)}">${av(p, 22)}${esc(p.name)}</button>`).join('')}</div>
-          <div class="cats">${['s', 'm', 'l'].map((k) => { const n = ((s.sizes || {}).todo || {})[k] || 0; const on = Math.abs(Number(d.points)) === n;
-            return `<button class="cat${on ? ' on' : ''}" data-bsize="${k}"><b>${esc(T.sizes[k])}</b><span>${d.neg ? '−' : '+'}${n} ${esc(T.pts)}</span></button>`; }).join('')}
-            <button class="cat${d.neg ? ' on neg' : ''}" data-bneg><b>${esc(T.minus)}</b><span>−</span></button></div>
-          <div class="br"><input class="in num" data-bp type="number" value="${esc(d.points)}" inputmode="numeric"><input class="in" data-br placeholder="${esc(T.reason)}" value="${esc(d.reason || '')}" maxlength="80"></div>
-          <div class="ea"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg ok" data-give>${esc(T.give)}</button></div></div></div>`;
       this.shadowRoot.innerHTML = `<style>
         :host{display:block}
         ${(window.FPX || {}).AWCSS || ''}
@@ -277,6 +253,8 @@
         .ri{width:48px;height:48px;border-radius:12px;background:rgba(105,195,80,.16);color:${G};display:flex;align-items:center;justify-content:center;flex:none}.ri ha-icon{--mdc-icon-size:26px}
         .rw.lock .ri{background:#2e2e2e;color:#777}
         .rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.rt b{font-size:15px}.rt span{font-size:12px;color:#999}.ms{display:flex;flex-direction:column;gap:3px}
+        .pen{width:36px;height:36px;flex:none;border-radius:10px;border:1px solid #333;background:transparent;color:#999;cursor:pointer;display:flex;align-items:center;justify-content:center}.pen ha-icon{--mdc-icon-size:18px}
+        .run[data-redit]{cursor:pointer}
         .rb{height:40px;padding:0 16px;border-radius:10px;border:none;background:${G};color:#141414;font:inherit;font-weight:600;cursor:pointer}
         .rb[disabled]{background:#333;color:#777;cursor:default}
         .pend,.hist{display:flex;flex-direction:column;gap:6px}.hint2{font-size:13px;color:#999;margin:0 2px 8px}
@@ -310,14 +288,11 @@
         .dlg{max-height:calc(100% - 70px);overflow:auto}
       </style>
       <div class="card">
-        <div class="top"><h2>${esc(T.title)}</h2>${edit ? `<button class="tb" data-chpin><ha-icon icon="mdi:form-textbox-password"></ha-icon>${esc(T.changePin)}</button>` : ''}
-          <button class="tb" data-edit><ha-icon icon="${edit ? 'mdi:check' : 'mdi:pencil-outline'}"></ha-icon>${esc(edit ? T.editDone : T.edit)}</button>
-          <button class="tb" data-bonus><ha-icon icon="mdi:star-plus-outline"></ha-icon>${esc(T.bonus)}</button></div>
+        <div class="top"><h2>${esc(T.title)}</h2></div>
         ${s.pin_default ? `<div class="warn"><ha-icon icon="mdi:shield-alert-outline"></ha-icon><span>${esc(T.startPin)}</span><button class="sg ok" data-chpin>${esc(T.changePin)}</button></div>` : ''}
-        ${openAw}
-        <div class="sec">${esc(T.fam)}</div>
         <div class="people">${cards}</div>
         ${detail}
+        ${openAw}
         ${pending}
         <div class="sec">${esc(sel ? fmt(T.shop, { name: sel.name }) : T.shopAll)}</div>${shop}
         ${history}

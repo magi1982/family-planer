@@ -8,7 +8,7 @@
 (() => {
   const VIRT = { plan: 'family_planer.plan', heute: 'family_planer.heute', verlauf: 'family_planer.verlauf', settings: 'family_planer.settings', script: 'family_planer.rollover' };
   const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
-  const IMAGE = (i) => (/^(av:[a-z0-9.+]{1,80}|svg:[a-z-]{1,30}|img:\/family_planer_files\/avatars\/[a-z0-9_]{1,120}\.(jpg|png|webp))$/.test(i || '') ? i : '');
+  const IMAGE = (i) => (/^(av:[a-z0-9.+]{1,80}|av2:[a-z0-9.]{1,200}|svg:[a-z-]{1,30}|img:\/family_planer_files\/avatars\/[a-z0-9_]{1,120}\.(jpg|png|webp))$/.test(i || '') ? i : '');
   const isVirt = (e) => typeof e === 'string' && e.startsWith('family_planer.');
   const enc = (o) => 'fp1:' + JSON.stringify(o);
   const dec = (s) => { if (!s || !String(s).startsWith('fp1:')) return {}; try { return JSON.parse(String(s).slice(4)) || {}; } catch (e) { return {}; } };
@@ -209,7 +209,7 @@
     return `<span class="sw" style="background:${t.bg1};border-color:${t.line}"><i style="background:${t.grad}"></i><i style="background:${t.bg4}"></i><i style="background:${t.text2}"></i></span>`; };
   const applyTheme = (el, name, style) => {
     const n = themeName(name); const t = THEMES[n]; const st = STYLES.includes(style) ? style : 'standard'; const f = surfaces(t, st);
-    Object.entries({ band: 'none', ...t, ...f }).forEach(([k, v]) => el.style.setProperty(`--fp-${k}`, v));
+    Object.entries({ band: 'none', ...t, pop: t.bg1, ...f }).forEach(([k, v]) => el.style.setProperty(`--fp-${k}`, v));
     el.dataset.fpTheme = n; el.dataset.fpStyle = st;
     // the page background is also offered globally, so a dashboard view can use background: var(--fp-page)
     document.documentElement.style.setProperty('--fp-page', t.page);
@@ -245,6 +245,23 @@
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && this._win && this._win.style.display !== 'none') this._showTodos(false); });
       }
       return this._winBox;
+    }
+    // "+ Special chore" / "+ To-do" of the chore plan: the form opens in a window of its own
+    _addDialog(kind, lang) {
+      if (kind !== 'special' && kind !== 'todo') return;
+      const ov = document.createElement('div');
+      ov.style.cssText = 'position:fixed;inset:0;z-index:20;display:flex;align-items:flex-start;justify-content:center;background:rgba(10,10,10,.72);padding:6vh 3vw;overflow:auto;box-sizing:border-box';
+      const box = document.createElement('div'); box.style.cssText = 'position:relative;width:min(760px,100%)';
+      const x = document.createElement('button'); x.type = 'button'; x.textContent = '✕'; x.setAttribute('aria-label', lang === 'en' ? 'Close' : 'Schliessen');
+      x.style.cssText = 'position:absolute;right:10px;top:12px;z-index:5;width:40px;height:40px;border-radius:20px;border:1px solid #3a3a3a;background:#2b2b2b;color:#ddd;font-size:18px;cursor:pointer';
+      const el = document.createElement(kind === 'special' ? 'fp-special-inner' : 'fp-todos-inner'); el.store = this._store; el.setConfig({ lang, dialog: true });
+      const close = () => { ov.remove(); document.removeEventListener('keydown', esc); };
+      const esc = (e) => { if (e.key === 'Escape') close(); };
+      x.addEventListener('click', close); ov.addEventListener('click', (e) => { if (e.target === ov) close(); }); el.addEventListener('fp-dialog-close', close);
+      document.addEventListener('keydown', esc);
+      box.append(x, el); ov.appendChild(box); document.body.appendChild(ov);  // on body: a glass card above must not clip it
+      const sn = this._store.snap; if (sn) applyTheme(ov, this._cfg.theme || sn.theme, this._cfg.style || sn.style);
+      if (kind === 'special') el.openAdd(); else setTimeout(() => el.focusAdd && el.focusAdd(), 50);
     }
     _showTodos(on, add) { if (this._win) this._win.style.display = on ? 'flex' : 'none'; if (on && this._todos) { this._todos.update(); if (add && this._todos.focusAdd) setTimeout(() => this._todos.focusAdd(), 50); } }
     getCardSize() { return this._cfg && this._cfg.view === 'plan' ? 10 : 12; }
@@ -300,7 +317,7 @@
       if (!this._todos || this._todos.parentNode !== host) { if (this._todos) this._todos.remove(); this._todos = document.createElement('fp-todos-inner'); this._todos.store = this._store; this._todos.setConfig({ lang }); host.appendChild(this._todos); }
       else this._todos.update();
       if (view === 'plan') {
-        if (!this._planEv) { this._planEv = true; this.addEventListener('fp-plan-add', (e) => { const k = e.detail && e.detail.kind; if (k === 'special' && this._special) this._special.openAdd(); if (k === 'todo' && this._todos) this._todos.focusAdd(); }); }
+        if (!this._planEv) { this._planEv = true; this.addEventListener('fp-plan-add', (e) => this._addDialog(e.detail && e.detail.kind, lang)); }
         if (!this._special || this._special.parentNode !== this) { this._special = document.createElement('fp-special-inner'); this._special.store = this._store; this._special.setConfig({ lang }); this.insertBefore(this._special, this._todos); }
         else this._special.update();
       }
@@ -315,13 +332,31 @@
   const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', einstellungen: 'settings' };
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-      design: 'Design', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'Im Kalender stehen Ferien. Seid ihr weg (Ämtli pausieren) oder zu Hause (Ämtli laufen weiter)?',
-      away: 'Wir sind weg', home: 'Wir sind zu Hause', close: 'Schliessen', open: 'offen', all: 'alle',
+      design: 'Design', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?',
+      away: 'Weg – Ämtli pausieren', home: 'Hier – Ämtli laufen weiter', close: 'Schliessen', open: 'offen', all: 'alle', fam: 'Ganze Familie', opt: 'Optional – lange Termine', optHint: 'Keine Ferien-Wörter, aber länger als die eingestellte Stundenzahl. Ohne Entscheid laufen die Ämtli weiter.',
       miss: 'Ansicht „{p}“ fehlt in diesem Dashboard. Ansicht mit diesem Pfad anlegen oder in der Navigationskarte unter paths: anpassen.' },
     en: { wd: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], mon: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-      design: 'Design', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays. Are you away (pause chores) or at home (chores go on)?',
-      away: 'We are away', home: 'We are at home', close: 'Close', open: 'open', all: 'all',
+      design: 'Design', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays in the next two weeks. Who do they apply to, and are you away or here?',
+      away: 'Away – pause chores', home: 'Here – chores go on', close: 'Close', open: 'open', all: 'all', fam: 'Whole family', opt: 'Optional – long events', optHint: 'No holiday words, but longer than the set number of hours. Without a decision chores go on.',
       miss: 'View "{p}" is missing in this dashboard. Add a view with this path or change it under paths: in the navigation card.' } };
+  const NAV_POPCSS = `
+        button{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--fp-line);background:var(--fp-bg3);color:var(--fp-text2);font:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+        button ha-icon{--mdc-icon-size:20px}button.on{border-color:color-mix(in srgb,var(--fp-accent) 60%,transparent);color:var(--fp-accent)}
+        .sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
+        .vs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.vs button{height:32px;padding:0 12px;border-radius:16px;font-size:12px}
+        .oh{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:14px 2px 4px}.oh2{font-size:12px;color:var(--fp-text3);margin:0 2px 8px}
+        .pop{width:min(620px,calc(100vw - 16px));box-sizing:border-box;max-height:calc(100vh - 90px);overflow:auto;background:var(--fp-pop,var(--fp-bg1));color:var(--fp-text);font-family:var(--fp-font);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);box-shadow:0 14px 40px rgba(0,0,0,.45);padding:14px;-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none)}
+        .ph{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 10px;display:flex;align-items:center;gap:6px}.ph .x{margin-left:auto;height:30px;padding:0 10px}
+        .tg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+        .tg button,.sg button{height:auto;flex-direction:column;align-items:stretch;padding:7px;gap:6px;border-radius:12px;font-size:12px;color:var(--fp-text)}
+        .tg button.on,.sg button.on{border-width:2px}
+        .tn{display:flex;align-items:center;justify-content:center;gap:4px}.tn ha-icon{--mdc-icon-size:14px}
+        .mini{display:block;padding:5px;box-sizing:border-box}.mini b{display:block}
+        .vl{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto}.vi{border:1px solid var(--fp-line);border-radius:12px;padding:10px 12px;background:var(--fp-bg2)}
+        .vt{font-weight:600}.vd{font-size:12px;color:var(--fp-text3);margin:2px 0 8px}.vb{display:flex;gap:8px;flex-wrap:wrap}.vb button{height:36px;font-size:13px}
+        .vb button.on.away{background:rgba(79,163,224,.18);border-color:#4FA3E0;color:#4FA3E0}.vb button.on.home{background:color-mix(in srgb,var(--fp-accent) 18%,transparent)}
+        .hint{font-size:13px;color:var(--fp-text2);margin:0 2px 10px}
+`;
   const escN = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   class FamilyPlanerNavCard extends HTMLElement {
     setConfig(c) {
@@ -330,7 +365,7 @@
       this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
       if (!this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
-        this.shadowRoot.addEventListener('click', (e) => {
+        this._onClick = (e) => {
           if (e.target.closest('[data-menu]')) { this.dispatchEvent(new Event('hass-toggle-menu', { bubbles: true, composed: true })); return; }
           const b = e.target.closest('[data-go]');
           if (b && this._views && !this._views.has(b.dataset.go)) { this._flash(NAV_T[this._lang()].miss.replace('{p}', b.dataset.go)); return; }
@@ -340,10 +375,13 @@
           if (e.target.closest('[data-x]')) { this._open = null; this._render(); return; }
           const th = e.target.closest('[data-theme]'); if (th) { this._save({ theme: th.dataset.theme }); return; }
           const sy = e.target.closest('[data-style]'); if (sy) { this._save({ style: sy.dataset.style }); return; }
+          const vf = e.target.closest('[data-vfam]'); if (vf) { const c = this._vacChoice(vf.dataset.key); c.family = !c.family; this._render(); return; }
+          const vp = e.target.closest('[data-vper]'); if (vp) { const c = this._vacChoice(vp.dataset.key); c.family = false; const i = c.persons.indexOf(vp.dataset.vper); if (i >= 0) c.persons.splice(i, 1); else c.persons.push(vp.dataset.vper); this._render(); return; }
           const vd = e.target.closest('[data-decide]'); if (vd) this._decide(vd.dataset.key, vd.dataset.decide);
-        });
+        };
+        this.shadowRoot.addEventListener('click', this._onClick);
         // a tap outside a popup closes it
-        this._outside = (e) => { if (this.isConnected && this._open && !e.composedPath().includes(this)) { this._open = null; this._render(); } };
+        this._outside = (e) => { const path = e.composedPath(); if (this.isConnected && this._open && !path.includes(this) && !path.includes(this._layer)) { this._open = null; this._render(); } };
         window.addEventListener('pointerdown', this._outside, true);
         window.addEventListener('location-changed', () => this._render());
         this._tick = setInterval(() => this._clock(), 15000);
@@ -361,8 +399,27 @@
         this._render();
       } catch (e) { this._views = null; }
     }
-    disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } }
+    disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } }
     getCardSize() { return 1; }
+    // who a holiday applies to, as picked in the popup (default: the persons found in the calendar)
+    _vacChoice(key) {
+      this._vc = this._vc || {}; if (this._vc[key]) return this._vc[key];
+      const v = (((this._store && this._store.snap) || {}).vacation_review || []).find((x) => x.key === key) || {};
+      this._vc[key] = { family: !!v.family, persons: [...((v.chosen && v.chosen.length ? v.chosen : v.persons) || [])] }; return this._vc[key];
+    }
+    // popups live in their own layer on top of the page, so cards below (glass style, own stacking) can never cover them
+    _popLayer(html, css) {
+      if (!html) { if (this._layer) this._layer.style.display = 'none'; return; }
+      if (!this._layer) {
+        this._layer = document.createElement('div'); this._layer.attachShadow({ mode: 'open' });
+        this._layer.shadowRoot.addEventListener('click', (e) => this._onClick(e));
+        document.body.appendChild(this._layer);
+      }
+      const bar = this.shadowRoot.querySelector('.bar'); const r = bar ? bar.getBoundingClientRect() : { bottom: 60, right: window.innerWidth - 8 };
+      this._layer.style.cssText = `display:block;position:fixed;z-index:9999;top:${Math.round(r.bottom + 6)}px;right:${Math.max(8, Math.round(window.innerWidth - r.right))}px`;
+      const s = this._store && this._store.snap; if (s) applyTheme(this._layer, this._cfg.theme || s.theme, this._cfg.style || s.style);
+      this._layer.shadowRoot.innerHTML = `<style>${css}</style>${html}`;
+    }
     getGridOptions() { return { columns: 'full', rows: 1 }; }
     _lang() { return LANG(this._hass, this._cfg, this._store); }
     _flash(msg) { this._err = msg; clearTimeout(this._et); this._et = setTimeout(() => { this._err = ''; this._render(); }, 3500); this._render(); }
@@ -373,7 +430,8 @@
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
     async _decide(key, decision) {
-      try { await window.FPPIN.call(this._store, 'family_planer/vacation/decide', { key, decision }, { lang: this._lang(), host: this }); }
+      const c = this._vacChoice(key);
+      try { await window.FPPIN.call(this._store, 'family_planer/vacation/decide', { key, decision, family: !!c.family, persons: c.family ? [] : c.persons }, { lang: this._lang(), host: this }); delete this._vc[key]; }
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
     _clock() {
@@ -394,7 +452,7 @@
       const title = this._cfg.titel || this._cfg.title || (s && s.title) || 'Family Planer';
       const showTitle = !!(s && s.settings && s.settings.nav_title);
       const n = new Date(); const p2 = (x) => String(x).padStart(2, '0');
-      const review = ((s && s.vacation_review) || []); const pending = review.filter((v) => !v.decision).length;
+      const review = ((s && s.vacation_review) || []).filter((v) => !v.decision); const pending = review.length;
       this.shadowRoot.innerHTML = `<style>
         :host{display:block;margin-bottom:8px}
         .bar::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}.bar{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);padding:6px 10px 6px 14px;font-family:var(--fp-font);color:var(--fp-text);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
@@ -410,41 +468,33 @@
         .rt{display:flex;justify-content:flex-end;gap:8px;position:relative}
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
         button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
-        .pop{position:absolute;right:0;top:48px;z-index:30;width:min(620px,92vw);background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);box-shadow:0 14px 40px rgba(0,0,0,.45);padding:14px;-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none)}
-        .pop:not(.glass){background:var(--fp-bg1)}
-        .ph{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 10px;display:flex;align-items:center;gap:6px}.ph .x{margin-left:auto;height:30px;padding:0 10px}
-        .tg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-        .tg button,.sg button{height:auto;flex-direction:column;align-items:stretch;padding:7px;gap:6px;border-radius:12px;font-size:12px;color:var(--fp-text)}
-        .tg button.on,.sg button.on{border-width:2px}
-        .tn{display:flex;align-items:center;justify-content:center;gap:4px}.tn ha-icon{--mdc-icon-size:14px}
-        .mini{display:block;padding:5px;box-sizing:border-box}.mini b{display:block}
-        .vl{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto}.vi{border:1px solid var(--fp-line);border-radius:12px;padding:10px 12px;background:var(--fp-bg2)}
-        .vt{font-weight:600}.vd{font-size:12px;color:var(--fp-text3);margin:2px 0 8px}.vb{display:flex;gap:8px;flex-wrap:wrap}.vb button{height:36px;font-size:13px}
-        .vb button.on.away{background:rgba(79,163,224,.18);border-color:#4FA3E0;color:#4FA3E0}.vb button.on.home{background:color-mix(in srgb,var(--fp-accent) 18%,transparent)}
-        .hint{font-size:13px;color:var(--fp-text2);margin:0 2px 10px}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
         @media (max-width:700px){.mid button span.l{display:none}.mid button{padding:0 12px}.clk span{display:none}.bar{grid-template-columns:auto 1fr auto}}
       </style><div class="bar"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span>${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span></span></span>
         <div class="mid">${btns.map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div>
         ${this._right(s, lang, review, pending)}</div>`;
+      this._popLayer(this._popHtml, NAV_POPCSS);
     }
     _right(s, lang, review, pending) {
       if (!s) return '<span></span>';
       const T = NAV_T[lang]; const cur = themeName(s.theme); const sty = STYLES.includes(s.style) ? s.style : 'standard';
       const nm = (k) => THEME_NAMES[k][lang === 'en' ? 'en' : 'de']; const sn = (k) => STYLE_NAMES[k][lang === 'en' ? 'en' : 'de'];
       const fmtD = (d) => { const x = new Date(d + 'T00:00'); return `${x.getDate()}.${x.getMonth() + 1}.`; };
-      const pname = (pid) => ((s.persons || []).find((p) => p.id === pid) || {}).name || pid;
-      const vac = review.length ? `<button class="ic vac${this._open === 'vac' ? ' on' : ''}" data-vac title="${escN(T.vac)}"><ha-icon icon="mdi:beach"></ha-icon>${pending ? `<b class="dot">${pending}</b>` : ''}</button>` : '';
+      const vac = pending ? `<button class="ic vac${this._open === 'vac' ? ' on' : ''}" data-vac title="${escN(T.vac)}"><ha-icon icon="mdi:beach"></ha-icon>${pending ? `<b class="dot">${pending}</b>` : ''}</button>` : '';
       const pop = this._open === 'theme' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:palette-outline"></ha-icon>${T.design}<button class="x" data-x>✕</button></div>
           <div class="tg">${Object.keys(THEMES).map((k) => `<button class="${k === cur ? 'on' : ''}" data-theme="${k}">${themeMini(k, sty)}<span class="tn">${k === cur ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${nm(k)}</span></button>`).join('')}</div>
           <div class="ph" style="margin-top:14px"><ha-icon icon="mdi:layers-outline"></ha-icon>${T.style}</div>
           <div class="sg">${STYLES.map((k) => `<button class="${k === sty ? 'on' : ''}" data-style="${k}">${themeMini(cur, k)}<span class="tn">${k === sty ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${sn(k)}</span></button>`).join('')}</div></div>`
-        : this._open === 'vac' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:beach"></ha-icon>${T.vac}<button class="x" data-x>✕</button></div><div class="hint">${T.vacHint}</div>
-          <div class="vl">${review.map((v) => `<div class="vi"><div class="vt">${escN(v.title)}</div><div class="vd">${fmtD(v.days[0])} – ${fmtD(v.days[v.days.length - 1])} · ${v.persons.map(pname).map(escN).join(', ') || T.all}</div>
-            <div class="vb"><button class="away${v.decision === 'away' ? ' on' : ''}" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
-            <button class="home${v.decision === 'home' ? ' on' : ''}" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`).join('')}</div></div>` : '';
+        : this._open === 'vac' && pending ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:beach"></ha-icon>${T.vac}<button class="x" data-x>✕</button></div><div class="hint">${T.vacHint}</div>
+          <div class="vl">${['holiday', 'long'].map((kind) => { const list = review.filter((v) => (v.kind || 'holiday') === kind); if (!list.length) return '';
+            return (kind === 'long' ? `<div class="oh">${T.opt}</div><div class="oh2">${T.optHint}</div>` : '') + list.map((v) => { const c = this._vacChoice(v.key);
+              return `<div class="vi"><div class="vt">${escN(v.title)}</div><div class="vd">${fmtD(v.days[0])} – ${fmtD(v.days[v.days.length - 1])}</div>
+              <div class="vs"><button class="${c.family ? 'on' : ''}" data-vfam data-key="${escN(v.key)}"><ha-icon icon="mdi:account-group"></ha-icon>${T.fam}</button>${(s.persons || []).map((p) => `<button class="${!c.family && c.persons.includes(p.id) ? 'on' : ''}" data-vper="${escN(p.id)}" data-key="${escN(v.key)}">${escN(p.name)}</button>`).join('')}</div>
+              <div class="vb"><button class="away" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
+              <button class="home" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`; }).join(''); }).join('')}</div></div>` : '';
+      this._popHtml = pop;
       return `<span class="rt">${vac}${this._cfg.theme_picker === false ? '' : `<button class="ic${this._open === 'theme' ? ' on' : ''}" data-themes title="${T.design}" aria-expanded="${this._open === 'theme'}">${themeSwatch(cur)}<ha-icon icon="mdi:palette-outline"></ha-icon></button>`}
-        ${pop}${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;
+        ${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;
     }
   }
   if (!customElements.get('family-planer-nav-card')) customElements.define('family-planer-nav-card', FamilyPlanerNavCard);

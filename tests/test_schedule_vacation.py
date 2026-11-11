@@ -129,3 +129,49 @@ def test_found_and_decisions():
     # "we stay at home": the holiday no longer pauses chores
     assert V.absences(by_owner, persons, ["Ferien"], "owner", decisions={key: "home"}) == {}
     assert V.absences(by_owner, persons, ["Ferien"], "owner", decisions={key: "away"})["tom"]
+
+
+# ------------------------------------------------------------------ 0.9.1: long events, scope, review window
+def test_long_events_need_a_decision():
+    persons = {"lea": {"name": "Lea"}, "tom": {"name": "Tom"}}
+    camp = {"summary": "Pfadi-Lager", "start": "2026-11-20", "end": "2026-11-24"}          # several days, no word
+    bday = {"summary": "Geburtstag Oma", "start": "2026-11-21", "end": "2026-11-22"}        # one all-day day: ignored
+    trip = {"summary": "Messe Basel", "start": "2026-11-25T06:00:00+01:00", "end": "2026-11-26T08:00:00+01:00"}
+    by_owner = {"lea": [camp, bday, trip]}
+    plain = V.found(by_owner, persons, ["Ferien"], "owner")
+    assert plain == []
+    longs = V.found(by_owner, persons, ["Ferien"], "owner", long_events=True)
+    assert [e["title"] for e in longs] == ["Pfadi-Lager", "Messe Basel"] and all(e["kind"] == "long" for e in longs)
+    # without a decision a long event pauses nothing
+    assert V.absences(by_owner, persons, ["Ferien"], "owner") == {}
+    key = V.event_key(camp)
+    away = V.absences(by_owner, persons, ["Ferien"], "owner", decisions={key: {"d": "away", "at": "2026-11-11"}})
+    assert away == {"lea": {"2026-11-20", "2026-11-21", "2026-11-22", "2026-11-23"}}
+
+
+def test_decision_for_family_or_persons():
+    persons = {"lea": {"name": "Lea"}, "mia": {"name": "Mia"}, "tom": {"name": "Tom"}}
+    ev = {"summary": "Skiferien", "start": "2026-12-26", "end": "2026-12-28"}
+    by_owner = {"lea": [ev]}
+    key = V.event_key(ev)
+    fam = V.absences(by_owner, persons, ["Ferien"], "owner", decisions={key: {"d": "away", "family": True}})
+    assert set(fam) == {"lea", "mia", "tom"}
+    some = V.absences(by_owner, persons, ["Ferien"], "owner", decisions={key: {"d": "away", "persons": ["mia"]}})
+    assert set(some) == {"mia"}
+    assert V.decision("home")["d"] == "home" and V.decision({"d": "maybe"}) == {}
+
+
+def test_review_window():
+    persons = {"lea": {"name": "Lea"}}
+    soon = {"summary": "Herbstferien", "start": "2026-11-20", "end": "2026-11-23"}
+    later = {"summary": "Sportferien", "start": "2027-02-06", "end": "2027-02-21"}
+    past = {"summary": "Sommerferien", "start": "2026-07-04", "end": "2026-08-10"}
+    every = V.found({"lea": [soon, later, past]}, persons, ["Ferien"], "owner", long_events=True)
+    today = date(2026, 11, 11)
+    rv = V.review(every, {}, today)
+    assert [e["title"] for e in rv] == ["Herbstferien"]          # two weeks ahead only, nothing past
+    key = V.event_key(soon)
+    rv = V.review(every, {key: {"d": "away", "at": "2026-11-11"}}, today)
+    assert rv[0]["decision"] == "away"
+    # decided more than 4 weeks ago: no longer listed
+    assert V.review(every, {key: {"d": "away", "at": "2026-10-01"}}, today) == []

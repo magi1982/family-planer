@@ -306,13 +306,76 @@
 - Ämtli des Tages nach **noch offen zuerst** sortieren, erledigte darunter.
 
 
-## Ideen für die nächste Version
+## Umgesetzt in 0.9.1
+
+- Fehler: Design-Auswahl und Ferien-Check bei *Glas* / *Transparent* verdeckt – Popups liegen jetzt immer zuoberst (20)
+- Belohnungen: Kacheln zuerst, „Noch zu gewinnen“ darunter, ohne „Bearbeiten“ und „Punkte geben“, Stift zum Ändern (21)
+- Einstellungen: ohne PIN nur Bilder, „Eltern-PIN“ öffnet alles; Bildauswahl aus dem Ämtliplan entfernt; „+ Besonderes Ämtli“ / „+ To-do“ im Popup (22)
+- Avatar-Baukasten v2 mit Ebenen, 18 Frisuren, Begleitern, 8 Hintergründen und Verkleidungen (23)
+- Ferien-Check: 2 Wochen vorher, ohne Vergangene, ganze Familie oder Personen, lange Termine als „Optional“, 4 Wochen in den Einstellungen (24)
+- Aus 19: Häkchen-Animation und Jetzt-Linie (schon in 0.9.0), grössere Tippflächen auf dem Handy, Status-Quellen nach 30 Tagen ausblenden
+
+## Archiv: Ideen 19–24 (Details zu 0.9.1)
+
+### 20. Fehler: Design-Auswahl und Ferien-Check bei Stil „Glas“ verdeckt
+**Status:** ✅ umgesetzt in 0.9.1
+
+- Mit Stil *Glas* (und *Transparent*) verschwinden die Popups der Navigation (Design, Ferien) hinter dem Planer.
+- Ursache: `backdrop-filter` macht Navigation und Planer zu eigenen Ebenen; der Planer kommt später im Dashboard und liegt darum oben.
+- Lösung: Navigationskarte bekommt eine eigene, höhere Ebene (`position:relative; z-index`), Popups liegen immer zuoberst. Mit allen 5 Designs × 3 Stilen prüfen.
+
+### 21. Belohnungen aufräumen
+**Status:** ✅ umgesetzt in 0.9.1
+
+- „Noch zu gewinnen“ **unter** die Personenkacheln.
+- Knopf **„Bearbeiten“ entfällt**: Belohnungen werden über „+ Belohnung“ auf der Personenkachel angelegt; Antippen einer Belohnung (Kachel oder Liste) öffnet sie zum Ändern/Löschen (Eltern-PIN).
+- **„Punkte geben“ entfällt** in der Oberfläche – dafür gibt es To-dos mit Grösse. Der Dienst für Automationen bleibt.
+- „Eltern-PIN ändern“ nur noch unter Einstellungen.
+
+### 22. Einstellungen: ohne PIN nur der Avatar-Baukasten
+**Status:** ✅ umgesetzt in 0.9.1
+
+- Öffnet man *Einstellungen*, sieht man **nur die Personen mit ihrem Avatar** und den Baukasten – jeder darf jedes Bild ändern.
+- Oben rechts **„Eltern-PIN“**: nach der Eingabe erscheinen alle Register (Allgemein, Personen, Ämtli, Punkte, To-dos, Listen, Ferien, Ansagen, Status). *Sperren* blendet sie wieder aus.
+- Die Bildauswahl im Ämtliplan (Einstellungen → Ämtli) **entfällt** – Bilder gibt es nur noch im Baukasten. Farbe, Name usw. bleiben unter *Personen*.
+- Register *Ämtli*: **„+ Besonderes Ämtli“** und **„+ To-do“** öffnen ein **Popup** mit dem Formular statt nach unten zu scrollen.
+
+### 23. Avatar-Baukasten neu denken
+**Status:** ✅ umgesetzt in 0.9.1
+
+Aufbau von oben nach unten, mit grosser Live-Vorschau links (auf dem Handy oben). Jeder Teil wird **separat** gewählt:
+1. **Hautfarbe** (9 Farbpunkte) und **Haarfarbe** (12 Farbpunkte).
+2. **Person** – wenige Grundfiguren: *Mädchen, Junge, Frau, Mann, Grosi, Grosspapi* (Körperform, Gesicht).
+3. **Frisur** – separat wählbar, **mindestens 15**, für jede Person: z. B. lang, lang mit Pony, Zöpfe, Dutt, Bob, Locken, Pferdeschwanz, Afro, Rastas, Space-Buns, Undercut, Irokese, kurz, Seitenscheitel, stachelig, Wuschel, Glatze.
+4. **Accessoires in Registern** (pro Register höchstens eins, Register frei kombinierbar), jedes Teil als kleine Vorschau auf dem aktuellen Avatar:
+   - *Kopf*: Cap, Mütze mit Bommel, Krone, Haarreif mit Blume, Katzen-/Hasen-/Bärenohren, Einhorn-Horn, Partyhut, Kopfhörer, Stirnband
+   - *Gesicht*: Brille rund/eckig, Sonnenbrille, Sommersprossen, Wangen-Glitzer, Bart, Schnauz, Pflaster, Gesichtsfarbe Tiger/Schmetterling
+   - *Kleidung*: T-Shirt-Farbe (Palette) plus Motiv (Stern, Herz, Blitz, Fussball, Rakete), Schal, Fliege, Kette
+   - *Begleiter*: Katze, Hund, Hase, Papagei, **Eidechse, Äffchen**, Mini-Drache, Pinguin, Fuchs, Roboter, Eule – dazu Ballon, Fussball, Gitarre, Zauberstab
+   - *Hintergrund*: **8 Muster über der Farbe der Person** (die Personenfarbe bleibt immer sichtbar): Sterne, Regenbogen, Herzen, Konfetti, Weltall, Wolken, Blasen, Blitze
+5. **Verkleidung** als **eigene Ebene über der Person**: Raumanzüge (Astronaut, Mars-Anzug), Superhelden-Kostüme (eigene Figuren, z. B. Sternenkraft, Funkenflug, Mondfee, Turbo, Sternschnuppe – keine Marvel/DC), Ninja, Ritter, Pirat, Zauberer, Prinzessin/Prinz, Dino, Feuerwehr. Kopfteile der Verkleidung blenden Kopf-Accessoires aus; Hintergrund und Begleiter bleiben.
+- Knopf **„Zufall“** für einen überraschenden Avatar.
+- Neues Bild-Format `av2:` mit Ebenen; alte `av:`-Bilder werden automatisch übernommen.
+- Test zeichnet weiterhin jede Kombination und prüft Überschneidungen.
+
+### 24. Ferien-Check verbessern
+**Status:** ✅ umgesetzt in 0.9.1
+
+- Anzeigen erst **2 Wochen vor Beginn**; **vergangene** Einträge nicht mehr berücksichtigen.
+- Pro Eintrag: **„Weg – Ämtli pausieren“** oder **„Hier – Ämtli laufen weiter“**.
+- Pro Eintrag zusätzlich wählen: **ganze Familie** oder **einzelne Personen**.
+- **Lange Termine ohne Ferien-Wort** (über der eingestellten Stundenzahl, z. B. Lager, Reisen) erscheinen **unter den Ferien als eigener Abschnitt „Optional“**. Ohne Entscheid pausieren sie nichts.
+- **Einmal entschieden**, verschwindet ein Eintrag aus dem Ferien-Popup oben rechts (Zähler zählt nur Offene). Unter *Einstellungen → Ferien* bleibt er noch **4 Wochen** sichtbar und kann dort geändert werden.
 
 ### 19. Kleinigkeiten nach 0.9.0
-**Status:** Idee – noch nicht umgesetzt
+**Status:** ✅ umgesetzt in 0.9.1
 
 - Noch grössere Tippflächen im Handy-Modus prüfen
 - Status-Seite: Quellen, die es nicht mehr gibt (gelöschter Kalender), nach 30 Tagen ausblenden
+
+## Ideen für die nächste Version
+
+_Noch keine._
 
 ---
 

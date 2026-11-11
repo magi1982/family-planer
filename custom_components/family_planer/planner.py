@@ -265,11 +265,9 @@ class FamilyPlanner:
             words = v["words"] or vacation.DEFAULT_WORDS
             decisions = self.settings.get("vacation_decisions") or {}
             away = vacation.absences(by_owner, self.data["persons"], words, v["scope"], v["min_hours"], decisions)
-            today_iso = now.date().isoformat()
-            self.vacation_review = [
-                {**e, "decision": decisions.get(e["key"])}
-                for e in vacation.found(by_owner, self.data["persons"], words, v["scope"], v["min_hours"])
-                if e["days"][-1] >= today_iso][:20]
+            every = vacation.found(by_owner, self.data["persons"], words, v["scope"], v["min_hours"], long_events=True)
+            self._vac_keys = {e["key"] for e in every}
+            self.vacation_review = vacation.review(every, decisions, now.date())
         else:
             self.vacation_review = []
         changed = away != self.away
@@ -281,14 +279,20 @@ class FamilyPlanner:
         elif changed:
             self._changed(save=False)
 
-    async def async_vacation_decide(self, key: str, decision: str | None) -> None:
-        """Holiday found in a calendar: "away" pauses chores, "home" keeps them going, None = ask again."""
+    async def async_vacation_decide(self, key: str, decision: str | None, family: bool = False,
+                                    persons: list[str] | None = None) -> None:
+        """Holiday found in a calendar: "away" pauses chores, "home" keeps them going, None = ask again.
+
+        family / persons: for whom it applies (default: the persons found in the calendar).
+        """
         dec = dict(self.settings.get("vacation_decisions") or {})
         if decision in ("away", "home"):
-            dec[key] = decision
+            dec[key] = {"d": decision, "family": bool(family),
+                        "persons": [p for p in (persons or []) if p in self.data["persons"]][:30],
+                        "at": self.today().isoformat()}
         else:
             dec.pop(key, None)
-        known = {e["key"] for e in self.vacation_review}
+        known = getattr(self, "_vac_keys", set()) | {e["key"] for e in self.vacation_review}
         dec = {k: v for k, v in dec.items() if k in known or k == key}  # forget events that are gone
         await self.async_update_settings({"vacation_decisions": dict(list(dec.items())[-60:])})
         await self.async_refresh_away(apply=True)
@@ -417,6 +421,11 @@ class FamilyPlanner:
             stt["error"] = (detail or "error")[:200]
         if detail and ok:
             stt["detail"] = detail[:120]
+        # sources that have not reported for 30 days (e.g. a removed calendar) disappear from the status page
+        old = (dt_util.now() - timedelta(days=30)).isoformat(timespec="seconds")
+        allst = self.data["status"]
+        for key in [k for k, v in allst.items() if max(v.get("ok") or "", v.get("fail") or "") < old]:
+            allst.pop(key, None)
 
     def pace(self) -> dict[str, Any]:
         return rewards.pace(self.data["ledger"], list(self.data["persons"]), self.today())

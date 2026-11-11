@@ -14,9 +14,10 @@ COLOR_RE = re.compile(r"^#[0-9A-Fa-f]{6}$")
 ICON_RE = re.compile(r"^mdi:[a-z0-9-]{1,64}$")
 ENTITY_RE = re.compile(r"^[a-z_]+\.[a-z0-9_]{1,200}$")
 TIME_RE = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
-# pictures: generated avatars ('av:k.long.blond.hell.0'), built-in portraits ('svg:frau') or uploaded photos
+# pictures: generated avatars (builder v2 'av2:m.lang.braun.hell.0.0.0.blau.0.0.0.0', old 'av:k.long.blond.hell.0'), built-in portraits ('svg:frau') or uploaded photos
 IMAGE_RE = re.compile(
     r"^(?:av:[a-z]\.[a-z]{2,12}\.[a-z]{2,12}\.[a-z]{2,12}\.[a-z0-9+]{1,40}"
+    r"|av2:(?:[a-z0-9]{1,14}\.){11}[a-z0-9]{1,14}"
     r"|svg:[a-z-]{2,30}"
     r"|img:/family_planer_files/avatars/[a-z0-9_]{1,80}_[0-9a-f]{24}\.(?:jpg|png|webp))$")
 
