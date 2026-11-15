@@ -353,7 +353,8 @@
   // builder html: buttons carry data-avb="part|value" (or data-avtab / data-avrnd); the host keeps code and tab
   const builder = (c, personColor, lang, tab, unlocked, extra) => {
     const mine = new Set(unlocked || []); const ok = (v) => !LOCKED.includes(v) || mine.has(v);
-    const t = T[lang === 'en' ? 'en' : 'de']; const o = parse(c); const cur = code(norm(o)); const n = norm(o); const tb = TABS.includes(tab) ? tab : 'head';
+    const tabs = TABS.filter((x) => x !== 'season' || (window.FPAVS && window.FPAVS.active()));
+    const t = T[lang === 'en' ? 'en' : 'de']; const o = parse(c); const cur = code(norm(o)); const n = norm(o); const tb = tabs.includes(tab) ? tab : 'head';
     const ZOOM = { hair: '10 0 44 44', head: '10 0 44 44', face: '14 10 36 36', neck: '12 30 40 34', motif: '12 36 40 28' };
     const pic = (cc, on, key, attr) => `<button class="avo${on ? ' on' : ''}" data-avb="${attr}" title="${esc(t.n[attr.replace('|', ':')] || t.n[key] || key)}"><span class="avs">${svg(cc, personColor, ZOOM[attr.split('|')[0]])}</span></button>`;
     const dot = (col, on, key, attr) => `<button class="avd${on ? ' on' : ''}" data-avb="${attr}" title="${esc(t.c[key] || key)}" style="background:${col}"></button>`;
@@ -370,13 +371,13 @@
     if (tb === 'fx') body = FX.some(ok) || FXB.some(ok) ? (FX.some(ok) ? row(t.small, opts('fx', FX)) : '') + (FXB.some(ok) ? row(t.big, `<button class="avo txt${n.fxb === '0' ? ' on' : ''}" data-avb="fxb|0">${esc(t.none)}</button>` + FXB.filter(ok).map(bigPic).join('')) : '') : `<div class="avh">${esc(t.fxNone)}</div>`;
     if (tb === 'cost') body = `<div class="avh">${esc(t.costHint)}</div>` + row('', opts('cost', COST));
     let prev = `<span class="fxw big"><span class="avs big">${svg(cur, personColor)}</span>${outer(cur)}</span>`;
-    if (tb === 'season' && window.FPAVS) { const sb = window.FPAVS.builderBody(cur, personColor, (extra || {}).name, lang, (extra || {}).vis); body = sb.html; prev = sb.prev; }
+    if (tb === 'season' && window.FPAVS) { const sb = window.FPAVS.builderBody(cur, personColor, (extra || {}).name, lang); body = sb.html; prev = sb.prev; }
     return `<div class="avb"><div class="avp">${prev}<button class="avrnd" data-avrnd><span aria-hidden="true">🎲</span> ${esc(t.rnd)}</button></div><div class="avc">
       ${row(t.sk, Object.entries(SK).map(([k, col]) => dot(col, n.sk === k, k, `sk|${k}`)).join(''))}
       ${row(t.hc, Object.entries(HC).map(([k, col]) => dot(col[0], n.hc === k, k, `hc|${k}`)).join(''))}
       ${row(t.fig, FIG.map((f) => pic(set(cur, 'fig', f), n.fig === f, f, `fig|${f}`)).join(''))}
       ${row(t.hair, HAIR.filter((h) => !(h === 'glatze' && KID(n.fig))).map((h) => pic(set(cur, 'hair', h), n.hair === h, h, `hair|${h}`)).join(''))}
-      <div class="avt">${TABS.map((x) => `<button class="${x === tb ? 'on' : ''}" data-avtab="${x}">${esc(t.tabs[x])}</button>`).join('')}</div>
+      <div class="avt">${tabs.map((x) => `<button class="${x === tb ? 'on' : ''}" data-avtab="${x}">${esc(t.tabs[x])}</button>`).join('')}</div>
       ${body}</div></div>`;
   };
   const css = `.avb{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}.avp{flex:none;display:flex;flex-direction:column;align-items:center;gap:10px;position:sticky;top:8px}

@@ -34,23 +34,24 @@
     return `<span class="fpfxs" aria-hidden="true" style="position:absolute;inset:-19%;pointer-events:none;z-index:3"><svg class="fxo" viewBox="-12 -12 88 88" width="100%" height="100%" style="overflow:visible"><style>${CSS}</style>${D.FX[c.fx][3]}</svg></span>`;
   };
   // builder register "Saison" (no PIN): pick up to 3 extras and one effect for the current (or a chosen) season
-  const T = { de: { none: 'Nichts', auto: 'Automatisch', ex: 'Saison-Extras (bis 3)', fx: 'Saison-Effekt', hint: 'Extras gelten nur während der Saison – danach ist dein normales Bild automatisch zurück.', season: 'Saison', off: 'Gerade ist keine Saison aktiv – du kannst trotzdem schon auswählen.' },
-    en: { none: 'None', auto: 'Automatic', ex: 'Season extras (up to 3)', fx: 'Season effect', hint: 'Extras only show during the season – afterwards your normal picture is back automatically.', season: 'Season', off: 'No season is active right now – you can still choose ahead.' } };
+  const T = { de: { none: 'Nichts', auto: 'Automatisch', ex: 'Saison-Extras (bis 3)', fx: 'Saison-Effekt', hint: 'Extras gelten nur während der Saison – danach ist dein normales Bild automatisch zurück.', season: 'Saison', off: 'Gerade ist keine Saison – die Saison-Extras erscheinen, sobald eine beginnt.' },
+    en: { none: 'None', auto: 'Automatic', ex: 'Season extras (up to 3)', fx: 'Season effect', hint: 'Extras only show during the season – afterwards your normal picture is back automatically.', season: 'Season', off: 'No season right now – season extras appear as soon as one starts.' } };
   const NAMES = { weihnachten: ['Weihnachten', 'Christmas'], silvester: ['Silvester', 'New Year'], dreikoenig: ['Dreikönig', 'Epiphany'], winter: ['Winter', 'Winter'], sport: ['Sportferien', 'Ski holidays'],
     fasnacht: ['Fasnacht', 'Carnival'], liebe: ['Liebe', 'Love'], fruehling: ['Frühling', 'Spring'], ostern: ['Ostern', 'Easter'], pfingsten: ['Pfingsten & Muttertag', 'Whitsun & Mother\'s Day'],
     vatertag: ['Vatertag', 'Father\'s Day'], sommer: ['Sommer', 'Summer'], august: ['1. August', 'Swiss National Day'], schule: ['Schulanfang', 'Back to school'], herbst: ['Herbst', 'Autumn'], geburtstag: ['Geburtstag', 'Birthday'] };
   api.NAMES = NAMES;
-  api.builderBody = (code, color, name, lang, pick) => {
+  // register "Season" only exists while a season (or a birthday) is on – and only for that season
+  api.active = () => !!vis();
+  api.builderBody = (code, color, name, lang) => {
     const t = T[lang === 'en' ? 'en' : 'de']; const L = lang === 'en' ? 1 : 0; const A = window.FPAV;
-    const v = pick && D.VIS[pick] ? pick : (vis() || 'weihnachten');
+    const v = vis(); if (!v) return { prev: '', html: `<div class="avh">${esc(t.off)}</div>`, vis: null };
     const own = ((persons[name] || {}).season_av || {})[v]; const c = api.choice(name, v) || { x: [], fx: '' };
-    const tabs = `<div class="avg">${Object.keys(NAMES).map((k) => `<button class="avo txt${k === v ? ' on' : ''}" data-avsv="${k}">${esc(NAMES[k][L])}</button>`).join('')}</div>`;
     const ex = `<button class="avo txt${own && !own.x.length ? ' on' : ''}" data-avs="${v}|x|0">${esc(t.none)}</button><button class="avo txt${!own ? ' on' : ''}" data-avs="${v}|auto|0">${esc(t.auto)}</button>` +
       (D.G[D.VIS[v]] || []).map((k) => `<button class="avo${D.X[k][2] ? ' lvx' : ''}${c.x.includes(k) ? ' on' : ''}" data-avs="${v}|x|${k}" title="${esc(D.X[k][L])}"><span class="avs">${api.decorate(code, color, name, { x: [k], fx: '' })}</span></button>`).join('');
     const fxs = `<button class="avo txt${!c.fx ? ' on' : ''}" data-avs="${v}|fx|0">${esc(t.none)}</button>` + Object.entries(D.FX).filter(([, f]) => f[2] === D.FXVIS[v]).map(([k, f]) =>
       `<button class="avo lvx${c.fx === k ? ' on' : ''}" data-avs="${v}|fx|${k}" title="${esc(f[L])}"><span class="fxw"><span class="avs">${A ? A.svg(code, color) : ''}</span>${api.outer(name, { x: [], fx: k })}</span></button>`).join('');
     const prev = `<span class="fxw big"><span class="avs big">${api.decorate(code, color, name, c)}</span>${api.outer(name, c)}</span>`;
-    return { prev, html: `<div class="avh">${esc(vis() ? t.hint : t.off)}</div><div class="avr"><b>${esc(t.season)}</b>${tabs}</div><div class="avr"><b>${esc(t.ex)}</b><div class="avg">${ex}</div></div><div class="avr"><b>${esc(t.fx)}</b><div class="avg">${fxs}</div></div>`, vis: v };
+    return { prev, html: `<div class="avh">${esc(NAMES[v] ? NAMES[v][L] + ' – ' : '')}${esc(t.hint)}</div><div class="avr"><b>${esc(t.ex)}</b><div class="avg">${ex}</div></div><div class="avr"><b>${esc(t.fx)}</b><div class="avg">${fxs}</div></div>`, vis: v };
   };
   // toggle helper for the host: returns the new season_av object
   api.toggle = (cur, v, kind, key) => {

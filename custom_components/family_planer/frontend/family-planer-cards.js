@@ -795,7 +795,8 @@
   // builder html: buttons carry data-avb="part|value" (or data-avtab / data-avrnd); the host keeps code and tab
   const builder = (c, personColor, lang, tab, unlocked, extra) => {
     const mine = new Set(unlocked || []); const ok = (v) => !LOCKED.includes(v) || mine.has(v);
-    const t = T[lang === 'en' ? 'en' : 'de']; const o = parse(c); const cur = code(norm(o)); const n = norm(o); const tb = TABS.includes(tab) ? tab : 'head';
+    const tabs = TABS.filter((x) => x !== 'season' || (window.FPAVS && window.FPAVS.active()));
+    const t = T[lang === 'en' ? 'en' : 'de']; const o = parse(c); const cur = code(norm(o)); const n = norm(o); const tb = tabs.includes(tab) ? tab : 'head';
     const ZOOM = { hair: '10 0 44 44', head: '10 0 44 44', face: '14 10 36 36', neck: '12 30 40 34', motif: '12 36 40 28' };
     const pic = (cc, on, key, attr) => `<button class="avo${on ? ' on' : ''}" data-avb="${attr}" title="${esc(t.n[attr.replace('|', ':')] || t.n[key] || key)}"><span class="avs">${svg(cc, personColor, ZOOM[attr.split('|')[0]])}</span></button>`;
     const dot = (col, on, key, attr) => `<button class="avd${on ? ' on' : ''}" data-avb="${attr}" title="${esc(t.c[key] || key)}" style="background:${col}"></button>`;
@@ -812,13 +813,13 @@
     if (tb === 'fx') body = FX.some(ok) || FXB.some(ok) ? (FX.some(ok) ? row(t.small, opts('fx', FX)) : '') + (FXB.some(ok) ? row(t.big, `<button class="avo txt${n.fxb === '0' ? ' on' : ''}" data-avb="fxb|0">${esc(t.none)}</button>` + FXB.filter(ok).map(bigPic).join('')) : '') : `<div class="avh">${esc(t.fxNone)}</div>`;
     if (tb === 'cost') body = `<div class="avh">${esc(t.costHint)}</div>` + row('', opts('cost', COST));
     let prev = `<span class="fxw big"><span class="avs big">${svg(cur, personColor)}</span>${outer(cur)}</span>`;
-    if (tb === 'season' && window.FPAVS) { const sb = window.FPAVS.builderBody(cur, personColor, (extra || {}).name, lang, (extra || {}).vis); body = sb.html; prev = sb.prev; }
+    if (tb === 'season' && window.FPAVS) { const sb = window.FPAVS.builderBody(cur, personColor, (extra || {}).name, lang); body = sb.html; prev = sb.prev; }
     return `<div class="avb"><div class="avp">${prev}<button class="avrnd" data-avrnd><span aria-hidden="true">🎲</span> ${esc(t.rnd)}</button></div><div class="avc">
       ${row(t.sk, Object.entries(SK).map(([k, col]) => dot(col, n.sk === k, k, `sk|${k}`)).join(''))}
       ${row(t.hc, Object.entries(HC).map(([k, col]) => dot(col[0], n.hc === k, k, `hc|${k}`)).join(''))}
       ${row(t.fig, FIG.map((f) => pic(set(cur, 'fig', f), n.fig === f, f, `fig|${f}`)).join(''))}
       ${row(t.hair, HAIR.filter((h) => !(h === 'glatze' && KID(n.fig))).map((h) => pic(set(cur, 'hair', h), n.hair === h, h, `hair|${h}`)).join(''))}
-      <div class="avt">${TABS.map((x) => `<button class="${x === tb ? 'on' : ''}" data-avtab="${x}">${esc(t.tabs[x])}</button>`).join('')}</div>
+      <div class="avt">${tabs.map((x) => `<button class="${x === tb ? 'on' : ''}" data-avtab="${x}">${esc(t.tabs[x])}</button>`).join('')}</div>
       ${body}</div></div>`;
   };
   const css = `.avb{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}.avp{flex:none;display:flex;flex-direction:column;align-items:center;gap:10px;position:sticky;top:8px}
@@ -874,23 +875,24 @@
     return `<span class="fpfxs" aria-hidden="true" style="position:absolute;inset:-19%;pointer-events:none;z-index:3"><svg class="fxo" viewBox="-12 -12 88 88" width="100%" height="100%" style="overflow:visible"><style>${CSS}</style>${D.FX[c.fx][3]}</svg></span>`;
   };
   // builder register "Saison" (no PIN): pick up to 3 extras and one effect for the current (or a chosen) season
-  const T = { de: { none: 'Nichts', auto: 'Automatisch', ex: 'Saison-Extras (bis 3)', fx: 'Saison-Effekt', hint: 'Extras gelten nur während der Saison – danach ist dein normales Bild automatisch zurück.', season: 'Saison', off: 'Gerade ist keine Saison aktiv – du kannst trotzdem schon auswählen.' },
-    en: { none: 'None', auto: 'Automatic', ex: 'Season extras (up to 3)', fx: 'Season effect', hint: 'Extras only show during the season – afterwards your normal picture is back automatically.', season: 'Season', off: 'No season is active right now – you can still choose ahead.' } };
+  const T = { de: { none: 'Nichts', auto: 'Automatisch', ex: 'Saison-Extras (bis 3)', fx: 'Saison-Effekt', hint: 'Extras gelten nur während der Saison – danach ist dein normales Bild automatisch zurück.', season: 'Saison', off: 'Gerade ist keine Saison – die Saison-Extras erscheinen, sobald eine beginnt.' },
+    en: { none: 'None', auto: 'Automatic', ex: 'Season extras (up to 3)', fx: 'Season effect', hint: 'Extras only show during the season – afterwards your normal picture is back automatically.', season: 'Season', off: 'No season right now – season extras appear as soon as one starts.' } };
   const NAMES = { weihnachten: ['Weihnachten', 'Christmas'], silvester: ['Silvester', 'New Year'], dreikoenig: ['Dreikönig', 'Epiphany'], winter: ['Winter', 'Winter'], sport: ['Sportferien', 'Ski holidays'],
     fasnacht: ['Fasnacht', 'Carnival'], liebe: ['Liebe', 'Love'], fruehling: ['Frühling', 'Spring'], ostern: ['Ostern', 'Easter'], pfingsten: ['Pfingsten & Muttertag', 'Whitsun & Mother\'s Day'],
     vatertag: ['Vatertag', 'Father\'s Day'], sommer: ['Sommer', 'Summer'], august: ['1. August', 'Swiss National Day'], schule: ['Schulanfang', 'Back to school'], herbst: ['Herbst', 'Autumn'], geburtstag: ['Geburtstag', 'Birthday'] };
   api.NAMES = NAMES;
-  api.builderBody = (code, color, name, lang, pick) => {
+  // register "Season" only exists while a season (or a birthday) is on – and only for that season
+  api.active = () => !!vis();
+  api.builderBody = (code, color, name, lang) => {
     const t = T[lang === 'en' ? 'en' : 'de']; const L = lang === 'en' ? 1 : 0; const A = window.FPAV;
-    const v = pick && D.VIS[pick] ? pick : (vis() || 'weihnachten');
+    const v = vis(); if (!v) return { prev: '', html: `<div class="avh">${esc(t.off)}</div>`, vis: null };
     const own = ((persons[name] || {}).season_av || {})[v]; const c = api.choice(name, v) || { x: [], fx: '' };
-    const tabs = `<div class="avg">${Object.keys(NAMES).map((k) => `<button class="avo txt${k === v ? ' on' : ''}" data-avsv="${k}">${esc(NAMES[k][L])}</button>`).join('')}</div>`;
     const ex = `<button class="avo txt${own && !own.x.length ? ' on' : ''}" data-avs="${v}|x|0">${esc(t.none)}</button><button class="avo txt${!own ? ' on' : ''}" data-avs="${v}|auto|0">${esc(t.auto)}</button>` +
       (D.G[D.VIS[v]] || []).map((k) => `<button class="avo${D.X[k][2] ? ' lvx' : ''}${c.x.includes(k) ? ' on' : ''}" data-avs="${v}|x|${k}" title="${esc(D.X[k][L])}"><span class="avs">${api.decorate(code, color, name, { x: [k], fx: '' })}</span></button>`).join('');
     const fxs = `<button class="avo txt${!c.fx ? ' on' : ''}" data-avs="${v}|fx|0">${esc(t.none)}</button>` + Object.entries(D.FX).filter(([, f]) => f[2] === D.FXVIS[v]).map(([k, f]) =>
       `<button class="avo lvx${c.fx === k ? ' on' : ''}" data-avs="${v}|fx|${k}" title="${esc(f[L])}"><span class="fxw"><span class="avs">${A ? A.svg(code, color) : ''}</span>${api.outer(name, { x: [], fx: k })}</span></button>`).join('');
     const prev = `<span class="fxw big"><span class="avs big">${api.decorate(code, color, name, c)}</span>${api.outer(name, c)}</span>`;
-    return { prev, html: `<div class="avh">${esc(vis() ? t.hint : t.off)}</div><div class="avr"><b>${esc(t.season)}</b>${tabs}</div><div class="avr"><b>${esc(t.ex)}</b><div class="avg">${ex}</div></div><div class="avr"><b>${esc(t.fx)}</b><div class="avg">${fxs}</div></div>`, vis: v };
+    return { prev, html: `<div class="avh">${esc(NAMES[v] ? NAMES[v][L] + ' – ' : '')}${esc(t.hint)}</div><div class="avr"><b>${esc(t.ex)}</b><div class="avg">${ex}</div></div><div class="avr"><b>${esc(t.fx)}</b><div class="avg">${fxs}</div></div>`, vis: v };
   };
   // toggle helper for the host: returns the new season_av object
   api.toggle = (cur, v, kind, key) => {
