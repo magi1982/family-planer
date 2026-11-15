@@ -6,7 +6,7 @@
 (() => {
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const rng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
-  const W = 1200; const H = 120;
+  const W = 1200; const H = 120; const CX = 640; // CX: where the main motif sits (a bit right of the middle, the navigation is on the left)
   const reduce = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 
   // ------------------------------------------------------------------------------ weather
@@ -203,12 +203,15 @@
     if (vis === 'silvester') sky = ['#090d24', '#2b1e52'];
     if (vis === 'fasnacht' && !night) sky = ['#6e3fd1', '#ff8ac1'];
     if (vis === 'sommer' && !night && ['sunny', 'partlycloudy', 'windy'].includes(kind)) sky = ['#1e9ef0', '#bfeaff'];
-    // narrow screens (phone) only show a slice of the landscape: centre that slice on the house
-    const focus = o.house === 'pool' && vis !== 'sommer' && vis !== 'fasnacht' ? 880 : 900;
-    const vb = o.narrow ? `${focus - 160} 0 320 ${H}` : `0 0 ${W} ${H}`;
+    // the main motif (house, or the beach / carnival scene) sits in the middle of the header: the landscape is
+    // shifted by dx and repeated at the right edge, so nothing is cut; phones show a slice around the same centre
+    const hasHouse = vis !== 'sommer' && vis !== 'fasnacht';
+    const focus = hasHouse ? (o.house === 'pool' ? 888 : 900) : vis === 'sommer' ? 760 : 600;
+    const dx = focus - CX; const sdx = hasHouse ? 0 : -dx; const BX = hasHouse ? CX - 215 : 600; // banners: left of the house, below the navigation
+    const vb = o.narrow ? `${CX - 160} 0 320 ${H}` : `0 0 ${W} ${H}`;
     let svg = `<svg viewBox="${vb}" preserveAspectRatio="xMidYMax slice" style="--wa:${wa.toFixed(1)}deg;--wd:${wd.toFixed(1)}s" aria-hidden="true">
       <defs><linearGradient id="fpsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient></defs>
-      <rect width="${W}" height="${H}" fill="url(#fpsky)"/>`;
+      <rect width="${W}" height="${H}" fill="url(#fpsky)"/><g transform="translate(${-dx} 0)"><g id="fpb">`;
     // sun, moon, stars
     if (night) {
       svg += fall(Math.round(26 * mul), r, (x, k) => `<circle class="tw" cx="${x.toFixed(0)}" cy="${(k * 60).toFixed(0)}" r="${(0.6 + r()).toFixed(1)}" fill="#fff" style="animation-delay:-${(r() * 3).toFixed(1)}s"/>`);
@@ -217,7 +220,7 @@
     if (kind === 'partlycloudy' && !night) [['#ff5a5a', 52], ['#ffb23d', 47], ['#ffe94d', 42], ['#55d16b', 37], ['#4aa8ff', 32], ['#8f6bff', 27]].forEach(([c, rr]) => { svg += `<path d="M${470 - rr * 2} 100 A ${rr * 2} ${rr * 1.7} 0 0 1 ${470 + rr * 2} 100" stroke="${c}" stroke-width="5" fill="none" opacity=".45"/>`; });
     // mountains (sport holidays) / sea (summer) in the background
     if (vis === 'sport' || (jz === 'winter' && vis === 'winter')) {
-      svg += `<path d="M0 92 L120 40 L210 78 L330 26 L460 84 L560 48 L700 90 L820 34 L960 86 L1080 44 L1200 80 V120 H0Z" fill="${night ? '#33415c' : '#6f86a3'}"/>`;
+      svg += `<path d="M0 92 L120 40 L210 78 L330 26 L460 84 L560 48 L700 90 L820 34 L960 86 L1080 44 L1200 92 V120 H0Z" fill="${night ? '#33415c' : '#6f86a3'}"/>`;
       [[120, 40], [330, 26], [560, 48], [820, 34], [1080, 44]].forEach(([x, y]) => { svg += `<path d="M${x - 22} ${y + 12} L${x} ${y} L${x + 22} ${y + 12} L${x + 12} ${y + 9} L${x + 5} ${y + 14} L${x - 4} ${y + 9} L${x - 12} ${y + 13}Z" fill="#f4f8fc"/>`; });
     }
     // clouds
@@ -229,8 +232,8 @@
     const gCol = snowGround ? '#eef4fa' : vis === 'fasnacht' ? '#5b3fa0' : ({ fruehling: '#8fcb6a', sommer: '#6fbf4f', herbst: '#b98a45', winter: '#7d8f6a' })[jz];
     if (vis === 'sommer') {
       svg += `<rect y="84" width="${W}" height="20" fill="#2aa7df"/><g class="wave">${fall(26, r, (x, k) => `<path d="M${(k * 0 + (x | 0) % 1200)} 88 q8 -4 16 0" stroke="#bff0ff" stroke-width="2" fill="none"/>`)}</g>`;
-      svg += `<path d="M0 100 C 200 92 400 104 600 98 C 800 92 1000 104 1200 96 V120 H0Z" fill="#f2d48f"/>`;
-    } else svg += `<path d="M0 98 C 160 90 340 104 520 96 C 700 89 900 104 1200 94 V120 H0Z" fill="${gCol}"/>`;
+      svg += `<path d="M0 100 C 200 92 400 104 600 98 C 800 92 1000 104 1200 100 V120 H0Z" fill="#f2d48f"/>`;
+    } else svg += `<path d="M0 98 C 160 90 340 104 520 96 C 700 89 900 104 1200 98 V120 H0Z" fill="${gCol}"/>`;
     // everyday house and trees (a little different every season)
     const lit = vis === 'weihnachten' || night;
     const smokeOn = ['herbst', 'winter'].includes(jz) || vis === 'weihnachten';
@@ -242,21 +245,22 @@
     } else if (vis !== 'sommer' && vis !== 'fasnacht') {
       (own ? [[150, 100, 1], [260, 102, 0.8], [720, 102, 0.85]] : [[150, 100, 1], [260, 102, 0.8], [1060, 100, 0.95], [1150, 102, 0.8]]).forEach(([x, y, sc]) => { svg += leafTree(x, y, sc, vis === 'fruehling' || vis === 'ostern' ? 'fruehling' : vis === 'herbst' ? 'herbst' : jz, r, true); });
     }
-    // ---- season layer
+    svg += `</g><use href="#fpb" x="${W}"/></g><g transform="translate(${sdx} 0)"><g id="fps">`;
+    // ---- season layer (items that belong to the house move with it: - dx)
     const P = [];
     if (vis === 'weihnachten') {
-      svg += fir(760, 104, 1.25, snowGround, true, r);
+      svg += fir(760 - dx, 104, 1.25, snowGround, true, r);
       // garland of bulbs along the top
       for (let x = 10; x < W; x += 28) svg += `<circle class="tw" cx="${x}" cy="${(6 + 7 * Math.sin(Math.PI * (x % 300) / 300)).toFixed(1)}" r="3" fill="${['#E5483B', '#F2B33D', '#3FA66B', '#3E8EDE', '#D35FB7'][(x / 28 | 0) % 5]}" style="animation-delay:-${(r() * 2).toFixed(2)}s"/>`;
       // Advent wreath with 1–4 candles lit
       const a = s.advent || 0;
       if (a) {
-        svg += `<g transform="translate(${own ? 640 : 990} 104)"><ellipse cx="0" cy="0" rx="30" ry="6" fill="#2f7a46"/>`;
+        svg += `<g transform="translate(${(own ? 1010 : 990) - dx} 104)"><ellipse cx="0" cy="0" rx="30" ry="6" fill="#2f7a46"/>`;
         [-18, -6, 6, 18].forEach((cx, i) => { svg += `<rect x="${cx - 3}" y="-18" width="6" height="16" rx="1" fill="#c8302e"/>${i < a ? `<path class="flame" d="M${cx} -27 q3 5 0 8 q-3 -3 0 -8z" fill="#FFC23D"/>` : ''}`; });
         svg += '</g>';
       }
       if (s.sub === 'samichlaus') svg += emo(340, 104, '🎅', 26) + emo(372, 106, '🎁', 18) + emo(306, 106, '🍊', 14);
-      if (s.sub === 'heiligabend') svg += '<path class="sun" d="M560 22 l4 9 10 1 -7.5 7 2 10 -8.5 -5 -8.5 5 2 -10 -7.5 -7 10 -1z" fill="#FFD24A"/>' + emo(700, 106, '🎁', 20);
+      if (s.sub === 'heiligabend') svg += '<path class="sun" d="M560 22 l4 9 10 1 -7.5 7 2 10 -8.5 -5 -8.5 5 2 -10 -7.5 -7 10 -1z" fill="#FFD24A"/>' + emo(700 - dx, 106, '🎁', 20);
       if (xmasSnow && kind !== 'snowy') kind = 'snowy-x';
     }
     if (vis === 'silvester' || (vis === 'august' && hour >= 22)) {
@@ -271,7 +275,7 @@
       svg += emo(300, 96, '🎭', 30, 'bob') + emo(900, 96, '🎭', 30, 'bob', 'style="animation-delay:-1.5s"') + emo(600, 100, '🥁', 22) + emo(160, 100, '🎺', 20);
       P.push(['confetti', 70]);
     }
-    if (vis === 'liebe') { P.push(['hearts', 14]); if (s.anniversary) svg += banner(lang === 'en' ? annText(s, 'en') : annText(s, 'de'), '#FF6B9B'); }
+    if (vis === 'liebe') { P.push(['hearts', 14]); if (s.anniversary) svg += banner(lang === 'en' ? annText(s, 'en') : annText(s, 'de'), '#FF6B9B', BX); }
     if (vis === 'fruehling' || vis === 'ostern') {
       svg += '<g transform="translate(470 102)"><path d="M0 0 L0 -34 M0 -20 L-18 -38 M0 -26 L16 -44" stroke="#7A5233" stroke-width="6" stroke-linecap="round"/><g class="sw" style="transform-origin:0 -30px">';
       for (let i = 0; i < 26; i++) svg += `<circle cx="${(r() - 0.5) * 60}" cy="${-34 - r() * 30}" r="${3 + r() * 4}" fill="${r() > 0.3 ? '#ffc4dc' : '#ffe6f0'}"/>`;
@@ -279,17 +283,17 @@
       for (let i = 0; i < 9; i++) { const x = 560 + i * 26; svg += `<path d="M${x} 104 v-14" stroke="#3f8f3a" stroke-width="2"/><path d="M${x - 5} 92 q5 -10 10 0 q-5 4 -10 0z" fill="${['#FF5A7A', '#FFD84D', '#FF8A3C', '#C77DFF'][i % 4]}"/>`; }
       for (let i = 0; i < 3; i++) svg += `<g class="fly" style="animation-duration:${(26 + r() * 14).toFixed(0)}s;animation-delay:-${(r() * 20).toFixed(0)}s"><path d="M0 ${24 + i * 9} q5 -5 10 0 q5 -5 10 0" stroke="#33415c" stroke-width="2" fill="none"/></g>`;
       if (vis === 'ostern') { svg += emo(380, 104, '🐰', 24, 'bob'); for (let i = 0; i < 6; i++) svg += `<ellipse cx="${200 + i * 140 + r() * 40}" cy="${104 + r() * 6}" rx="6" ry="8" fill="${['#FF7AB6', '#FFD84D', '#5CE1E6', '#9EDC9E', '#B07CFF', '#FF8A3C'][i]}"/>`; }
-      if (s.key === 'muttertag') { svg += emo(380, 106, '💐', 24); P.push(['hearts', 8]); svg += banner(lang === 'en' ? 'Thank you, Mum!' : 'Danke, Mami!', '#FF6B9B'); }
+      if (s.key === 'muttertag') { svg += emo(380, 106, '💐', 24); P.push(['hearts', 8]); svg += banner(lang === 'en' ? 'Thank you, Mum!' : 'Danke, Mami!', '#FF6B9B', BX); }
     }
     if (vis === 'pfingsten') {
       svg += '<g class="bob"><path d="M560 20 L580 34 L560 52 L540 34Z" fill="#FF8A3C"/><path d="M560 20 L560 52 M540 34 L580 34" stroke="#fff" stroke-width="1.2"/><path d="M560 52 q10 14 -4 24 q-12 10 2 22" stroke="#33415c" stroke-width="1.4" fill="none"/></g>';
-      if (s.key === 'muttertag') { svg += emo(380, 106, '💐', 24); P.push(['hearts', 8]); svg += banner(lang === 'en' ? 'Thank you, Mum!' : 'Danke, Mami!', '#FF6B9B'); }
+      if (s.key === 'muttertag') { svg += emo(380, 106, '💐', 24); P.push(['hearts', 8]); svg += banner(lang === 'en' ? 'Thank you, Mum!' : 'Danke, Mami!', '#FF6B9B', BX); }
       else if (s.key === 'auffahrt') svg += emo(380, 106, '🧺', 20);
     }
     if (vis === 'vatertag') {
       svg += '<path d="M360 104 L360 62 M520 104 L520 62" stroke="#6b4a2e" stroke-width="6"/><path d="M360 70 Q 440 100 520 70" stroke="#e8c27a" stroke-width="8" fill="none"/><path d="M360 70 Q 440 96 520 70" stroke="#d9534f" stroke-width="2" fill="none" stroke-dasharray="6 6"/>';
       svg += emo(440, 88, '😎', 18) + `<g class="fly" style="animation-duration:24s"><path d="M0 30 l22 6 -22 6 6 -6z" fill="#fff" stroke="#9aa7b4"/></g>`;
-      svg += banner(lang === 'en' ? 'Thank you, Dad!' : 'Danke, Papi!', '#3E8EDE');
+      svg += banner(lang === 'en' ? 'Thank you, Dad!' : 'Danke, Papi!', '#3E8EDE', BX);
     }
     if (vis === 'sommer') {
       svg += '<g class="sw" style="transform-origin:180px 104px"><path d="M180 104 Q 186 70 176 40" stroke="#8a5a2b" stroke-width="6" fill="none"/>' + ['M176 40 q-30 -6 -44 12', 'M176 40 q30 -8 44 10', 'M176 40 q-18 -22 -40 -18', 'M176 40 q18 -24 40 -16'].map((d) => `<path d="${d}" stroke="#2f9a46" stroke-width="7" fill="none" stroke-linecap="round"/>`).join('') + '</g>';
@@ -307,8 +311,9 @@
     if (vis === 'geburtstag') {
       for (let x = 0; x < W; x += 22) svg += `<path d="M${x} 4 l14 0 -7 16z" fill="${['#FF7AB6', '#FFD84D', '#5CE1E6', '#9EDC9E', '#B07CFF'][(x / 22) % 5]}"/>`;
       ['#FF7AB6', '#FFD84D', '#5CE1E6', '#9EDC9E', '#B07CFF'].forEach((c, i) => { const x = 300 + i * 150; svg += `<g class="bob" style="animation-delay:-${i * 0.6}s"><path d="M${x} ${60 + (i % 2) * 8} q-4 20 2 38" stroke="#fff" stroke-width="1" fill="none" opacity=".7"/><ellipse cx="${x}" cy="${46 + (i % 2) * 8}" rx="13" ry="16" fill="${c}"/></g>`; });
-      svg += banner('Happy Birthday!', '#FF7AB6');
+      svg += banner('Happy Birthday!', '#FF7AB6', BX);
     }
+    svg += `</g><use href="#fps" x="${W}"/><use href="#fps" x="${-W}"/></g>`;
     // ---- weather layer (Christmas: it always snows – the real weather stays in the corner)
     if (!o.still) {
       const n = (x) => Math.max(0, Math.round(x * mul * wildMul));
@@ -333,7 +338,7 @@
     if (lang === 'en') return y ? `${y} years ${wed ? 'married' : 'together'}` : (wed ? 'Happy anniversary!' : 'Our day!');
     return y ? `${y} Jahre ${wed ? 'verheiratet' : 'zusammen'}` : (wed ? 'Hochzeitstag!' : 'Unser Tag!'); };
   // banner on the meadow below the buttons, so the navigation stays readable
-  const banner = (text, col) => `<g transform="translate(600 108)"><path d="M-96 -10 H96 L88 0 L96 10 H-96 L-88 0Z" fill="${col}" opacity=".92"/><text x="0" y="4.5" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" font-family="system-ui,sans-serif">${esc(text)}</text></g>`;
+  const banner = (text, col, x = 600) => `<g transform="translate(${x} 108)"><path d="M-96 -10 H96 L88 0 L96 10 H-96 L-88 0Z" fill="${col}" opacity=".92"/><text x="0" y="4.5" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" font-family="system-ui,sans-serif">${esc(text)}</text></g>`;
 
   // ------------------------------------------------------------------------------ check effect (seasonal mini burst)
   const FX_EMO = { weihnachten: ['❄️', '⭐', '🎄'], silvester: ['✨', '🎉'], dreikoenig: ['👑', '⭐'], winter: ['❄️'], sport: ['❄️', '⛷️'], fasnacht: ['🎉', '🎊'], liebe: ['💕', '💗'],

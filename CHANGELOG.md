@@ -8,6 +8,7 @@
 
 ### Changed
 - **Tidier header:** time on top with the date (and the season label) below; the navigation shows icons only (labels as tooltip / screen-reader text) and sits right next to the date, which leaves the middle free for the scene.
+- **House in the middle of the scene:** every landscape and season is shifted so the house (or the beach / carnival scene) sits in the free middle of the header, also on tablets; the landscape repeats seamlessly at the right edge. Advent wreath, Christmas tree and presents stay next to the house, banners sit below the navigation.
 - **Design picker removed from the header** – choose the design under *Settings → General*. The header is calmer and leaves more room for the scene.
 - **Points on every task in the planner:** chores show *+N* next to the title (fair mode: their share of the day's points), to-dos and special chores show it in their label. The values come from the server, so they always match what gets booked.
 
