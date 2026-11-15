@@ -7,6 +7,7 @@
 - **Filters for chores and special chores:** chips at the top of the chore plan (per person, daily, with deadline / rhythm, not assigned) and of the special chores (on, off, own, volunteer, daily, weekly, occasion, weather, while away, secret, needs adult), each with a count, plus a search box.
 
 ### Changed
+- **Tidier header:** time on top with the date (and the season label) below; the navigation shows icons only (labels as tooltip / screen-reader text) and sits right next to the date, which leaves the middle free for the scene.
 - **Design picker removed from the header** – choose the design under *Settings → General*. The header is calmer and leaves more room for the scene.
 - **Points on every task in the planner:** chores show *+N* next to the title (fair mode: their share of the day's points), to-dos and special chores show it in their label. The values come from the server, so they always match what gets booked.
 
