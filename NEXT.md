@@ -541,3 +541,7 @@ Dazu: die Korrektur gegen den Ladefehler nach Updates (Week-View-Element doppelt
 ### 46. Punkte bei To-dos, Ämtli und Sonderämtli im Planer anzeigen
 To-dos geben schon Punkte (nach Grösse S/M/L oder fixem Wert), aber die Kachel zeigt sie nicht. Neu: im Etikett „☑ To-do · +N“ wie bei den Sonderämtli, in der Heute-Ansicht und in der Wochenansicht. Ohne Punkte bleibt das Etikett wie heute.
 **Status:** ✅ umgesetzt (lokal, noch nicht veröffentlicht)
+
+### 47. Kopfszene auf dem Tablet (iPad Air)
+Auf 1180 px quer verdeckt der Vorschlag (z. B. „Familien-Spaziergang“) die untere Hälfte vom Haus, hochkant (820 px) liegt das Haus fast ganz hinter Vorschlag und Navigationsknöpfen. Idee: bei Tablet-Breite den Vorschlag nur als kleines Symbol neben dem Wetter zeigen (antippen = Text) und die Szene so verschieben, dass das Haus in der Lücke rechts neben der Navigation steht; hochkant die Navigation nur mit Symbolen.
+**Status:** 💡 Idee

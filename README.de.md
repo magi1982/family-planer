@@ -130,7 +130,7 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 
 ### Ferien pausieren Ämtli
 
-**Abzeichen „weg“**: Mit den echten Uhrzeiten aus dem Kalender zeigt ein kleines Abzeichen unter dem Namen „✈️ morgen ab 15:00 weg“, am Tag selbst „✈️ ab 15:00 weg“, danach „✈️ weg bis Di 23:30“ (🌴 bei Ferien) – so sehen alle, wer weg ist. Der Ferien-Check-Knopf (Strand-Symbol) ist immer da: Er zeigt, wer weg ist, und alle erkannten Einträge; Antworten lassen sich später ändern. Direkt darunter holt der **Aktualisieren-Knopf** alle Kalender und Listen auf einmal neu (ohne PIN, höchstens alle 20 s); links daneben sitzt der Design-Knopf.
+**Abzeichen „weg“**: Mit den echten Uhrzeiten aus dem Kalender zeigt ein kleines Abzeichen unter dem Namen „✈️ morgen ab 15:00 weg“, am Tag selbst „✈️ ab 15:00 weg“, danach „✈️ weg bis Di 23:30“ (🌴 bei Ferien) – so sehen alle, wer weg ist. Der Ferien-Check-Knopf (Strand-Symbol) ist immer da: Er zeigt, wer weg ist, und alle erkannten Einträge; Antworten lassen sich später ändern. Direkt darunter holt der **Aktualisieren-Knopf** alle Kalender und Listen auf einmal neu (ohne PIN, höchstens alle 20 s). Das Design wählt man unter *Einstellungen → Allgemein*.
 
 - Ein **ganztägiger** (oder mindestens 20 Stunden langer) Termin mit einem **Ferien-Wort** im Kalender einer Person pausiert ihre Ämtli – sie zählen **weder als erledigt noch als verpasst**, Zuverlässigkeit und Serie bleiben unberührt.
 - Wortenden zählen: „Ferien“ findet „Skiferien“ und „Sommerferien“, aber nicht „Ferienplanung“.
@@ -285,7 +285,7 @@ data:
 
 Jedes Design gibt es in drei **Stilen**: *Standard*, *Transparent* und *Glas* (Milchglas-Flächen über dem Hintergrund des Designs). Ältere Designs (Loxone, Apple, Google, Nord) werden automatisch auf *Dunkel* umgestellt.
 
-**Design wechseln wie in einer App**: oben rechts in der Navigation zeigt eine kleine Farbprobe das aktuelle Design. Antippen öffnet die Auswahl mit einer **Mini-Vorschau** jedes Designs und dem Stil; ein Tipp wechselt sofort, für alle Geräte. Das Wechseln braucht die Eltern-PIN.
+**Design**: Design und Stil der Flächen wählt man unter *Einstellungen → Allgemein*; es gilt sofort auf allen Geräten (Eltern-PIN).
 
 - Weiterhin auch unter *Einstellungen → Allgemein* und *Konfigurieren → Design, Sprache & Seitenleiste*. Karten in eigenen Dashboards können es mit `theme:` / `style:` überschreiben. `theme_picker: false` an der Navigationskarte blendet die Auswahl aus.
 - Ein eigenes Dashboard kann den Hintergrund des Designs mit `background: var(--fp-page)` an der Ansicht übernehmen.

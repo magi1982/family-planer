@@ -574,7 +574,7 @@
               <button class="home${v.decision === 'home' ? ' sel' : ''}" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`; }).join(''); }).join('')}</div></div>` : '';
       this._popHtml = pop;
       const rf = `<button class="ic rf${this._busyR ? ' spin' : ''}" data-refresh title="${escN(T.refresh)}" aria-label="${escN(T.refresh)}"><ha-icon icon="mdi:refresh"></ha-icon></button>`;
-      return `<span class="rt">${this._wxCorner(s, lang)}${this._cfg.theme_picker === false ? '' : `<button class="ic${this._open === 'theme' ? ' on' : ''}" data-themes title="${T.design}" aria-expanded="${this._open === 'theme'}">${themeSwatch(cur)}<ha-icon icon="mdi:palette-outline"></ha-icon></button>`}<span class="stk">${vac}${rf}</span>
+      return `<span class="rt">${this._wxCorner(s, lang)}<span class="stk">${vac}${rf}</span>
         ${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;
     }
   }

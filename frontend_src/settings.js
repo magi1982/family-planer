@@ -34,7 +34,7 @@
       F('mod_lists', 'bool', 'Modul Smarte Listen', 'Smart lists module', 'Einkaufs- und To-do-Listen, die sich selbst sortieren.', 'Shopping and to-do lists that sort themselves.'),
       F('language', 'select', 'Sprache des Family Planers', 'Family Planer language', 'Automatisch wie Profil/Home Assistant, oder fest Deutsch bzw. Englisch – unabhängig von Home Assistant.', 'Automatic like your profile/Home Assistant, or fixed German or English – independent of Home Assistant.',
         { opts: [['auto', { de: 'Automatisch', en: 'Automatic' }], ['de', 'Deutsch'], ['en', 'English']] }),
-      F('theme', 'select', 'Design', 'Design', 'Farben des Planers. Auch oben rechts in der Navigation wählbar (mit Vorschau).', 'Colours of the planner. Also available at the top right of the navigation (with preview).',
+      F('theme', 'select', 'Design', 'Design', 'Farben des Planers.', 'Colours of the planner.',
         { opts: [['ha', { de: 'Standard (wie Home Assistant)', en: 'Standard (like Home Assistant)' }], ['light', { de: 'Hell', en: 'Light' }], ['dark', { de: 'Dunkel', en: 'Dark' }], ['rainbow', { de: 'Regenbogen', en: 'Rainbow' }], ['space', { de: 'Weltall', en: 'Space' }]] }),
       F('style', 'select', 'Stil der Flächen', 'Surface style', 'Transparent und Glas lassen den Hintergrund des Designs durchscheinen.', 'Transparent and glass let the design\'s background shine through.',
         { opts: [['standard', { de: 'Standard', en: 'Standard' }], ['transparent', { de: 'Transparent', en: 'Transparent' }], ['glass', { de: 'Glas', en: 'Glass' }]] }),
@@ -226,6 +226,7 @@
       if (ds.navtg) { const n = this._forms.general.nav; n.hidden = el.checked ? n.hidden.filter((x) => x !== ds.navtg) : [...n.hidden, ds.navtg]; return; }
       if (ds.evon || ds.evld) { const ev = this._forms.seasons.events = this._forms.seasons.events || {}; const k = ds.evon || ds.evld; ev[k] = { ...(ev[k] || {}) }; if (ds.evon) ev[k].on = el.checked; else if (el.value === '') delete ev[k].lead; else ev[k].lead = Number(el.value); return; }
       if (ds.sf) { this._sonderInput(el, ds); return; }
+      if (ds.sq !== undefined) { this._sQ = el.value; const q = el.value.toLowerCase(); this.shadowRoot.querySelectorAll('[data-stxt]').forEach((r) => { r.hidden = !!q && !r.dataset.stxt.includes(q); }); return; }
       if (ds.awon || ds.awsz) { const it = this._forms.points.awards.items; const id = ds.awon || ds.awsz; it[id] = { ...(it[id] || {}) }; if (ds.awon) it[id].on = el.checked; else it[id].size = el.value; return; }
       if (ds.pk === 'role') { const p = this._persons[Number(ds.pi)]; if (p) p.role = el.value; return; }
       if (ds.pk === 'bday_anim') { const p = this._persons[Number(ds.pi)]; if (p) p.bday_anim = el.value === '' ? null : Number(el.value); return; }
@@ -305,6 +306,15 @@
     }
     // ---------------------------------------------------------------- special chores (definitions, catalogue)
     async _sonderLoad() { const res = await this._call('family_planer/sonder/list', {}); if (res) { this._sonder = res; this._render(); } }
+    // which special chores a filter chip keeps (anchor kinds grouped like a parent thinks about them)
+    _sonderPass(d, f) {
+      if (f === 'all') return true;
+      const t = (d.anchor || {}).t;
+      const m = { on: d.on, off: !d.on, own: !d.tpl, free: d.mode === 'free', daily: t === 'daily', weekly: t === 'weekly' || t === 'every',
+        occasion: ['event', 'bday', 'wedding', 'advent_week', 'advent_sunday', 'yearly', 'once'].includes(t), weather: t === 'weather' || t === 'temp' || !!d.weather,
+        away: (d.away || []).length > 0, secret: !!d.secret, adult: !!d.adult };
+      return !!m[f];
+    }
     _sonderTab() {
       const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de);
       if (!this._sonder) { if (!this._sonderBusy) { this._sonderBusy = true; this._sonderLoad().finally(() => { this._sonderBusy = false; }); } return `<div class="hint3">…</div>`; }
@@ -321,12 +331,20 @@
         const awayTxt = (d.away || []).length ? lbl(` · nur wenn ${d.away.map(pn).join(' & ')} weg`, ` · only while ${d.away.map(pn).join(' & ')} away`) : '';
         return (base ? base() : '') + lead + span + awayTxt + (d.season ? ` · ${d.season.replace('jz:', '').replace('vis:', '')}` : '') + (d.from ? lbl(` · ab ${d.from}`, ` · from ${d.from}`) : '') + (d.until ? lbl(` · bis ${d.until}`, ` · until ${d.until}`) : ''); };
       const title = (d) => (lang === 'en' && d.title_en ? d.title_en : d.title);
-      const list = S.defs.slice().sort((x, y) => (y.on - x.on) || title(x).localeCompare(title(y))).map((d) => `<div class="sdr${d.on ? '' : ' off'}"><input type="checkbox" class="sw" data-son="${esc(d.id)}" ${d.on ? 'checked' : ''}><span class="si">${esc(d.icon)}</span>
+      if (!this._sOrd) this._sOrd = S.defs.slice().sort((x, y) => (y.on - x.on) || title(x).localeCompare(title(y))).map((d) => d.id);
+      const pos = (d) => { const i = this._sOrd.indexOf(d.id); return i < 0 ? -1 : i; };
+      const flt = this._sFilt || 'all'; const q = (this._sQ || '').toLowerCase();
+      const FL = [['all', lbl('Alle', 'All')], ['on', lbl('Ein', 'On')], ['off', lbl('Aus', 'Off')], ['own', lbl('Eigene', 'Own')], ['free', lbl('Freiwillig', 'Volunteer')], ['daily', lbl('Täglich', 'Daily')],
+        ['weekly', lbl('Wöchentlich', 'Weekly')], ['occasion', lbl('Anlass', 'Occasion')], ['weather', lbl('Wetter', 'Weather')], ['away', lbl('Wenn weg', 'While away')], ['secret', lbl('Geheim', 'Secret')], ['adult', lbl('Mit Erwachsenem', 'Needs adult')]];
+      const shown = S.defs.filter((d) => this._sonderPass(d, flt));
+      const filters = `<div class="flt">${FL.map(([k, n]) => { const c = k === 'all' ? S.defs.length : S.defs.filter((d) => this._sonderPass(d, k)).length;
+        return c || k === flt ? `<button class="fc${k === flt ? ' on' : ''}" data-sflt="${k}">${esc(n)} <i>${c}</i></button>` : ''; }).join('')}<input class="fq" data-sq type="search" placeholder="${esc(lbl('Suchen …', 'Search …'))}" value="${esc(this._sQ || '')}"></div>`;
+      const list = shown.sort((x, y) => pos(x) - pos(y)).map((d) => `<div class="sdr${d.on ? '' : ' off'}" data-stxt="${esc((title(d) + ' ' + (d.title_en || '')).toLowerCase())}"${q && !(title(d) + ' ' + (d.title_en || '')).toLowerCase().includes(q) ? ' hidden' : ''}><input type="checkbox" class="sw" data-son="${esc(d.id)}" ${d.on ? 'checked' : ''}><span class="si">${esc(d.icon)}</span>
         <span class="st"><b>${esc(title(d))}${d.secret ? ' 🤫' : ''}</b><small>${esc(when(d))} · ${esc(MD[d.mode] || d.mode)} · ${esc(SZ[d.size])}${d.size === 'own' ? ' ' + esc(d.pts) : ''}</small></span>
         <button class="sg" data-sedit="${esc(d.id)}">${lbl('Bearbeiten', 'Edit')}</button></div>${ed && ed.id === d.id ? this._sonderForm() : ''}`).join('');
       const miss = S.missing.length ? `<div class="sec2">${lbl('Vorlagen wieder hinzufügen', 'Add templates again')}</div><div class="vch">${S.missing.map((m) => `<button class="chip" data-stpl="${esc(m.id)}">${esc(m.icon)} ${esc(lang === 'en' && m.title_en ? m.title_en : m.title)}</button>`).join('')}</div>` : '';
       return `<div class="sec2">${lbl('Sonderämtli & Vorlagen', 'Special chores & templates')}</div><div class="hint3">${esc(lbl('Eingeschaltete erscheinen zur richtigen Zeit – freiwillige im Feld „Freiwillig“ beim Planer: Wer zuerst tippt, bekommt es. Wiederkehrende kommen jedes Mal neu.', 'Switched-on ones appear at the right time – volunteer ones in the "Volunteer" tile in the planner: whoever taps first gets it. Recurring ones come back every time.'))}</div>
-        <button class="addb" data-snew>${lbl('+ Neues Sonderämtli', '+ New special chore')}</button>${ed && !ed.id ? this._sonderForm() : ''}<div class="sdl">${list}</div>${miss}`;
+        <button class="addb" data-snew>${lbl('+ Neues Sonderämtli', '+ New special chore')}</button>${ed && !ed.id ? this._sonderForm() : ''}${filters}<div class="sdl">${list || `<div class="hint3">${esc(lbl('Nichts gefunden.', 'Nothing found.'))}</div>`}</div>${miss}`;
     }
     _sonderForm() {
       const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de); const d = this._sEdit; const a = d.anchor || { t: 'once' };
@@ -376,6 +394,7 @@
     }
     async _sonderClick(t) {
       const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de);
+      const fb = t.closest('[data-sflt]'); if (fb) { this._sFilt = fb.dataset.sflt; this._render(); return true; }
       const on = t.closest('[data-son]');
       if (on && this._sonder) { const d = this._sonder.defs.find((x) => x.id === on.dataset.son); if (d) { d.on = on.checked; const { id, ...data } = d; await this._call('family_planer/sonder/save', { sonder_id: id, data }); } return true; }
       const ed = t.closest('[data-sedit]'); if (ed && this._sonder) { const d = this._sonder.defs.find((x) => x.id === ed.dataset.sedit); this._sEdit = this._sEdit && this._sEdit.id === d.id ? null : clone(d); this._render(); return true; }
@@ -386,10 +405,10 @@
       const pp = t.closest('[data-spp]'); if (pp && this._sEdit) { const c = this._sEdit.persons || []; this._sEdit.persons = c.includes(pp.dataset.spp) ? c.filter((x) => x !== pp.dataset.spp) : [...c, pp.dataset.spp]; this._render(); return true; }
       if (t.closest('[data-ssave]') && this._sEdit) {
         const { id, ...data } = this._sEdit; if (!String(data.title || '').trim()) { this._flash(lbl('Bitte einen Titel eingeben.', 'Please enter a title.'), true); return true; }
-        const res = await this._call('family_planer/sonder/save', { ...(id ? { sonder_id: id } : {}), data }); if (res) { this._sEdit = null; this._sonder = null; this._flash(this.T.saved); } return true;
+        const res = await this._call('family_planer/sonder/save', { ...(id ? { sonder_id: id } : {}), data }); if (res) { this._sEdit = null; this._flash(this.T.saved); this._sonderLoad(); } return true;
       }
-      if (t.closest('[data-sdel]') && this._sEdit && this._sEdit.id) { const res = await this._call('family_planer/sonder/delete', { sonder_id: this._sEdit.id }); if (res !== null) { this._sEdit = null; this._sonder = null; this._flash(this.T.saved); } return true; }
-      const tp = t.closest('[data-stpl]'); if (tp) { const res = await this._call('family_planer/sonder/template', { template: tp.dataset.stpl }); if (res) { this._sonder = null; this._flash(this.T.saved); } return true; }
+      if (t.closest('[data-sdel]') && this._sEdit && this._sEdit.id) { const res = await this._call('family_planer/sonder/delete', { sonder_id: this._sEdit.id }); if (res !== null) { this._sEdit = null; this._flash(this.T.saved); this._sonderLoad(); } return true; }
+      const tp = t.closest('[data-stpl]'); if (tp) { const res = await this._call('family_planer/sonder/template', { template: tp.dataset.stpl }); if (res) { this._flash(this.T.saved); this._sonderLoad(); } return true; }
       return false;
     }
     async _savePerson(i) {
@@ -574,7 +593,9 @@
         .tb.pin{color:${G};border-color:${G}}
         .hint3{font-size:13px;color:#999;margin:0 2px 10px;max-width:980px}
         .evl{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px;margin-top:8px}.evr{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;background:#232323;border:1px solid #2a2a2a}.evr .nn{flex:1;font-size:13px}.evr small{color:#8a8a8a;font-size:11px}.evr .in.n{width:58px}.evr small.dl{min-width:86px;text-align:left;color:#7a7a7a}.evr.off{opacity:.55}
-        .sdl{display:flex;flex-direction:column;gap:6px;max-width:980px;margin-top:10px}.sdr{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:#232323;border:1px solid #2a2a2a}.sdr.off{opacity:.6}
+        .sdl{display:flex;flex-direction:column;gap:6px;max-width:980px;margin-top:10px}.sdr{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:#232323;border:1px solid #2a2a2a}.sdr.off{opacity:.6}.sdr[hidden]{display:none}
+        .flt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;max-width:980px;margin-top:14px}.fc{height:32px;padding:0 12px;border-radius:16px;border:1px solid #3a3a3a;background:#262626;color:#bbb;font:inherit;font-size:13px;cursor:pointer}
+        .fc i{font-style:normal;color:#777;font-size:11px;margin-left:2px}.fc.on{border-color:${G};color:${G}}.fc.on i{color:${G}}.fq{flex:1;min-width:140px;height:32px;padding:0 12px;border-radius:16px;border:1px solid #3a3a3a;background:#1b1b1b;color:#eee;font:inherit;font-size:13px}
         .sdr .si{font-size:22px}.sdr .st{flex:1;min-width:0}.sdr .st b{display:block;font-size:14px;font-weight:500}.sdr .st small{display:block;font-size:12px;color:#8a8a8a;margin-top:2px}
         .sform{padding:10px 12px;border-radius:12px;border:1px solid #3a3a3a;background:#1e1e1e;max-width:980px}
         .vch{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.vch .chip{height:30px;font-size:12px}.vbt{display:flex;gap:6px;flex-wrap:wrap}

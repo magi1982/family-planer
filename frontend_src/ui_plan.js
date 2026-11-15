@@ -25,11 +25,14 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
       const r = this.shadowRoot;
       r.addEventListener('click', (e) => this._onClick(e));
       r.addEventListener('change', (e) => this._onChange(e));
-      r.addEventListener('input', (e) => { if (e.target.dataset.new === 't') this._new.t = e.target.value; });
+      r.addEventListener('input', (e) => {
+        if (e.target.dataset.new === 't') this._new.t = e.target.value;
+        if (e.target.dataset.q !== undefined) { this._q = e.target.value; const q = this._q.toLowerCase(); this.shadowRoot.querySelectorAll('.list .row[data-txt]').forEach((x) => { x.hidden = !!q && !x.dataset.txt.includes(q); }); }
+      });
       r.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.target.blur(); });
       r.addEventListener('focusout', () => setTimeout(() => { if (this._dirty && !this._editing()) { this._dirty = false; this._render(); } }, 60));
     }
-    _editing() { const a = this.shadowRoot && this.shadowRoot.activeElement; return !!a && a.tagName === 'INPUT'; }
+    _editing() { const a = this.shadowRoot && this.shadowRoot.activeElement; return !!a && a.tagName === 'INPUT' && a.dataset.q === undefined; }
     _order() { return this._kids().map((k) => k.name); }
     _rows() {
       const order = this._order();
@@ -79,6 +82,7 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
     _isPick(key, p, d) { const k = this._pick; return !!k && k.key === key && k.p === p && k.d === d; }
     _onClick(e) {
       const t = e.target;
+      const fb = t.closest('[data-flt]'); if (fb) { this._flt = fb.dataset.flt; this._render(true); return; }
       const ha = t.closest('[data-hadd]'); if (ha) { this.dispatchEvent(new CustomEvent('fp-plan-add', { bubbles: true, composed: true, detail: { kind: ha.dataset.hadd } })); return; }
       if (t.closest('[data-add]')) { const inp = this.shadowRoot.querySelector('[data-new="t"]'); if (inp) this._new.t = inp.value; this._add(); return; }
       const arw = t.closest('.arw');
@@ -184,8 +188,19 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
           cnt[k.name].map((n) => `<div class="ovc" style="background:${n ? rgba(k.farbe, 0.12 + (0.5 * n) / max) : 'var(--fp-bg3,#262626)'};color:${n ? 'var(--fp-text,#fff)' : 'var(--fp-text3,#555)'}">${n ? fmt(n) : '·'}</div>`).join('') +
           `<div class="ovt">${fmt(cnt[k.name].reduce((a, b) => a + b, 0))}</div>`).join('') + `</div>`;
       const sum = (z, r, f) => Object.entries(z).map(([n, t]) => `<b>${esc(n)}:</b> ${daysTxt(n, t, r, f)}`).join('<br>') || 'Noch niemandem zugeteilt';
-      const body = rows.map((r) => `
-        <div class="row" data-uid="${esc(r.uid)}">
+      // stable order while the page is open: assigning a day must not move the row away from the finger
+      if (!this._ord) this._ord = rows.map((r) => r.uid);
+      rows.forEach((r) => { if (!this._ord.includes(r.uid)) this._ord.unshift(r.uid); });
+      const flt = this._flt || 'all'; const q = (this._q || '').toLowerCase();
+      const hasRf = (r) => Object.values(r.r || {}).some((x) => x && x[0] > 1) || Object.values(r.f || {}).some((x) => x);
+      const pass = (r, f) => f === 'all' || (f === 'daily' ? Object.values(r.z).some((t) => (t || []).length === 7) : f === 'rhythm' ? hasRf(r)
+        : f === 'none' ? !Object.values(r.z).some((t) => (t || []).length) : f.startsWith('p:') ? ((r.z[f.slice(2)] || []).length > 0) : true);
+      const FL = [['all', 'Alle'], ...kids.map((k) => ['p:' + k.name, k.name]), ['daily', 'Täglich'], ['rhythm', 'Mit Frist / Rhythmus'], ['none', 'Nicht zugeteilt']];
+      const filters = `<div class="flt">${FL.map(([k, n]) => { const c = rows.filter((r) => pass(r, k)).length;
+        return c || k === flt ? `<button class="fc${k === flt ? ' on' : ''}" data-flt="${esc(k)}">${esc(n)} <i>${c}</i></button>` : ''; }).join('')}<input class="fq" data-q type="search" placeholder="Suchen …" value="${esc(this._q || '')}"></div>`;
+      const shownRows = rows.filter((r) => pass(r, flt)).sort((a, b) => this._ord.indexOf(a.uid) - this._ord.indexOf(b.uid));
+      const body = shownRows.map((r) => `
+        <div class="row" data-uid="${esc(r.uid)}" data-txt="${esc(r.t.toLowerCase())}"${q && !r.t.toLowerCase().includes(q) ? ' hidden' : ''}>
           <div class="tcol"><div class="tl"><input class="in" data-f="t" value="${esc(r.t)}"><label class="pts" title="Punkte bzw. Gewicht für dieses Ämtli (im fairen Modus: Anteil am Tageswert)"><input class="in pn" data-f="p" type="number" min="0" max="1000" inputmode="numeric" value="${r.pts == null ? '' : r.pts}" placeholder="${Number(this._cfg.punkte_standard) || 10}"><span>Pkt.</span></label></div><div class="rl">${sum(r.z, r.r, r.f)}</div></div>
           <div class="asg">${this._asg(r.uid, r.z, r.r, r.f)}</div>
           <button class="del${this._confirm === r.uid ? ' cf' : ''}" data-del>${this._confirm === r.uid ? 'Löschen?' : '<ha-icon icon="mdi:trash-can-outline"></ha-icon>'}</button>
@@ -203,6 +218,9 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
         .ovp{display:flex;align-items:center;gap:8px;font-size:14px;min-width:0}.ovp span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .ovc{height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
         .ovt{text-align:center;font-size:14px;color:#bbb;font-weight:600}
+        .flt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}.fc{height:32px;padding:0 12px;border-radius:16px;border:1px solid #3a3a3a;background:#262626;color:#bbb;font:inherit;font-size:13px;cursor:pointer}
+        .fc i{font-style:normal;color:#777;font-size:11px;margin-left:2px}.fc.on{border-color:${G};color:${G}}.fc.on i{color:${G}}.fq{flex:1;min-width:140px;height:32px;padding:0 12px;border-radius:16px;border:1px solid #3a3a3a;background:#1b1b1b;color:#eee;font:inherit;font-size:13px}
+        .row[hidden]{display:none}
         .list{background:#262626;border:1px solid #2f2f2f;border-radius:12px;overflow:hidden}
         .row{display:grid;grid-template-columns:minmax(200px,1fr) auto 56px;gap:16px;align-items:start;padding:14px;border-top:1px solid #313131}.row:first-child{border-top:none}
         .in,.sel{background:#2e2e2e;border:1px solid #3a3a3a;color:#eee;border-radius:9px;height:44px;padding:0 12px;font:inherit;font-size:15px;width:100%;box-sizing:border-box;outline:none}
@@ -257,6 +275,7 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
         <div class="sec">Wochenübersicht</div>
         ${overview}
         <div class="sec">Ämtli</div>
+        ${filters}
         <div class="list">${body || '<div class="empty">Noch keine Ämtli – unten hinzufügen.</div>'}</div>
         <div class="add"><div class="sec" style="margin-top:0">Neues Ämtli</div>
           <div class="row">

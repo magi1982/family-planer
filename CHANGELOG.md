@@ -3,10 +3,15 @@
 ## Unreleased
 
 ### Added
-- **Refresh button in the header:** pulls all person calendars, smart lists and to-do lists with names right away, then recomputes absences, the season scene and the list categories; the week view reloads its events. No PIN (it only reads), at most once every 20 s. It sits below the holiday check; the design button moved to their left.
+- **Refresh button in the header:** pulls all person calendars, smart lists and to-do lists with names right away, then recomputes absences, the season scene and the list categories; the week view reloads its events. No PIN (it only reads), at most once every 20 s. It sits below the holiday check.
+- **Filters for chores and special chores:** chips at the top of the chore plan (per person, daily, with deadline / rhythm, not assigned) and of the special chores (on, off, own, volunteer, daily, weekly, occasion, weather, while away, secret, needs adult), each with a count, plus a search box.
+
+### Changed
+- **Design picker removed from the header** – choose the design under *Settings → General*. The header is calmer and leaves more room for the scene.
 - **Points on every task in the planner:** chores show *+N* next to the title (fair mode: their share of the day's points), to-dos and special chores show it in their label. The values come from the server, so they always match what gets booked.
 
 ### Fixed
+- **Lists no longer jump while you work:** switching a special chore on or assigning a day to a chore keeps the row where it is (the order is fixed while the page is open); saving no longer blanks the list and throws you back to the top.
 - **Shopping list *Optimise* no longer hangs:** reading the list is limited to 15 s and the AI to 30 s (at most 60 items per request); if it takes longer, the planner sorts by keywords only and the button shows *taking too long* after 60 s at the latest.
 - **To-dos from a list with several names:** a name at the start decides ("Lea calendar for Mia" → only Lea, the title keeps "for Mia"). Without a leading name the first name in the text assigns it. Before, every name got its own to-do.
 - **Secret special chores:** revealing the title is now a separate eye button on the right (avatar-builder style, no wiggle) – yellow like *I'll take it* in the volunteer tile, subtle grey once somebody has taken the job. Before, the small "tap to reveal" label sat inside the chore button, so tapping it often ticked the chore off.
