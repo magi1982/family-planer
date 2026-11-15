@@ -528,3 +528,12 @@ Einstellung unter *Saisons & Wetter*: „Standard-Haus“ oder „Haus mit Pool 
 ### 44. Abzeichen „weg“ am Avatar
 Wenn eine Person als weg gilt (gleiche Erkennung wie „Ämtli pausieren“: Kalender oder Ferien-Check), zeigt ihr Avatar im Planer (Heute und Woche) ein kleines Abzeichen: am Vortag „✈️ ab morgen weg“, während der Abwesenheit „✈️ weg bis Mi“ (letzter Tag). Bei Ferien 🌴 statt ✈️.
 **Status:** ✅ umgesetzt in 0.13.0
+
+### 45. Welche Sonderämtli ins Freiwillig-Feld kommen
+Heute: Reihenfolge der gespeicherten Liste (Vorlagen zuerst), wer drin ist, bleibt – eigene und Weg-Ämtli kommen oft nicht dran. Neu:
+1. Vorrang für selten passende: „Nur wenn weg ist“, Geburtstag, Hochzeitstag; dann eigene Sonderämtli; dann Vorlagen.
+2. Bald endende zuerst (Frist / „bis“-Zeit heute).
+3. Der Rest wechselt täglich, damit nicht immer dieselben Vorlagen die Plätze belegen.
+4. Ein Ämtli mit höherem Vorrang darf ein noch nicht genommenes Vorlagen-Ämtli verdrängen.
+Dazu: die Korrektur gegen den Ladefehler nach Updates (Week-View-Element doppelt registriert) ist schon im Code und kommt mit diesem Update.
+**Status:** 💡 Idee – fürs nächste Update
