@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.2 – 2026-11-15
 
 ### Added
 - **Refresh button in the header:** pulls all person calendars, smart lists and to-do lists with names right away, then recomputes absences, the season scene and the list categories; the week view reloads its events. No PIN (it only reads), at most once every 20 s. It sits below the holiday check.
