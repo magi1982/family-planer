@@ -131,9 +131,61 @@
 .scn.still *{animation:none!important}.scn.still .fl,.scn.still .rise{display:none}`;
   api.CSS = CSS;
 
+  // ------------------------------------------------------------------------------ house with pool & pergola (setting)
+  // tall gable house facing the garden, garage joined on the left with a frosted-glass railing, pool to the south;
+  // snow, pool cover in winter, lights in the evening, fairy lights in Advent, icicles below -5°
+  const TILE = '#C9CDD2';
+  const pool = (o, x1, x2, y1, y2, persp) => {
+    const winter = o.snow || o.jz === 'winter';
+    const shape = persp ? `M${x1 + persp} ${y1} H${x2 - persp} L${x2} ${y2} H${x1}Z` : `M${x1} ${y1} H${x2} V${y2} H${x1}Z`;
+    let g = `<path d="${persp ? `M${x1 + persp - 8} ${y1 - 3} H${x2 - persp + 8} L${x2 + 10} ${y2 + 4} H${x1 - 10}Z` : `M${x1 - 8} ${y1 - 3} H${x2 + 8} V${y2 + 4} H${x1 - 8}Z`}" fill="${o.snow ? '#eef4fa' : TILE}"/>`;
+    if (winter) return g + `<path d="${shape}" fill="#3f4f5c"/>` + [0.25, 0.5, 0.75].map((f) => `<line x1="${x1 + (x2 - x1) * f}" y1="${y1}" x2="${x1 + (x2 - x1) * f}" y2="${y2}" stroke="#6c7c88" stroke-width="1.2"/>`).join('') + (o.snow ? `<path d="${shape}" fill="#fff" opacity=".55"/>` : '');
+    g += `<defs><linearGradient id="fpwater" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${o.night ? '#1fb5c9' : '#5fe0ea'}"/><stop offset="1" stop-color="${o.night ? '#0b6f8a' : '#1fb0cf'}"/></linearGradient></defs><path d="${shape}" fill="url(#fpwater)"/>`;
+    g += `<clipPath id="fppool"><path d="${shape}"/></clipPath><g clip-path="url(#fppool)"><g class="wave" style="animation-duration:6s">`;
+    for (let x = x1 - 60; x < x2 + 60; x += 22) g += `<path d="M${x} ${y1 + 4} q5 -2 10 0 t10 0 M${x + 8} ${y1 + 9} q5 -2 10 0" stroke="#fff" stroke-width="1" fill="none" opacity=".55"/>`;
+    g += '</g></g>';
+    if (o.night) g += `<ellipse cx="${(x1 + x2) / 2}" cy="${(y1 + y2) / 2}" rx="${(x2 - x1) / 2.4}" ry="${(y2 - y1) / 2.2}" fill="#7ff7ff" opacity=".25" class="sun"/>`;
+    return g;
+  };
+  const parasol = (o, x, ground) => `<path d="M${x} ${ground} V${ground - 26}" stroke="#a88a5a" stroke-width="1.6"/><g class="sw" style="transform-origin:${x}px ${ground - 26}px"><path d="M${x - 20} ${ground - 22} Q${x} ${ground - 38} ${x + 20} ${ground - 22}Z" fill="${o.snow ? '#eef4fa' : '#D8B677'}"/>`
+    + Array.from({ length: 9 }, (_, i) => `<line x1="${x - 18 + i * 4.5}" y1="${ground - 22}" x2="${x - 18 + i * 4.5}" y2="${ground - 19}" stroke="#b8955a" stroke-width="1"/>`).join('') + '</g>';
+  const smoke = (o, x, y) => (o.smoke ? Array.from({ length: 3 }, (_, i) => `<circle class="smk" cx="${x}" cy="${y}" r="4" fill="#dfe3e8" style="--dx:${Math.round(12 + o.wind / 3)}px;animation-delay:-${i * 1.3}s"/>`).join('') : '');
+  const houseS = (o) => {
+    const cold = typeof o.temp === 'number' && o.temp < -5;
+    const lit = o.night || o.vis === 'weihnachten';
+    const glass = o.night ? '#FFD86B' : '#bfe0ff';
+    const icicles = (x1, x2, y) => { let g = ''; for (let x = x1 + 3; x < x2 - 2; x += 6) { const l = 3 + ((x * 7) % 5); g += `<path d="M${x - 1.5} ${y} L${x} ${y + l} L${x + 1.5} ${y}Z" fill="#e8f7ff" opacity=".95"/>`; } return g; };
+    let g = '';
+    // garage, joined to the house; flat roof with frosted glass railing
+    g += '<rect x="852" y="68" width="48" height="30" fill="#f1e3c8"/><rect x="850" y="66" width="52" height="3" fill="#a7adb5"/>';
+    g += `<rect x="852" y="56" width="48" height="10" fill="#fff" opacity="${o.night ? 0.3 : 0.6}"/><rect x="852" y="55" width="48" height="1.6" fill="#a7adb5"/>`;
+    if (o.snow) g += '<rect x="850" y="53" width="52" height="2.5" rx="1.2" fill="#fff"/><rect x="850" y="64.5" width="52" height="2" fill="#fff"/>';
+    if (cold) g += icicles(850, 902, 69);
+    // house: tall body, gable to the front
+    g += '<rect x="900" y="40" width="112" height="58" fill="#f1e3c8"/>';
+    g += `<rect x="988" y="10" width="9" height="20" fill="#8a3b2b"/>` + smoke(o, 992, 8);
+    g += '<path d="M900 40 L956 8 L1012 40Z" fill="#f1e3c8"/><path d="M892 44 L956 6 L1020 44" fill="none" stroke="#b5523b" stroke-width="7" stroke-linejoin="round"/>';
+    if (o.snow) g += '<path d="M890 41 L956 3 L1022 41" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>';
+    if (cold) g += '<g>' + Array.from({ length: 7 }, (_, i) => { const x = 896 + i * 9.5; const y = 44 - (x - 892) * 0.59; const l = 3 + (i % 3) * 2; return `<path d="M${x - 1.4} ${y} L${x} ${y + l} L${x + 1.4} ${y}Z" fill="#e8f7ff"/>`; }).join('') + Array.from({ length: 7 }, (_, i) => { const x = 960 + i * 9.5; const y = 6 + (x - 956) * 0.59; const l = 3 + (i % 3) * 2; return `<path d="M${x - 1.4} ${y + 4} L${x} ${y + 4 + l} L${x + 1.4} ${y + 4}Z" fill="#e8f7ff"/>`; }).join('') + '</g>';
+    // upper floor: smaller window left, wider window right; ground floor glass front
+    g += `<rect x="916" y="46" width="28" height="16" rx="1" fill="${glass}" stroke="#fff" stroke-width="2"/><line x1="930" y1="46" x2="930" y2="62" stroke="#fff" stroke-width="1.5"/><rect x="968" y="46" width="28" height="16" rx="1" fill="${glass}" stroke="#fff" stroke-width="2"/><line x1="982" y1="46" x2="982" y2="62" stroke="#fff" stroke-width="1.5"/>`;
+    g += `<rect x="910" y="76" width="38" height="22" fill="${glass}" stroke="#fff" stroke-width="1.5"/><rect x="954" y="76" width="22" height="22" fill="${glass}" stroke="#fff" stroke-width="1.5"/><rect x="982" y="76" width="24" height="22" fill="${glass}" stroke="#fff" stroke-width="1.5"/>`;
+    // pergola: roof bar and posts only, table silhouette
+    g += '<rect x="902" y="69" width="108" height="5" fill="#4a5058"/><rect x="903" y="69" width="3" height="29" fill="#4a5058"/><rect x="1006" y="69" width="3" height="29" fill="#4a5058"/><path d="M944 90 h22 M948 90 v8 M962 90 v8" stroke="#3a3f46" stroke-width="2"/>';
+    if (o.snow) g += '<rect x="901" y="67" width="110" height="2.5" rx="1.2" fill="#fff"/>';
+    if (o.night) g += '<rect x="906" y="74" width="100" height="1.2" fill="#FFE7A8"/>';
+    if (o.vis === 'weihnachten') for (let x = 908; x < 1006; x += 7) g += `<circle class="tw" cx="${x}" cy="75.5" r="1.5" fill="${['#E5483B', '#F2B33D', '#3FA66B', '#3E8EDE'][(x / 7 | 0) % 4]}" style="animation-delay:-${(x % 7) / 3}s"/>`;
+    if (cold) g += icicles(901, 1011, 74);
+    g += parasol(o, 836, 98);
+    g += pool(o, 872, 1040, 102, 113);
+    return g;
+  };
+  // placed between the buttons and the weather corner, so the controls never hide it
+  const poolHouse = (o) => `<g transform="translate(888 99) scale(.75) translate(-956 -99)">${houseS(o)}</g>`;
+
   // ------------------------------------------------------------------------------ the scene
   // o: { season, wx (weather()), hour, lang, intensity ('calm'|'normal'|'lots'), storm (km/h), still (bool) }
-  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years].join('|'); };
+  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5].join('|'); };
   api.scene = (o) => {
     const s = o.season || { vis: 'alltag', jz: 'sommer' }; const vis = s.vis || 'alltag'; const jz = s.jz || 'sommer'; const lang = o.lang === 'en' ? 'en' : 'de';
     const w = o.wx || { kind: 'partlycloudy', wind: 8 }; let kind = w.kind || 'partlycloudy';
@@ -178,12 +230,14 @@
     } else svg += `<path d="M0 98 C 160 90 340 104 520 96 C 700 89 900 104 1200 94 V120 H0Z" fill="${gCol}"/>`;
     // everyday house and trees (a little different every season)
     const lit = vis === 'weihnachten' || night;
-    const smoke = ['herbst', 'winter'].includes(jz) || vis === 'weihnachten';
-    if (vis !== 'sommer' && vis !== 'fasnacht') svg += house(900, 100, night, snowGround, lit, smoke, wind);
+    const smokeOn = ['herbst', 'winter'].includes(jz) || vis === 'weihnachten';
+    const own = o.house === 'pool' && vis !== 'sommer' && vis !== 'fasnacht';
+    if (own) svg += poolHouse({ night, snow: snowGround, smoke: smokeOn, wind, jz, vis, temp: w.temp });
+    else if (vis !== 'sommer' && vis !== 'fasnacht') svg += house(900, 100, night, snowGround, lit, smokeOn, wind);
     if (vis === 'weihnachten' || vis === 'winter' || vis === 'sport') {
-      [[150, 102, 1], [250, 104, 0.8], [1060, 102, 0.95], [1150, 104, 0.75]].forEach(([x, y, sc]) => { svg += fir(x, y, sc, snowGround, false, r); });
+      (own ? [[150, 102, 1], [250, 104, 0.8], [720, 104, 0.85]] : [[150, 102, 1], [250, 104, 0.8], [1060, 102, 0.95], [1150, 104, 0.75]]).forEach(([x, y, sc]) => { svg += fir(x, y, sc, snowGround, false, r); });
     } else if (vis !== 'sommer' && vis !== 'fasnacht') {
-      [[150, 100, 1], [260, 102, 0.8], [1060, 100, 0.95], [1150, 102, 0.8]].forEach(([x, y, sc]) => { svg += leafTree(x, y, sc, vis === 'fruehling' || vis === 'ostern' ? 'fruehling' : vis === 'herbst' ? 'herbst' : jz, r, true); });
+      (own ? [[150, 100, 1], [260, 102, 0.8], [720, 102, 0.85]] : [[150, 100, 1], [260, 102, 0.8], [1060, 100, 0.95], [1150, 102, 0.8]]).forEach(([x, y, sc]) => { svg += leafTree(x, y, sc, vis === 'fruehling' || vis === 'ostern' ? 'fruehling' : vis === 'herbst' ? 'herbst' : jz, r, true); });
     }
     // ---- season layer
     const P = [];
@@ -194,7 +248,7 @@
       // Advent wreath with 1–4 candles lit
       const a = s.advent || 0;
       if (a) {
-        svg += '<g transform="translate(990 104)"><ellipse cx="0" cy="0" rx="30" ry="6" fill="#2f7a46"/>';
+        svg += `<g transform="translate(${own ? 640 : 990} 104)"><ellipse cx="0" cy="0" rx="30" ry="6" fill="#2f7a46"/>`;
         [-18, -6, 6, 18].forEach((cx, i) => { svg += `<rect x="${cx - 3}" y="-18" width="6" height="16" rx="1" fill="#c8302e"/>${i < a ? `<path class="flame" d="M${cx} -27 q3 5 0 8 q-3 -3 0 -8z" fill="#FFC23D"/>` : ''}`; });
         svg += '</g>';
       }

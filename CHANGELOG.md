@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.0 – 2026-11-15
+
+### New
+- **House with pool & pergola** for the header scene (*Settings → Seasons & weather → House in the scene*): a tall gabled house facing the garden with two upper windows, floor-level windows below, a simple pergola, an attached garage with a frosted-glass railing on its flat roof, a thatched parasol and a pool in front. It follows the weather and seasons like the standard house: snow on roof, railing and pergola, pool covered in winter, lit windows and pergola light in the evening, fairy lights at Christmas and **icicles below −5°**. The Advent wreath moves to the meadow so it never hides the house.
+
 ## 0.11.0 – 2026-11-15
 
 ### New

@@ -218,9 +218,10 @@ def _on_year(mo: int, d: int, year: int) -> date:
 DEFAULTS = {
     "enabled": True, "lead_day": 3, "lead_school": 3, "christmas_start": "advent", "xmas_snow": True,
     "weather": None, "storm_kmh": 50, "intensity": "normal", "priority": list(PRIORITY),
-    "events": {}, "wedding": "", "couple": "", "anim_bday": True,
+    "events": {}, "wedding": "", "couple": "", "anim_bday": True, "house": "standard",
 }
 INTENSITY = ("calm", "normal", "lots")
+HOUSES = ("standard", "pool")
 
 
 def clean_settings(raw) -> dict:
@@ -249,6 +250,7 @@ def clean_settings(raw) -> dict:
         "wedding": clean_date(raw.get("wedding")),
         "couple": clean_date(raw.get("couple")),
         "anim_bday": bool(raw.get("anim_bday", True)),
+        "house": raw.get("house") if raw.get("house") in HOUSES else "standard",
     }
 
 

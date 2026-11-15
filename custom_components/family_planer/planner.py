@@ -1373,7 +1373,7 @@ class FamilyPlanner:
             "season": self.season(),
             "season_cfg": {k: v for k, v in self.season_settings().items()
                            if k in ("weather", "storm_kmh", "intensity", "sug_enabled", "sug_from", "pool", "pool_min",
-                                    "jacuzzi", "jacuzzi_min", "xmas_snow", "anim_bday")},
+                                    "jacuzzi", "jacuzzi_min", "xmas_snow", "anim_bday", "house")},
             "busy": self.busy,
             "sonder": sonder.view(self.data["sonder_inst"], self.data["sonder"], self.lang),
             "sonder_points": {iid: self.sonder_points(i) for iid, i in self.data["sonder_inst"].items()},

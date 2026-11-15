@@ -90,3 +90,8 @@ def test_upcoming_lists_events():
     up = S.upcoming({}, date(2026, 11, 15))
     keys = [u["key"] for u in up]
     assert "advent" in keys and "silvester" in keys
+
+
+def test_house_setting():
+    assert S.clean_settings({"house": "pool"})["house"] == "pool"
+    assert S.clean_settings({"house": "<x>"})["house"] == "standard"

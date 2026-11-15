@@ -11,10 +11,10 @@ const errors = []; let n = 0;
 const bad = (html) => /undefined|NaN|\[object|null/.test(html);
 const VIS = Object.keys(X.DATA.VIS).concat(['alltag']);
 const KINDS = ['sunny', 'clear-night', 'partlycloudy', 'cloudy', 'rainy', 'pouring', 'lightning', 'snowy', 'fog', 'windy'];
-for (const vis of VIS) for (const jz of ['fruehling', 'sommer', 'herbst', 'winter']) for (const kind of KINDS) for (const hour of [9, 21, 23]) {
+for (const house of ['standard', 'pool']) for (const vis of VIS) for (const jz of ['fruehling', 'sommer', 'herbst', 'winter']) for (const kind of KINDS) for (const hour of [9, 21, 23]) {
   const se = { vis, jz, key: vis, sub: vis === 'weihnachten' ? 'advent2' : null, advent: vis === 'weihnachten' ? 2 : 0, snow: true, wild: 3, anniversary: vis === 'liebe' ? { key: 'hochzeitstag', years: 12 } : null };
-  const html = S.scene({ season: se, wx: { kind, wind: 30, temp: 5 }, hour, lang: 'de', intensity: 'lots', storm: 50, still: false });
-  n += 1; if (!html.startsWith('<div class="scn') || bad(html)) errors.push(`scene ${vis}/${jz}/${kind}/${hour}`);
+  const html = S.scene({ season: se, wx: { kind, wind: 30, temp: hour === 9 ? -8 : 5 }, hour, lang: 'de', intensity: 'lots', storm: 50, still: false, house });
+  n += 1; if (!html.startsWith('<div class="scn') || bad(html)) errors.push(`scene ${house}/${vis}/${jz}/${kind}/${hour}`);
 }
 const code = A.code({ ...A.parse(''), fig: 'm', hair: 'lang', hc: 'braun', sk: 'hell', shirt: 'blau' });
 const SERVER = /^av2:(?:[a-z0-9]{1,16}\.){11,13}[a-z0-9]{1,16}$/;
