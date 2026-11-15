@@ -1447,7 +1447,7 @@ class LoxWochenplanerCard extends FpBase {
     const open = (snap.sonder || []).filter((it) => it.pid == null && !it.done && this._sonderVisible(it, tStr));
     return open.map((it) => {
       const who = this._claim === it.id ? `<div class="who"><span>${TX.who}</span>${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="wp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 26)}<b>${esc(p.name)}</b></button>`).join('')}<button class="wp x" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${this._revealBtn(it, true)}<button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${who}</div>`;
+      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span><div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -1912,13 +1912,14 @@ class LoxWochenplanerCard extends FpBase {
       .ptp{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:#f5c542;opacity:.85;vertical-align:middle}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),var(--fp-bg2,#232323) 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--fp-bg3,#2b2b2b);font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
       .vs2{font-size:11px;color:var(--fp-text3,#8a8a8a);margin-top:3px}.c.vc2{display:flex;flex-direction:column;gap:6px}
-      .vcard{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
-      .vcard .vi{font-size:22px}.vcard .vt{flex:1;min-width:120px;font-size:13px;line-height:1.3}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
+      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
+      .vcard .vi{font-size:22px;text-align:center}.vcard .vt{min-width:0;font-size:13px;line-height:1.3}
+      .vcard .vbtn,.vcard .who{grid-column:1 / -1}.vbtn{display:flex;gap:8px}.vbtn .take{flex:1;height:40px;animation:fppul 2.4s ease-in-out infinite}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
       .take{border:none;border-radius:10px;padding:8px 12px;background:#f5c542;color:var(--fp-on-accent,#141414);font:inherit;font-size:13px;font-weight:700;cursor:pointer;animation:fpwig 2.4s ease-in-out infinite}
       .who{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.who span{font-size:12px;color:var(--fp-text2,#aaa);margin-right:4px}
       .wp{display:flex;align-items:center;gap:6px;border:1px solid var(--c,#444);background:var(--fp-bg2,#232323);color:inherit;border-radius:18px;padding:2px 10px 2px 2px;font:inherit;font-size:13px;cursor:pointer}.wp.x{padding:4px 10px;border-color:#444;color:var(--fp-text2,#999)}
       @keyframes fpvin{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
-      @keyframes fpwig{0%,86%,100%{transform:rotate(0)}90%{transform:rotate(-4deg)}95%{transform:rotate(4deg)}}
+      @keyframes fppul{0%,80%,100%{transform:none}88%{transform:scale(1.04)}}@keyframes fpwig{0%,86%,100%{transform:rotate(0)}90%{transform:rotate(-4deg)}95%{transform:rotate(4deg)}}
       .x2{font-size:11px;font-weight:700;color:#ff7ab6;margin-left:4px;white-space:nowrap}
       .awb{display:inline-block;max-width:100%;box-sizing:border-box;margin:3px 0 2px;padding:1px 8px;border-radius:10px;font-size:11px;line-height:1.3;background:var(--fp-bg3,#2b2b2b);border:1px dashed var(--fp-line,#555);color:var(--fp-text2,#bbb)}.awb.now{border-style:solid;border-color:#4fa3e0;color:#cfe6fa;background:rgba(79,163,224,.14)}
       .lab.bday{position:relative;overflow:visible;background:linear-gradient(120deg,rgba(255,122,182,.22),rgba(255,216,77,.18),rgba(92,225,230,.18),rgba(176,124,255,.22));background-size:300% 300%;animation:fpbdg 6s ease-in-out infinite}
@@ -2739,7 +2740,7 @@ class LoxWochenplanerCard extends FpBase {
     const open = (snap.sonder || []).filter((it) => it.pid == null && !it.done && this._sonderVisible(it, tStr));
     return open.map((it) => {
       const who = this._claim === it.id ? `<div class="who"><span>${TX.who}</span>${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="wp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 26)}<b>${esc(p.name)}</b></button>`).join('')}<button class="wp x" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${this._revealBtn(it, true)}<button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${who}</div>`;
+      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span><div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -3204,13 +3205,14 @@ class LoxWochenplanerCard extends FpBase {
       .ptp{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:#f5c542;opacity:.85;vertical-align:middle}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),var(--fp-bg2,#232323) 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--fp-bg3,#2b2b2b);font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
       .vs2{font-size:11px;color:var(--fp-text3,#8a8a8a);margin-top:3px}.c.vc2{display:flex;flex-direction:column;gap:6px}
-      .vcard{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
-      .vcard .vi{font-size:22px}.vcard .vt{flex:1;min-width:120px;font-size:13px;line-height:1.3}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
+      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
+      .vcard .vi{font-size:22px;text-align:center}.vcard .vt{min-width:0;font-size:13px;line-height:1.3}
+      .vcard .vbtn,.vcard .who{grid-column:1 / -1}.vbtn{display:flex;gap:8px}.vbtn .take{flex:1;height:40px;animation:fppul 2.4s ease-in-out infinite}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
       .take{border:none;border-radius:10px;padding:8px 12px;background:#f5c542;color:var(--fp-on-accent,#141414);font:inherit;font-size:13px;font-weight:700;cursor:pointer;animation:fpwig 2.4s ease-in-out infinite}
       .who{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.who span{font-size:12px;color:var(--fp-text2,#aaa);margin-right:4px}
       .wp{display:flex;align-items:center;gap:6px;border:1px solid var(--c,#444);background:var(--fp-bg2,#232323);color:inherit;border-radius:18px;padding:2px 10px 2px 2px;font:inherit;font-size:13px;cursor:pointer}.wp.x{padding:4px 10px;border-color:#444;color:var(--fp-text2,#999)}
       @keyframes fpvin{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
-      @keyframes fpwig{0%,86%,100%{transform:rotate(0)}90%{transform:rotate(-4deg)}95%{transform:rotate(4deg)}}
+      @keyframes fppul{0%,80%,100%{transform:none}88%{transform:scale(1.04)}}@keyframes fpwig{0%,86%,100%{transform:rotate(0)}90%{transform:rotate(-4deg)}95%{transform:rotate(4deg)}}
       .x2{font-size:11px;font-weight:700;color:#ff7ab6;margin-left:4px;white-space:nowrap}
       .awb{display:inline-block;max-width:100%;box-sizing:border-box;margin:3px 0 2px;padding:1px 8px;border-radius:10px;font-size:11px;line-height:1.3;background:var(--fp-bg3,#2b2b2b);border:1px dashed var(--fp-line,#555);color:var(--fp-text2,#bbb)}.awb.now{border-style:solid;border-color:#4fa3e0;color:#cfe6fa;background:rgba(79,163,224,.14)}
       .lab.bday{position:relative;overflow:visible;background:linear-gradient(120deg,rgba(255,122,182,.22),rgba(255,216,77,.18),rgba(92,225,230,.18),rgba(176,124,255,.22));background-size:300% 300%;animation:fpbdg 6s ease-in-out infinite}

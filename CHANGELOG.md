@@ -13,6 +13,7 @@
 - **Real day and night:** the scene follows Home Assistant's `sun.sun` (night when the sun is below the horizon, before only by the clock 20–6). Around sunset and sunrise with sun or a few clouds the sky glows orange / pink with a low sun.
 - **Garden lights at night:** small lights shine up into the trees and bushes. More grass tufts everywhere and a few round stones (snow caps in winter).
 - **Christmas lights and Swiss bunting:** the fairy lights hang on a sagging wire and every bulb glows and sparkles in its own colour; on 1 August a string of red and white pennants with little Swiss crosses sways along the top. Spring tulips grow beside the house instead of in front of the pool.
+- **Volunteer tile, symmetric:** symbol and title on top, below *I'll take it* (full width, gentle pulse instead of the wiggle) and the eye button side by side, both 40 px high.
 - **Rainbow design:** the selected button uses a calm two-colour gradient (pink → violet) instead of all rainbow colours; the rainbow band stays.
 - **House in the middle of the scene:** every landscape and season is shifted so the house (or the beach / carnival scene) sits in the free middle of the header, also on tablets; the landscape repeats seamlessly at the right edge. Advent wreath, Christmas tree and presents stay next to the house, banners sit below the navigation.
 - **Design picker removed from the header** – choose the design under *Settings → General*. The header is calmer and leaves more room for the scene.
