@@ -8,7 +8,7 @@ An event pauses chores only when it is *safe* that someone is away:
 from __future__ import annotations
 
 from collections import Counter
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 import hashlib
 import re
 
@@ -142,6 +142,79 @@ def decision(raw) -> dict:
         return {}
     return {"d": raw["d"], "family": bool(raw.get("family")), "persons": [p for p in raw.get("persons") or [] if isinstance(p, str)][:30],
             "at": str(raw.get("at") or "")[:10]}
+
+
+def absence_spans(events_by_owner: dict[str | None, list[dict]], persons: dict, words: list[str], scope: str,
+                  min_hours: float = 20, decisions: dict | None = None) -> dict[str, list[dict]]:
+    """{person_id: [{"start", "end", "kind"}]} – the exact times of every absence (same rules as absences())."""
+    decisions = decisions or {}
+    out: dict[str, list[dict]] = {}
+    for ev in found(events_by_owner, persons, words, scope, min_hours, long_events=True):
+        dec = decision(decisions.get(ev["key"]))
+        if dec.get("d") == "home" or (ev["kind"] == "long" and dec.get("d") != "away"):
+            continue
+        who_ = list(persons) if dec.get("family") else [p for p in dec.get("persons", []) if p in persons] or ev["persons"]
+        for pid in who_:
+            out.setdefault(pid, []).append({"start": ev["start"], "end": ev["end"],
+                                            "kind": "holiday" if ev["kind"] == "holiday" else "trip"})
+    return out
+
+
+def _at(value, tz) -> tuple[datetime, bool]:
+    x, all_day = _parse(value)
+    if all_day:
+        return datetime.combine(x, time.min, tz), True
+    return (x.astimezone(tz) if x.tzinfo else x.replace(tzinfo=tz)), False
+
+
+def badge_at(spans: list[dict], now: datetime) -> dict | None:
+    """Avatar badge with real times: {"state": "tomorrow" | "today" | "now", "at" / "until", "allday", "kind"}.
+
+    tomorrow: away from tomorrow (at = time, None for all-day); today: leaves later today (at); now: away until …
+    """
+    tz = now.tzinfo
+    cur, up = [], []
+    for sp in spans or []:
+        try:
+            s, sa = _at(sp["start"], tz)
+            e, ea = _at(sp["end"], tz)
+        except (ValueError, TypeError, KeyError):
+            continue
+        if s <= now < e:
+            cur.append((e, ea, sp.get("kind", "trip")))
+        elif s > now:
+            up.append((s, sa, sp.get("kind", "trip"), e, ea))
+    if cur:
+        e, ea, kind = max(cur)
+        for s2, _sa2, _k2, e2, ea2 in sorted(up):  # a following absence right after this one
+            if s2 <= e and e2 > e:
+                e, ea = e2, ea2
+        if ea:
+            return {"state": "now", "until": (e - timedelta(days=1)).date().isoformat(), "allday": True, "kind": kind}
+        return {"state": "now", "until": e.isoformat(timespec="minutes"), "allday": False, "kind": kind}
+    if up:
+        s, sa, kind, _e, _ea = min(up)
+        if s.date() == now.date():
+            return {"state": "today", "at": s.strftime("%H:%M"), "kind": kind}
+        if s.date() == now.date() + timedelta(days=1):
+            return {"state": "tomorrow", "at": None if sa else s.strftime("%H:%M"), "kind": kind}
+    return None
+
+
+def next_change(spans_by_pid: dict[str, list[dict]], now: datetime) -> datetime | None:
+    """Next moment an absence starts or ends (to refresh badges and special chores right then)."""
+    tz = now.tzinfo
+    nxt = None
+    for spans in spans_by_pid.values():
+        for sp in spans:
+            for key in ("start", "end"):
+                try:
+                    t, _ = _at(sp[key], tz)
+                except (ValueError, TypeError, KeyError):
+                    continue
+                if t > now and (nxt is None or t < nxt):
+                    nxt = t
+    return nxt
 
 
 def absence_kinds(events_by_owner: dict[str | None, list[dict]], persons: dict, words: list[str], scope: str,

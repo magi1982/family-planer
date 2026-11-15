@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.1 – 2026-11-15
+
+### Fixed
+- **Away badge uses the real times** from the calendar (Home Assistant time zone): the day before *✈️ away tomorrow from 15:00*, on the day *✈️ away from 15:00 today*, then *✈️ away until Tue 23:30*. Before, a trip starting in the afternoon only showed from the next full day. Badges and special chores *only while away* switch exactly when the absence starts or ends; pausing chores still uses whole days.
+- **The holiday check could not be opened** once every entry was answered, so there was no way to see or change a decision. The button is now always there while holiday detection is on (the red number only for open questions). It shows *Who is away?* at the top and lists answered entries too, with the current answer highlighted and changeable.
+
 ## 0.13.0 – 2026-11-15
 
 ### New

@@ -334,14 +334,15 @@
   const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', einstellungen: 'settings' };
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-      design: 'Design', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?',
+      design: 'Design', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
       away: 'Weg – Ämtli pausieren', home: 'Hier – Ämtli laufen weiter', close: 'Schliessen', open: 'offen', all: 'alle', fam: 'Ganze Familie', opt: 'Optional – lange Termine', optHint: 'Keine Ferien-Wörter, aber länger als die eingestellte Stundenzahl. Ohne Entscheid laufen die Ämtli weiter.',
       miss: 'Ansicht „{p}“ fehlt in diesem Dashboard. Ansicht mit diesem Pfad anlegen oder in der Navigationskarte unter paths: anpassen.' },
     en: { wd: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], mon: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-      design: 'Design', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays in the next two weeks. Who do they apply to, and are you away or here?',
+      design: 'Design', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays in the next two weeks. Who do they apply to, and are you away or here?', vacEmpty: 'No absence in the calendar for the next two weeks.', awWho: 'Who is away?', awNone: 'Nobody is away right now.', awUntil: 'away until {d}', awAt: 'away from {t} today', awTomAt: 'away tomorrow from {t}', awTom: 'away from tomorrow', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       away: 'Away – pause chores', home: 'Here – chores go on', close: 'Close', open: 'open', all: 'all', fam: 'Whole family', opt: 'Optional – long events', optHint: 'No holiday words, but longer than the set number of hours. Without a decision chores go on.',
       miss: 'View "{p}" is missing in this dashboard. Add a view with this path or change it under paths: in the navigation card.' } };
-  const NAV_POPCSS = `
+  const NAV_POPCSS = `.pop .aw{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;margin:4px 0;border-radius:10px;background:var(--fp-bg2);font-size:13px}.pop .vb button.sel{outline:2px solid var(--fp-accent)}
+
         button{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--fp-line);background:var(--fp-bg3);color:var(--fp-text2);font:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
         button ha-icon{--mdc-icon-size:20px}button.on{border-color:color-mix(in srgb,var(--fp-accent) 60%,transparent);color:var(--fp-accent)}
         .sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
@@ -503,7 +504,7 @@
         button ha-icon{--mdc-icon-size:20px}
         .rt{display:flex;justify-content:flex-end;align-items:center;gap:8px;position:relative}
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
-        button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
+        button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}button.vac.quiet{color:inherit;border-color:var(--fp-line)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
         @media (max-width:700px){.mid button span.l{display:none}.mid button{padding:0 12px}.clk span{display:none}.bar{grid-template-columns:auto 1fr auto}}
         .bar.sc{min-height:96px;padding-top:10px;padding-bottom:10px}.bar.sc > :not(.scn){position:relative;z-index:1}.bar.sc .clk b,.bar.sc .clk span,.bar.sc .ttl{text-shadow:0 1px 3px rgba(0,0,0,.55)}
@@ -541,18 +542,25 @@
       const T = NAV_T[lang]; const cur = themeName(s.theme); const sty = STYLES.includes(s.style) ? s.style : 'standard';
       const nm = (k) => THEME_NAMES[k][lang === 'en' ? 'en' : 'de']; const sn = (k) => STYLE_NAMES[k][lang === 'en' ? 'en' : 'de'];
       const fmtD = (d) => { const x = new Date(d + 'T00:00'); return `${x.getDate()}.${x.getMonth() + 1}.`; };
-      const vac = pending ? `<button class="ic vac${this._open === 'vac' ? ' on' : ''}" data-vac title="${escN(T.vac)}"><ha-icon icon="mdi:beach"></ha-icon>${pending ? `<b class="dot">${pending}</b>` : ''}</button>` : '';
+      const allRev = (s.vacation_review || []); const vacOn = ((s.vacation || {}).enabled !== false) && s.modules && s.modules.week;
+      const vac = vacOn || allRev.length ? `<button class="ic vac${this._open === 'vac' ? ' on' : ''}${pending ? '' : ' quiet'}" data-vac title="${escN(T.vac)}"><ha-icon icon="mdi:beach"></ha-icon>${pending ? `<b class="dot">${pending}</b>` : ''}</button>` : '';
+      const awayList = Object.entries(s.away_badge || {}).map(([pid, b]) => { const p = (s.persons || []).find((x) => x.id === pid); if (!p) return '';
+        const ic = b.kind === 'holiday' ? '🌴' : '✈️'; const d = (x) => { const dd = new Date(String(x).slice(0, 10) + 'T12:00'); return `${T.wd[dd.getDay()]} ${dd.getDate()}.${dd.getMonth() + 1}.`; };
+        const txt = b.state === 'now' ? T.awUntil.replace('{d}', b.allday ? d(b.until) : `${d(b.until)} ${String(b.until).slice(11, 16)}`) : b.state === 'today' ? T.awAt.replace('{t}', b.at) : (b.at ? T.awTomAt.replace('{t}', b.at) : T.awTom);
+        return `<div class="aw"><b>${escN(p.name)}</b><span>${ic} ${escN(txt)}</span></div>`; }).join('');
       const pop = this._open === 'theme' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:palette-outline"></ha-icon>${T.design}<button class="x" data-x>✕</button></div>
           <div class="tg">${Object.keys(THEMES).map((k) => `<button class="${k === cur ? 'on' : ''}" data-theme="${k}">${themeMini(k, sty)}<span class="tn">${k === cur ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${nm(k)}</span></button>`).join('')}</div>
           <div class="ph" style="margin-top:14px"><ha-icon icon="mdi:layers-outline"></ha-icon>${T.style}</div>
           <div class="sg">${STYLES.map((k) => `<button class="${k === sty ? 'on' : ''}" data-style="${k}">${themeMini(cur, k)}<span class="tn">${k === sty ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${sn(k)}</span></button>`).join('')}</div></div>`
-        : this._open === 'vac' && pending ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:beach"></ha-icon>${T.vac}<button class="x" data-x>✕</button></div><div class="hint">${T.vacHint}</div>
-          <div class="vl">${['holiday', 'long'].map((kind) => { const list = review.filter((v) => (v.kind || 'holiday') === kind); if (!list.length) return '';
+        : this._open === 'vac' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:beach"></ha-icon>${T.vac}<button class="x" data-x>✕</button></div>
+          <div class="oh">${T.awWho}</div>${awayList || `<div class="hint">${T.awNone}</div>`}
+          ${allRev.length ? `<div class="hint">${T.vacHint}</div>` : `<div class="hint">${T.vacEmpty}</div>`}
+          <div class="vl">${['holiday', 'long'].map((kind) => { const list = allRev.filter((v) => (v.kind || 'holiday') === kind); if (!list.length) return '';
             return (kind === 'long' ? `<div class="oh">${T.opt}</div><div class="oh2">${T.optHint}</div>` : '') + list.map((v) => { const c = this._vacChoice(v.key);
               return `<div class="vi"><div class="vt">${escN(v.title)}</div><div class="vd">${fmtD(v.days[0])} – ${fmtD(v.days[v.days.length - 1])}</div>
               <div class="vs"><button class="${c.family ? 'on' : ''}" data-vfam data-key="${escN(v.key)}"><ha-icon icon="mdi:account-group"></ha-icon>${T.fam}</button>${(s.persons || []).map((p) => `<button class="${!c.family && c.persons.includes(p.id) ? 'on' : ''}" data-vper="${escN(p.id)}" data-key="${escN(v.key)}">${escN(p.name)}</button>`).join('')}</div>
-              <div class="vb"><button class="away" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
-              <button class="home" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`; }).join(''); }).join('')}</div></div>` : '';
+              <div class="vb"><button class="away${v.decision === 'away' ? ' sel' : ''}" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
+              <button class="home${v.decision === 'home' ? ' sel' : ''}" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`; }).join(''); }).join('')}</div></div>` : '';
       this._popHtml = pop;
       return `<span class="rt">${this._wxCorner(s, lang)}${vac}${this._cfg.theme_picker === false ? '' : `<button class="ic${this._open === 'theme' ? ' on' : ''}" data-themes title="${T.design}" aria-expanded="${this._open === 'theme'}">${themeSwatch(cur)}<ha-icon icon="mdi:palette-outline"></ha-icon></button>`}
         ${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;

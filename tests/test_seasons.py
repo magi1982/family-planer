@@ -104,3 +104,24 @@ def test_away_badge():
     assert V.badge(days, date(2026, 11, 16)) == {"state": "now", "until": "2026-11-18", "kind": "trip"}
     assert V.badge(days, date(2026, 11, 19)) is None
     assert V.badge({"2026-07-01": "holiday"}, date(2026, 7, 1))["kind"] == "holiday"
+
+
+def test_away_badge_with_times():
+    from datetime import datetime, timedelta, timezone
+    V = importlib.import_module("fpkg.vacation")
+    tz = timezone(timedelta(hours=1))
+    trip = [{"start": "2026-11-15T15:00:00+01:00", "end": "2026-11-17T23:30:00+01:00", "kind": "trip"}]
+    at = lambda d, h, m=0: datetime(2026, 11, d, h, m, tzinfo=tz)  # noqa: E731
+    assert V.badge_at(trip, at(14, 9)) == {"state": "tomorrow", "at": "15:00", "kind": "trip"}
+    assert V.badge_at(trip, at(15, 10)) == {"state": "today", "at": "15:00", "kind": "trip"}
+    assert V.badge_at(trip, at(15, 16)) == {"state": "now", "until": "2026-11-17T23:30+01:00", "allday": False, "kind": "trip"}
+    assert V.badge_at(trip, at(18, 0)) is None
+    ferien = [{"start": "2026-07-04", "end": "2026-07-12", "kind": "holiday"}]
+    assert V.badge_at(ferien, datetime(2026, 7, 3, 12, tzinfo=tz))["at"] is None
+    assert V.badge_at(ferien, datetime(2026, 7, 6, 12, tzinfo=tz))["until"] == "2026-07-11"
+    assert V.next_change({"m": trip}, at(15, 10)) == at(15, 15)
+    ev = {"summary": "Sam Paris", "start": "2026-11-15T15:00:00+01:00", "end": "2026-11-17T23:30:00+01:00"}
+    P = {"m": {"name": "Sam"}}
+    assert V.absence_spans({"m": [ev]}, P, V.DEFAULT_WORDS, "owner", 20) == {}  # long event: only once confirmed
+    key = V.found({"m": [ev]}, P, V.DEFAULT_WORDS, "owner", 20, long_events=True)[0]["key"]
+    assert V.absence_spans({"m": [ev]}, P, V.DEFAULT_WORDS, "owner", 20, {key: "away"})["m"][0]["kind"] == "trip"

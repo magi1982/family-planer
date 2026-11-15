@@ -38,11 +38,11 @@ const TX = {
   de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
     secret: '🤫 Geheim-Ämtli', reveal: 'antippen zum Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
-    awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
+    awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
     secret: '🤫 Secret job', reveal: 'tap to reveal', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
-    awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
+    awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
 // birthday animations behind the birthday child (one per day, chosen by the server)
 const BDAY_FX = (n) => {
@@ -462,8 +462,15 @@ class LoxWochenplanerCard extends FpBase {
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
   _awBadge(snap, pid) {
     const b = ((snap || {}).away_badge || {})[pid]; if (!b) return '';
-    const ic = b.kind === 'holiday' ? '🌴' : '✈️'; let txt = TX.awTom;
-    if (b.state === 'now') { const t = ymd(startOfDay(new Date())); txt = b.until === t ? TX.awToday : TX.awNow.replace('{d}', TX.wd[new Date(b.until + 'T12:00:00').getDay()]); }
+    const ic = b.kind === 'holiday' ? '🌴' : '✈️'; let txt;
+    if (b.state === 'tomorrow') txt = b.at ? TX.awTomAt.replace('{t}', b.at) : TX.awTom;
+    else if (b.state === 'today') txt = TX.awAt.replace('{t}', b.at);
+    else {
+      // until: a date (all-day) or Swiss-time date and time "2026-11-17T23:30+01:00"
+      const day = String(b.until).slice(0, 10); const tm = b.allday ? '' : String(b.until).slice(11, 16);
+      const isToday = day === ymd(startOfDay(new Date())); const wd = TX.wd[new Date(day + 'T12:00:00').getDay()];
+      txt = b.allday ? (isToday ? TX.awToday : TX.awNow.replace('{d}', wd)) : TX.awNow.replace('{d}', isToday ? tm : `${wd} ${tm}`);
+    }
     return `<div class="awb${b.state === 'now' ? ' now' : ''}">${ic} ${esc(txt)}</div>`;
   }
   _lvBadge(name) {

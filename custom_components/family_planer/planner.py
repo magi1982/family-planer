@@ -16,6 +16,7 @@ from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import (
     async_call_later,
+    async_track_point_in_time,
     async_track_state_change_event,
     async_track_time_change,
     async_track_time_interval,
@@ -119,6 +120,8 @@ class FamilyPlanner:
         self.owns_panel = False
         self.away: dict[str, set[str]] = {}
         self.away_kind: dict[str, dict[str, str]] = {}
+        self.away_spans: dict[str, list[dict]] = {}
+        self._away_timer = None
         self.vacation_review: list[dict] = []  # holidays found in the calendars, waiting for "away / at home"
         self._away_known = False
         self._pin_fail: list[datetime] = []
@@ -194,6 +197,9 @@ class FamilyPlanner:
         for unsub in self._unsubs:
             unsub()
         self._unsubs.clear()
+        if self._away_timer:
+            self._away_timer()
+            self._away_timer = None
         if self._list_unsub:
             self._list_unsub()
             self._list_unsub = None
@@ -278,7 +284,7 @@ class FamilyPlanner:
                 "wedding": st.get("wedding") or None, "vis": vis,
                 "weather": self._wx_kind(self._wx.get("day_cond") or self._wx.get("cond")),
                 "tmax": self._wx.get("tmax") if isinstance(self._wx.get("tmax"), (int, float)) else None,
-                "away": {pid for pid, days in self.away.items() if today.isoformat() in days}}
+                "away": {pid for pid, days in self.away.items() if today.isoformat() in days} | self.away_now()}
 
     def refresh_sonder(self) -> bool:
         today = self.today()
@@ -338,6 +344,30 @@ class FamilyPlanner:
                     cur["pts"] = earned
                 else:
                     ledger.remove(cur)
+
+    def away_now(self) -> set[str]:
+        """Persons away right now by the exact times (a trip from 15:00 counts from 15:00)."""
+        now = dt_util.now()
+        return {pid for pid, spans in self.away_spans.items() if (b := vacation.badge_at(spans, now)) and b["state"] == "now"}
+
+    def _schedule_away_change(self) -> None:
+        """Refresh badges and special chores exactly when an absence starts or ends."""
+        if self._away_timer:
+            self._away_timer()
+            self._away_timer = None
+        nxt = vacation.next_change(self.away_spans, dt_util.now())
+        if nxt is None or nxt - dt_util.now() > timedelta(days=3):
+            return
+
+        @callback
+        def fire(_now: datetime) -> None:
+            self._away_timer = None
+            if self.module_on(MODULE_WEEK):
+                self.refresh_sonder()
+            self._changed()
+            self._schedule_away_change()
+
+        self._away_timer = async_track_point_in_time(self.hass, fire, nxt + timedelta(seconds=5))
 
     def sonder_points(self, inst: dict) -> int:
         df = self.data["sonder"].get(inst.get("sid")) or {}
@@ -475,6 +505,7 @@ class FamilyPlanner:
             words = v["words"] or vacation.DEFAULT_WORDS
             decisions = self.settings.get("vacation_decisions") or {}
             self.away_kind = vacation.absence_kinds(by_owner, self.data["persons"], words, v["scope"], v["min_hours"], decisions)
+            self.away_spans = vacation.absence_spans(by_owner, self.data["persons"], words, v["scope"], v["min_hours"], decisions)
             away = {pid: set(days) for pid, days in self.away_kind.items()}
             every = vacation.found(by_owner, self.data["persons"], words, v["scope"], v["min_hours"], long_events=True)
             self._vac_keys = {e["key"] for e in every}
@@ -482,8 +513,17 @@ class FamilyPlanner:
         else:
             self.vacation_review = []
             self.away_kind = {}
+            self.away_spans = {}
+        self._schedule_away_change()
+        old_spans = getattr(self, "_spans_seen", None)
         changed = away != self.away
         self.away = away
+        if old_spans != self.away_spans:
+            self._spans_seen = {k: list(v) for k, v in self.away_spans.items()}
+            if not changed:
+                if self.module_on(MODULE_WEEK):
+                    self.refresh_sonder()
+                self._changed(save=False)
         if changed and self.module_on(MODULE_WEEK):
             self.refresh_sonder()
         self._away_known = True
@@ -1423,7 +1463,7 @@ class FamilyPlanner:
                            if k in ("weather", "storm_kmh", "intensity", "sug_enabled", "sug_from", "pool", "pool_min",
                                     "jacuzzi", "jacuzzi_min", "xmas_snow", "anim_bday", "house")},
             "busy": self.busy,
-            "away_badge": {pid: b for pid, days in self.away_kind.items() if (b := vacation.badge(days, self.today()))},
+            "away_badge": {pid: b for pid, spans in self.away_spans.items() if (b := vacation.badge_at(spans, dt_util.now()))},
             "sonder": sonder.view(self.data["sonder_inst"], self.data["sonder"], self.lang),
             "sonder_points": {iid: self.sonder_points(i) for iid, i in self.data["sonder_inst"].items()},
             "todos": sorted(({"id": tid, **t} for tid, t in self.data["todos"].items()),
