@@ -67,6 +67,7 @@ _LOGGER = logging.getLogger(__name__)
 
 PERSON_FIELDS = ("name", "color", "image", "aliases", "calendar", "school", "order", "role", "birthday", "bday_anim", "season_av")
 BDAY_ANIMS = 5
+TEMPLATES_ADULT = {t[0]: True for t in sonder.CATALOGUE if t[8].get("adult")}
 ROLES = ("kid", "adult")
 
 
@@ -147,6 +148,16 @@ class FamilyPlanner:
         self.data.setdefault("sonder_inst", {})
         if "sonder" not in self.data:  # 0.11: catalogue of fun special chores (everyday ones switched off)
             self.data["sonder"] = sonder.seed()
+            self.data["sonder_tpls"] = list(sonder.TEMPLATES)
+        # templates added in later versions appear once; templates that need a grown-up get the flag
+        seen = set(self.data.setdefault("sonder_tpls", [d.get("tpl") for d in self.data["sonder"].values() if d.get("tpl")]))
+        for tid in sonder.TEMPLATES:
+            if tid not in seen:
+                self.data["sonder"].setdefault(f"t_{tid}", sonder.from_template(tid))
+                self.data["sonder_tpls"].append(tid)
+        for d in self.data["sonder"].values():
+            d.setdefault("away", [])
+            d.setdefault("adult", (TEMPLATES_ADULT.get(d.get("tpl")) or False))
         settings = self.data["settings"]
         for key, val in DEFAULT_SETTINGS.items():
             if key == CONF_MODULES:
@@ -265,7 +276,8 @@ class FamilyPlanner:
                 "birthdays": {pid: p["birthday"] for pid, p in self.data["persons"].items() if p.get("birthday")},
                 "wedding": st.get("wedding") or None, "vis": vis,
                 "weather": self._wx_kind(self._wx.get("day_cond") or self._wx.get("cond")),
-                "tmax": self._wx.get("tmax") if isinstance(self._wx.get("tmax"), (int, float)) else None}
+                "tmax": self._wx.get("tmax") if isinstance(self._wx.get("tmax"), (int, float)) else None,
+                "away": {pid for pid, days in self.away.items() if today.isoformat() in days}}
 
     def refresh_sonder(self) -> bool:
         today = self.today()
@@ -469,6 +481,8 @@ class FamilyPlanner:
             self.vacation_review = []
         changed = away != self.away
         self.away = away
+        if changed and self.module_on(MODULE_WEEK):
+            self.refresh_sonder()
         self._away_known = True
         if changed and apply:
             engine.rollover(self.data, self.today(), self.away)

@@ -116,3 +116,24 @@ def test_volunteer_keeps_eligible_and_max_open():
     insts = {}
     SO.refresh(insts, defs, PERSONS, date(2026, 10, 5), ctx(date(2026, 10, 5)), {"max_open": 3})
     assert len(insts) == 3 and all(i["elig"] == ["a", "b"] for i in insts.values())
+
+
+def test_only_while_a_grown_up_is_away():
+    persons = {**PERSONS, "d": {"name": "Tom", "role": "adult"}}
+    df = SO.clean_def({"title": "Mama verwöhnen", "anchor": {"t": "daily"}, "span": 1, "away": ["d"]}, persons)
+    today = date(2026, 10, 6)
+    assert SO.desired({"x": df}, persons, today, ctx(today)) == {}
+    w = SO.desired({"x": df}, persons, today, ctx(today, away={"d"}))
+    assert list(w.values())[0]["elig"] == ["a", "b"]
+    anyone = SO.from_template("wegznacht")
+    assert SO.desired({"y": anyone}, persons, today, ctx(today, away={"c"}))
+    assert SO.desired({"y": anyone}, persons, today, ctx(today, away={"a"})) == {}  # a child away is not enough
+
+
+def test_needs_a_grown_up_and_away_child_gets_nothing():
+    persons = {**PERSONS, "d": {"name": "Tom", "role": "adult"}}
+    df = SO.clean_def({"title": "Kerzen", "anchor": {"t": "daily"}, "span": 1, "adult": True, "mode": "each"}, persons)
+    today = date(2026, 10, 6)
+    assert SO.desired({"x": df}, persons, today, ctx(today, away={"c", "d"})) == {}
+    w = SO.desired({"x": df}, persons, today, ctx(today, away={"d", "a"}))
+    assert [x["pid"] for x in w.values()] == ["b"]

@@ -52,7 +52,7 @@ CATALOGUE = [
     ("haustier", "🐾", "Haustier-Spa: das Haustier bürsten und verwöhnen", "Pet spa: brush and pamper the pet", "s", _W(6), 0, 2, {"on": False}),
     ("kuehlschrank", "🧊", "Kühlschrank-Tetris: aufräumen, Abgelaufenes melden", "Fridge Tetris: tidy up, report anything out of date", "l", _W(3), 0, 3, {"on": False}),
     ("hoehle", "⛺", "Regentag: Höhle bauen und danach wieder aufräumen", "Rainy day: build a den and tidy it up afterwards", "m", {"t": "weather", "c": "rainy"}, 0, 1, {"from": "12:00", "until": "19:00"}),
-    ("schnee", "❄️", "Schnee schaufeln mit einem Erwachsenen", "Shovel snow with a grown-up", "l", {"t": "weather", "c": "snowy"}, 0, 1, {"until": "18:00"}),
+    ("schnee", "❄️", "Schnee schaufeln mit einem Erwachsenen", "Shovel snow with a grown-up", "l", {"t": "weather", "c": "snowy"}, 0, 1, {"until": "18:00", "adult": True}),
     ("sonnencreme", "🧴", "Sonnencreme-Erinnerer für alle", "Sun cream reminder for everyone", "s", {"t": "temp", "min": 25}, 0, 1, {"until": "11:00"}),
     ("lied", "🎶", "Ein Weihnachtslied vorsingen", "Sing a Christmas song", "s", {"t": "advent_week"}, 1, 7, {}),
     ("guetzli", "🍪", "Guetzli ausstechen und verzieren", "Cut out and decorate Christmas biscuits", "m", {"t": "event", "k": "advent"}, 1, 6, {}),
@@ -61,7 +61,7 @@ CATALOGUE = [
     ("xmaskarte", "💌", "Weihnachtskarte für Grosi und Grosspapi basteln", "Make a Christmas card for the grandparents", "m", {"t": "yearly", "md": "12-01"}, 0, 15, {}),
     ("kugeln", "🎄", "Christbaumkugeln aufhängen", "Hang the Christmas baubles", "m", {"t": "yearly", "md": "12-10"}, 0, 15, {"mode": "each"}),
     ("gedicht", "📜", "Weihnachtsgedicht auswendig lernen", "Learn a Christmas poem by heart", "l", {"t": "event", "k": "advent"}, 0, 0, {"end_md": "12-24"}),
-    ("kerzen", "🕯️", "Adventskerzen mit einem Erwachsenen anzünden", "Light the Advent candles with a grown-up", "s", {"t": "advent_sunday"}, 0, 1, {"until": "20:00"}),
+    ("kerzen", "🕯️", "Adventskerzen mit einem Erwachsenen anzünden", "Light the Advent candles with a grown-up", "s", {"t": "advent_sunday"}, 0, 1, {"until": "20:00", "adult": True}),
     ("chlausversli", "🎅", "Ein Samichlaus-Versli aufsagen", "Recite a St. Nicholas rhyme", "m", {"t": "yearly", "md": "12-01"}, 0, 6, {"mode": "each"}),
     ("vorsaetze", "🎯", "Vorsätze-Plakat für die Familie malen", "Paint a New Year's resolutions poster", "m", {"t": "yearly", "md": "12-27"}, 0, 5, {}),
     ("konfetti", "🎊", "Konfetti-Aufräum-Profi", "Confetti clean-up pro", "m", {"t": "yearly", "md": "01-01"}, 0, 2, {}),
@@ -94,6 +94,9 @@ CATALOGUE = [
     ("bdayplakat", "🌈", "Kompliment-Plakat für das Geburtstagskind", "Compliment poster for the birthday child", "m", {"t": "bday"}, -3, 4, {"secret": True}),
     ("ballone", "🎈", "Ballone aufblasen", "Blow up the balloons", "m", {"t": "bday"}, -1, 2, {"from": "12:00", "until": "07:00", "secret": True}),
     ("bdaytisch", "🎁", "Geburtstagstisch dekorieren", "Decorate the birthday table", "m", {"t": "bday"}, -1, 1, {"from": "12:00", "until": "21:00", "secret": True}),
+    ("wegznacht", "🍝", "Beim Znacht helfen – heute ist jemand weg", "Help with dinner – someone is away today", "m", {"t": "daily"}, 0, 1, {"from": "12:00", "until": "19:00", "away": ["any"]}),
+    ("wegbild", "💌", "Ein Bild oder Briefli malen für wer gerade weg ist", "Draw a picture or write a note for whoever is away", "s", {"t": "daily"}, 0, 1, {"away": ["any"]}),
+    ("wegabend", "🛋️", "Einen gemütlichen Abend für wer daheim ist vorbereiten", "Prepare a cosy evening for whoever is at home", "m", {"t": "daily"}, 0, 1, {"from": "15:00", "until": "20:00", "away": ["any"], "secret": True}),
     ("bdaylied", "🎵", "Geburtstagslied am Morgen singen", "Sing happy birthday in the morning", "s", {"t": "bday"}, -1, 2, {"until": "09:00", "secret": True}),
 ]
 TEMPLATES = {t[0]: t for t in CATALOGUE}
@@ -105,7 +108,7 @@ def from_template(tid: str) -> dict:
                       "span": span, "from": extra.get("from", ""), "until": extra.get("until", ""),
                       "season": extra.get("season", ""), "mode": extra.get("mode", "free"),
                       "secret": extra.get("secret", False), "next_wd": extra.get("next_wd"), "end_md": extra.get("end_md"),
-                      "on": extra.get("on", True)}, {})
+                      "away": extra.get("away", []), "adult": extra.get("adult", False), "on": extra.get("on", True)}, {})
 
 
 def seed() -> dict:
@@ -164,6 +167,9 @@ def clean_def(raw, persons: dict) -> dict:
         "from": _hhmm(raw.get("from")), "until": _hhmm(raw.get("until")),
         "season": season, "weather": raw.get("weather") if raw.get("weather") in WEATHER else "",
         "secret": bool(raw.get("secret")), "on": bool(raw.get("on", True)),
+        # only while these people are away ("any" = any grown-up); hidden while every grown-up is away
+        "away": [a for a in (raw.get("away") or []) if a == "any" or (a in persons if persons else isinstance(a, str) and len(a) <= 40)][:6],
+        "adult": bool(raw.get("adult")),
         "tpl": raw.get("tpl") if raw.get("tpl") in TEMPLATES else None,
     }
 
@@ -258,6 +264,23 @@ def _eligible(df: dict, persons: dict) -> list[str]:
 # --------------------------------------------------------------------------------------------- instances
 
 
+def _adults(persons: dict) -> list[str]:
+    return [p for p, x in persons.items() if x.get("role") == "adult"]
+
+
+def _away_ok(df: dict, persons: dict, away: set) -> bool:
+    """Away condition: e.g. "only while Dad is away"; "needs a grown-up" hides it while every grown-up is away."""
+    adults = _adults(persons)
+    want = df.get("away") or []
+    if "any" in want and not any(a in away for a in adults):
+        return False
+    if any(p != "any" and p not in away for p in want):
+        return False
+    if df.get("adult") and adults and all(a in away for a in adults):
+        return False
+    return True
+
+
 def desired(defs: dict, persons: dict, today: date, ctx: dict) -> dict[str, dict]:
     """Instances that should be open today: {iid: {sid, start, end, pid, for, mode}}."""
     out: dict[str, dict] = {}
@@ -266,11 +289,13 @@ def desired(defs: dict, persons: dict, today: date, ctx: dict) -> dict[str, dict
             continue
         if df["weather"] and ctx.get("weather") != df["weather"]:
             continue
+        if not _away_ok(df, persons, ctx.get("away") or set()):
+            continue
         for anc, for_pid in anchors(df, today, ctx):
             start, end = window(df, anc)
             if not (start <= today <= end) or not _season_ok(df, start, ctx):
                 continue
-            elig = [p for p in _eligible(df, persons) if p != for_pid]
+            elig = [p for p in _eligible(df, persons) if p != for_pid and p not in (ctx.get("away") or set())]
             if not elig:
                 continue
             base = f"{sid}:{anc.isoformat()}" + (f":{for_pid}" if for_pid else "")
