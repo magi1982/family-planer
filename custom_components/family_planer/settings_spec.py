@@ -192,8 +192,9 @@ def todos(data: dict, cur: dict) -> tuple[dict, set[str]]:
            "size": data.get("size") if data.get("size") in TODO_SIZES else cur.get("size", "s"),
            "keep_days": validate.integer(data.get("keep_days", cur.get("keep_days")), 0, 30, 1),
            "max_shown": validate.integer(data.get("max_shown", cur.get("max_shown")), 1, 20, 4),
-           "show_age": _bool(data, "show_age", cur.get("show_age", True))}
-    return {"todos": new}, set()
+           "show_age": _bool(data, "show_age", cur.get("show_age", True)),
+           "name_lists": validate.entities(data.get("name_lists", cur.get("name_lists")), ("todo",))}
+    return {"todos": new}, {"name_lists"} if new["name_lists"] != (cur.get("name_lists") or []) else set()
 
 
 SUG_DEFAULTS = {"sug_enabled": True, "sug_from": "12:00", "pool": None, "pool_min": 24, "jacuzzi": None, "jacuzzi_min": 34}

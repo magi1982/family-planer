@@ -6,6 +6,8 @@
 - On phones the header only showed the middle of the landscape (sky, rainbow), so the house was out of view. Narrow screens now centre the scene on the house.
 
 ### Changed
+- **To-do lists with names** (*Settings → To-dos*): any to-do list – e.g. the Alexa to-do list – can now be chosen directly, like a calendar; it no longer has to be a smart list. Items with a name or nickname become to-dos of that person and ticking off works both ways. Only names at the start are removed from the title; a name in the middle stays part of it.
+- Navigation: the lists button shows a list icon instead of a shopping cart.
 - Avatar builder: the *Season* register only appears while a season, holiday or birthday is on, and only shows the extras and effects of that season.
 - *Settings → Seasons & weather → Switch seasons on and off*: every event shows its default lead time next to the field (e.g. *default 3 d*, *on the day* for birthdays), taken from the fields above; the empty field shows the same number in grey instead of a dash.
 

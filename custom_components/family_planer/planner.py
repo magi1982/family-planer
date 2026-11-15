@@ -168,6 +168,8 @@ class FamilyPlanner:
             self.announcer.start()
             self._unsubs.append(async_track_time_interval(
                 self.hass, self._handle_away_timer, timedelta(minutes=self.vacation_settings()["refresh_minutes"])))
+        if self.module_on(MODULE_WEEK) and not self.module_on(MODULE_LISTS):
+            self._track_lists()  # to-do lists with names (To-dos settings)
         if self.module_on(MODULE_LISTS):
             h, m = parse_hhmm(settings[CONF_OPTIMIZE_TIME], "03:00")
             self._unsubs.append(async_track_time_change(self.hass, self._handle_optimize, hour=h, minute=m, second=20))
@@ -201,6 +203,7 @@ class FamilyPlanner:
         if self.module_on(MODULE_WEEK):
             await self.async_refresh_away()
             await self.async_refresh_season(force=True)
+            await self.async_sync_name_lists()
         await self.async_rollover()
         if self.module_on(MODULE_LISTS):
             await self.async_optimize_all(use_ai=False)
@@ -209,6 +212,7 @@ class FamilyPlanner:
     def _handle_away_timer(self, _now: datetime) -> None:
         self.hass.async_create_task(self.async_refresh_away(apply=True))
         self.hass.async_create_task(self.async_refresh_season())
+        self.hass.async_create_task(self.async_sync_name_lists())
 
     # ------------------------------------------------------------------ seasons, weather, special chores
     def season_settings(self) -> dict[str, Any]:
@@ -818,13 +822,25 @@ class FamilyPlanner:
         if self._list_unsub:
             self._list_unsub()
             self._list_unsub = None
-        entities = sorted({lst["entity"] for lst in self.data["lists"].values() if lst.get("entity")})
+        entities = sorted({lst["entity"] for lst in self.data["lists"].values() if lst.get("entity")}
+                          | set(self.todo_settings()["name_lists"]))
         if entities:
             self._list_unsub = async_track_state_change_event(self.hass, entities, self._handle_list_change)
 
     @callback
     def _handle_list_change(self, event: Event) -> None:
         entity = event.data.get("entity_id")
+        if entity in self.todo_settings()["name_lists"]:
+            key = f"names:{entity}"
+            if cancel := self._list_timers.pop(key, None):
+                cancel()
+
+            @callback
+            def run_names(_now: datetime, entity: str = entity, key: str = key) -> None:
+                self._list_timers.pop(key, None)
+                self.hass.async_create_task(self.async_sync_name_list(entity))
+
+            self._list_timers[key] = async_call_later(self.hass, 2, run_names)
         for lid, lst in self.data["lists"].items():
             if lst.get("entity") != entity:
                 continue
@@ -900,6 +916,17 @@ class FamilyPlanner:
             self._changed(save=changed)
         return {"created": result.created if result else [], "removed": result.removed if result else [],
                 "assigned": result.assigned if result else 0}
+
+    async def async_sync_name_list(self, entity: str) -> None:
+        """A to-do list chosen under To-dos: items with a name or nickname become that person's to-dos."""
+        st = self.hass.states.get(entity)
+        if st is None or st.state in ("unavailable", "unknown"):
+            return
+        self._sync_list_todos(entity, await self._list_items(entity))
+
+    async def async_sync_name_lists(self) -> None:
+        for entity in self.todo_settings()["name_lists"]:
+            await self.async_sync_name_list(entity)
 
     def _sync_list_todos(self, entity: str, items: list[dict]) -> None:
         """Items with a name or nickname become to-dos of that person; ticking off works both ways."""
@@ -1068,7 +1095,8 @@ class FamilyPlanner:
         return {"confirm": bool(cur.get("confirm", True)), "size": size,
                 "keep_days": validate.integer(cur.get("keep_days"), 0, 30, 1),
                 "max_shown": validate.integer(cur.get("max_shown"), 1, 20, 4),
-                "show_age": bool(cur.get("show_age", True))}
+                "show_age": bool(cur.get("show_age", True)),
+                "name_lists": validate.entities(cur.get("name_lists"), ("todo",))}
 
     def sizes(self) -> dict[str, Any]:
         """Point values of the size choices (to-dos, bonus points) and the reward categories."""
@@ -1220,6 +1248,9 @@ class FamilyPlanner:
             self.hass.async_create_task(self.async_refresh_away(apply=True, rescan="rescan" in flags))
         if "rollover" in flags:
             await self.async_rollover()
+        if "name_lists" in flags:
+            self._track_lists()
+            self.hass.async_create_task(self.async_sync_name_lists())
         if "season" in flags or "sonder" in flags:
             self.hass.async_create_task(self.async_refresh_season(force="season" in flags))
         return flags

@@ -205,7 +205,7 @@ Per child (or person, e.g. university/work):
 
 ### To-dos without a date
 
-At most the **4 oldest** open to-dos per person are shown in the planner (adjustable), *+2 more* expands the rest; below each to-do it says how long it has been open. **To-dos from a shared list** (e.g. the Alexa to-do list): switch on *Names → to-do of the person* for the list under *Settings → Lists*. An item with a name or nickname (*"Lea tidy room large"*) becomes a to-do of that person; a trailing *klein / mittel / gross* (small / medium / large) sets the size and the points, several names give one to-do each, and ticking off works both ways.
+At most the **4 oldest** open to-dos per person are shown in the planner (adjustable), *+2 more* expands the rest; below each to-do it says how long it has been open. **To-dos from a shared list** (e.g. the Alexa to-do list): choose the list under *Settings → To-dos → To-do lists with names* (or switch on *Names → to-do of the person* for a smart list). An item with a name or nickname (*"Lea tidy room large"*) becomes a to-do of that person; a trailing *klein / mittel / gross* (small / medium / large) sets the size and the points, several names give one to-do each, and ticking off works both ways.
 
 ![To-dos](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/todos.png)
 

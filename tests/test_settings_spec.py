@@ -76,7 +76,9 @@ def test_pin_rules():
 
 def test_todo_settings():
     patch, _ = S.todos({"confirm": False, "size": "xl", "keep_days": 99}, {})
-    assert patch["todos"] == {"confirm": False, "size": "s", "keep_days": 30, "max_shown": 4, "show_age": True}  # unknown size falls back
+    assert patch["todos"] == {"confirm": False, "size": "s", "keep_days": 30, "max_shown": 4, "show_age": True, "name_lists": []}  # unknown size falls back
+    patch, flags = S.todos({"name_lists": ["todo.alexa", "light.x"]}, {})
+    assert patch["todos"]["name_lists"] == ["todo.alexa"] and "name_lists" in flags
     assert S.todos({"max_shown": 0}, {})[0]["todos"]["max_shown"] == 1
     patch, _ = S.todos({"size": "l"}, {"size": "m"})
     assert patch["todos"]["size"] == "l"

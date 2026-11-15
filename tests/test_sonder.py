@@ -99,6 +99,7 @@ def test_person_todos_from_names():
     assert pids == ["a", "b"] and title == "Tisch decken" and size == "s"
     assert PT.match("Milch kaufen", PERSONS)[0] == []
     assert PT.match("Miaus Futter", PERSONS)[0] == []
+    assert PT.match("Fotos für Mia bearbeiten", PERSONS) == (["b"], "Fotos für Mia bearbeiten", None)
 
 
 def test_speech_birthday_and_praise():
