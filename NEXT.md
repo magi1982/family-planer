@@ -551,4 +551,4 @@ Die Prozentzahl (heute grünes Bändeli unter dem Namen) auf die gleiche Höhe w
 1. **Ring** – Kreis-Fortschritt mit Zahl in der Mitte, Farbe nach Stufe.
 2. **Grosse Zahl** – „82 %“ gross in der Stufenfarbe, darunter „zuverlässig“ und ein dünner Balken.
 3. **Fähnchen** – hängendes Fähnchen oben rechts an der Karte mit der Zahl (braucht am wenigsten Platz, Name und Abzeichen bleiben einzeilig).
-**Status:** 💡 Idee – Michael wählt einen Vorschlag
+**Status:** ✅ Fähnchen umgesetzt (etwas weiter links, lokal)

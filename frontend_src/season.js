@@ -222,7 +222,7 @@
 
   // ------------------------------------------------------------------------------ the scene
   // o: { season, wx (weather()), hour, lang, intensity ('calm'|'normal'|'lots'), storm (km/h), still (bool) }
-  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [o.dusk, s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5, o.narrow].join('|'); };
+  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [o.top || 0, o.dusk, s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5, o.narrow].join('|'); };
   api.scene = (o) => {
     const s = o.season || { vis: 'alltag', jz: 'sommer' }; const vis = s.vis || 'alltag'; const jz = s.jz || 'sommer'; const lang = o.lang === 'en' ? 'en' : 'de';
     const w = o.wx || { kind: 'partlycloudy', wind: 8 }; let kind = w.kind || 'partlycloudy';
@@ -247,6 +247,7 @@
     // shifted by dx and repeated at the right edge, so nothing is cut; phones show a slice around the same centre
     const hasHouse = vis !== 'sommer' && vis !== 'fasnacht';
     const focus = hasHouse ? (o.house === 'pool' ? 888 : 900) : vis === 'sommer' ? 760 : 600;
+    const TOP = Math.max(0, Math.min(40, Number(o.top) || 0)); // top of the visible part (garlands hang from there)
     const dx = focus - CX; const sdx = hasHouse ? 0 : -dx; const BX = hasHouse ? CX - 215 : 600; // banners: left of the house, below the navigation
     const vb = o.narrow ? `${CX - 160} 0 320 ${H}` : `0 0 ${W} ${H}`;
     let svg = `<svg viewBox="${vb}" preserveAspectRatio="xMidYMax slice" style="--wa:${wa.toFixed(1)}deg;--wd:${wd.toFixed(1)}s" aria-hidden="true">
@@ -310,8 +311,8 @@
       svg += fir(760 - dx, 104, 1.25, snowGround, true, r);
       // garland of bulbs along the top
       // fairy lights on a sagging wire; every bulb glows and sparkles in its own colour
-      for (let x0 = 0; x0 < W; x0 += 300) svg += `<path d="M${x0} 16 Q ${x0 + 150} 40 ${x0 + 300} 16" stroke="#2c3a2c" stroke-width="1.2" fill="none"/>`;
-      for (let x = 10; x < W; x += 25) { const y = 16 + 12 * Math.sin(Math.PI * (x % 300) / 300); const c = ['#FF4D4D', '#FFC83D', '#3FD07A', '#4FA8FF', '#FF6FD8'][(x / 25 | 0) % 5]; const d = (r() * 2.4).toFixed(2);
+      for (let x0 = 0; x0 < W; x0 += 300) svg += `<path d="M${x0} ${TOP + 6} Q ${x0 + 150} ${TOP + 30} ${x0 + 300} ${TOP + 6}" stroke="#2c3a2c" stroke-width="1.2" fill="none"/>`;
+      for (let x = 10; x < W; x += 25) { const y = TOP + 6 + 12 * Math.sin(Math.PI * (x % 300) / 300); const c = ['#FF4D4D', '#FFC83D', '#3FD07A', '#4FA8FF', '#FF6FD8'][(x / 25 | 0) % 5]; const d = (r() * 2.4).toFixed(2);
         svg += `<rect x="${(x - 1.3).toFixed(1)}" y="${(y - 1).toFixed(1)}" width="2.6" height="2.6" fill="#2c3a2c"/><circle class="glw" cx="${x}" cy="${(y + 4.5).toFixed(1)}" r="8" fill="${c}" style="animation-delay:-${d}s"/><circle class="tw" cx="${x}" cy="${(y + 4.5).toFixed(1)}" r="2.8" fill="${c}" style="animation-delay:-${d}s"/><circle cx="${(x - 0.8).toFixed(1)}" cy="${(y + 3.6).toFixed(1)}" r=".8" fill="#fff" opacity=".8"/>`; }
       // Advent wreath with 1–4 candles lit
       const a = s.advent || 0;
@@ -363,8 +364,8 @@
     }
     if (vis === 'august') {
       // bunting on a string: red pennants with a white cross, white ones with a red cross
-      for (let x0 = 0; x0 < W; x0 += 240) svg += `<path d="M${x0} 12 Q ${x0 + 120} 32 ${x0 + 240} 12" stroke="#8a8f96" stroke-width="1" fill="none"/>`;
-      for (let x = 4; x < W - 10; x += 20) { const y = 12 + 10 * Math.sin(Math.PI * ((x + 7) % 240) / 240); const red = (x / 20 | 0) % 2 === 0; const f = red ? '#DA291C' : '#ffffff'; const k = red ? '#ffffff' : '#DA291C';
+      for (let x0 = 0; x0 < W; x0 += 240) svg += `<path d="M${x0} ${TOP - 2} Q ${x0 + 120} ${TOP + 58} ${x0 + 240} ${TOP - 2}" stroke="#8a8f96" stroke-width="1" fill="none"/><circle cx="${x0}" cy="${TOP + 1}" r="2" fill="#8a8f96"/>`;
+      for (let x = 4; x < W - 10; x += 20) { const t = ((x + 7) % 240) / 240; const y = TOP - 2 + 60 * t * (1 - t); const red = (x / 20 | 0) % 2 === 0; const f = red ? '#DA291C' : '#ffffff'; const k = red ? '#ffffff' : '#DA291C';
         svg += `<g class="sw" style="transform-origin:${x + 7}px ${y.toFixed(1)}px;animation-delay:-${(r() * 3).toFixed(1)}s"><path d="M${x} ${y.toFixed(1)} h14 l-7 15z" fill="${f}" stroke="${red ? 'none' : '#d9d9d9'}" stroke-width=".5"/><path d="M${x + 7} ${(y + 2).toFixed(1)} v6 M${x + 4} ${(y + 5).toFixed(1)} h6" stroke="${k}" stroke-width="1.8"/></g>`; }
       svg += '<g transform="translate(560 40)"><path d="M0 64 V0" stroke="#999" stroke-width="2"/><g class="sw" style="transform-origin:0 0"><rect x="0" y="0" width="30" height="30" fill="#DA291C"/><path d="M15 6 v18 M6 15 h18" stroke="#fff" stroke-width="6"/></g></g>';
       if (hour >= 21) { svg += '<g transform="translate(380 104)"><path d="M-22 0 L22 0" stroke="#6b4a2e" stroke-width="5"/><path class="flame" d="M-16 0 Q -8 -36 0 -46 Q 8 -36 16 0Z" fill="#FF8A3C"/><path class="flame" d="M-8 0 Q 0 -24 8 0Z" fill="#FFD24A"/></g>'; P.push(['sparks', 12]); }

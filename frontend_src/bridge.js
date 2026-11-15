@@ -389,7 +389,7 @@
         window.addEventListener('pointerdown', this._outside, true);
         window.addEventListener('location-changed', () => this._render());
         this._tick = setInterval(() => this._clock(), 15000);
-        window.addEventListener('resize', () => { if (this._narrowNow() !== this._wasNarrow) { this._wasNarrow = this._narrowNow(); this._render(); } });
+        window.addEventListener('resize', () => { if (this._narrowNow() !== this._wasNarrow || this._topNow() !== this._wasTop) { this._wasNarrow = this._narrowNow(); this._wasTop = this._topNow(); this._render(); } });
       }
       this._render();
     }
@@ -402,6 +402,12 @@
       const sig = (st ? `${st.state}|${(st.attributes || {}).temperature}|${(st.attributes || {}).wind_speed}` : '') + `|${lt.night}|${lt.dusk}`;
       if (sig !== this._wxSig) { this._wxSig = sig; if (!first) this._render(); }
       if (ent !== this._fcEnt) this._subForecast(ent);
+    }
+    // how much of the scene's top is cut off at this header size (garlands hang from the visible edge)
+    _topNow() {
+      const b = this.shadowRoot && this.shadowRoot.querySelector('.bar'); const r = b && b.getBoundingClientRect();
+      if (!r || !r.width || !r.height) return 0;
+      return Math.max(0, Math.round((120 - r.height * (this._narrowNow() ? 320 : 1200) / r.width) / 4) * 4);
     }
     _narrowNow() { const w = this.getBoundingClientRect().width || window.innerWidth; return w > 0 && w < 700; }
     _wxEnt() { const s = this._store && this._store.snap; return (s && s.season_cfg && s.season_cfg.weather) || null; }
@@ -430,7 +436,7 @@
       const cfg = s.season_cfg || {}; const n = new Date(); const wx = SE.weather(this._hass, cfg.weather, lang);
       const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
       const lt = this._light();
-      const o = { season: se, wx, hour: n.getHours(), night: lt.night, dusk: lt.dusk, lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow() };
+      const o = { season: se, wx, hour: n.getHours(), night: lt.night, dusk: lt.dusk, lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow(), top: this._topNow() };
       if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };
       const key = SE.sceneKey(o); return { key, html: key === this._scnKey && this._scnEl ? null : SE.scene(o), wx };
     }
@@ -529,7 +535,7 @@
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
         button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}button.vac.quiet{color:inherit;border-color:var(--fp-line)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
-        @media (max-width:700px){.clk .dt{display:none}.mid{margin-left:0;justify-content:center;gap:6px}.bar{grid-template-columns:auto 1fr auto}.wxn{padding:0 8px}}
+        @media (max-width:700px){.clk .dt{display:none}.bar{grid-template-columns:auto 1fr;row-gap:8px}.mid{grid-column:1 / -1;grid-row:2;margin-left:0;justify-content:center;gap:8px}.rt{grid-column:2;grid-row:1}.rt .stk{flex-direction:row}.wxn{padding:0 8px}}
         .bar.sc{min-height:96px;padding-top:10px;padding-bottom:10px}.bar.sc > :not(.scn){position:relative;z-index:1}.bar.sc .clk b,.bar.sc .clk span,.bar.sc .ttl{text-shadow:0 1px 3px rgba(0,0,0,.55)}
         .bar.sc .mid button:not(.on),.bar.sc .rt > button,.bar.sc .stk button{background:color-mix(in srgb,var(--fp-bg3) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
         .wxc{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px;min-width:0}.wxc.one{justify-content:center}
@@ -549,6 +555,8 @@
         this._scnKey = sc.key;
       } else { this._scnEl = null; this._scnKey = ''; }
       this._popLayer(this._popHtml, NAV_POPCSS);
+      // first paint: the header size is known only now -> draw the scene once more with the right top edge
+      if (sc.key) { const t = this._topNow(); if (t !== this._usedTop) { this._usedTop = t; window.requestAnimationFrame(() => this._render()); } }
     }
     _navBtn(k, lang, cur) {
       const T = NAV_T[lang]; const miss = this._views && !this._views.has(this._paths[k]);
