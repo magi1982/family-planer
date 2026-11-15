@@ -186,7 +186,7 @@
 
   // ------------------------------------------------------------------------------ the scene
   // o: { season, wx (weather()), hour, lang, intensity ('calm'|'normal'|'lots'), storm (km/h), still (bool) }
-  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5].join('|'); };
+  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5, o.narrow].join('|'); };
   api.scene = (o) => {
     const s = o.season || { vis: 'alltag', jz: 'sommer' }; const vis = s.vis || 'alltag'; const jz = s.jz || 'sommer'; const lang = o.lang === 'en' ? 'en' : 'de';
     const w = o.wx || { kind: 'partlycloudy', wind: 8 }; let kind = w.kind || 'partlycloudy';
@@ -204,7 +204,10 @@
     if (vis === 'silvester') sky = ['#090d24', '#2b1e52'];
     if (vis === 'fasnacht' && !night) sky = ['#6e3fd1', '#ff8ac1'];
     if (vis === 'sommer' && !night && ['sunny', 'partlycloudy', 'windy'].includes(kind)) sky = ['#1e9ef0', '#bfeaff'];
-    let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice" style="--wa:${wa.toFixed(1)}deg;--wd:${wd.toFixed(1)}s" aria-hidden="true">
+    // narrow screens (phone) only show a slice of the landscape: centre that slice on the house
+    const focus = o.house === 'pool' && vis !== 'sommer' && vis !== 'fasnacht' ? 880 : 900;
+    const vb = o.narrow ? `${focus - 160} 0 320 ${H}` : `0 0 ${W} ${H}`;
+    let svg = `<svg viewBox="${vb}" preserveAspectRatio="xMidYMax slice" style="--wa:${wa.toFixed(1)}deg;--wd:${wd.toFixed(1)}s" aria-hidden="true">
       <defs><linearGradient id="fpsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient></defs>
       <rect width="${W}" height="${H}" fill="url(#fpsky)"/>`;
     // sun, moon, stars
@@ -5588,6 +5591,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         window.addEventListener('pointerdown', this._outside, true);
         window.addEventListener('location-changed', () => this._render());
         this._tick = setInterval(() => this._clock(), 15000);
+        window.addEventListener('resize', () => { if (this._narrowNow() !== this._wasNarrow) { this._wasNarrow = this._narrowNow(); this._render(); } });
       }
       this._render();
     }
@@ -5600,6 +5604,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (sig !== this._wxSig) { this._wxSig = sig; if (!first) this._render(); }
       if (ent !== this._fcEnt) this._subForecast(ent);
     }
+    _narrowNow() { const w = this.getBoundingClientRect().width || window.innerWidth; return w > 0 && w < 700; }
     _wxEnt() { const s = this._store && this._store.snap; return (s && s.season_cfg && s.season_cfg.weather) || null; }
     async _subForecast(ent) {
       if (this._fcUnsub) { try { this._fcUnsub(); } catch (e) { /* closed */ } this._fcUnsub = null; }
@@ -5616,7 +5621,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const SE = window.FPSEASON; if (!SE || !s || !s.season) return { key: '', html: '' };
       const cfg = s.season_cfg || {}; const n = new Date(); const wx = SE.weather(this._hass, cfg.weather, lang);
       const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
-      const o = { season: se, wx, hour: n.getHours(), lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard' };
+      const o = { season: se, wx, hour: n.getHours(), lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow() };
       if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };
       const key = SE.sceneKey(o); return { key, html: key === this._scnKey && this._scnEl ? null : SE.scene(o), wx };
     }

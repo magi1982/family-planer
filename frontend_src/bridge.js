@@ -387,6 +387,7 @@
         window.addEventListener('pointerdown', this._outside, true);
         window.addEventListener('location-changed', () => this._render());
         this._tick = setInterval(() => this._clock(), 15000);
+        window.addEventListener('resize', () => { if (this._narrowNow() !== this._wasNarrow) { this._wasNarrow = this._narrowNow(); this._render(); } });
       }
       this._render();
     }
@@ -399,6 +400,7 @@
       if (sig !== this._wxSig) { this._wxSig = sig; if (!first) this._render(); }
       if (ent !== this._fcEnt) this._subForecast(ent);
     }
+    _narrowNow() { const w = this.getBoundingClientRect().width || window.innerWidth; return w > 0 && w < 700; }
     _wxEnt() { const s = this._store && this._store.snap; return (s && s.season_cfg && s.season_cfg.weather) || null; }
     async _subForecast(ent) {
       if (this._fcUnsub) { try { this._fcUnsub(); } catch (e) { /* closed */ } this._fcUnsub = null; }
@@ -415,7 +417,7 @@
       const SE = window.FPSEASON; if (!SE || !s || !s.season) return { key: '', html: '' };
       const cfg = s.season_cfg || {}; const n = new Date(); const wx = SE.weather(this._hass, cfg.weather, lang);
       const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
-      const o = { season: se, wx, hour: n.getHours(), lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard' };
+      const o = { season: se, wx, hour: n.getHours(), lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow() };
       if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };
       const key = SE.sceneKey(o); return { key, html: key === this._scnKey && this._scnEl ? null : SE.scene(o), wx };
     }

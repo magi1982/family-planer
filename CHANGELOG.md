@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.12.1 – 2026-11-15
+
+### Fixed
+- On phones the header only showed the middle of the landscape (sky, rainbow), so the house was out of view. Narrow screens now centre the scene on the house.
+
 ## 0.12.0 – 2026-11-15
 
 ### New
