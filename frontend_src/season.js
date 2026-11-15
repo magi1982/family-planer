@@ -92,6 +92,43 @@
     } else g += '<path d="M-14 -36 l-6 -4 M12 -40 l6 -5 M-6 -46 l-3 -6" stroke="#6b4a2e" stroke-width="3" stroke-linecap="round"/>';
     return g + '</g></g>';
   };
+  // our garden right of the own house: a big apple tree, a smaller red maple and a flower bed (white & violet in summer)
+  const appleTree = (x, y, s, jz, snow, r) => {
+    let g = `<g transform="translate(${x} ${y}) scale(${s})"><g class="sw" style="transform-origin:0 0">`;
+    g += '<path d="M-2 0 C -3 -14 -1 -24 -2 -30 M-2 -24 C -10 -30 -18 -32 -24 -40 M-2 -27 C 6 -33 14 -36 22 -44 M-2 -30 C -4 -38 -2 -44 0 -52" stroke="#6e4b30" stroke-width="5" stroke-linecap="round" fill="none"/>';
+    if (jz === 'winter') {
+      g += '<path d="M-24 -40 l-6 -5 M-24 -40 l1 -8 M22 -44 l7 -4 M22 -44 l-1 -8 M0 -52 l-5 -6 M0 -52 l5 -6" stroke="#6e4b30" stroke-width="2.5" stroke-linecap="round"/>';
+      if (snow) g += '<path d="M-28 -43 q4 -3 8 0 M18 -46 q5 -3 9 0 M-4 -55 q4 -3 8 0" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>';
+      return g + '</g></g>';
+    }
+    const leaf = { fruehling: '#8fd07a', sommer: '#3e9440', herbst: '#a7a83c' }[jz] || '#3e9440';
+    [[-20, -42, 15], [0, -50, 18], [19, -44, 15], [-9, -58, 13], [10, -60, 12]].forEach(([cx, cy, rr]) => { g += `<circle cx="${cx}" cy="${cy}" r="${rr}" fill="${leaf}"/>`; });
+    if (jz === 'fruehling') for (let i = 0; i < 26; i++) g += `<circle cx="${((r() - 0.5) * 56).toFixed(1)}" cy="${(-38 - r() * 30).toFixed(1)}" r="${(1.6 + r() * 1.6).toFixed(1)}" fill="${r() > 0.35 ? '#ffffff' : '#ffc9dc'}"/>`;
+    if (jz === 'sommer' || jz === 'herbst') for (let i = 0; i < (jz === 'herbst' ? 12 : 8); i++) g += `<circle cx="${((r() - 0.5) * 50).toFixed(1)}" cy="${(-36 - r() * 28).toFixed(1)}" r="${jz === 'herbst' ? 2.8 : 2.2}" fill="${jz === 'herbst' ? '#d7262e' : (r() > 0.5 ? '#9fc23a' : '#e0503c')}"/>`;
+    g += '</g>';
+    if (jz === 'herbst') g += '<circle cx="-14" cy="-2" r="2.6" fill="#d7262e"/><circle cx="9" cy="-1.5" r="2.6" fill="#c81f28"/>';
+    return g + '</g>';
+  };
+  const redMaple = (x, y, s, jz, snow) => {
+    let g = `<g transform="translate(${x} ${y}) scale(${s})"><g class="sw" style="transform-origin:0 0;animation-delay:-1.3s">`;
+    g += '<path d="M0 0 L0 -22 M0 -14 L-10 -24 M0 -17 L9 -27" stroke="#5a3a28" stroke-width="4" stroke-linecap="round" fill="none"/>';
+    if (jz === 'winter') {
+      g += '<path d="M-10 -24 l-4 -5 M9 -27 l4 -5 M0 -22 l0 -8" stroke="#5a3a28" stroke-width="2" stroke-linecap="round"/>';
+      if (snow) g += '<path d="M-13 -27 q3 -2 6 0 M7 -30 q3 -2 6 0" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/>';
+      return g + '</g></g>';
+    }
+    const c = { fruehling: ['#a8323a', '#c94a3a'], sommer: ['#7e1f2b', '#9b2a33'], herbst: ['#e2412c', '#f08a24'] }[jz] || ['#7e1f2b', '#9b2a33'];
+    g += `<ellipse cx="-8" cy="-28" rx="13" ry="10" fill="${c[0]}"/><ellipse cx="9" cy="-31" rx="13" ry="10" fill="${c[1]}"/><ellipse cx="0" cy="-38" rx="12" ry="9" fill="${c[0]}"/>`;
+    return g + '</g></g>';
+  };
+  const flowerBed = (x, y, jz, snow, r) => {
+    let g = `<g transform="translate(${x} ${y})">`;
+    if (jz === 'winter') return g + (snow ? '<ellipse cx="0" cy="-3" rx="26" ry="6" fill="#ffffff"/><ellipse cx="-14" cy="-5" rx="9" ry="5" fill="#f3f7fb"/>' : '<ellipse cx="0" cy="-4" rx="24" ry="6" fill="#5d6b4a"/>') + '</g>';
+    g += `<ellipse cx="-12" cy="-7" rx="13" ry="9" fill="${jz === 'herbst' ? '#8a7a3a' : '#3f8a3e'}"/><ellipse cx="11" cy="-8" rx="14" ry="10" fill="${jz === 'herbst' ? '#7d6a33' : '#367f37'}"/>`;
+    if (jz === 'sommer') for (let i = 0; i < 18; i++) g += `<circle cx="${((r() - 0.5) * 46).toFixed(1)}" cy="${(-6 - r() * 12).toFixed(1)}" r="${(2 + r() * 2).toFixed(1)}" fill="${i % 2 ? '#ffffff' : '#9b6bd6'}"/>`;
+    if (jz === 'fruehling') for (let i = 0; i < 7; i++) g += `<circle cx="${((r() - 0.5) * 40).toFixed(1)}" cy="${(-8 - r() * 8).toFixed(1)}" r="1.8" fill="${i % 2 ? '#ffffff' : '#c7a4ef'}"/>`;
+    return g + '</g>';
+  };
   const house = (x, y, night, snow, lit, smoke, wind) => {
     const win = lit || night ? '#FFD86B' : '#bfe0ff';
     let g = `<g transform="translate(${x} ${y})"><rect x="-46" y="-44" width="92" height="44" rx="2" fill="#f1e3c8"/><path d="M-54 -42 L0 -76 L54 -42Z" fill="#b5523b"/>`;
@@ -238,7 +275,11 @@
     const lit = vis === 'weihnachten' || night;
     const smokeOn = ['herbst', 'winter'].includes(jz) || vis === 'weihnachten';
     const own = o.house === 'pool' && vis !== 'sommer' && vis !== 'fasnacht';
-    if (own) svg += poolHouse({ night, snow: snowGround, smoke: smokeOn, wind, jz, vis, temp: w.temp });
+    if (own) {
+      svg += poolHouse({ night, snow: snowGround, smoke: smokeOn, wind, jz, vis, temp: w.temp });
+      const gz = vis === 'ostern' || vis === 'fruehling' ? 'fruehling' : vis === 'herbst' ? 'herbst' : ['weihnachten', 'sport', 'silvester', 'dreikoenig'].includes(vis) ? 'winter' : jz;
+      svg += redMaple(1112, 103, 0.95, gz, snowGround) + appleTree(1042, 104, 1.25, gz, snowGround, r) + flowerBed(978, 106, gz, snowGround, r);
+    }
     else if (vis !== 'sommer' && vis !== 'fasnacht') svg += house(900, 100, night, snowGround, lit, smokeOn, wind);
     if (vis === 'weihnachten' || vis === 'winter' || vis === 'sport') {
       (own ? [[150, 102, 1], [250, 104, 0.8], [720, 104, 0.85]] : [[150, 102, 1], [250, 104, 0.8], [1060, 102, 0.95], [1150, 104, 0.75]]).forEach(([x, y, sc]) => { svg += fir(x, y, sc, snowGround, false, r); });
@@ -255,7 +296,7 @@
       // Advent wreath with 1–4 candles lit
       const a = s.advent || 0;
       if (a) {
-        svg += `<g transform="translate(${(own ? 1010 : 990) - dx} 104)"><ellipse cx="0" cy="0" rx="30" ry="6" fill="#2f7a46"/>`;
+        svg += `<g transform="translate(${(own ? 984 : 990) - dx} 108)"><ellipse cx="0" cy="0" rx="30" ry="6" fill="#2f7a46"/>`;
         [-18, -6, 6, 18].forEach((cx, i) => { svg += `<rect x="${cx - 3}" y="-18" width="6" height="16" rx="1" fill="#c8302e"/>${i < a ? `<path class="flame" d="M${cx} -27 q3 5 0 8 q-3 -3 0 -8z" fill="#FFC23D"/>` : ''}`; });
         svg += '</g>';
       }

@@ -7,12 +7,15 @@
 - **Filters for chores and special chores:** chips at the top of the chore plan (per person, daily, with deadline / rhythm, not assigned) and of the special chores (on, off, own, volunteer, daily, weekly, occasion, weather, while away, secret, needs adult), each with a count, plus a search box.
 
 ### Changed
-- **Tidier header:** time on top with the date (and the season label) below; the navigation shows icons only (labels as tooltip / screen-reader text) and sits right next to the date, which leaves the middle free for the scene.
+- **Tidier, symmetric header:** time with the special-day label (e.g. *3rd Advent*) on top, the full date below (*Sunday, 13 December*); planner, lists and rewards as square icon buttons right next to it. On the right everything has the same height: weather and suggestion tiles, holiday check and refresh stacked, settings as a square button at the edge.
+- **Our garden in the scene (own house):** a big apple tree (blossoms in spring, apples in summer and autumn, bare in winter), a smaller red maple (bright red in autumn) and a flower bed with white and violet flowers in summer – the right side of the house is no longer empty.
+- **Rainbow design:** the selected button uses a calm two-colour gradient (pink → violet) instead of all rainbow colours; the rainbow band stays.
 - **House in the middle of the scene:** every landscape and season is shifted so the house (or the beach / carnival scene) sits in the free middle of the header, also on tablets; the landscape repeats seamlessly at the right edge. Advent wreath, Christmas tree and presents stay next to the house, banners sit below the navigation.
 - **Design picker removed from the header** – choose the design under *Settings → General*. The header is calmer and leaves more room for the scene.
 - **Points on every task in the planner:** chores show *+N* next to the title (fair mode: their share of the day's points), to-dos and special chores show it in their label. The values come from the server, so they always match what gets booked.
 
 ### Fixed
+- **Date in the header** shows the weekday in full again (a second, short weekday list overwrote it).
 - **Lists no longer jump while you work:** switching a special chore on or assigning a day to a chore keeps the row where it is (the order is fixed while the page is open); saving no longer blanks the list and throws you back to the top.
 - **Shopping list *Optimise* no longer hangs:** reading the list is limited to 15 s and the AI to 30 s (at most 60 items per request); if it takes longer, the planner sorts by keywords only and the button shows *taking too long* after 60 s at the latest.
 - **To-dos from a list with several names:** a name at the start decides ("Lea calendar for Mia" → only Lea, the title keeps "for Mia"). Without a leading name the first name in the text assigns it. Before, every name got its own to-do.

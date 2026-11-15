@@ -171,7 +171,7 @@
       accent: '#69C350', 'on-accent': '#0f1115', radius: '16px', font: SYS, grad: 'linear-gradient(90deg,#69C350,#3FBF9B)',
       page: 'radial-gradient(1200px 600px at 10% -10%,#1d2531 0%,transparent 60%),radial-gradient(900px 500px at 110% 110%,#16241c 0%,transparent 55%),#0f1115', glow: '0 6px 20px rgba(0,0,0,.35)' },
     rainbow: { bg0: '#121018', bg1: '#1a1722', bg2: '#201c2a', bg3: '#272233', bg4: '#30293e', line: '#3b3350', text: '#f6f3fb', text2: '#bcb3cc', text3: '#82799a',
-      accent: '#FF6FAE', 'on-accent': '#1a0f18', radius: '20px', font: SYS, grad: RAINBOW, band: RAINBOW,
+      accent: '#FF6FAE', 'on-accent': '#1a0f18', radius: '20px', font: SYS, grad: 'linear-gradient(135deg,#FF6FAE,#8F6BFF)', band: RAINBOW,
       page: 'radial-gradient(700px 420px at 0% 0%,rgba(255,95,109,.22),transparent 60%),radial-gradient(700px 420px at 100% 10%,rgba(79,163,224,.22),transparent 60%),radial-gradient(800px 500px at 50% 110%,rgba(143,107,255,.25),transparent 60%),#121018', glow: '0 8px 28px rgba(255,111,174,.12)' },
     space: { bg0: '#0a0c1d', bg1: '#11142b', bg2: '#161a36', bg3: '#1c2142', bg4: '#252b52', line: '#2b3263', text: '#eef0ff', text2: '#aab1d8', text3: '#6e76a6',
       accent: '#7C9CFF', 'on-accent': '#0a0c1d', radius: '18px', font: SYS, grad: 'linear-gradient(90deg,#7C9CFF,#B07CFF,#5CE1E6)',
@@ -334,11 +334,11 @@
   const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', einstellungen: 'settings' };
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-      design: 'Design', refresh: 'Kalender und Listen aktualisieren', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+      design: 'Design', refresh: 'Kalender und Listen aktualisieren', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wds: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
       away: 'Weg – Ämtli pausieren', home: 'Hier – Ämtli laufen weiter', close: 'Schliessen', open: 'offen', all: 'alle', fam: 'Ganze Familie', opt: 'Optional – lange Termine', optHint: 'Keine Ferien-Wörter, aber länger als die eingestellte Stundenzahl. Ohne Entscheid laufen die Ämtli weiter.',
       miss: 'Ansicht „{p}“ fehlt in diesem Dashboard. Ansicht mit diesem Pfad anlegen oder in der Navigationskarte unter paths: anpassen.' },
     en: { wd: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], mon: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-      design: 'Design', refresh: 'Refresh calendars and lists', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays in the next two weeks. Who do they apply to, and are you away or here?', vacEmpty: 'No absence in the calendar for the next two weeks.', awWho: 'Who is away?', awNone: 'Nobody is away right now.', awUntil: 'away until {d}', awAt: 'away from {t} today', awTomAt: 'away tomorrow from {t}', awTom: 'away from tomorrow', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      design: 'Design', refresh: 'Refresh calendars and lists', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays in the next two weeks. Who do they apply to, and are you away or here?', vacEmpty: 'No absence in the calendar for the next two weeks.', awWho: 'Who is away?', awNone: 'Nobody is away right now.', awUntil: 'away until {d}', awAt: 'away from {t} today', awTomAt: 'away tomorrow from {t}', awTom: 'away from tomorrow', wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       away: 'Away – pause chores', home: 'Here – chores go on', close: 'Close', open: 'open', all: 'all', fam: 'Whole family', opt: 'Optional – long events', optHint: 'No holiday words, but longer than the set number of hours. Without a decision chores go on.',
       miss: 'View "{p}" is missing in this dashboard. Add a view with this path or change it under paths: in the navigation card.' } };
   const NAV_POPCSS = `.pop .aw{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;margin:4px 0;border-radius:10px;background:var(--fp-bg2);font-size:13px}.pop .vb button.sel{outline:2px solid var(--fp-accent)}
@@ -481,7 +481,7 @@
       const el = this.shadowRoot && this.shadowRoot.querySelector('.clk'); if (!el) return;
       const T = NAV_T[this._lang()]; const n = new Date(); const p2 = (x) => String(x).padStart(2, '0');
       el.querySelector('b').textContent = `${p2(n.getHours())}:${p2(n.getMinutes())}`;
-      el.querySelector('span').textContent = `${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}`;
+      el.querySelector('.dt').textContent = `${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}`;
     }
     _render() {
       if (!this.shadowRoot || !this._cfg) return;
@@ -505,31 +505,32 @@
         .t{display:flex;align-items:center;gap:10px;min-width:0}
         .clk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;white-space:nowrap}.dl{display:flex;align-items:center;gap:8px;min-width:0}.clk b{font-size:26px;font-weight:300;font-variant-numeric:tabular-nums;color:var(--fp-accent);line-height:1}
         .clk .dt{font-size:14px;color:var(--fp-text);overflow:hidden;text-overflow:ellipsis}.ttl{font-size:10px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1.2px;display:block}
-        .mid{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start;margin-left:10px}.mid button span.l{display:none}.mid button{padding:0 13px}
+        .mid{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start;margin-left:10px}.mid button span.l{display:none}
         button{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--fp-line);background:var(--fp-bg3);color:var(--fp-text2);font:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
         .mid button.on{background:var(--fp-grad);border-color:transparent;color:var(--fp-on-accent);font-weight:600}
         button.on{border-color:color-mix(in srgb,var(--fp-accent) 60%,transparent);color:var(--fp-accent)}
         button.menu{padding:0 10px}
         button ha-icon{--mdc-icon-size:20px}
         .rt{display:flex;justify-content:flex-end;align-items:center;gap:8px;position:relative}
-        .stk{display:flex;flex-direction:column;gap:4px}.stk button{height:32px;justify-content:center;min-width:40px;padding:0 10px}.stk button ha-icon{--mdc-icon-size:18px}
+        .stk{display:flex;flex-direction:column;gap:6px;justify-content:center}.stk.one{align-self:stretch}
+        button.sq,.mid button{width:40px;height:40px;min-width:40px;padding:0;justify-content:center;flex:none}
         button.rf.spin ha-icon{animation:fprot 1s linear infinite}@keyframes fprot{to{transform:rotate(360deg)}}
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
         button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}button.vac.quiet{color:inherit;border-color:var(--fp-line)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
-        @media (max-width:700px){.mid button{padding:0 12px}.clk .dl{display:none}.mid{margin-left:0;justify-content:center}.bar{grid-template-columns:auto 1fr auto}}
+        @media (max-width:700px){.clk .dt{display:none}.mid{margin-left:0;justify-content:center;gap:6px}.bar{grid-template-columns:auto 1fr auto}.wxn{padding:0 8px}}
         .bar.sc{min-height:96px;padding-top:10px;padding-bottom:10px}.bar.sc > :not(.scn){position:relative;z-index:1}.bar.sc .clk b,.bar.sc .clk span,.bar.sc .ttl{text-shadow:0 1px 3px rgba(0,0,0,.55)}
         .bar.sc .mid button:not(.on),.bar.sc .rt > button,.bar.sc .stk button{background:color-mix(in srgb,var(--fp-bg3) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-        .wxc{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-right:4px;min-width:0}
-        .wxn{display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:14px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:13px;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}.wxn b{font-size:15px}.wxn i{font-style:normal;font-size:18px}
-        .sug{display:flex;align-items:center;gap:8px;max-width:280px;padding:4px 10px 4px 6px;border-radius:12px;background:color-mix(in srgb,var(--fp-accent) 22%,var(--fp-bg1));border:1px solid color-mix(in srgb,var(--fp-accent) 50%,transparent);font-size:12px;line-height:1.25;animation:fpsugin .6s ease-out}
-        .sug i{font-style:normal;font-size:22px;animation:fpbob 3s ease-in-out infinite}.sug b{display:block;font-size:13px}.sug span{color:var(--fp-text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        .slab{display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:12px;white-space:nowrap}
+        .wxc{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px;min-width:0}.wxc.one{justify-content:center}
+        .wxn{display:flex;align-items:center;justify-content:center;gap:6px;height:40px;box-sizing:border-box;padding:0 12px;border-radius:10px;border:1px solid var(--fp-line);background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:13px;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}.wxn b{font-size:15px}.wxn i{font-style:normal;font-size:18px}
+        .sug{display:flex;align-items:center;gap:8px;max-width:260px;height:40px;box-sizing:border-box;padding:0 10px 0 6px;border-radius:10px;background:color-mix(in srgb,var(--fp-accent) 22%,var(--fp-bg1));border:1px solid color-mix(in srgb,var(--fp-accent) 50%,transparent);font-size:12px;line-height:1.25;animation:fpsugin .6s ease-out}
+        .sug i{font-style:normal;font-size:20px;animation:fpbob 3s ease-in-out infinite}.sug b{display:block;font-size:12px;line-height:1.2}.sug span span{font-size:11px;line-height:1.2}.sug span{color:var(--fp-text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .tl{display:flex;align-items:center;gap:10px}.slab{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:12px;white-space:nowrap}
         @keyframes fpsugin{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
         @media (max-width:700px){.sug,.wxn span,.slab{display:none}}
-      </style><div class="bar${sc.key ? ' sc' : ''}"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dl"><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span></span>
-        <div class="mid">${btns.map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div>
-        ${this._right(s, lang, review, pending)}</div>`;
+      </style><div class="bar${sc.key ? ' sc' : ''}"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b>${this._seasonLabel(s, lang)}</span><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span></span></span>
+        <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div>
+        ${this._right(s, lang, review, pending, btns.includes('einstellungen') ? this._navBtn('einstellungen', lang, cur) : '')}</div>`;
       const bar = this.shadowRoot.querySelector('.bar');
       if (sc.key && bar) {
         if (keepScn) bar.prepend(keepScn);
@@ -537,6 +538,10 @@
         this._scnKey = sc.key;
       } else { this._scnEl = null; this._scnKey = ''; }
       this._popLayer(this._popHtml, NAV_POPCSS);
+    }
+    _navBtn(k, lang, cur) {
+      const T = NAV_T[lang]; const miss = this._views && !this._views.has(this._paths[k]);
+      return `<button class="sq${this._paths[k] === cur ? ' on' : ''}${miss ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(miss ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon></button>`;
     }
     _seasonLabel(s, lang) {
       const se = s && s.season; if (!se || se.enabled === false || !se.label || !window.FPSEASON) return '';
@@ -546,17 +551,17 @@
     _wxCorner(s, lang) {
       const wx = this._wxNow; if (!wx) return '';
       const sg = window.FPSEASON && window.FPSEASON.suggest(s, this._hass, wx, this._fc, new Date());
-      return `<span class="wxc"><span class="wxn" title="${escN(wx.text)}"><i>${wx.icon}</i>${wx.temp != null ? `<b>${wx.temp}°</b>` : ''}<span>${escN(wx.text)}</span></span>${sg ? `<span class="sug" title="${escN(sg.text)}"><i>${sg.icon}</i><span><b>${escN(sg.title)}</b><span>${escN(sg.text)}</span></span></span>` : ''}</span>`;
+      return `<span class="wxc${sg ? '' : ' one'}"><span class="wxn" title="${escN(wx.text)}"><i>${wx.icon}</i>${wx.temp != null ? `<b>${wx.temp}°</b>` : ''}<span>${escN(wx.text)}</span></span>${sg ? `<span class="sug" title="${escN(sg.text)}"><i>${sg.icon}</i><span><b>${escN(sg.title)}</b><span>${escN(sg.text)}</span></span></span>` : ''}</span>`;
     }
-    _right(s, lang, review, pending) {
+    _right(s, lang, review, pending, setBtn = '') {
       if (!s) return '<span></span>';
       const T = NAV_T[lang]; const cur = themeName(s.theme); const sty = STYLES.includes(s.style) ? s.style : 'standard';
       const nm = (k) => THEME_NAMES[k][lang === 'en' ? 'en' : 'de']; const sn = (k) => STYLE_NAMES[k][lang === 'en' ? 'en' : 'de'];
       const fmtD = (d) => { const x = new Date(d + 'T00:00'); return `${x.getDate()}.${x.getMonth() + 1}.`; };
       const allRev = (s.vacation_review || []); const vacOn = ((s.vacation || {}).enabled !== false) && s.modules && s.modules.week;
-      const vac = vacOn || allRev.length ? `<button class="ic vac${this._open === 'vac' ? ' on' : ''}${pending ? '' : ' quiet'}" data-vac title="${escN(T.vac)}"><ha-icon icon="mdi:beach"></ha-icon>${pending ? `<b class="dot">${pending}</b>` : ''}</button>` : '';
+      const vac = vacOn || allRev.length ? `<button class="ic sq vac${this._open === 'vac' ? ' on' : ''}${pending ? '' : ' quiet'}" data-vac title="${escN(T.vac)}"><ha-icon icon="mdi:beach"></ha-icon>${pending ? `<b class="dot">${pending}</b>` : ''}</button>` : '';
       const awayList = Object.entries(s.away_badge || {}).map(([pid, b]) => { const p = (s.persons || []).find((x) => x.id === pid); if (!p) return '';
-        const ic = b.kind === 'holiday' ? '🌴' : '✈️'; const d = (x) => { const dd = new Date(String(x).slice(0, 10) + 'T12:00'); return `${T.wd[dd.getDay()]} ${dd.getDate()}.${dd.getMonth() + 1}.`; };
+        const ic = b.kind === 'holiday' ? '🌴' : '✈️'; const d = (x) => { const dd = new Date(String(x).slice(0, 10) + 'T12:00'); return `${T.wds[dd.getDay()]} ${dd.getDate()}.${dd.getMonth() + 1}.`; };
         const txt = b.state === 'now' ? T.awUntil.replace('{d}', b.allday ? d(b.until) : `${d(b.until)} ${String(b.until).slice(11, 16)}`) : b.state === 'today' ? T.awAt.replace('{t}', b.at) : (b.at ? T.awTomAt.replace('{t}', b.at) : T.awTom);
         return `<div class="aw"><b>${escN(p.name)}</b><span>${ic} ${escN(txt)}</span></div>`; }).join('');
       const pop = this._open === 'theme' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:palette-outline"></ha-icon>${T.design}<button class="x" data-x>✕</button></div>
@@ -573,8 +578,8 @@
               <div class="vb"><button class="away${v.decision === 'away' ? ' sel' : ''}" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
               <button class="home${v.decision === 'home' ? ' sel' : ''}" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`; }).join(''); }).join('')}</div></div>` : '';
       this._popHtml = pop;
-      const rf = `<button class="ic rf${this._busyR ? ' spin' : ''}" data-refresh title="${escN(T.refresh)}" aria-label="${escN(T.refresh)}"><ha-icon icon="mdi:refresh"></ha-icon></button>`;
-      return `<span class="rt">${this._wxCorner(s, lang)}<span class="stk">${vac}${rf}</span>
+      const rf = `<button class="ic sq rf${this._busyR ? ' spin' : ''}" data-refresh title="${escN(T.refresh)}" aria-label="${escN(T.refresh)}"><ha-icon icon="mdi:refresh"></ha-icon></button>`;
+      return `<span class="rt">${this._wxCorner(s, lang)}<span class="stk">${vac}${rf}</span>${setBtn ? `<span class="stk one">${setBtn}</span>` : ''}
         ${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;
     }
   }
