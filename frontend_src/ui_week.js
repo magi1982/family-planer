@@ -36,11 +36,11 @@ const SOON_T = ['in {n} Min', 'in {n} Std'];
 const FPL = 'de';
 const TX = {
   de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
+    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
-    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
+    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', spcH: 'Special chores', open: '{n} open', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
@@ -766,16 +766,18 @@ class LoxWochenplanerCard extends FpBase {
         const isBday = ((snapX.season || {}).birthdays || []).includes(pid); const seX = snapX.season || {};
         const away = ((this._cfg.abwesend || {})[k.name] || []).includes(dStr);
         const ev = dayEv(k, dSel);
-        const sec = (title, html) => (html ? `<div class="tsec"><div class="tsh">${title}</div>${html}</div>` : '');
+        // one header line per section: "Ämtli · 1 von 4" left, "Alles erledigt!" right
+        const sec = (title, html, info, right) => (html ? `<div class="tsec"><div class="tsh"><span>${title}${info ? ` · ${info}` : ''}</span>${right || ''}</div>${html}</div>` : '');
         const evRow = (e) => { const est = isT ? evState(e) : { c: '', b: '' }; return `<div class="ev one${est.c}" style="border-color:${e.c.farbe}"><span class="et">${esc(e.title)}</span><span class="tm">${evRange(e, false)}</span>${est.b}</div>`; };
         const school = ['alle', 'schule'].includes(modeX) ? (modeX === 'schule' ? ev.lessons.map((e) => ({ ...e, title: e.loc ? `${e.title} · ${e.loc}` : e.title })) : ev.blockEvs) : [];
         const evs = ['alle', 'termine'].includes(modeX) ? ev.rest : [];
-        let chores = ''; let tdh = '';
+        let chores = ''; let tdh = ''; let sph = ''; let chInfo = ''; let chRight = ''; let tdInfo = '';
         if (['alle', 'aemtli', 'extra'].includes(modeX)) {
           if (isT) {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
-            chores = mine.length ? `<div class="prog"><span>${TX.of.replace('{a}', dn).replace('{b}', mine.length)}</span>${dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''}</div><div class="bg one">` + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Spezial${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
+            if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
+            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Spezial${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
@@ -787,11 +789,13 @@ class LoxWochenplanerCard extends FpBase {
           const rest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
           const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
           tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}${ageOf(t)}</span></button>`).join('')
-            + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '') + this._sonderBtns(snapX, pid, tStr);
+            + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '');
           if (tdh) tdh = `<div class="bg one">${tdh}</div>`;
+          if (tdOpen.length) tdInfo = TX.open.replace('{n}', tdOpen.length);
+          sph = this._sonderBtns(snapX, pid, tStr); if (sph) sph = `<div class="bg one">${sph}</div>`;
         }
         const body = away ? `<div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon><span>Ferien</span></div>`
-          : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores) + sec(TX.todos, tdh)) || `<div class="none">${TX.none}</div>`;
+          : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || `<div class="none">${TX.none}</div>`;
         return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pid]) || 0) : ''}
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
           <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
@@ -920,7 +924,7 @@ class LoxWochenplanerCard extends FpBase {
       .seg.vw{margin-left:0}.seg.vw + .seg{margin-left:auto}
       .tgrid{display:grid;gap:8px;align-items:start}.tcol{background:#232323;border-radius:12px;min-width:0;box-shadow:inset 0 3px 0 var(--pc,#555);overflow:hidden}
       .tcol .lab.th{background:transparent;padding:12px 10px 8px;position:relative;overflow:visible}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
-      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{font-size:10px;color:#7a7a7a;text-transform:uppercase;letter-spacing:1px;margin:2px 2px 0}
+      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:10px;color:#7a7a7a;text-transform:uppercase;letter-spacing:1px;margin:2px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
       .bg.one{grid-template-columns:1fr}
       .age{display:block;font-size:10px;color:#8a8a8a;font-weight:400;margin-top:2px}
       .tdmore{background:none;border:1px dashed #3a3a3a;color:#999;border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}

@@ -7,12 +7,16 @@
 - **Filters for chores and special chores:** chips at the top of the chore plan (per person, daily, with deadline / rhythm, not assigned) and of the special chores (on, off, own, volunteer, daily, weekly, occasion, weather, while away, secret, needs adult), each with a count, plus a search box.
 
 ### Changed
+- **One header line per section in the today view:** *Chores · 1 of 4* with *All done!* on the right, *To-dos · 3 open*; special chores have their own section instead of sitting under the to-dos. The settings button sits at the top right.
 - **Tidier, symmetric header:** time with the special-day label (e.g. *3rd Advent*) on top, the full date below (*Sunday, 13 December*); planner, lists and rewards as square icon buttons right next to it. On the right everything has the same height: weather and suggestion tiles, holiday check and refresh stacked, settings as a square button at the edge.
 - **Our garden in the scene (own house):** a big apple tree (blossoms in spring, apples in summer and autumn, bare in winter), a smaller red maple (bright red in autumn) and a flower bed with white and violet flowers in summer – the right side of the house is no longer empty.
+- **Real day and night:** the scene follows Home Assistant's `sun.sun` (night when the sun is below the horizon, before only by the clock 20–6). Around sunset and sunrise with sun or a few clouds the sky glows orange / pink with a low sun.
+- **Garden lights at night:** small lights shine up into the trees and bushes. More grass tufts everywhere and a few round stones (snow caps in winter).
 - **Rainbow design:** the selected button uses a calm two-colour gradient (pink → violet) instead of all rainbow colours; the rainbow band stays.
 - **House in the middle of the scene:** every landscape and season is shifted so the house (or the beach / carnival scene) sits in the free middle of the header, also on tablets; the landscape repeats seamlessly at the right edge. Advent wreath, Christmas tree and presents stay next to the house, banners sit below the navigation.
 - **Design picker removed from the header** – choose the design under *Settings → General*. The header is calmer and leaves more room for the scene.
 - **Points on every task in the planner:** chores show *+N* next to the title (fair mode: their share of the day's points), to-dos and special chores show it in their label. The values come from the server, so they always match what gets booked.
+
 
 ### Fixed
 - **Date in the header** shows the weekday in full again (a second, short weekday list overwrote it).

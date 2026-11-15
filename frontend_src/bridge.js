@@ -398,7 +398,8 @@
       if (first) { this._store = Store.get(h.connection, this._cfg.entry_id); this._off = this._store.listen(() => this._render()); this._loadViews(); }
       // weather entity changed -> only the scene and the little weather corner are updated
       const ent = this._wxEnt(); const st = ent && h.states[ent];
-      const sig = st ? `${st.state}|${(st.attributes || {}).temperature}|${(st.attributes || {}).wind_speed}` : '';
+      const lt = this._light();
+      const sig = (st ? `${st.state}|${(st.attributes || {}).temperature}|${(st.attributes || {}).wind_speed}` : '') + `|${lt.night}|${lt.dusk}`;
       if (sig !== this._wxSig) { this._wxSig = sig; if (!first) this._render(); }
       if (ent !== this._fcEnt) this._subForecast(ent);
     }
@@ -414,12 +415,22 @@
         } catch (e) { /* this weather entity offers no such forecast */ }
       }
     }
+    // day / night / sunset from the real sun (sun.sun); without it the clock decides (night 20–6)
+    _light() {
+      const sun = this._hass && this._hass.states && this._hass.states['sun.sun'];
+      if (!sun) return { night: null, dusk: null };
+      const el = Number((sun.attributes || {}).elevation);
+      const night = sun.state === 'below_horizon' && !(el > -2);
+      const dusk = Number.isFinite(el) && el > -4 && el < 6 ? ((sun.attributes || {}).rising ? 'dawn' : 'dusk') : null;
+      return { night, dusk };
+    }
     // the animated scene stays the same element while nothing changes, so animations never restart
     _sceneHtml(s, lang) {
       const SE = window.FPSEASON; if (!SE || !s || !s.season) return { key: '', html: '' };
       const cfg = s.season_cfg || {}; const n = new Date(); const wx = SE.weather(this._hass, cfg.weather, lang);
       const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
-      const o = { season: se, wx, hour: n.getHours(), lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow() };
+      const lt = this._light();
+      const o = { season: se, wx, hour: n.getHours(), night: lt.night, dusk: lt.dusk, lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow() };
       if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };
       const key = SE.sceneKey(o); return { key, html: key === this._scnKey && this._scnEl ? null : SE.scene(o), wx };
     }
@@ -512,7 +523,7 @@
         button.menu{padding:0 10px}
         button ha-icon{--mdc-icon-size:20px}
         .rt{display:flex;justify-content:flex-end;align-items:center;gap:8px;position:relative}
-        .stk{display:flex;flex-direction:column;gap:6px;justify-content:center}.stk.one{align-self:stretch}
+        .stk{display:flex;flex-direction:column;gap:6px;justify-content:center}.stk.one{align-self:stretch;justify-content:flex-start}
         button.sq,.mid button{width:40px;height:40px;min-width:40px;padding:0;justify-content:center;flex:none}
         button.rf.spin ha-icon{animation:fprot 1s linear infinite}@keyframes fprot{to{transform:rotate(360deg)}}
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}

@@ -223,7 +223,7 @@
 
   // ------------------------------------------------------------------------------ the scene
   // o: { season, wx (weather()), hour, lang, intensity ('calm'|'normal'|'lots'), storm (km/h), still (bool) }
-  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5, o.narrow].join('|'); };
+  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [o.dusk, s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5, o.narrow].join('|'); };
   api.scene = (o) => {
     const s = o.season || { vis: 'alltag', jz: 'sommer' }; const vis = s.vis || 'alltag'; const jz = s.jz || 'sommer'; const lang = o.lang === 'en' ? 'en' : 'de';
     const w = o.wx || { kind: 'partlycloudy', wind: 8 }; let kind = w.kind || 'partlycloudy';
@@ -238,6 +238,9 @@
     const SKY = night ? ['#0b1430', '#22365e'] : ({ sunny: ['#5fb0ff', '#cfe8ff'], partlycloudy: ['#78b8f0', '#d4e9fb'], cloudy: ['#8b9aad', '#ccd6e0'], rainy: ['#5f6d7d', '#9faab6'],
       pouring: ['#4c5866', '#87929e'], lightning: ['#383f4d', '#69717f'], snowy: ['#a8b7c8', '#e4ecf4'], fog: ['#b7bfc8', '#e0e4e8'], windy: ['#7fb2e2', '#cfe3f5'] })[kind] || ['#78b8f0', '#d4e9fb'];
     let sky = SKY;
+    // sunset / sunrise glow when the sun can be seen (sunny, a few clouds, wind)
+    const glowSun = !night && o.dusk && ['sunny', 'partlycloudy', 'windy'].includes(kind);
+    if (glowSun) sky = o.dusk === 'dawn' ? ['#7d8fd6', '#ffc7a8'] : ['#5b4f9e', '#ff9a5c'];
     if (vis === 'silvester') sky = ['#090d24', '#2b1e52'];
     if (vis === 'fasnacht' && !night) sky = ['#6e3fd1', '#ff8ac1'];
     if (vis === 'sommer' && !night && ['sunny', 'partlycloudy', 'windy'].includes(kind)) sky = ['#1e9ef0', '#bfeaff'];
@@ -248,14 +251,15 @@
     const dx = focus - CX; const sdx = hasHouse ? 0 : -dx; const BX = hasHouse ? CX - 215 : 600; // banners: left of the house, below the navigation
     const vb = o.narrow ? `${CX - 160} 0 320 ${H}` : `0 0 ${W} ${H}`;
     let svg = `<svg viewBox="${vb}" preserveAspectRatio="xMidYMax slice" style="--wa:${wa.toFixed(1)}deg;--wd:${wd.toFixed(1)}s" aria-hidden="true">
-      <defs><linearGradient id="fpsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient></defs>
+      <defs><linearGradient id="fpsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient><radialGradient id="fpglow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset=".6" stop-color="#ffd27a" stop-opacity=".18"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient></defs>
       <rect width="${W}" height="${H}" fill="url(#fpsky)"/><g transform="translate(${-dx} 0)"><g id="fpb">`;
     // sun, moon, stars
     if (night) {
       svg += fall(Math.round(26 * mul), r, (x, k) => `<circle class="tw" cx="${x.toFixed(0)}" cy="${(k * 60).toFixed(0)}" r="${(0.6 + r()).toFixed(1)}" fill="#fff" style="animation-delay:-${(r() * 3).toFixed(1)}s"/>`);
       if (!['rainy', 'pouring', 'lightning', 'snowy', 'fog', 'cloudy'].includes(kind) || vis === 'silvester') svg += '<circle cx="640" cy="26" r="13" fill="#f6f1d5"/><circle cx="646" cy="22" r="12" fill="#22365e" opacity=".9"/>';
-    } else if (['sunny', 'partlycloudy', 'windy'].includes(kind)) svg += '<circle class="sun" cx="610" cy="28" r="17" fill="#FFE27A"/><circle cx="610" cy="28" r="30" fill="#FFE27A" opacity=".25"/>';
-    if (kind === 'partlycloudy' && !night) [['#ff5a5a', 52], ['#ffb23d', 47], ['#ffe94d', 42], ['#55d16b', 37], ['#4aa8ff', 32], ['#8f6bff', 27]].forEach(([c, rr]) => { svg += `<path d="M${470 - rr * 2} 100 A ${rr * 2} ${rr * 1.7} 0 0 1 ${470 + rr * 2} 100" stroke="${c}" stroke-width="5" fill="none" opacity=".45"/>`; });
+    } else if (glowSun) svg += `<circle cx="600" cy="88" r="40" fill="#FFB25C" opacity=".35"/><circle cx="600" cy="88" r="20" fill="#FF8A3C"/>`;
+    else if (['sunny', 'partlycloudy', 'windy'].includes(kind)) svg += '<circle class="sun" cx="610" cy="28" r="17" fill="#FFE27A"/><circle cx="610" cy="28" r="30" fill="#FFE27A" opacity=".25"/>';
+    if (kind === 'partlycloudy' && !night && !glowSun) [['#ff5a5a', 52], ['#ffb23d', 47], ['#ffe94d', 42], ['#55d16b', 37], ['#4aa8ff', 32], ['#8f6bff', 27]].forEach(([c, rr]) => { svg += `<path d="M${470 - rr * 2} 100 A ${rr * 2} ${rr * 1.7} 0 0 1 ${470 + rr * 2} 100" stroke="${c}" stroke-width="5" fill="none" opacity=".45"/>`; });
     // mountains (sport holidays) / sea (summer) in the background
     if (vis === 'sport' || (jz === 'winter' && vis === 'winter')) {
       svg += `<path d="M0 92 L120 40 L210 78 L330 26 L460 84 L560 48 L700 90 L820 34 L960 86 L1080 44 L1200 92 V120 H0Z" fill="${night ? '#33415c' : '#6f86a3'}"/>`;
@@ -271,7 +275,16 @@
     if (vis === 'sommer') {
       svg += `<rect y="84" width="${W}" height="20" fill="#2aa7df"/><g class="wave">${fall(26, r, (x, k) => `<path d="M${(k * 0 + (x | 0) % 1200)} 88 q8 -4 16 0" stroke="#bff0ff" stroke-width="2" fill="none"/>`)}</g>`;
       svg += `<path d="M0 100 C 200 92 400 104 600 98 C 800 92 1000 104 1200 100 V120 H0Z" fill="#f2d48f"/>`;
-    } else svg += `<path d="M0 98 C 160 90 340 104 520 96 C 700 89 900 104 1200 98 V120 H0Z" fill="${gCol}"/>`;
+    } else {
+      svg += `<path d="M0 98 C 160 90 340 104 520 96 C 700 89 900 104 1200 98 V120 H0Z" fill="${gCol}"/>`;
+      // grass tufts everywhere and a few round stones (spring / summer green, autumn straw, winter only stones)
+      const gr = snowGround ? null : vis === 'fasnacht' ? null : ({ fruehling: ['#5fae46', '#7cc35c'], sommer: ['#4c9a36', '#6cb84a'], herbst: ['#a88a3e', '#c2a252'], winter: ['#7c8a5a', '#93a06a'] })[jz];
+      if (gr) for (let i = 0; i < 46; i++) { const x = (i * 26 + r() * 18) % W; const y = 104 + r() * 12; const c = gr[i % 2];
+        svg += `<path d="M${x.toFixed(0)} ${y.toFixed(0)} q-3 -7 -5 -9 M${(x + 2).toFixed(0)} ${y.toFixed(0)} q0 -8 1 -11 M${(x + 4).toFixed(0)} ${y.toFixed(0)} q3 -6 6 -8" stroke="${c}" stroke-width="1.6" stroke-linecap="round" fill="none"/>`; }
+      [[330, 110, 1], [345, 112, 0.7], [700, 112, 0.9], [1175, 109, 1.1], [1190, 112, 0.7], [520, 114, 0.8]].forEach(([x, y, k]) => {
+        svg += `<ellipse cx="${x}" cy="${y}" rx="${(8 * k).toFixed(1)}" ry="${(5 * k).toFixed(1)}" fill="${night ? '#59606b' : '#9aa1ab'}"/><ellipse cx="${x - 2 * k}" cy="${y - 2 * k}" rx="${(4 * k).toFixed(1)}" ry="${(2 * k).toFixed(1)}" fill="${night ? '#6d7480' : '#c3c8cf'}"/>`
+          + (snowGround ? `<ellipse cx="${x}" cy="${y - 4 * k}" rx="${(7 * k).toFixed(1)}" ry="${(2.4 * k).toFixed(1)}" fill="#fff"/>` : ''); });
+    }
     // everyday house and trees (a little different every season)
     const lit = vis === 'weihnachten' || night;
     const smokeOn = ['herbst', 'winter'].includes(jz) || vis === 'weihnachten';
@@ -286,6 +299,10 @@
       (own ? [[150, 102, 1], [250, 104, 0.8], [720, 104, 0.85]] : [[150, 102, 1], [250, 104, 0.8], [1060, 102, 0.95], [1150, 104, 0.75]]).forEach(([x, y, sc]) => { svg += fir(x, y, sc, snowGround, false, r); });
     } else if (vis !== 'sommer' && vis !== 'fasnacht') {
       (own ? [[150, 100, 1], [260, 102, 0.8], [720, 102, 0.85]] : [[150, 100, 1], [260, 102, 0.8], [1060, 100, 0.95], [1150, 102, 0.8]]).forEach(([x, y, sc]) => { svg += leafTree(x, y, sc, vis === 'fruehling' || vis === 'ostern' ? 'fruehling' : vis === 'herbst' ? 'herbst' : jz, r, true); });
+    }
+    if (night && hasHouse) {
+      const spots = own ? [[150, 1], [250, 0.8], [720, 0.85], [978, 0.6], [1042, 1.25], [1112, 0.95]] : [[150, 1], [260, 0.8], [1060, 0.95], [1150, 0.8]];
+      spots.forEach(([x, k]) => { svg += `<ellipse cx="${x}" cy="${(104 - 42 * k).toFixed(0)}" rx="${(32 * k).toFixed(0)}" ry="${(30 * k).toFixed(0)}" fill="url(#fpglow)"/><ellipse cx="${x}" cy="106" rx="${(14 * k).toFixed(0)}" ry="3" fill="#ffd77a" opacity=".45"/><circle class="tw" cx="${x}" cy="105" r="1.8" fill="#fff2c4"/>`; });
     }
     svg += `</g><use href="#fpb" x="${W}"/></g><g transform="translate(${sdx} 0)"><g id="fps">`;
     // ---- season layer (items that belong to the house move with it: - dx)
@@ -991,11 +1008,11 @@ const SOON_T = ['in {n} Min', 'in {n} Std'];
 const FPL = 'de';
 const TX = {
   de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
+    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
-    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
+    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', spcH: 'Special chores', open: '{n} open', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
@@ -1721,16 +1738,18 @@ class LoxWochenplanerCard extends FpBase {
         const isBday = ((snapX.season || {}).birthdays || []).includes(pid); const seX = snapX.season || {};
         const away = ((this._cfg.abwesend || {})[k.name] || []).includes(dStr);
         const ev = dayEv(k, dSel);
-        const sec = (title, html) => (html ? `<div class="tsec"><div class="tsh">${title}</div>${html}</div>` : '');
+        // one header line per section: "Ämtli · 1 von 4" left, "Alles erledigt!" right
+        const sec = (title, html, info, right) => (html ? `<div class="tsec"><div class="tsh"><span>${title}${info ? ` · ${info}` : ''}</span>${right || ''}</div>${html}</div>` : '');
         const evRow = (e) => { const est = isT ? evState(e) : { c: '', b: '' }; return `<div class="ev one${est.c}" style="border-color:${e.c.farbe}"><span class="et">${esc(e.title)}</span><span class="tm">${evRange(e, false)}</span>${est.b}</div>`; };
         const school = ['alle', 'schule'].includes(modeX) ? (modeX === 'schule' ? ev.lessons.map((e) => ({ ...e, title: e.loc ? `${e.title} · ${e.loc}` : e.title })) : ev.blockEvs) : [];
         const evs = ['alle', 'termine'].includes(modeX) ? ev.rest : [];
-        let chores = ''; let tdh = '';
+        let chores = ''; let tdh = ''; let sph = ''; let chInfo = ''; let chRight = ''; let tdInfo = '';
         if (['alle', 'aemtli', 'extra'].includes(modeX)) {
           if (isT) {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
-            chores = mine.length ? `<div class="prog"><span>${TX.of.replace('{a}', dn).replace('{b}', mine.length)}</span>${dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''}</div><div class="bg one">` + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Spezial${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
+            if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
+            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Spezial${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
@@ -1742,11 +1761,13 @@ class LoxWochenplanerCard extends FpBase {
           const rest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
           const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
           tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}${ageOf(t)}</span></button>`).join('')
-            + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '') + this._sonderBtns(snapX, pid, tStr);
+            + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '');
           if (tdh) tdh = `<div class="bg one">${tdh}</div>`;
+          if (tdOpen.length) tdInfo = TX.open.replace('{n}', tdOpen.length);
+          sph = this._sonderBtns(snapX, pid, tStr); if (sph) sph = `<div class="bg one">${sph}</div>`;
         }
         const body = away ? `<div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon><span>Ferien</span></div>`
-          : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores) + sec(TX.todos, tdh)) || `<div class="none">${TX.none}</div>`;
+          : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || `<div class="none">${TX.none}</div>`;
         return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pid]) || 0) : ''}
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
           <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
@@ -1875,7 +1896,7 @@ class LoxWochenplanerCard extends FpBase {
       .seg.vw{margin-left:0}.seg.vw + .seg{margin-left:auto}
       .tgrid{display:grid;gap:8px;align-items:start}.tcol{background:var(--fp-bg2,#232323);border-radius:12px;min-width:0;box-shadow:inset 0 3px 0 var(--pc,#555);overflow:hidden}
       .tcol .lab.th{background:transparent;padding:12px 10px 8px;position:relative;overflow:visible}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
-      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{font-size:10px;color:var(--fp-text3,#7a7a7a);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 0}
+      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:10px;color:var(--fp-text3,#7a7a7a);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
       .bg.one{grid-template-columns:1fr}
       .age{display:block;font-size:10px;color:var(--fp-text3,#8a8a8a);font-weight:400;margin-top:2px}
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
@@ -2279,11 +2300,11 @@ const SOON_T = ['in {n} min', 'in {n} h'];
 const FPL = 'en';
 const TX = {
   de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
+    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
-    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
+    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', spcH: 'Special chores', open: '{n} open', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
@@ -3009,16 +3030,18 @@ class LoxWochenplanerCard extends FpBase {
         const isBday = ((snapX.season || {}).birthdays || []).includes(pid); const seX = snapX.season || {};
         const away = ((this._cfg.abwesend || {})[k.name] || []).includes(dStr);
         const ev = dayEv(k, dSel);
-        const sec = (title, html) => (html ? `<div class="tsec"><div class="tsh">${title}</div>${html}</div>` : '');
+        // one header line per section: "Ämtli · 1 von 4" left, "Alles erledigt!" right
+        const sec = (title, html, info, right) => (html ? `<div class="tsec"><div class="tsh"><span>${title}${info ? ` · ${info}` : ''}</span>${right || ''}</div>${html}</div>` : '');
         const evRow = (e) => { const est = isT ? evState(e) : { c: '', b: '' }; return `<div class="ev one${est.c}" style="border-color:${e.c.farbe}"><span class="et">${esc(e.title)}</span><span class="tm">${evRange(e, false)}</span>${est.b}</div>`; };
         const school = ['alle', 'schule'].includes(modeX) ? (modeX === 'schule' ? ev.lessons.map((e) => ({ ...e, title: e.loc ? `${e.title} · ${e.loc}` : e.title })) : ev.blockEvs) : [];
         const evs = ['alle', 'termine'].includes(modeX) ? ev.rest : [];
-        let chores = ''; let tdh = '';
+        let chores = ''; let tdh = ''; let sph = ''; let chInfo = ''; let chRight = ''; let tdInfo = '';
         if (['alle', 'aemtli', 'extra'].includes(modeX)) {
           if (isT) {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
-            chores = mine.length ? `<div class="prog"><span>${TX.of.replace('{a}', dn).replace('{b}', mine.length)}</span>${dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''}</div><div class="bg one">` + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Special${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
+            if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
+            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Special${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
@@ -3030,11 +3053,13 @@ class LoxWochenplanerCard extends FpBase {
           const rest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
           const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
           tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Tap again to finish' : t.title)}${ageOf(t)}</span></button>`).join('')
-            + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '') + this._sonderBtns(snapX, pid, tStr);
+            + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '');
           if (tdh) tdh = `<div class="bg one">${tdh}</div>`;
+          if (tdOpen.length) tdInfo = TX.open.replace('{n}', tdOpen.length);
+          sph = this._sonderBtns(snapX, pid, tStr); if (sph) sph = `<div class="bg one">${sph}</div>`;
         }
         const body = away ? `<div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon><span>Ferien</span></div>`
-          : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores) + sec(TX.todos, tdh)) || `<div class="none">${TX.none}</div>`;
+          : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || `<div class="none">${TX.none}</div>`;
         return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pid]) || 0) : ''}
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
           <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
@@ -3163,7 +3188,7 @@ class LoxWochenplanerCard extends FpBase {
       .seg.vw{margin-left:0}.seg.vw + .seg{margin-left:auto}
       .tgrid{display:grid;gap:8px;align-items:start}.tcol{background:var(--fp-bg2,#232323);border-radius:12px;min-width:0;box-shadow:inset 0 3px 0 var(--pc,#555);overflow:hidden}
       .tcol .lab.th{background:transparent;padding:12px 10px 8px;position:relative;overflow:visible}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
-      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{font-size:10px;color:var(--fp-text3,#7a7a7a);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 0}
+      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:10px;color:var(--fp-text3,#7a7a7a);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
       .bg.one{grid-template-columns:1fr}
       .age{display:block;font-size:10px;color:var(--fp-text3,#8a8a8a);font-weight:400;margin-top:2px}
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
@@ -5787,7 +5812,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (first) { this._store = Store.get(h.connection, this._cfg.entry_id); this._off = this._store.listen(() => this._render()); this._loadViews(); }
       // weather entity changed -> only the scene and the little weather corner are updated
       const ent = this._wxEnt(); const st = ent && h.states[ent];
-      const sig = st ? `${st.state}|${(st.attributes || {}).temperature}|${(st.attributes || {}).wind_speed}` : '';
+      const lt = this._light();
+      const sig = (st ? `${st.state}|${(st.attributes || {}).temperature}|${(st.attributes || {}).wind_speed}` : '') + `|${lt.night}|${lt.dusk}`;
       if (sig !== this._wxSig) { this._wxSig = sig; if (!first) this._render(); }
       if (ent !== this._fcEnt) this._subForecast(ent);
     }
@@ -5803,12 +5829,22 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         } catch (e) { /* this weather entity offers no such forecast */ }
       }
     }
+    // day / night / sunset from the real sun (sun.sun); without it the clock decides (night 20–6)
+    _light() {
+      const sun = this._hass && this._hass.states && this._hass.states['sun.sun'];
+      if (!sun) return { night: null, dusk: null };
+      const el = Number((sun.attributes || {}).elevation);
+      const night = sun.state === 'below_horizon' && !(el > -2);
+      const dusk = Number.isFinite(el) && el > -4 && el < 6 ? ((sun.attributes || {}).rising ? 'dawn' : 'dusk') : null;
+      return { night, dusk };
+    }
     // the animated scene stays the same element while nothing changes, so animations never restart
     _sceneHtml(s, lang) {
       const SE = window.FPSEASON; if (!SE || !s || !s.season) return { key: '', html: '' };
       const cfg = s.season_cfg || {}; const n = new Date(); const wx = SE.weather(this._hass, cfg.weather, lang);
       const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
-      const o = { season: se, wx, hour: n.getHours(), lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow() };
+      const lt = this._light();
+      const o = { season: se, wx, hour: n.getHours(), night: lt.night, dusk: lt.dusk, lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow() };
       if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };
       const key = SE.sceneKey(o); return { key, html: key === this._scnKey && this._scnEl ? null : SE.scene(o), wx };
     }
@@ -5901,7 +5937,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         button.menu{padding:0 10px}
         button ha-icon{--mdc-icon-size:20px}
         .rt{display:flex;justify-content:flex-end;align-items:center;gap:8px;position:relative}
-        .stk{display:flex;flex-direction:column;gap:6px;justify-content:center}.stk.one{align-self:stretch}
+        .stk{display:flex;flex-direction:column;gap:6px;justify-content:center}.stk.one{align-self:stretch;justify-content:flex-start}
         button.sq,.mid button{width:40px;height:40px;min-width:40px;padding:0;justify-content:center;flex:none}
         button.rf.spin ha-icon{animation:fprot 1s linear infinite}@keyframes fprot{to{transform:rotate(360deg)}}
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}

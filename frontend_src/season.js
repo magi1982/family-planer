@@ -222,7 +222,7 @@
 
   // ------------------------------------------------------------------------------ the scene
   // o: { season, wx (weather()), hour, lang, intensity ('calm'|'normal'|'lots'), storm (km/h), still (bool) }
-  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5, o.narrow].join('|'); };
+  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [o.dusk, s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5, o.narrow].join('|'); };
   api.scene = (o) => {
     const s = o.season || { vis: 'alltag', jz: 'sommer' }; const vis = s.vis || 'alltag'; const jz = s.jz || 'sommer'; const lang = o.lang === 'en' ? 'en' : 'de';
     const w = o.wx || { kind: 'partlycloudy', wind: 8 }; let kind = w.kind || 'partlycloudy';
@@ -237,6 +237,9 @@
     const SKY = night ? ['#0b1430', '#22365e'] : ({ sunny: ['#5fb0ff', '#cfe8ff'], partlycloudy: ['#78b8f0', '#d4e9fb'], cloudy: ['#8b9aad', '#ccd6e0'], rainy: ['#5f6d7d', '#9faab6'],
       pouring: ['#4c5866', '#87929e'], lightning: ['#383f4d', '#69717f'], snowy: ['#a8b7c8', '#e4ecf4'], fog: ['#b7bfc8', '#e0e4e8'], windy: ['#7fb2e2', '#cfe3f5'] })[kind] || ['#78b8f0', '#d4e9fb'];
     let sky = SKY;
+    // sunset / sunrise glow when the sun can be seen (sunny, a few clouds, wind)
+    const glowSun = !night && o.dusk && ['sunny', 'partlycloudy', 'windy'].includes(kind);
+    if (glowSun) sky = o.dusk === 'dawn' ? ['#7d8fd6', '#ffc7a8'] : ['#5b4f9e', '#ff9a5c'];
     if (vis === 'silvester') sky = ['#090d24', '#2b1e52'];
     if (vis === 'fasnacht' && !night) sky = ['#6e3fd1', '#ff8ac1'];
     if (vis === 'sommer' && !night && ['sunny', 'partlycloudy', 'windy'].includes(kind)) sky = ['#1e9ef0', '#bfeaff'];
@@ -247,14 +250,15 @@
     const dx = focus - CX; const sdx = hasHouse ? 0 : -dx; const BX = hasHouse ? CX - 215 : 600; // banners: left of the house, below the navigation
     const vb = o.narrow ? `${CX - 160} 0 320 ${H}` : `0 0 ${W} ${H}`;
     let svg = `<svg viewBox="${vb}" preserveAspectRatio="xMidYMax slice" style="--wa:${wa.toFixed(1)}deg;--wd:${wd.toFixed(1)}s" aria-hidden="true">
-      <defs><linearGradient id="fpsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient></defs>
+      <defs><linearGradient id="fpsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient><radialGradient id="fpglow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset=".6" stop-color="#ffd27a" stop-opacity=".18"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient></defs>
       <rect width="${W}" height="${H}" fill="url(#fpsky)"/><g transform="translate(${-dx} 0)"><g id="fpb">`;
     // sun, moon, stars
     if (night) {
       svg += fall(Math.round(26 * mul), r, (x, k) => `<circle class="tw" cx="${x.toFixed(0)}" cy="${(k * 60).toFixed(0)}" r="${(0.6 + r()).toFixed(1)}" fill="#fff" style="animation-delay:-${(r() * 3).toFixed(1)}s"/>`);
       if (!['rainy', 'pouring', 'lightning', 'snowy', 'fog', 'cloudy'].includes(kind) || vis === 'silvester') svg += '<circle cx="640" cy="26" r="13" fill="#f6f1d5"/><circle cx="646" cy="22" r="12" fill="#22365e" opacity=".9"/>';
-    } else if (['sunny', 'partlycloudy', 'windy'].includes(kind)) svg += '<circle class="sun" cx="610" cy="28" r="17" fill="#FFE27A"/><circle cx="610" cy="28" r="30" fill="#FFE27A" opacity=".25"/>';
-    if (kind === 'partlycloudy' && !night) [['#ff5a5a', 52], ['#ffb23d', 47], ['#ffe94d', 42], ['#55d16b', 37], ['#4aa8ff', 32], ['#8f6bff', 27]].forEach(([c, rr]) => { svg += `<path d="M${470 - rr * 2} 100 A ${rr * 2} ${rr * 1.7} 0 0 1 ${470 + rr * 2} 100" stroke="${c}" stroke-width="5" fill="none" opacity=".45"/>`; });
+    } else if (glowSun) svg += `<circle cx="600" cy="88" r="40" fill="#FFB25C" opacity=".35"/><circle cx="600" cy="88" r="20" fill="#FF8A3C"/>`;
+    else if (['sunny', 'partlycloudy', 'windy'].includes(kind)) svg += '<circle class="sun" cx="610" cy="28" r="17" fill="#FFE27A"/><circle cx="610" cy="28" r="30" fill="#FFE27A" opacity=".25"/>';
+    if (kind === 'partlycloudy' && !night && !glowSun) [['#ff5a5a', 52], ['#ffb23d', 47], ['#ffe94d', 42], ['#55d16b', 37], ['#4aa8ff', 32], ['#8f6bff', 27]].forEach(([c, rr]) => { svg += `<path d="M${470 - rr * 2} 100 A ${rr * 2} ${rr * 1.7} 0 0 1 ${470 + rr * 2} 100" stroke="${c}" stroke-width="5" fill="none" opacity=".45"/>`; });
     // mountains (sport holidays) / sea (summer) in the background
     if (vis === 'sport' || (jz === 'winter' && vis === 'winter')) {
       svg += `<path d="M0 92 L120 40 L210 78 L330 26 L460 84 L560 48 L700 90 L820 34 L960 86 L1080 44 L1200 92 V120 H0Z" fill="${night ? '#33415c' : '#6f86a3'}"/>`;
@@ -270,7 +274,16 @@
     if (vis === 'sommer') {
       svg += `<rect y="84" width="${W}" height="20" fill="#2aa7df"/><g class="wave">${fall(26, r, (x, k) => `<path d="M${(k * 0 + (x | 0) % 1200)} 88 q8 -4 16 0" stroke="#bff0ff" stroke-width="2" fill="none"/>`)}</g>`;
       svg += `<path d="M0 100 C 200 92 400 104 600 98 C 800 92 1000 104 1200 100 V120 H0Z" fill="#f2d48f"/>`;
-    } else svg += `<path d="M0 98 C 160 90 340 104 520 96 C 700 89 900 104 1200 98 V120 H0Z" fill="${gCol}"/>`;
+    } else {
+      svg += `<path d="M0 98 C 160 90 340 104 520 96 C 700 89 900 104 1200 98 V120 H0Z" fill="${gCol}"/>`;
+      // grass tufts everywhere and a few round stones (spring / summer green, autumn straw, winter only stones)
+      const gr = snowGround ? null : vis === 'fasnacht' ? null : ({ fruehling: ['#5fae46', '#7cc35c'], sommer: ['#4c9a36', '#6cb84a'], herbst: ['#a88a3e', '#c2a252'], winter: ['#7c8a5a', '#93a06a'] })[jz];
+      if (gr) for (let i = 0; i < 46; i++) { const x = (i * 26 + r() * 18) % W; const y = 104 + r() * 12; const c = gr[i % 2];
+        svg += `<path d="M${x.toFixed(0)} ${y.toFixed(0)} q-3 -7 -5 -9 M${(x + 2).toFixed(0)} ${y.toFixed(0)} q0 -8 1 -11 M${(x + 4).toFixed(0)} ${y.toFixed(0)} q3 -6 6 -8" stroke="${c}" stroke-width="1.6" stroke-linecap="round" fill="none"/>`; }
+      [[330, 110, 1], [345, 112, 0.7], [700, 112, 0.9], [1175, 109, 1.1], [1190, 112, 0.7], [520, 114, 0.8]].forEach(([x, y, k]) => {
+        svg += `<ellipse cx="${x}" cy="${y}" rx="${(8 * k).toFixed(1)}" ry="${(5 * k).toFixed(1)}" fill="${night ? '#59606b' : '#9aa1ab'}"/><ellipse cx="${x - 2 * k}" cy="${y - 2 * k}" rx="${(4 * k).toFixed(1)}" ry="${(2 * k).toFixed(1)}" fill="${night ? '#6d7480' : '#c3c8cf'}"/>`
+          + (snowGround ? `<ellipse cx="${x}" cy="${y - 4 * k}" rx="${(7 * k).toFixed(1)}" ry="${(2.4 * k).toFixed(1)}" fill="#fff"/>` : ''); });
+    }
     // everyday house and trees (a little different every season)
     const lit = vis === 'weihnachten' || night;
     const smokeOn = ['herbst', 'winter'].includes(jz) || vis === 'weihnachten';
@@ -285,6 +298,10 @@
       (own ? [[150, 102, 1], [250, 104, 0.8], [720, 104, 0.85]] : [[150, 102, 1], [250, 104, 0.8], [1060, 102, 0.95], [1150, 104, 0.75]]).forEach(([x, y, sc]) => { svg += fir(x, y, sc, snowGround, false, r); });
     } else if (vis !== 'sommer' && vis !== 'fasnacht') {
       (own ? [[150, 100, 1], [260, 102, 0.8], [720, 102, 0.85]] : [[150, 100, 1], [260, 102, 0.8], [1060, 100, 0.95], [1150, 102, 0.8]]).forEach(([x, y, sc]) => { svg += leafTree(x, y, sc, vis === 'fruehling' || vis === 'ostern' ? 'fruehling' : vis === 'herbst' ? 'herbst' : jz, r, true); });
+    }
+    if (night && hasHouse) {
+      const spots = own ? [[150, 1], [250, 0.8], [720, 0.85], [978, 0.6], [1042, 1.25], [1112, 0.95]] : [[150, 1], [260, 0.8], [1060, 0.95], [1150, 0.8]];
+      spots.forEach(([x, k]) => { svg += `<ellipse cx="${x}" cy="${(104 - 42 * k).toFixed(0)}" rx="${(32 * k).toFixed(0)}" ry="${(30 * k).toFixed(0)}" fill="url(#fpglow)"/><ellipse cx="${x}" cy="106" rx="${(14 * k).toFixed(0)}" ry="3" fill="#ffd77a" opacity=".45"/><circle class="tw" cx="${x}" cy="105" r="1.8" fill="#fff2c4"/>`; });
     }
     svg += `</g><use href="#fpb" x="${W}"/></g><g transform="translate(${sdx} 0)"><g id="fps">`;
     // ---- season layer (items that belong to the house move with it: - dx)
