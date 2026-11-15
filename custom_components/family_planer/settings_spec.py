@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from . import validate
+from . import seasons as seasons_mod, sonder as sonder_mod, validate
 
 THEMES = ("ha", "light", "dark", "rainbow", "space")
 STYLES = ("standard", "transparent", "glass")
@@ -30,7 +30,8 @@ LANGUAGES = ("auto", "de", "en")
 MODES = ("fair", "per_chore")
 MODULES = ("week", "lists")
 TODO_SIZES = ("none", "s", "m", "l")
-SECTIONS = ("general", "vacation", "points", "announce", "lists_settings", "todos")
+SECTIONS = ("general", "vacation", "points", "announce", "lists_settings", "todos", "seasons", "sonder")
+VIEWS = ("today", "week")
 
 
 class SettingsError(ValueError):
@@ -67,6 +68,7 @@ def general(data: dict, cur: dict) -> tuple[dict, set[str]]:
         "reliability_days": validate.integer(data.get("reliability_days", cur.get("reliability_days")), 7, 90, 30),
         "school_gap": validate.integer(data.get("school_gap", cur.get("school_gap")), 0, 240, 0),
         "school_window": validate.integer(data.get("school_window", cur.get("school_window", 60)), 0, 240, 60),
+        "default_view": data.get("default_view") if data.get("default_view") in VIEWS else (cur.get("default_view") if cur.get("default_view") in VIEWS else "today"),
     }
     if not any(patch["modules"].values()):
         raise SettingsError("modules", "no_modules")
@@ -135,6 +137,14 @@ def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list,
             {"rebook"})
 
 
+def _times(raw) -> list[str]:
+    """'12:30, 18:30' or a list -> sorted unique HH:MM values (max 6)."""
+    if isinstance(raw, str):
+        raw = raw.split(",")
+    out = [validate.hhmm(str(x).strip(), "") for x in (raw or [])][:12]
+    return sorted({x for x in out if x})[:6]
+
+
 def announce(data: dict, cur: dict, persons: dict) -> tuple[dict, set[str]]:
     new = {
         "enabled": _bool(data, "enabled", cur.get("enabled")),
@@ -154,8 +164,14 @@ def announce(data: dict, cur: dict, persons: dict) -> tuple[dict, set[str]]:
         "queue_special": _bool(data, "queue_special", cur.get("queue_special", True)),
         "max_items": validate.integer(data.get("max_items", cur.get("max_items")), 1, 10, 3),
         "reward_hours": validate.integer(data.get("reward_hours", cur.get("reward_hours")), 0, 48, 0),
+        "fixed": _bool(data, "fixed", cur.get("fixed", True)),
+        "times": _times(data.get("times", cur.get("times", ["12:30", "18:30"]))),
+        "evening": _bool(data, "evening", cur.get("evening", True)),
+        "evening_time": validate.hhmm(data.get("evening_time"), cur.get("evening_time") or "20:00"),
+        "praise": _bool(data, "praise", cur.get("praise", True)),
+        "birthday": _bool(data, "birthday", cur.get("birthday", True)),
     }
-    if new["enabled"] and not new["motion"]:
+    if new["enabled"] and not new["motion"] and not new["fixed"]:
         raise SettingsError("motion", "no_motion")
     if new["enabled"] and not (new["notify"] or (new["tts"] and new["media_players"])):
         raise SettingsError("notify", "no_target")
@@ -174,8 +190,32 @@ def lists_settings(data: dict, cur: dict) -> tuple[dict, set[str]]:
 def todos(data: dict, cur: dict) -> tuple[dict, set[str]]:
     new = {"confirm": _bool(data, "confirm", cur.get("confirm", True)),
            "size": data.get("size") if data.get("size") in TODO_SIZES else cur.get("size", "s"),
-           "keep_days": validate.integer(data.get("keep_days", cur.get("keep_days")), 0, 30, 1)}
+           "keep_days": validate.integer(data.get("keep_days", cur.get("keep_days")), 0, 30, 1),
+           "max_shown": validate.integer(data.get("max_shown", cur.get("max_shown")), 1, 20, 4),
+           "show_age": _bool(data, "show_age", cur.get("show_age", True))}
     return {"todos": new}, set()
+
+
+SUG_DEFAULTS = {"sug_enabled": True, "sug_from": "12:00", "pool": None, "pool_min": 24, "jacuzzi": None, "jacuzzi_min": 34}
+
+
+def seasons(data: dict, cur: dict) -> tuple[dict, set[str]]:
+    """Seasons & weather: design layer, lead days, weather entity, anniversaries and suggestions."""
+    merged = {**cur, **{k: v for k, v in data.items() if k in seasons_mod.DEFAULTS}}
+    clean = seasons_mod.clean_settings(merged)
+    clean.update({
+        "sug_enabled": _bool(data, "sug_enabled", cur.get("sug_enabled", True)),
+        "sug_from": validate.hhmm(data.get("sug_from"), cur.get("sug_from") or "12:00"),
+        "pool": validate.entity(data.get("pool", cur.get("pool")), ("sensor", "water_heater", "climate")),
+        "pool_min": validate.integer(data.get("pool_min", cur.get("pool_min")), 15, 40, 24),
+        "jacuzzi": validate.entity(data.get("jacuzzi", cur.get("jacuzzi")), ("sensor", "water_heater", "climate")),
+        "jacuzzi_min": validate.integer(data.get("jacuzzi_min", cur.get("jacuzzi_min")), 20, 42, 34),
+    })
+    return {"seasons": clean}, {"season"}
+
+
+def sonder(data: dict, cur: dict) -> tuple[dict, set[str]]:
+    return {"sonder_settings": sonder_mod.clean_settings({**cur, **data})}, {"sonder"}
 
 
 def school(data: dict) -> dict:

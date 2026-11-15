@@ -4,6 +4,7 @@ Every phrase must occur in the source (build.py checks this), so the list stays 
 """
 
 WEEK = [
+    ("const FPL = 'de';", "const FPL = 'en';"),
     ("'Nochmals tippen zum Erledigen'", "'Tap again to finish'"),
     ('<em class="tag">⭐ Spezial</em>', '<em class="tag">⭐ Special</em>'),
     ("const SOON_T = ['in {n} Min', 'in {n} Std'];", "const SOON_T = ['in {n} min', 'in {n} h'];"),
@@ -53,8 +54,8 @@ WEEK = [
      '${lv.t} · Reliability ${s.pct} %'),
     ('title="To-do hinzufügen"',
      'title="Add to-do"'),
-    ("${ymd(sel) === tStr ? 'Heute' : WDL[isoWd(sel) - 1]}",
-     "${ymd(sel) === tStr ? 'Today' : WDL[isoWd(sel) - 1]}"),
+    ("${ymd(dd) === tStr ? 'Heute' : WDL[isoWd(dd) - 1]}",
+     "${ymd(dd) === tStr ? 'Today' : WDL[isoWd(dd) - 1]}"),
     ("return short ? 'ganzt.' : 'ganztägig';", "return short ? 'all day' : 'all day';"),
     ("const WD = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];", "const WD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];"),
     ("const WDL = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];",

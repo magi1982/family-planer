@@ -109,7 +109,9 @@ def async_register_websocket(hass: HomeAssistant) -> None:
                     ws_redeem, ws_decide, ws_adjust, ws_announce_test,
                     ws_pin_unlock, ws_pin_change, ws_settings_get, ws_settings_save, ws_person_save, ws_person_remove,
                     ws_list_save, ws_list_remove, ws_reward_save, ws_reward_remove,
-                    ws_todo_save, ws_todo_set, ws_todo_delete, ws_theme_set, ws_vacation_decide, ws_person_order):
+                    ws_todo_save, ws_todo_set, ws_todo_delete, ws_theme_set, ws_vacation_decide, ws_person_order,
+                    ws_sonder_claim, ws_sonder_set, ws_sonder_release, ws_sonder_list, ws_sonder_save,
+                    ws_sonder_delete, ws_sonder_template):
         websocket_api.async_register_command(hass, handler)
 
 
@@ -213,6 +215,7 @@ async def ws_delete_chore(hass: HomeAssistant, connection: websocket_api.ActiveC
     vol.Optional("color"): vol.Match(r"^#[0-9A-Fa-f]{6}$"),
     vol.Optional("image"): vol.All(str, vol.Length(max=200)),
     vol.Optional("aliases"): vol.All([vol.All(str, vol.Length(max=40))], vol.Length(max=10)),
+    vol.Optional("season_av"): vol.All(dict, vol.Length(max=20)),
 })
 @websocket_api.async_response
 async def ws_update_person(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
@@ -221,9 +224,9 @@ async def ws_update_person(hass: HomeAssistant, connection: websocket_api.Active
     if planner is None:
         _not_found(connection, msg)
         return
-    patch = {k: msg[k] for k in ("color", "image", "aliases") if k in msg}
-    # a person's picture may be changed without the PIN; colour and nicknames need it
-    if not (_may_edit(connection, msg, planner) if set(patch) <= {"image"} else _change(connection, msg, planner)):
+    patch = {k: msg[k] for k in ("color", "image", "aliases", "season_av") if k in msg}
+    # a person's picture (and seasonal extras) may be changed without the PIN; colour and nicknames need it
+    if not (_may_edit(connection, msg, planner) if set(patch) <= {"image", "season_av"} else _change(connection, msg, planner)):
         return
     if "image" in patch and not planner.image_allowed(msg["person_id"], patch["image"]):
         connection.send_error(msg["id"], "locked", "This extra is not unlocked for this person")
@@ -479,7 +482,7 @@ def ws_settings_get(hass: HomeAssistant, connection: websocket_api.ActiveConnect
 
 @websocket_api.websocket_command({vol.Required("type"): "family_planer/settings/save", vol.Optional("entry_id"): str,
                                   vol.Required("token"): TOKEN, vol.Required("section"): vol.In(
-                                      ["general", "vacation", "points", "announce", "lists_settings", "todos"]),
+                                      ["general", "vacation", "points", "announce", "lists_settings", "todos", "seasons", "sonder"]),
                                   vol.Required("data"): DATA})
 @websocket_api.async_response
 async def ws_settings_save(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
@@ -522,7 +525,7 @@ async def ws_person_save(hass: HomeAssistant, connection: websocket_api.ActiveCo
         return
     try:
         patch: dict[str, Any] = {"name": name}
-        for key in ("color", "calendar", "role", "image"):
+        for key in ("color", "calendar", "role", "image", "birthday", "bday_anim"):
             if key in data:
                 patch[key] = data[key]
         if "aliases" in data:
@@ -580,7 +583,8 @@ async def ws_list_save(hass: HomeAssistant, connection: websocket_api.ActiveConn
     data = msg["data"]
     spec = {"name": validate.text(data.get("name"), 40), "entity": validate.entity(data.get("entity"), ("todo",)),
             "icon": validate.icon(data.get("icon"), "mdi:cart-outline"),
-            "max_categories": validate.integer(data.get("max_categories"), 5, 20, 10), "auto": bool(data.get("auto", True))}
+            "max_categories": validate.integer(data.get("max_categories"), 5, 20, 10), "auto": bool(data.get("auto", True)),
+            "person_todos": bool(data.get("person_todos", False))}
     if not spec["name"] or not spec["entity"]:
         connection.send_error(msg["id"], "invalid_list", "entity" if spec["name"] else "name")
         return
@@ -755,3 +759,129 @@ async def ws_person_order(hass: HomeAssistant, connection: websocket_api.ActiveC
         return
     await planner.async_person_order(msg["order"])
     connection.send_result(msg["id"])
+
+
+# ---------------------------------------------------------------------------------------------- special chores
+SONDER_ID = vol.All(str, vol.Length(min=1, max=120), vol.Match(r"^[\w:\-]+$"))
+
+
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/sonder/claim", vol.Optional("entry_id"): str,
+                                  vol.Required("inst_id"): SONDER_ID, vol.Required("person_id"): ID})
+@websocket_api.async_response
+async def ws_sonder_claim(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    """Volunteer tile: "I'll take it!" – no PIN, like ticking off a chore."""
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    try:
+        await planner.async_sonder_claim(msg["inst_id"], msg["person_id"])
+    except KeyError:
+        connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Unknown special chore")
+        return
+    except ValueError as err:
+        connection.send_error(msg["id"], str(err), "Not possible")
+        return
+    connection.send_result(msg["id"])
+
+
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/sonder/set", vol.Optional("entry_id"): str,
+                                  vol.Required("inst_id"): SONDER_ID, vol.Required("done"): bool})
+@websocket_api.async_response
+async def ws_sonder_set(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    try:
+        await planner.async_sonder_set(msg["inst_id"], msg["done"])
+    except KeyError:
+        connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Unknown special chore")
+        return
+    except ValueError as err:
+        connection.send_error(msg["id"], str(err), "Not possible")
+        return
+    connection.send_result(msg["id"])
+
+
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/sonder/release", vol.Optional("entry_id"): str,
+                                  vol.Required("token"): TOKEN, vol.Required("inst_id"): SONDER_ID})
+@websocket_api.async_response
+async def ws_sonder_release(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    if not _unlocked(connection, msg, planner):
+        return
+    try:
+        await planner.async_sonder_release(msg["inst_id"])
+    except (KeyError, ValueError):
+        connection.send_error(msg["id"], "not_possible", "Not possible")
+        return
+    connection.send_result(msg["id"])
+
+
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/sonder/list", vol.Optional("entry_id"): str,
+                                  vol.Required("token"): TOKEN})
+@websocket_api.async_response
+async def ws_sonder_list(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    from . import sonder
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    if not _unlocked(connection, msg, planner):
+        return
+    used = {d.get("tpl") for d in planner.data["sonder"].values()}
+    connection.send_result(msg["id"], {
+        "defs": [{"id": sid, **d} for sid, d in planner.data["sonder"].items()],
+        "missing": [{"id": t[0], "icon": t[1], "title": t[2], "title_en": t[3]} for t in sonder.CATALOGUE if t[0] not in used],
+        "settings": planner.sonder_settings()})
+
+
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/sonder/save", vol.Optional("entry_id"): str,
+                                  vol.Required("token"): TOKEN, vol.Optional("sonder_id"): vol.All(str, vol.Length(max=40)),
+                                  vol.Required("data"): DATA})
+@websocket_api.async_response
+async def ws_sonder_save(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    if not _unlocked(connection, msg, planner):
+        return
+    sid = await planner.async_sonder_save(msg.get("sonder_id"), msg["data"])
+    connection.send_result(msg["id"], {"sonder_id": sid})
+
+
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/sonder/delete", vol.Optional("entry_id"): str,
+                                  vol.Required("token"): TOKEN, vol.Required("sonder_id"): vol.All(str, vol.Length(max=40))})
+@websocket_api.async_response
+async def ws_sonder_delete(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    if not _unlocked(connection, msg, planner):
+        return
+    await planner.async_sonder_delete(msg["sonder_id"])
+    connection.send_result(msg["id"])
+
+
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/sonder/template", vol.Optional("entry_id"): str,
+                                  vol.Required("token"): TOKEN, vol.Required("template"): vol.All(str, vol.Length(max=40))})
+@websocket_api.async_response
+async def ws_sonder_template(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    if not _unlocked(connection, msg, planner):
+        return
+    try:
+        sid = await planner.async_sonder_template(msg["template"])
+    except KeyError:
+        connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Unknown template")
+        return
+    connection.send_result(msg["id"], {"sonder_id": sid})

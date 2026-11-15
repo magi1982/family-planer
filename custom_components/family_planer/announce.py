@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 from homeassistant.const import STATE_ON
 from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
-from homeassistant.helpers.event import async_track_state_change_event
+from homeassistant.helpers.event import async_track_state_change_event, async_track_time_change
 from homeassistant.util import dt as dt_util
 
 from . import engine, msgqueue, speech
@@ -27,7 +27,11 @@ DEFAULT_ANNOUNCE: dict[str, Any] = {
     # queue: one-off messages wait for the next motion (within quiet-hours limits) until they expire
     "queue": True, "queue_start": "07:00", "queue_end": "21:00", "queue_rewards": True, "queue_special": True,
     "max_items": 3, "reward_hours": 0,  # 0 = until the next day change
+    # without a motion sensor: fixed times (lunch, evening) plus a 20:00 summary of what is still open
+    "fixed": True, "times": ["12:30", "18:30"], "evening": True, "evening_time": "20:00",
+    "praise": True, "birthday": True,
 }
+BIRTHDAY_TIMES = ("08:15", "11:45", "14:30", "16:45", "19:15")
 
 
 def _in_window(now: time, start: str, end: str) -> bool:
@@ -45,6 +49,9 @@ class Announcer:
         self._unsub = None
         self._last: datetime | None = None
         self._all_done_day: str | None = None
+        self._timers: list = []
+        self._praise_day: str | None = None
+        self._bday_said: dict[str, int] = {}
 
     @property
     def cfg(self) -> dict[str, Any]:
@@ -54,14 +61,92 @@ class Announcer:
     def start(self) -> None:
         self.stop()
         cfg = self.cfg
-        if cfg["enabled"] and cfg["motion"] and (cfg["notify"] or (cfg["tts"] and cfg["media_players"])):
+        if not (cfg["enabled"] and (cfg["notify"] or (cfg["tts"] and cfg["media_players"]))):
+            return
+        if cfg["motion"]:
             self._unsub = async_track_state_change_event(self.hass, cfg["motion"], self._motion)
+        elif cfg["fixed"]:
+            for t in cfg["times"]:
+                self._at(t, "fixed")
+        if cfg["evening"]:
+            self._at(cfg["evening_time"], "evening")
+        if cfg["birthday"]:
+            for t in BIRTHDAY_TIMES:
+                self._at(t, "birthday")
+
+    def _at(self, hhmm: str, kind: str) -> None:
+        try:
+            h, m = (int(x) for x in hhmm.split(":"))
+        except ValueError:
+            return
+
+        @callback
+        def fire(_now: datetime) -> None:
+            self.hass.async_create_task(self.async_timed(kind), eager_start=False)
+
+        self._timers.append(async_track_time_change(self.hass, fire, hour=h, minute=m, second=0))
 
     @callback
     def stop(self) -> None:
         if self._unsub:
             self._unsub()
             self._unsub = None
+        for cancel in self._timers:
+            cancel()
+        self._timers.clear()
+
+    def _home(self) -> list[tuple[str, dict]]:
+        """Persons the announcements are for – without those marked away (holiday check)."""
+        cfg = self.cfg
+        p = self.planner
+        today = p.today().isoformat()
+        return [(pid, x) for pid, x in p.persons_sorted() if (not cfg["persons"] or pid in cfg["persons"])
+                and today not in (p.away.get(pid) or ())]
+
+    async def async_timed(self, kind: str) -> str:
+        """Fixed-time announcements (no motion sensor), the evening summary and birthday messages."""
+        cfg = self.cfg
+        p = self.planner
+        home = self._home()
+        if not home:
+            return ""
+        today = p.today()
+        text = ""
+        if kind == "birthday":
+            bdays = [pid for pid in (p.season().get("birthdays") or []) if any(pid == h for h, _ in home)]
+            parts = []
+            for pid in bdays:
+                n = self._bday_said.get(f"{today}:{pid}", 0)
+                name = p.data["persons"][pid]["name"]
+                msgs = speech.birthday_messages(name, p.lang, today.toordinal() + hash(pid) % 97, len(BIRTHDAY_TIMES),
+                                                (p.season().get("ages") or {}).get(pid))
+                if n < len(msgs):
+                    parts.append(msgs[n])
+                    self._bday_said[f"{today}:{pid}"] = n + 1
+            text = " ".join(parts)
+        else:
+            open_by, done = [], []
+            for pid, person in home:
+                act = engine.active_items(p.data["items"], pid, today)
+                titles = sorted(it["title"] for _, it in act if not it.get("done"))
+                if titles:
+                    open_by.append((person["name"], titles))
+                elif act:
+                    done.append(person["name"])
+            mx = int(cfg.get("max_items", 3))
+            if kind == "evening":
+                text = speech.evening_message(open_by, p.lang, mx)
+            else:
+                text = speech.open_chores_message(open_by, p.lang, mx)
+            # now and then a little praise – at most once a day, on roughly every second day
+            if (cfg["praise"] and done and self._praise_day != today.isoformat() and kind != "evening"
+                    and today.toordinal() % 2 == 0):
+                self._praise_day = today.isoformat()
+                who = done[today.toordinal() % len(done)]
+                text = (text + " " + speech.praise_message(who, p.lang, today.toordinal())).strip()
+        if text:
+            await self.async_say(text)
+        return text
 
     @callback
     def _motion(self, event: Event[EventStateChangedData]) -> None:

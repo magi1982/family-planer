@@ -38,6 +38,8 @@ eingerichtet, **kein YAML**.
   - [Bilder: Avatare oder eigenes Foto](#bilder-avatare-oder-eigenes-foto)
 - [Modul Smarte Listen](#modul-smarte-listen)
 - [Designs](#designs)
+- [Saisons & Wetter](#saisons--wetter)
+- [Sonderämtli für Freiwillige](#sonderämtli-für-freiwillige)
 - [Navigation](#navigation)
 - [Einstellungen im Planer](#einstellungen-im-planer)
 - [Vollbild per Doppeltippen](#vollbild-per-doppeltippen)
@@ -202,6 +204,8 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 
 ### To-dos ohne Datum
 
+Im Planer stehen pro Person höchstens die **4 ältesten** offenen To-dos (einstellbar), „+2 weitere“ klappt den Rest auf; unter jedem To-do steht, seit wann es offen ist. **To-dos aus einer geteilten Liste** (z. B. der Alexa-To-do-Liste): unter *Einstellungen → Listen* bei der Liste *Namen → To-do der Person* einschalten. Ein Eintrag mit Name oder Spitzname („Lea Zimmer aufräumen gross“) wird ein To-do dieser Person; *klein / mittel / gross* am Schluss bestimmt Grösse und Punkte, mehrere Namen ergeben je ein To-do, und Abhaken geht in beide Richtungen.
+
 ![To-dos](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/todos.png)
 
 - Einfache To-dos für eine Person **ohne Ablaufdatum und ohne Wiederholung** – sie bleiben stehen, bis sie erledigt sind (z. B. *Zimmer aufräumen*, *Bücher zurückbringen*).
@@ -211,6 +215,8 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 - Erledigte To-dos bleiben eine einstellbare Anzahl Tage sichtbar und verschwinden dann.
 
 ### Ansagen bei Bewegung
+
+**Ohne Bewegungsmelder** sagt der Planer zu festen Zeiten an (Standard 12:30 und 18:30). Zusätzlich wählbar: um 20:00 eine Zusammenfassung, was noch offen ist (höchstens so viele Ämtli pro Person wie eingestellt), ab und zu ein Lob (höchstens einmal am Tag) und an Geburtstagen fünf lustige Ansagen fürs Geburtstagskind, über den Tag verteilt. Ist im Ferien-Check „weg“ bestätigt, wird nichts angesagt.
 
 - **Bewegungsmelder** wählen (Bewegung, Präsenz, Anwesenheit) und eine **Ansage** über
   - Alexa: Benachrichtigungs-Entität *Ankündigen* oder *Sprechen* (Integration *Alexa Devices*), oder
@@ -282,12 +288,45 @@ Jedes Design gibt es in drei **Stilen**: *Standard*, *Transparent* und *Glas* (M
 - Weiterhin auch unter *Einstellungen → Allgemein* und *Konfigurieren → Design, Sprache & Seitenleiste*. Karten in eigenen Dashboards können es mit `theme:` / `style:` überschreiben. `theme_picker: false` an der Navigationskarte blendet die Auswahl aus.
 - Ein eigenes Dashboard kann den Hintergrund des Designs mit `background: var(--fp-page)` an der Ansicht übernehmen.
 
+## Saisons & Wetter
+
+**Wetter-Szene.** Unter *Einstellungen → Saisons & Wetter* eine Wetter-Entität wählen – die Navigation wird zu einer kleinen, animierten Landschaft: Haus, Bäume, Wolken, Sonne oder Mond hinter Uhr und Knöpfen. Zehn Wetterzustände (Sonne, teilweise bewölkt mit Regenbogen, Wolken, Regen, Starkregen, Gewitter, Schnee, Nebel, Wind, klare Nacht) und die Jahreszeit verändern das Bild – Blüten im Frühling, Grün im Sommer, orange Bäume und fallende Blätter im Herbst, kahle Bäume im Winter. Wind bewegt Bäume, Wolken und Kaminrauch; ab der *Sturm*-Schwelle (Standard 50 km/h) biegen sie sich richtig. Das aktuelle Wetter steht klein oben rechts. *Effekt-Stärke* (ruhig / normal / viel); „Bewegung reduzieren“ im Gerät schaltet alle Partikel aus.
+
+**Saisons als Design-Ebene.** Über jedes Design und jeden Stil legt der Planer die aktuelle Saison: eigenes Kopfbild, Seitenhintergrund, Farbband, ein kleiner Effekt beim Abhaken und die Avatar-Extras.
+
+| Art | Ereignisse | Sichtbar ab |
+|---|---|---|
+| Lange Saisons | Advent & Weihnachten (ab 1. Advent, die Kerzen zünden sich Sonntag für Sonntag an; Samichlaus und Heiligabend als Untersaisons; es schneit immer), Winter, Frühling, Sommer, Herbst | Starttag |
+| Feiertage | Neujahr, Berchtoldstag, Karfreitag, Ostermontag, Tag der Arbeit, Auffahrt, Pfingstmontag, 1. August (Höhenfeuer ab 21 Uhr, Feuerwerk ab 22 Uhr), Weihnachtstag, Stephanstag | 3 Tage vorher |
+| Bräuche | Dreikönigstag, Valentinstag, Fasnacht, Jahreszeiten-Anfänge, Ostern, Muttertag, Pfingsten, Vatertag, Schulanfang, Bettag, Erntedank, Advents-Sonntage, Samichlaus, Heiligabend, Silvester | 3 Tage vorher |
+| Schulferien | aus den Kalendertiteln: Sportferien, Frühlingsferien, Pfingstferien, Sommerferien (ein Strand), Herbstferien, Weihnachtsferien | 3 Tage vorher |
+| Persönlich | Geburtstage, Hochzeitstag, Kennenlerntag | am Tag selbst |
+
+Jedes Ereignis lässt sich ausschalten oder bekommt eine eigene Vorlaufzeit; der *Vorrang* entscheidet, wenn mehreres zusammenfällt (Standard: Geburtstag > Jahrestag > Feiertag > Brauch > Schulferien > lange Saison). Ob in den eigenen Familienferien Ämtli pausieren, bleibt im [Ferien-Check](#ferien-pausieren-ämtli).
+
+**Geburtstage.** Geburtsdatum pro Person unter *Einstellungen → Personen* (Jahr freiwillig). Am Tag gibt es oben Wimpel, Ballone und ein „Happy Birthday“-Band, und die Zeile des Geburtstagskinds feiert den ganzen Tag mit einer von fünf Animationen, die hinter der Person hervorkommen: Konfetti-Kanone, Ballon-Fahrt, Seifenblasen, Regenbogen-Disco oder Sternenregen – für alle verschieden und jedes Jahr eine andere, oder fest pro Person. **Alle Punkte des Geburtstagskinds zählen doppelt.**
+
+**Jahrestage.** Hochzeitstag und Kennenlerntag unter *Einstellungen → Saisons & Wetter* – schwebende Herzen und „14 Jahre verheiratet“.
+
+**Saison-Extras für Avatare.** Der Avatar-Baukasten hat ein Register *Saison* (ohne PIN): pro Saison bis zu drei Extras (87 insgesamt, viele animiert – Zipfelmütze, Rentier mit Blinknase, Wunderkerze, Schweizerfahne, Strohhut, Hasenohren …) und einer von 57 Effekten als Aura. Ohne Auswahl bekommt jede Person automatisch ein anderes Extra. Extras sind eine eigene Ebene: Nach der Saison ist das normale Bild von selbst zurück.
+
+**Vorschläge.** Ab Mittag (einstellbar) erscheint unter dem Wetter höchstens ein Vorschlag pro Tag, jeden Tag ein anderer: Badi-Wetter (braucht einen Pool-Temperatursensor, Wasser ab 24°, sonnig, kein Regen bis am Abend), Pool-Abendschwumm, Pool-Party, Jacuzzi von Herbst bis Frühling an trockenen Abenden, wenn keine Erwachsenen abends einen Termin haben (auch *unter Sternen*, *im Schnee*, *Eltern-Jacuzzi ab 21 Uhr*; braucht einen Jacuzzi-Temperatursensor), Homecinema, Spieleabend, Guetzli backen (nur in der Weihnachtszeit), Basteln, Puzzle und Fotoalbum (höchstens alle 14 Tage), Lego-Challenge, Grillabend, Velotour, Spaziergang, Znacht in der Pergola, Schlitteln, heisse Schoggi, Adventsfenster, Ostereier suchen, Badi am See, Glace, eine Teamwork-Belohnung, wenn alle fertig sind – oder einfach ein ruhiger Abend.
+
+## Sonderämtli für Freiwillige
+
+Lustige Extra-Ämtli, die nur **Bonuspunkte** geben – nicht erledigt oder abgelaufen verschlechtert die Zuverlässigkeit (%) nie. Unter *Einstellungen → Sonderämtli* (Eltern-PIN) gibt es 58 Vorlagen mit passendem Zeitpunkt (Christbaumkugeln für jedes Kind vom 10. bis 24. Dezember, Geburtstagskarte 3 Tage vorher, Laub rechen ab Dienstag 5 Tage inkl. Samstag, Eier färben vor Ostern, Schweizerfahne aufhängen …); alltägliche starten ausgeschaltet. Eigene mit Titel, Symbol, Punkten (klein / mittel / gross / eigene), Vergabe, Wann (einmalig, täglich, Wochentage, alle X Tage, jährlich, bei einem Ereignis, am Geburtstag einer Person, am Hochzeitstag, im Advent, bei Wetter, ab Temperatur), Vorlauf, Frist, Uhrzeit, Sichtbarkeit (immer / in einer Saison / bei Wetter) und *geheim*.
+
+- **Freiwillig**: Das Ämtli wartet in der Kachel *Freiwillig* neben den Personen (nur sichtbar, wenn etwas offen ist). Das schnellste Kind tippt *Ich nehm's!*, wählt sich aus, und das Ämtli wandert in seine Zeile. Wiederkehrende kommen jedes Mal neu.
+- **Jedes Kind**, **Überraschung** (zufällig, standardmässig höchstens 2 pro Kind und Woche) oder **Fix**.
+- **Geheim**: Im Planer steht „Geheim-Ämtli“, antippen zeigt es 5 Sekunden. Bei Geburtstagen bekommt das Geburtstagskind es nie.
+
 ## Navigation
 
 - Eine Zeile: links **Uhrzeit und Datum** (oder der Titel des Planers), in der Mitte die Seiten, rechts der **Ferien-Check** 🌴 und die Design-Auswahl.
 - **Ferien-Check** 🌴: Ein Zähler zeigt, wie viele Ferien und lange Termine der nächsten zwei Wochen noch offen sind (Details unter *Ferien pausieren Ämtli*). Eltern-PIN.
 - **Reihenfolge und sichtbare Knöpfe** unter *Einstellungen → Allgemein*. Zeigt ein Knopf auf eine Ansicht, die es im Dashboard nicht gibt, erscheint er gestrichelt mit Hinweis statt einer leeren Seite.
 - **Heute**: Eine rote Jetzt-Linie trennt vergangene und kommende Termine, beim nächsten steht *in 25 Min*; beim Abhaken gibt es eine kleine Häkchen-Animation.
+- **Ansicht Heute**: oben links *Heute | Woche*. *Heute* zeigt nur den aktuellen Tag, die Personen als Spalten nebeneinander – Schule, Termine mit Jetzt-Linie, Ämtli (offene zuerst), To-dos und Sonderämtli; ‹ › für die anderen Tage, alle Filter funktionieren. *Einstellungen → Allgemein → Standard-Ansicht* bestimmt, welche Ansicht nach der Ruhezeit und beim Zurückkehren aus einem Menü kommt (Standard *Heute*).
 - **Handy**: Der Planer zeigt nur heute, mit ‹ › Pfeilen und Wischen für die anderen Tage; nach der Ruhezeit springt er zurück auf heute.
 
 ## Einstellungen im Planer

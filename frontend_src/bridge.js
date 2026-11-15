@@ -23,7 +23,7 @@
       const msg = { type: 'family_planer/subscribe' }; if (this.entryId) msg.entry_id = this.entryId;
       this.unsub = this.conn.subscribeMessage((s) => {
         if (s && s.reload) { this._resubscribe(); return; }
-        this.snap = s; this.err = null; this.subs.forEach((f) => f());
+        this.snap = s; this.err = null; if (window.FPSEASON) window.FPSEASON.setSnap(s); if (window.FPAVS) window.FPAVS.setPersons(s.persons); this.subs.forEach((f) => f());
         if (window.FPCONFETTI) window.FPCONFETTI.check(this);
       }, msg).catch((e) => {
         if (tries > 0 && tries < 30) { setTimeout(() => this._subscribe(tries + 1), 2000); return; }
@@ -209,10 +209,12 @@
     return `<span class="sw" style="background:${t.bg1};border-color:${t.line}"><i style="background:${t.grad}"></i><i style="background:${t.bg4}"></i><i style="background:${t.text2}"></i></span>`; };
   const applyTheme = (el, name, style) => {
     const n = themeName(name); const t = THEMES[n]; const st = STYLES.includes(style) ? style : 'standard'; const f = surfaces(t, st);
-    Object.entries({ band: 'none', ...t, pop: t.bg1, ...f }).forEach(([k, v]) => el.style.setProperty(`--fp-${k}`, v));
+    const SE = window.FPSEASON; const sPage = SE ? SE.page() : ''; const sBand = SE ? SE.band() : '';
+    const page = sPage ? `${sPage},${t.page}` : t.page;
+    Object.entries({ band: 'none', ...t, pop: t.bg1, ...f, ...(sBand ? { band: sBand } : {}), page }).forEach(([k, v]) => el.style.setProperty(`--fp-${k}`, v));
     el.dataset.fpTheme = n; el.dataset.fpStyle = st;
     // the page background is also offered globally, so a dashboard view can use background: var(--fp-page)
-    document.documentElement.style.setProperty('--fp-page', t.page);
+    document.documentElement.style.setProperty('--fp-page', page);
   };
   const MSG = { de: { off: 'Das Modul „{m}“ ist ausgeschaltet. Einschalten unter Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren → Module.', week: 'Wochenplan', lists: 'Smarte Listen' },
     en: { off: 'The module "{m}" is switched off. Switch it on under Settings → Devices & services → Family Planer → Configure → Modules.', week: 'Week plan', lists: 'Smart lists' } };
@@ -388,7 +390,35 @@
       }
       this._render();
     }
-    set hass(h) { const first = !this._hass; this._hass = h; if (first) { this._store = Store.get(h.connection, this._cfg.entry_id); this._off = this._store.listen(() => this._render()); this._loadViews(); } }
+    set hass(h) {
+      const first = !this._hass; this._hass = h;
+      if (first) { this._store = Store.get(h.connection, this._cfg.entry_id); this._off = this._store.listen(() => this._render()); this._loadViews(); }
+      // weather entity changed -> only the scene and the little weather corner are updated
+      const ent = this._wxEnt(); const st = ent && h.states[ent];
+      const sig = st ? `${st.state}|${(st.attributes || {}).temperature}|${(st.attributes || {}).wind_speed}` : '';
+      if (sig !== this._wxSig) { this._wxSig = sig; if (!first) this._render(); }
+      if (ent !== this._fcEnt) this._subForecast(ent);
+    }
+    _wxEnt() { const s = this._store && this._store.snap; return (s && s.season_cfg && s.season_cfg.weather) || null; }
+    async _subForecast(ent) {
+      if (this._fcUnsub) { try { this._fcUnsub(); } catch (e) { /* closed */ } this._fcUnsub = null; }
+      this._fcEnt = ent; this._fc = null; if (!ent || !this._hass) return;
+      for (const type of ['hourly', 'daily']) {
+        try {
+          this._fcUnsub = await this._hass.connection.subscribeMessage((m) => { this._fc = (m && m.forecast) || null; }, { type: 'weather/subscribe_forecast', entity_id: ent, forecast_type: type });
+          return;
+        } catch (e) { /* this weather entity offers no such forecast */ }
+      }
+    }
+    // the animated scene stays the same element while nothing changes, so animations never restart
+    _sceneHtml(s, lang) {
+      const SE = window.FPSEASON; if (!SE || !s || !s.season) return { key: '', html: '' };
+      const cfg = s.season_cfg || {}; const n = new Date(); const wx = SE.weather(this._hass, cfg.weather, lang);
+      const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
+      const o = { season: se, wx, hour: n.getHours(), lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce() };
+      if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };
+      const key = SE.sceneKey(o); return { key, html: key === this._scnKey && this._scnEl ? null : SE.scene(o), wx };
+    }
     // reads the dashboard's view paths once, so a button whose view is missing shows a hint instead of an empty page
     async _loadViews() {
       try {
@@ -435,6 +465,7 @@
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
     _clock() {
+      const hr = new Date().getHours(); if (hr !== this._hr) { this._hr = hr; this._render(); }
       const el = this.shadowRoot && this.shadowRoot.querySelector('.clk'); if (!el) return;
       const T = NAV_T[this._lang()]; const n = new Date(); const p2 = (x) => String(x).padStart(2, '0');
       el.querySelector('b').textContent = `${p2(n.getHours())}:${p2(n.getMinutes())}`;
@@ -453,7 +484,10 @@
       const showTitle = !!(s && s.settings && s.settings.nav_title);
       const n = new Date(); const p2 = (x) => String(x).padStart(2, '0');
       const review = ((s && s.vacation_review) || []).filter((v) => !v.decision); const pending = review.length;
-      this.shadowRoot.innerHTML = `<style>
+      const sc = this._sceneHtml(s, lang); const keepScn = sc.key && sc.html === null ? this._scnEl : null;
+      if (keepScn) keepScn.remove();
+      this._wxNow = sc.wx || null;
+      this.shadowRoot.innerHTML = `<style>${window.FPSEASON ? window.FPSEASON.CSS : ''}
         :host{display:block;margin-bottom:8px}
         .bar::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}.bar{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);padding:6px 10px 6px 14px;font-family:var(--fp-font);color:var(--fp-text);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
         .t{display:flex;align-items:center;gap:10px;min-width:0}
@@ -465,15 +499,40 @@
         button.on{border-color:color-mix(in srgb,var(--fp-accent) 60%,transparent);color:var(--fp-accent)}
         button.menu{padding:0 10px}
         button ha-icon{--mdc-icon-size:20px}
-        .rt{display:flex;justify-content:flex-end;gap:8px;position:relative}
+        .rt{display:flex;justify-content:flex-end;align-items:center;gap:8px;position:relative}
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
         button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
         @media (max-width:700px){.mid button span.l{display:none}.mid button{padding:0 12px}.clk span{display:none}.bar{grid-template-columns:auto 1fr auto}}
-      </style><div class="bar"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span>${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span></span></span>
+        .bar.sc{min-height:96px;padding-top:10px;padding-bottom:10px}.bar.sc > :not(.scn){position:relative;z-index:1}.bar.sc .clk b,.bar.sc .clk span,.bar.sc .ttl{text-shadow:0 1px 3px rgba(0,0,0,.55)}
+        .bar.sc .mid button:not(.on),.bar.sc .rt > button{background:color-mix(in srgb,var(--fp-bg3) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+        .wxc{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-right:4px;min-width:0}
+        .wxn{display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:14px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:13px;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}.wxn b{font-size:15px}.wxn i{font-style:normal;font-size:18px}
+        .sug{display:flex;align-items:center;gap:8px;max-width:280px;padding:4px 10px 4px 6px;border-radius:12px;background:color-mix(in srgb,var(--fp-accent) 22%,var(--fp-bg1));border:1px solid color-mix(in srgb,var(--fp-accent) 50%,transparent);font-size:12px;line-height:1.25;animation:fpsugin .6s ease-out}
+        .sug i{font-style:normal;font-size:22px;animation:fpbob 3s ease-in-out infinite}.sug b{display:block;font-size:13px}.sug span{color:var(--fp-text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .slab{display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:12px;white-space:nowrap}
+        @keyframes fpsugin{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
+        @media (max-width:700px){.sug,.wxn span,.slab{display:none}}
+      </style><div class="bar${sc.key ? ' sc' : ''}"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span>${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span></span>${this._seasonLabel(s, lang)}</span>
         <div class="mid">${btns.map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div>
         ${this._right(s, lang, review, pending)}</div>`;
+      const bar = this.shadowRoot.querySelector('.bar');
+      if (sc.key && bar) {
+        if (keepScn) bar.prepend(keepScn);
+        else { const tmp = document.createElement('div'); tmp.innerHTML = sc.html; this._scnEl = tmp.firstElementChild; bar.prepend(this._scnEl); }
+        this._scnKey = sc.key;
+      } else { this._scnEl = null; this._scnKey = ''; }
       this._popLayer(this._popHtml, NAV_POPCSS);
+    }
+    _seasonLabel(s, lang) {
+      const se = s && s.season; if (!se || se.enabled === false || !se.label || !window.FPSEASON) return '';
+      const ic = (window.FPSEASON.LABEL[se.vis] || [''])[0]; const sub = { advent1: '1. Advent', advent2: '2. Advent', advent3: '3. Advent', advent4: '4. Advent' }[se.sub] || '';
+      return `<span class="slab">${ic} ${escN(sub || (lang === 'en' ? se.label.en : se.label.de))}</span>`;
+    }
+    _wxCorner(s, lang) {
+      const wx = this._wxNow; if (!wx) return '';
+      const sg = window.FPSEASON && window.FPSEASON.suggest(s, this._hass, wx, this._fc, new Date());
+      return `<span class="wxc"><span class="wxn" title="${escN(wx.text)}"><i>${wx.icon}</i>${wx.temp != null ? `<b>${wx.temp}°</b>` : ''}<span>${escN(wx.text)}</span></span>${sg ? `<span class="sug" title="${escN(sg.text)}"><i>${sg.icon}</i><span><b>${escN(sg.title)}</b><span>${escN(sg.text)}</span></span></span>` : ''}</span>`;
     }
     _right(s, lang, review, pending) {
       if (!s) return '<span></span>';
@@ -493,7 +552,7 @@
               <div class="vb"><button class="away" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
               <button class="home" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`; }).join(''); }).join('')}</div></div>` : '';
       this._popHtml = pop;
-      return `<span class="rt">${vac}${this._cfg.theme_picker === false ? '' : `<button class="ic${this._open === 'theme' ? ' on' : ''}" data-themes title="${T.design}" aria-expanded="${this._open === 'theme'}">${themeSwatch(cur)}<ha-icon icon="mdi:palette-outline"></ha-icon></button>`}
+      return `<span class="rt">${this._wxCorner(s, lang)}${vac}${this._cfg.theme_picker === false ? '' : `<button class="ic${this._open === 'theme' ? ' on' : ''}" data-themes title="${T.design}" aria-expanded="${this._open === 'theme'}">${themeSwatch(cur)}<ha-icon icon="mdi:palette-outline"></ha-icon></button>`}
         ${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;
     }
   }

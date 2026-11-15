@@ -52,3 +52,57 @@ def special_chore_message(person: str, title: str, days: int, lang: str) -> str:
         return f"{person}, {tail} ist „{title}“ dran."
     tail = "today" if days <= 1 else f"within the next {days} days"
     return f"{person}, \"{title}\" is due {tail}."
+
+
+PRAISE = {
+    "de": ["{n}, du hast heute alles erledigt. Mega!", "Bravo {n}! Alle Ämtli geschafft – das ist Teamwork.",
+           "{n}, du bist heute ein echter Ämtli-Profi.", "Hey {n}, schon alles erledigt? Wow, Daumen hoch!",
+           "{n}, danke für deine Hilfe heute. Du machst das super!"],
+    "en": ["{n}, you finished everything today. Awesome!", "Well done {n}! All chores done – that's teamwork.",
+           "{n}, you're a real chore champion today.", "Hey {n}, all done already? Wow, thumbs up!",
+           "{n}, thanks for your help today. You're doing great!"],
+}
+BIRTHDAY = {
+    "de": ["Achtung, Achtung! Heute hat {n} Geburtstag. Alle bitte einmal laut Hurra rufen!",
+           "{n}, heute zählen alle deine Punkte doppelt. Geburtstagskind-Bonus!",
+           "Wichtige Durchsage: Das Geburtstagskind {n} darf heute ein Lied wünschen.",
+           "{n}, die Kühlschrank-Kommission hat beschlossen: Heute gibt es Kuchen!",
+           "Hallo {n}! Wusstest du, dass du heute offiziell ein Jahr cooler bist?",
+           "{n}, für dich gibt es heute einen Extra-Applaus. Alle klatschen jetzt!",
+           "Geburtstags-Alarm! {n}, wir finden dich grossartig.",
+           "{n}, die Ämtli-Polizei drückt heute ein Auge zu – aber nur ein kleines!"],
+    "en": ["Attention please! Today is {n}'s birthday. Everybody shout hooray!",
+           "{n}, all your points count double today. Birthday bonus!",
+           "Important announcement: birthday star {n} gets to pick a song today.",
+           "{n}, the fridge committee has decided: there will be cake today!",
+           "Hello {n}! Did you know you're officially one year cooler today?",
+           "{n}, here's an extra round of applause for you. Everybody clap now!",
+           "Birthday alert! {n}, we think you're amazing.",
+           "{n}, the chore police are turning a blind eye today – but only a small one!"],
+}
+BIRTHDAY_AGE = {"de": "{n}, heute wirst du {a}! Herzlichen Glückwunsch!", "en": "{n}, you're turning {a} today! Happy birthday!"}
+
+
+def praise_message(name: str, lang: str, seed: int) -> str:
+    lst = PRAISE["de" if lang == "de" else "en"]
+    return lst[seed % len(lst)].format(n=name)
+
+
+def birthday_messages(name: str, lang: str, seed: int, count: int = 5, age: int | None = None) -> list[str]:
+    """Funny birthday announcements for one day, all different."""
+    lg = "de" if lang == "de" else "en"
+    lst = BIRTHDAY[lg]
+    start = seed % len(lst)
+    out = [lst[(start + k) % len(lst)].format(n=name) for k in range(min(count, len(lst)))]
+    if age:
+        out[0] = BIRTHDAY_AGE[lg].format(n=name, a=age)
+    return out
+
+
+def evening_message(open_by_person: list[tuple[str, list[str]]], lang: str, max_items: int = 3) -> str:
+    """20:00 summary: what is still open today."""
+    msg = open_chores_message(open_by_person, lang, max_items)
+    if not msg:
+        return ""
+    head = "Guten Abend! Bevor der Tag zu Ende ist" if lang == "de" else "Good evening! Before the day ends"
+    return msg.replace("Hallo! Noch offen" if lang == "de" else "Hello! Still to do", head + (", noch offen" if lang == "de" else ", still to do"), 1)

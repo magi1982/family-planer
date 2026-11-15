@@ -102,3 +102,20 @@ def language(setting: Any, system: Any) -> str:
     if setting in ("de", "en"):
         return setting
     return "de" if str(system or "").lower().startswith(("de", "gsw")) else "en"
+
+
+_KEY = __import__("re").compile(r"^[A-Za-z0-9_]{1,24}$")
+
+
+def season_av(value) -> dict:
+    """Seasonal avatar extras per season: {"weihnachten": {"x": ["zipfel"], "fx": "glow"}} – keys only, no markup."""
+    out: dict = {}
+    if not isinstance(value, dict):
+        return out
+    for vis, sel in list(value.items())[:20]:
+        if not (isinstance(vis, str) and _KEY.match(vis) and isinstance(sel, dict)):
+            continue
+        xs = [x for x in (sel.get("x") or []) if isinstance(x, str) and _KEY.match(x)][:3] if isinstance(sel.get("x"), list) else []
+        fx = sel.get("fx") if isinstance(sel.get("fx"), str) and _KEY.match(sel.get("fx") or "") else ""
+        out[vis] = {"x": list(dict.fromkeys(xs)), "fx": fx}
+    return out

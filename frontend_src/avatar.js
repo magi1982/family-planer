@@ -312,7 +312,7 @@
   const T = {
     de: { sk: 'Hautfarbe', hc: 'Haarfarbe', fig: 'Person', hair: 'Frisur', rnd: 'Zufall', none: 'Nichts', shirt: 'T-Shirt-Farbe', motif: 'Motiv', neck: 'Am Hals',
       c: { porzellan: 'Porzellan', hell: 'Hell', pfirsich: 'Pfirsich', mittel: 'Mittel', oliv: 'Oliv', karamell: 'Karamell', braun: 'Braun', tief: 'Dunkelbraun', espresso: 'Espresso', platin: 'Platinblond', blond: 'Blond', rotblond: 'Rotblond', hellbraun: 'Hellbraun', schwarz: 'Schwarz', rot: 'Rot', grau: 'Grau', rosa: 'Rosa', blau: 'Blau', lila: 'Lila', gruen: 'Grün', weiss: 'Weiss', orange: 'Orange', gelb: 'Gelb', tuerkis: 'Türkis', pink: 'Pink' },
-      tabs: { head: 'Kopf', face: 'Gesicht', cloth: 'Kleidung', pet: 'Begleiter', bg: 'Hintergrund', cost: 'Verkleidung', fx: '✨ Effekte' }, fxNone: 'Effekte schaltest du mit Levels frei – ab Level 5 geht es los!', small: 'Kleine Effekte', big: 'Grosse Effekte', lock: 'Mit Levels freigeschaltet',
+      tabs: { head: 'Kopf', face: 'Gesicht', cloth: 'Kleidung', pet: 'Begleiter', bg: 'Hintergrund', cost: 'Verkleidung', fx: '✨ Effekte', season: '🎄 Saison' }, fxNone: 'Effekte schaltest du mit Levels frei – ab Level 5 geht es los!', small: 'Kleine Effekte', big: 'Grosse Effekte', lock: 'Mit Levels freigeschaltet',
       costHint: 'Verkleidungen liegen über der Person – Hintergrund und Begleiter bleiben.',
       n: { skaterhelm: 'Skater-Helm', edelkrone: 'Edelstein-Krone', rubinkrone: 'Rubin-Krone', diamantbrille: 'Diamant-Brille', rubinmaske: 'Rubin-Maske', rubinumhang: 'Rubin-Umhang',
         babydrache: 'Baby-Drache', phoenix: 'Phönix-Küken', kristallfuchs: 'Kristall-Fuchs', rubindrache: 'Rubin-Drache', szepter: 'Szepter', comic: 'Comic-Explosion', sonnenuntergang: 'Sonnenuntergang',
@@ -330,7 +330,7 @@
         astro: 'Astronaut', mars: 'Mars-Anzug', sternenkraft: 'Held Sternenkraft', funkenflug: 'Held Funkenflug', mondfee: 'Heldin Mondfee', turbo: 'Held Turbo', sternschnuppe: 'Heldin Sternschnuppe', ninja: 'Ninja', ritter: 'Ritter', pirat: 'Pirat', zauberer: 'Zauberer', prinzessin: 'Prinzessin', prinz: 'Prinz', dino: 'Dino', feuerwehr: 'Feuerwehr' } },
     en: { sk: 'Skin tone', hc: 'Hair colour', fig: 'Person', hair: 'Hair', rnd: 'Random', none: 'None', shirt: 'T-shirt colour', motif: 'Motif', neck: 'Around the neck',
       c: { porzellan: 'Porcelain', hell: 'Light', pfirsich: 'Peach', mittel: 'Medium', oliv: 'Olive', karamell: 'Caramel', braun: 'Brown', tief: 'Dark brown', espresso: 'Espresso', platin: 'Platinum blonde', blond: 'Blonde', rotblond: 'Strawberry blonde', hellbraun: 'Light brown', schwarz: 'Black', rot: 'Red', grau: 'Grey', rosa: 'Pink', blau: 'Blue', lila: 'Purple', gruen: 'Green', weiss: 'White', orange: 'Orange', gelb: 'Yellow', tuerkis: 'Turquoise', pink: 'Pink' },
-      tabs: { head: 'Head', face: 'Face', cloth: 'Clothes', pet: 'Buddy', bg: 'Background', cost: 'Costume', fx: '✨ Effects' }, fxNone: 'Effects are unlocked with levels – it starts at level 5!', small: 'Small effects', big: 'Big effects', lock: 'Unlocked with levels',
+      tabs: { head: 'Head', face: 'Face', cloth: 'Clothes', pet: 'Buddy', bg: 'Background', cost: 'Costume', fx: '✨ Effects', season: '🎄 Season' }, fxNone: 'Effects are unlocked with levels – it starts at level 5!', small: 'Small effects', big: 'Big effects', lock: 'Unlocked with levels',
       costHint: 'Costumes go over the person – background and buddy stay.',
       n: { skaterhelm: 'Skater helmet', edelkrone: 'Jewel crown', rubinkrone: 'Ruby crown', diamantbrille: 'Diamond glasses', rubinmaske: 'Ruby mask', rubinumhang: 'Ruby cape',
         babydrache: 'Baby dragon', phoenix: 'Phoenix chick', kristallfuchs: 'Crystal fox', rubindrache: 'Ruby dragon', szepter: 'Sceptre', comic: 'Comic burst', sonnenuntergang: 'Sunset',
@@ -349,9 +349,9 @@
   };
   Object.assign(T.de.n, { 'head:katze': 'Katzenohren', 'head:hase': 'Hasenohren', 'pet:katze': 'Katze', 'pet:hase': 'Hase', 'pet:fussball': 'Fussball' });
   Object.assign(T.en.n, { 'head:katze': 'Cat ears', 'head:hase': 'Bunny ears', 'pet:katze': 'Cat', 'pet:hase': 'Bunny', 'pet:fussball': 'Football' });
-  const TABS = ['head', 'face', 'cloth', 'pet', 'bg', 'cost', 'fx'];
+  const TABS = ['head', 'face', 'cloth', 'pet', 'bg', 'cost', 'fx', 'season'];
   // builder html: buttons carry data-avb="part|value" (or data-avtab / data-avrnd); the host keeps code and tab
-  const builder = (c, personColor, lang, tab, unlocked) => {
+  const builder = (c, personColor, lang, tab, unlocked, extra) => {
     const mine = new Set(unlocked || []); const ok = (v) => !LOCKED.includes(v) || mine.has(v);
     const t = T[lang === 'en' ? 'en' : 'de']; const o = parse(c); const cur = code(norm(o)); const n = norm(o); const tb = TABS.includes(tab) ? tab : 'head';
     const ZOOM = { hair: '10 0 44 44', head: '10 0 44 44', face: '14 10 36 36', neck: '12 30 40 34', motif: '12 36 40 28' };
@@ -369,7 +369,9 @@
     const bigPic = (v) => `<button class="avo lvx${n.fxb === v ? ' on' : ''}" data-avb="fxb|${v}" title="${esc(t.n[v] || v)}"><span class="fxw"><span class="avs">${svg(cur, personColor)}</span>${outer(set(cur, 'fxb', v))}</span></button>`;
     if (tb === 'fx') body = FX.some(ok) || FXB.some(ok) ? (FX.some(ok) ? row(t.small, opts('fx', FX)) : '') + (FXB.some(ok) ? row(t.big, `<button class="avo txt${n.fxb === '0' ? ' on' : ''}" data-avb="fxb|0">${esc(t.none)}</button>` + FXB.filter(ok).map(bigPic).join('')) : '') : `<div class="avh">${esc(t.fxNone)}</div>`;
     if (tb === 'cost') body = `<div class="avh">${esc(t.costHint)}</div>` + row('', opts('cost', COST));
-    return `<div class="avb"><div class="avp"><span class="fxw big"><span class="avs big">${svg(cur, personColor)}</span>${outer(cur)}</span><button class="avrnd" data-avrnd><span aria-hidden="true">🎲</span> ${esc(t.rnd)}</button></div><div class="avc">
+    let prev = `<span class="fxw big"><span class="avs big">${svg(cur, personColor)}</span>${outer(cur)}</span>`;
+    if (tb === 'season' && window.FPAVS) { const sb = window.FPAVS.builderBody(cur, personColor, (extra || {}).name, lang, (extra || {}).vis); body = sb.html; prev = sb.prev; }
+    return `<div class="avb"><div class="avp">${prev}<button class="avrnd" data-avrnd><span aria-hidden="true">🎲</span> ${esc(t.rnd)}</button></div><div class="avc">
       ${row(t.sk, Object.entries(SK).map(([k, col]) => dot(col, n.sk === k, k, `sk|${k}`)).join(''))}
       ${row(t.hc, Object.entries(HC).map(([k, col]) => dot(col[0], n.hc === k, k, `hc|${k}`)).join(''))}
       ${row(t.fig, FIG.map((f) => pic(set(cur, 'fig', f), n.fig === f, f, `fig|${f}`)).join(''))}

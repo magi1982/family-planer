@@ -31,9 +31,12 @@ from . import (
     levels,
     lists,
     msgqueue,
+    persontodos,
     rewards,
     schedule,
+    seasons,
     settings_spec,
+    sonder,
     speech,
     vacation,
     validate,
@@ -62,7 +65,8 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-PERSON_FIELDS = ("name", "color", "image", "aliases", "calendar", "school", "order", "role")
+PERSON_FIELDS = ("name", "color", "image", "aliases", "calendar", "school", "order", "role", "birthday", "bday_anim", "season_av")
+BDAY_ANIMS = 5
 ROLES = ("kid", "adult")
 
 
@@ -85,7 +89,7 @@ def clean_school(value) -> dict:
             times[str(day)] = sorted(clean)
     return {"calendar": validate.entity(value.get("calendar"), ("calendar",)), "times": times,
             "travel": validate.integer(value.get("travel"), 0, 240, 0)}
-LIST_FIELDS = ("name", "entity", "icon", "max_categories", "auto")
+LIST_FIELDS = ("name", "entity", "icon", "max_categories", "auto", "person_todos")
 
 
 def parse_hhmm(value: str | None, default: str = "00:00") -> tuple[int, int]:
@@ -118,6 +122,9 @@ class FamilyPlanner:
         self._pin_fail: list[datetime] = []
         self._ai_last: dict[str, datetime] = {}
         self.closing = False
+        self.busy: dict[str, list[list]] = {}  # today's timed events per person (suggestions)
+        self._wx: dict[str, Any] = {}  # weather condition and today's maximum (special chores)
+        self._ferien_day: str | None = None
 
     # ------------------------------------------------------------------ lifecycle
     async def async_load(self) -> None:
@@ -136,6 +143,10 @@ class FamilyPlanner:
         for key in ("persons", "chores", "items", "history", "settings", "lists", "rewards", "requests", "todos"):
             self.data.setdefault(key, {})
         self.data.setdefault("ledger", [])
+        self.data.setdefault("ferien", [])
+        self.data.setdefault("sonder_inst", {})
+        if "sonder" not in self.data:  # 0.11: catalogue of fun special chores (everyday ones switched off)
+            self.data["sonder"] = sonder.seed()
         settings = self.data["settings"]
         for key, val in DEFAULT_SETTINGS.items():
             if key == CONF_MODULES:
@@ -189,6 +200,7 @@ class FamilyPlanner:
     async def _handle_started(self, _hass: HomeAssistant) -> None:
         if self.module_on(MODULE_WEEK):
             await self.async_refresh_away()
+            await self.async_refresh_season(force=True)
         await self.async_rollover()
         if self.module_on(MODULE_LISTS):
             await self.async_optimize_all(use_ai=False)
@@ -196,6 +208,186 @@ class FamilyPlanner:
     @callback
     def _handle_away_timer(self, _now: datetime) -> None:
         self.hass.async_create_task(self.async_refresh_away(apply=True))
+        self.hass.async_create_task(self.async_refresh_season())
+
+    # ------------------------------------------------------------------ seasons, weather, special chores
+    def season_settings(self) -> dict[str, Any]:
+        cur = self.settings.get("seasons") or {}
+        return {**settings_spec.SUG_DEFAULTS, **seasons.clean_settings(cur),
+                **{k: cur[k] for k in settings_spec.SUG_DEFAULTS if k in cur}}
+
+    def sonder_settings(self) -> dict[str, Any]:
+        return sonder.clean_settings(self.settings.get("sonder_settings"))
+
+    def season(self) -> dict[str, Any]:
+        today = self.today()
+        res = seasons.resolve(self.season_settings(), today, self.data.get("ferien"), self.data["persons"])
+        # birthday animation: own choice, else rotating yearly and different for everybody
+        order = [pid for pid, _ in self.persons_sorted()]
+        res["bday_anim"] = {}
+        for pid in res["birthdays"]:
+            choice = self.data["persons"][pid].get("bday_anim")
+            res["bday_anim"][pid] = (choice if isinstance(choice, int) and 0 <= choice < BDAY_ANIMS
+                                     else (order.index(pid) + today.year) % BDAY_ANIMS)
+        return res
+
+    async def _weather(self) -> None:
+        ent = self.season_settings().get("weather")
+        st = self.hass.states.get(ent) if ent else None
+        if st is None:
+            self._wx = {}
+            return
+        wx: dict[str, Any] = {"cond": st.state, "temp": st.attributes.get("temperature")}
+        try:
+            res = await self.hass.services.async_call("weather", "get_forecasts", {"entity_id": ent, "type": "daily"},
+                                                      blocking=True, return_response=True)
+            fc = ((res or {}).get(ent) or {}).get("forecast") or []
+            if fc:
+                wx["tmax"] = fc[0].get("temperature")
+                wx["day_cond"] = fc[0].get("condition")
+        except Exception as err:  # noqa: BLE001 - a weather integration without forecasts is fine
+            _LOGGER.debug("No forecast from %s: %s", ent, err)
+        self._wx = wx
+
+    @staticmethod
+    def _wx_kind(cond: str | None) -> str | None:
+        return {"rainy": "rainy", "pouring": "rainy", "lightning-rainy": "rainy", "snowy": "snowy",
+                "snowy-rainy": "snowy", "sunny": "sunny", "clear-night": "sunny", "windy": "windy",
+                "windy-variant": "windy", "cloudy": "cloudy", "partlycloudy": "cloudy", "fog": "cloudy"}.get(cond or "")
+
+    def _sonder_ctx(self, today: date, vis: str) -> dict[str, Any]:
+        st = self.season_settings()
+        return {"events": seasons.event_dates(today, self.data.get("ferien"), st),
+                "birthdays": {pid: p["birthday"] for pid, p in self.data["persons"].items() if p.get("birthday")},
+                "wedding": st.get("wedding") or None, "vis": vis,
+                "weather": self._wx_kind(self._wx.get("day_cond") or self._wx.get("cond")),
+                "tmax": self._wx.get("tmax") if isinstance(self._wx.get("tmax"), (int, float)) else None}
+
+    def refresh_sonder(self) -> bool:
+        today = self.today()
+        return sonder.refresh(self.data["sonder_inst"], self.data["sonder"], self.data["persons"], today,
+                              self._sonder_ctx(today, self.season()["vis"]), self.sonder_settings())
+
+    async def async_refresh_season(self, force: bool = False) -> None:
+        """School holidays from the calendars (once a day), today's events (suggestions), weather, special chores."""
+        today = self.today()
+        cals = {p["calendar"]: pid for pid, p in self.data["persons"].items() if p.get("calendar")}
+        start = dt_util.start_of_local_day()
+        if force or self._ferien_day != today.isoformat():
+            self._ferien_day = today.isoformat()
+            found: list[dict] = []
+            for cal in cals:
+                found += await self._events(cal, start - timedelta(days=60), start + timedelta(days=300))
+            fer = seasons.ferien_ranges(found)
+            if fer != self.data.get("ferien"):
+                self.data["ferien"] = fer[:40]
+        busy: dict[str, list[list]] = {}
+        for cal, pid in cals.items():
+            for ev in await self._events(cal, start, start + timedelta(days=1)):
+                s_, e_ = str(ev.get("start")), str(ev.get("end"))
+                if len(s_) > 10:  # timed events only
+                    busy.setdefault(pid, []).append([s_, e_])
+        self.busy = {k: v[:20] for k, v in busy.items()}
+        await self._weather()
+        self.refresh_sonder()
+        self._changed()
+
+    def _birthday_bonus(self) -> None:
+        """Birthday: every point the birthday child earns today counts double (one extra ledger entry)."""
+        today = self.today()
+        try:
+            bdays = set(self.season()["birthdays"])
+        except Exception:  # noqa: BLE001 - never block saving
+            return
+        ledger = self.data["ledger"]
+        off = self.day_offset()
+        for pid in bdays:
+            ref = f"bday:{pid}:{today.isoformat()}"
+            earned = 0
+            for e in ledger:
+                if e.get("pid") != pid or e.get("kind") in ("bday", "level", "redeem") or e.get("pts", 0) <= 0:
+                    continue
+                try:
+                    day = (datetime.fromisoformat(e["ts"]) - off).date()
+                except (ValueError, TypeError, KeyError):
+                    continue
+                if day == today:
+                    earned += e["pts"]
+            cur = next((e for e in ledger if e.get("ref") == ref), None)
+            if cur is None and earned:
+                rewards._add(ledger, pid, earned, "bday", ref, "🎂 x2", dt_util.now().isoformat())
+            elif cur is not None and cur["pts"] != earned:
+                if earned:
+                    cur["pts"] = earned
+                else:
+                    ledger.remove(cur)
+
+    def sonder_points(self, inst: dict) -> int:
+        df = self.data["sonder"].get(inst.get("sid")) or {}
+        return sonder.points(df, rewards.size_points(self.gamification()["day_points"]))
+
+    async def async_sonder_claim(self, iid: str, pid: str) -> None:
+        sonder.claim(self.data["sonder_inst"], self.data["sonder"], self.data["persons"], iid, pid,
+                     dt_util.now().isoformat())
+        self._changed()
+
+    async def async_sonder_set(self, iid: str, done: bool) -> None:
+        inst = self.data["sonder_inst"][iid]
+        if inst.get("pid") is None:
+            raise ValueError("not_claimed")
+        inst["done"] = bool(done)
+        inst["done_at"] = dt_util.now().isoformat() if done else None
+        ref = f"sonder:{iid}"
+        self.data["ledger"][:] = [e for e in self.data["ledger"] if e.get("ref") != ref]
+        pts = self.sonder_points(inst)
+        if done and pts > 0:
+            df = self.data["sonder"].get(inst["sid"]) or {}
+            rewards._add(self.data["ledger"], inst["pid"], pts, "sonder", ref, "⭐ " + (df.get("title") or ""),
+                         dt_util.now().isoformat())
+        self._changed()
+
+    async def async_sonder_release(self, iid: str) -> None:
+        """Parents: give a claimed special chore back to the volunteer tile."""
+        inst = self.data["sonder_inst"][iid]
+        if inst.get("done") or inst.get("mode") not in ("free", None):
+            raise ValueError("not_free")
+        inst["pid"] = None
+        inst["claimed_at"] = None
+        self._changed()
+
+    async def async_sonder_save(self, sid: str | None, spec: dict[str, Any]) -> str:
+        clean = sonder.clean_def(spec, self.data["persons"])
+        if sid in self.data["sonder"]:
+            clean["tpl"] = self.data["sonder"][sid].get("tpl")
+            if spec.get("title") and spec.get("title") != self.data["sonder"][sid].get("title"):
+                clean["title_en"] = ""
+        else:
+            sid = sonder.new_id()
+        self.data["sonder"][sid] = clean
+        # an edited definition starts fresh: open, unclaimed instances are rebuilt
+        self.data["sonder_inst"] = {k: v for k, v in self.data["sonder_inst"].items()
+                                    if v["sid"] != sid or v.get("done") or v.get("pid")}
+        self.refresh_sonder()
+        self._changed()
+        await self._store.async_save(self.data)
+        return sid
+
+    async def async_sonder_delete(self, sid: str) -> None:
+        self.data["sonder"].pop(sid, None)
+        self.data["sonder_inst"] = {k: v for k, v in self.data["sonder_inst"].items() if v["sid"] != sid or v.get("done")}
+        self._changed()
+        await self._store.async_save(self.data)
+
+    async def async_sonder_template(self, tid: str) -> str:
+        """Add a catalogue template again (e.g. after deleting it)."""
+        if tid not in sonder.TEMPLATES:
+            raise KeyError(tid)
+        sid = f"t_{tid}" if f"t_{tid}" not in self.data["sonder"] else sonder.new_id()
+        self.data["sonder"][sid] = {**sonder.from_template(tid), "on": True}
+        self.refresh_sonder()
+        self._changed()
+        await self._store.async_save(self.data)
+        return sid
 
     # ------------------------------------------------------------------ holidays
     def vacation_settings(self) -> dict[str, Any]:
@@ -338,6 +530,7 @@ class FamilyPlanner:
     def _changed(self, save: bool = True) -> None:
         if save:
             self._eval_levels()
+            self._birthday_bonus()
             self._store.async_delay_save(lambda: self.data, 1)
         async_dispatcher_send(self.hass, SIGNAL_UPDATE.format(self.entry.entry_id))
         for cb in list(self._listeners):
@@ -492,6 +685,8 @@ class FamilyPlanner:
         self.set_status("rollover", True)
         self._prune_todos(today)
         self.book_points()
+        if self.module_on(MODULE_WEEK):
+            self.refresh_sonder()
         self._changed()
 
     async def async_set_item(self, item_id: str, done: bool) -> None:
@@ -548,7 +743,10 @@ class FamilyPlanner:
                  "calendar": lambda v: validate.entity(v, ("calendar",)),
                  "school": clean_school,
                  "order": lambda v: validate.integer(v, 0, 99, person.get("order", 0)),
-                 "role": lambda v: v if v in ROLES else person.get("role", "kid")}
+                 "role": lambda v: v if v in ROLES else person.get("role", "kid"),
+                 "birthday": seasons.clean_date,
+                 "bday_anim": lambda v: v if isinstance(v, int) and 0 <= v < BDAY_ANIMS else None,
+                 "season_av": validate.season_av}
         for key in PERSON_FIELDS:
             if key in patch:
                 person[key] = clean[key](patch[key])
@@ -678,6 +876,8 @@ class FamilyPlanner:
             self.set_status(f"list:{list_id}", False, f"{lst['entity']} unavailable")
         else:
             self.set_status(f"list:{list_id}", True, str(len(items)))
+        if lst.get("person_todos") and ent is not None and ent.state not in ("unavailable", "unknown"):
+            self._sync_list_todos(lst["entity"], items)
         names = [it.get("summary", "") for it in items if it.get("summary")]
         open_names = [it["summary"] for it in items if it.get("summary") and it.get("status") == "needs_action"]
         before = json.dumps([lst["categories"], lst["assignments"]], sort_keys=True)
@@ -701,6 +901,51 @@ class FamilyPlanner:
         return {"created": result.created if result else [], "removed": result.removed if result else [],
                 "assigned": result.assigned if result else 0}
 
+    def _sync_list_todos(self, entity: str, items: list[dict]) -> None:
+        """Items with a name or nickname become to-dos of that person; ticking off works both ways."""
+        todos = self.data["todos"]
+        mine = {t.get("src"): (tid, t) for tid, t in todos.items() if str(t.get("src") or "").startswith(entity + "|")}
+        seen: set[str] = set()
+        changed = False
+        for it in items[:300]:
+            uid, summary = it.get("uid"), it.get("summary")
+            if not uid or not summary:
+                continue
+            pids, title, size = persontodos.match(summary, self.data["persons"])
+            for pid in pids[:10]:
+                key = f"{entity}|{uid}|{pid}"
+                seen.add(key)
+                found = mine.get(key)
+                if found is None:
+                    if it.get("status") != "needs_action":
+                        continue
+                    tid = engine.new_id()
+                    todos[tid] = {"created": dt_util.now().isoformat(), "done": False, "done_at": None,
+                                  "title": validate.text(title, 80) or "?", "person_id": pid, "src": key,
+                                  "size": size or self.todo_settings()["size"]}
+                    changed = True
+                else:
+                    tid, todo = found
+                    if it.get("status") == "completed" and not todo.get("done"):
+                        self._book_todo(tid, todo, True)
+                        changed = True
+        for key, (tid, todo) in mine.items():
+            if key not in seen and not todo.get("done"):  # deleted in the app / on Alexa
+                todos.pop(tid, None)
+                changed = True
+        if changed:
+            self._changed()
+
+    def _book_todo(self, todo_id: str, todo: dict, done: bool) -> None:
+        todo["done"] = bool(done)
+        todo["done_at"] = dt_util.now().isoformat() if done else None
+        ref = f"todo:{todo_id}"
+        self.data["ledger"][:] = [e for e in self.data["ledger"] if e.get("ref") != ref]
+        pts = self.todo_points(todo)
+        if done and pts > 0:
+            rewards._add(self.data["ledger"], todo["person_id"], pts, "todo", ref, todo["title"],
+                         dt_util.now().isoformat())
+
     async def async_optimize_all(self, use_ai: bool) -> None:
         for lid in list(self.data["lists"]):
             await self.async_refresh_list(lid, use_ai=use_ai)
@@ -723,6 +968,7 @@ class FamilyPlanner:
             self.data["lists"][list_id] = lists.new_list(
                 spec["name"], spec["entity"], spec.get("max_categories", 10), spec.get("auto", True),
                 spec.get("icon", ""))
+            self.data["lists"][list_id]["person_todos"] = bool(spec.get("person_todos"))
         self._track_lists()
         self._changed()
         await self._store.async_save(self.data)
@@ -820,7 +1066,9 @@ class FamilyPlanner:
         if size not in rewards.TODO_SIZES:  # before 0.7.0 a fixed number of points was the default
             size = "s" if validate.integer(cur.get("points"), 0, 1000, 0) else "none"
         return {"confirm": bool(cur.get("confirm", True)), "size": size,
-                "keep_days": validate.integer(cur.get("keep_days"), 0, 30, 1)}
+                "keep_days": validate.integer(cur.get("keep_days"), 0, 30, 1),
+                "max_shown": validate.integer(cur.get("max_shown"), 1, 20, 4),
+                "show_age": bool(cur.get("show_age", True))}
 
     def sizes(self) -> dict[str, Any]:
         """Point values of the size choices (to-dos, bonus points) and the reward categories."""
@@ -866,16 +1114,20 @@ class FamilyPlanner:
 
     async def async_set_todo(self, todo_id: str, done: bool) -> None:
         todo = self.data["todos"][todo_id]
-        todo["done"] = bool(done)
-        todo["done_at"] = dt_util.now().isoformat() if done else None
-        ref = f"todo:{todo_id}"
-        self.data["ledger"][:] = [e for e in self.data["ledger"] if e.get("ref") != ref]
-        pts = self.todo_points(todo)
-        if done and pts > 0:
-            rewards._add(self.data["ledger"], todo["person_id"], pts, "todo", ref, todo["title"],
-                         dt_util.now().isoformat())
+        self._book_todo(todo_id, todo, done)
         self._changed()
         await self._store.async_save(self.data)
+        src = str(todo.get("src") or "")
+        if src.count("|") == 2:  # from a shared list: tick it off there once everybody named in it is done
+            entity, uid, _pid = src.split("|")
+            same = [t for t in self.data["todos"].values() if str(t.get("src") or "").startswith(f"{entity}|{uid}|")]
+            status = "completed" if all(t.get("done") for t in same) else "needs_action"
+            if validate.entity(entity, ("todo",)) and self.hass.states.get(entity) is not None:
+                try:
+                    await self.hass.services.async_call("todo", "update_item",
+                                                        {"entity_id": entity, "item": uid, "status": status}, blocking=True)
+                except Exception as err:  # noqa: BLE001 - the list may not support status changes
+                    _LOGGER.debug("Cannot update %s on %s: %s", uid, entity, err)
 
     async def async_delete_todo(self, todo_id: str) -> None:
         self.data["todos"].pop(todo_id, None)
@@ -908,7 +1160,11 @@ class FamilyPlanner:
                         "admin_only_edit": bool(st.get("admin_only_edit")),
                         "reliability_days": self.reliability_days(),
                         "school_gap": validate.integer(st.get("school_gap"), 0, 240, 0),
-                        "school_window": validate.integer(st.get("school_window", 60), 0, 240, 60)},
+                        "school_window": validate.integer(st.get("school_window", 60), 0, 240, 60),
+                        "default_view": st.get("default_view") if st.get("default_view") in settings_spec.VIEWS else "today"},
+            "seasons": self.season_settings(),
+            "sonder": self.sonder_settings(),
+            "season_upcoming": seasons.upcoming(self.season_settings(), self.today(), self.data.get("ferien"))[:40],
             "vacation": {k: v for k, v in self.vacation_settings().items() if k != "scanned"},
             "points": {**self.gamification(), "mode": self.points_mode(),
                        "reward_notify": validate.entities(st.get("reward_notify"), ("notify",)),
@@ -920,10 +1176,11 @@ class FamilyPlanner:
             "todos": self.todo_settings(),
             "persons": [{"id": pid, "name": p["name"], "color": p.get("color"), "calendar": p.get("calendar"),
                          "aliases": p.get("aliases", []), "image": p.get("image", ""), "school": clean_school(p.get("school")),
-                         "order": p.get("order", 0), "role": p.get("role", "kid")}
+                         "order": p.get("order", 0), "role": p.get("role", "kid"),
+                         "birthday": p.get("birthday") or "", "bday_anim": p.get("bday_anim")}
                         for pid, p in self.persons_sorted()],
             "lists": [{"id": lid, "name": lst["name"], "entity": lst["entity"], "icon": lst.get("icon") or "",
-                       "max_categories": lst.get("max_categories", 10), "auto": lst.get("auto", True)}
+                       "max_categories": lst.get("max_categories", 10), "auto": lst.get("auto", True), "person_todos": bool(lst.get("person_todos"))}
                       for lid, lst in self.data["lists"].items()],
             "rewards": [{"id": rid, **r} for rid, r in sorted(self.data["rewards"].items(), key=lambda x: x[1]["cost"])],
         }
@@ -948,6 +1205,10 @@ class FamilyPlanner:
             patch, flags = settings_spec.lists_settings(data, st)
         elif section == "todos":
             patch, flags = settings_spec.todos(data, self.todo_settings())
+        elif section == "seasons":
+            patch, flags = settings_spec.seasons(data, self.season_settings())
+        elif section == "sonder":
+            patch, flags = settings_spec.sonder(data, self.sonder_settings())
         else:
             raise settings_spec.SettingsError("section", "unknown_section")
         if "gamification" in patch:
@@ -959,6 +1220,8 @@ class FamilyPlanner:
             self.hass.async_create_task(self.async_refresh_away(apply=True, rescan="rescan" in flags))
         if "rollover" in flags:
             await self.async_rollover()
+        if "season" in flags or "sonder" in flags:
+            self.hass.async_create_task(self.async_refresh_season(force="season" in flags))
         return flags
 
     # ------------------------------------------------------------------ gamification & rewards
@@ -1105,7 +1368,15 @@ class FamilyPlanner:
                          "fullscreen_auto": bool(st.get("fullscreen_auto", False)),
                          "nav": self.nav(), "nav_title": bool(st.get("nav_title", False)),
                          "early_time": self.award_settings()["early_time"],
-                         "confetti": self.award_settings()["confetti"]},
+                         "confetti": self.award_settings()["confetti"],
+                         "default_view": st.get("default_view") if st.get("default_view") in settings_spec.VIEWS else "today"},
+            "season": self.season(),
+            "season_cfg": {k: v for k, v in self.season_settings().items()
+                           if k in ("weather", "storm_kmh", "intensity", "sug_enabled", "sug_from", "pool", "pool_min",
+                                    "jacuzzi", "jacuzzi_min", "xmas_snow", "anim_bday")},
+            "busy": self.busy,
+            "sonder": sonder.view(self.data["sonder_inst"], self.data["sonder"], self.lang),
+            "sonder_points": {iid: self.sonder_points(i) for iid, i in self.data["sonder_inst"].items()},
             "todos": sorted(({"id": tid, **t} for tid, t in self.data["todos"].items()),
                             key=lambda t: (t.get("done"), t.get("created") or "")),
             "todo_settings": self.todo_settings(),

@@ -39,6 +39,8 @@ home – and **shopping and to-do lists that sort themselves**. Everything is se
   - [Pictures: avatars or your own photo](#pictures-avatars-or-your-own-photo)
 - [Smart lists module](#smart-lists-module)
 - [Designs](#designs)
+- [Seasons & weather](#seasons--weather)
+- [Special chores for volunteers](#special-chores-for-volunteers)
 - [Navigation](#navigation)
 - [Settings in the planner](#settings-in-the-planner)
 - [Fullscreen on double tap](#fullscreen-on-double-tap)
@@ -203,6 +205,8 @@ Per child (or person, e.g. university/work):
 
 ### To-dos without a date
 
+At most the **4 oldest** open to-dos per person are shown in the planner (adjustable), *+2 more* expands the rest; below each to-do it says how long it has been open. **To-dos from a shared list** (e.g. the Alexa to-do list): switch on *Names → to-do of the person* for the list under *Settings → Lists*. An item with a name or nickname (*"Lea tidy room large"*) becomes a to-do of that person; a trailing *klein / mittel / gross* (small / medium / large) sets the size and the points, several names give one to-do each, and ticking off works both ways.
+
 ![To-dos](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/todos.png)
 
 - Simple to-dos for a person **without due date or repetition** – they stay until they are done (e.g. *tidy up the room*, *return library books*).
@@ -212,6 +216,8 @@ Per child (or person, e.g. university/work):
 - Finished to-dos stay visible for a configurable number of days, then disappear.
 
 ### Announcements on motion
+
+**Without a motion sensor** the planner announces at fixed times (default 12:30 and 18:30). In addition, optional: a summary at 20:00 of what is still open (at most the set number of chores per person), now and then some praise (at most once a day), and on birthdays five funny announcements for the birthday child, spread over the day. Nothing is announced while *away* is confirmed in the holiday check.
 
 - Choose **motion sensors** (motion, presence, occupancy) and an **announcement** via
   - Alexa: notify entity *Announce* or *Speak* (*Alexa Devices* integration), or
@@ -283,12 +289,45 @@ Each design comes in three **styles**: *Standard*, *Transparent* and *Glass* (fr
 - Still available under *Settings → General* and *Configure → Design, language & sidebar*. Cards in your own dashboards can override it with `theme:` / `style:`. `theme_picker: false` on the navigation card hides the picker.
 - Your own dashboard can use the design's background with `background: var(--fp-page)` on the view.
 
+## Seasons & weather
+
+**Weather scene.** Choose a weather entity under *Settings → Seasons & weather* and the navigation turns into a small animated landscape: a house, trees, clouds, sun or moon behind the clock and the buttons. Ten weather states (sun, partly cloudy with a rainbow, clouds, rain, pouring rain, thunderstorm, snow, fog, wind, clear night) and the season of the year change the picture – blossoms in spring, green in summer, orange trees and falling leaves in autumn, bare trees in winter. Wind moves trees, clouds and chimney smoke; above the *storm threshold* (default 50 km/h) they really bend. The current weather is shown small at the top right. *Effect strength* (calm / normal / lots); *Reduce motion* on the device turns all particles off.
+
+**Seasons as a design layer.** Over every design and style the planner lays the current season: own header scene, page background, colour band, a little burst when ticking off and the avatar extras.
+
+| Kind | Events | Shown from |
+|---|---|---|
+| Long seasons | Advent & Christmas (from the 1st Advent, candles light up Sunday by Sunday; St. Nicholas and Christmas Eve as sub-seasons; it always snows), winter, spring, summer, autumn | start day |
+| Public holidays | New Year, St. Berchtold's Day, Good Friday, Easter Monday, Labour Day, Ascension, Whit Monday, Swiss National Day (bonfire from 9 pm, fireworks from 10 pm), Christmas Day, Boxing Day | 3 days before |
+| Customs | Epiphany, Valentine's Day, carnival, first days of the seasons, Easter, Mother's Day, Whitsun, Father's Day, first day of school, Federal Day of Thanksgiving, harvest festival, Advent Sundays, St. Nicholas, Christmas Eve, New Year's Eve | 3 days before |
+| School holidays | from calendar titles: Sportferien, Frühlingsferien, Pfingstferien, Sommerferien (a beach), Herbstferien, Weihnachtsferien | 3 days before |
+| Personal | birthdays, wedding anniversary, couple anniversary | the day itself |
+
+Every event can be switched off or get its own lead time; the *priority* decides when several coincide (default: birthday > anniversary > public holiday > custom > school holidays > long season). Pausing chores during your own family holidays stays in the [holiday check](#holidays-pause-chores).
+
+**Birthdays.** Enter the birth date per person (*Settings → People*, the year is optional). On the day the header gets bunting, balloons and a *Happy Birthday* banner, and the birthday child's row celebrates all day with one of five animations coming from behind the person: confetti cannon, balloon ride, soap bubbles, rainbow disco or star shower – a different one for everybody and every year, or a fixed one per person. **All points of the birthday child count double.**
+
+**Anniversaries.** Wedding and couple anniversary under *Settings → Seasons & weather* – floating hearts and *14 years married*.
+
+**Seasonal avatar extras.** The avatar builder has a *Season* register (no PIN): per season up to three extras (87 in total, many animated – Santa hat, reindeer with blinking nose, sparkler, Swiss flag, straw hat, bunny ears …) and one of 57 effects as an aura. Without a choice everybody automatically gets a different extra. Extras are a separate layer: after the season the normal picture is back by itself.
+
+**Suggestions.** From noon (adjustable) one suggestion per day appears below the weather, a different one every day: pool weather (needs a pool temperature sensor, water from 24°, sunny, no rain until the evening), evening swim, pool party, hot tub from autumn to spring on dry evenings when no adult has an evening appointment (also *under the stars*, *in the snow*, *for parents from 9 pm*; needs a hot-tub temperature sensor), home cinema, games night, baking (Christmas only), crafts, puzzle and photo album (at most every 14 days), Lego challenge, barbecue, bike ride, family walk, dinner on the terrace, sledging, hot chocolate, Advent windows, Easter egg hunt, lake swim, ice cream, a teamwork reward when everybody is done, or simply a quiet evening.
+
+## Special chores for volunteers
+
+Fun extra jobs that only give **bonus points** – not done or expired never lowers the reliability (%). Under *Settings → Special chores* (parent PIN) there is a catalogue of 58 templates with sensible timing (Christmas baubles for every child from 10 to 24 December, a birthday card 3 days before, raking leaves from Tuesday for 5 days including Saturday, dyeing eggs before Easter, hanging the Swiss flag …); everyday ones start switched off. Create your own with title, symbol, points (small / medium / large / own), assignment, when (once, daily, weekdays, every X days, yearly, at an event, a person's birthday, the wedding anniversary, Advent, weather, temperature), lead time, time to do it, time of day, visibility (always / in a season / with some weather) and *secret*.
+
+- **Volunteer**: the job waits in the *Volunteer* tile next to the people (only visible while something is open). The fastest child taps *I'll take it!*, picks themselves and the job moves into their row. Recurring ones come back every time.
+- **Every child**, **Surprise** (random, default at most 2 per child and week) or **Fixed**.
+- **Secret**: the planner shows *Secret job*; a tap reveals it for 5 seconds. For birthdays the birthday child never gets it.
+
 ## Navigation
 
 - One row: **time and date** on the left (or the planner's title), the pages in the middle, on the right the **holiday check** 🌴 and the design picker.
 - **Holiday check** 🌴: a badge shows how many holidays and long events of the next two weeks are undecided (details under *Holidays pause chores*). Parent PIN.
 - **Order and visible buttons** under *Settings → General*. If a button points to a view your dashboard does not have, it is shown dashed with a hint instead of opening an empty page.
 - **Today**: a red now line separates past and coming events, the next event shows *in 25 min*; ticking off a chore plays a short check animation.
+- **Today view**: *Today | Week* at the top left. *Today* shows only the current day with the people side by side as columns – school, events with the now line, chores (open first), to-dos and special chores; ‹ › for the other days, all filters work. *Settings → General → Default view* decides which one is shown after the idle time and when coming back from another page (default *Today*).
 - **Phone**: the planner shows only today, with ‹ › arrows and swipe for the other days; it returns to today after the idle time.
 
 ## Settings in the planner

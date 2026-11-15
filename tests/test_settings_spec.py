@@ -76,7 +76,8 @@ def test_pin_rules():
 
 def test_todo_settings():
     patch, _ = S.todos({"confirm": False, "size": "xl", "keep_days": 99}, {})
-    assert patch["todos"] == {"confirm": False, "size": "s", "keep_days": 30}  # unknown size falls back
+    assert patch["todos"] == {"confirm": False, "size": "s", "keep_days": 30, "max_shown": 4, "show_age": True}  # unknown size falls back
+    assert S.todos({"max_shown": 0}, {})[0]["todos"]["max_shown"] == 1
     patch, _ = S.todos({"size": "l"}, {"size": "m"})
     assert patch["todos"]["size"] == "l"
 
@@ -114,3 +115,21 @@ def test_award_settings_in_points_section():
     assert aw["items"]["crown"] == {"on": False, "size": "xl"}
     assert aw["items"]["bee"]["size"] == "s" and aw["items"]["bee"]["on"] is True  # invalid size -> default
     assert aw["early_time"] == "12:00" and aw["confetti"] is False
+
+
+def test_announce_fixed_times_without_motion():
+    patch, _ = S.announce({"enabled": True, "notify": ["notify.alexa"], "times": "18:30, 12:30, 99:00, x"}, {}, {})
+    a = patch["announce"]
+    assert a["times"] == ["12:30", "18:30"] and a["fixed"] and a["evening_time"] == "20:00"
+    with pytest.raises(S.SettingsError):
+        S.announce({"enabled": True, "notify": ["notify.alexa"], "fixed": False}, {}, {})
+
+
+def test_seasons_and_sonder_sections():
+    patch, flags = S.seasons({"weather": "weather.home", "pool": "light.x", "jacuzzi": "sensor.tub", "lead_day": 5,
+                              "wedding": "2012-06-09", "sug_from": "nope"}, {})
+    se = patch["seasons"]
+    assert se["weather"] == "weather.home" and se["pool"] is None and se["jacuzzi"] == "sensor.tub"
+    assert se["lead_day"] == 5 and se["wedding"] == "2012-06-09" and se["sug_from"] == "12:00" and "season" in flags
+    assert S.sonder({"surprise_per_week": 99}, {})[0]["sonder_settings"]["surprise_per_week"] == 14
+    assert S.general({"default_view": "evil"}, {"modules": {}})[0]["default_view"] == "today"

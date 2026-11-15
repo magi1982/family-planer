@@ -42,6 +42,8 @@
       F('nav_title', 'bool', 'Titel statt Uhrzeit in der Navigation', 'Title instead of the time in the navigation', 'Zeigt links den Namen des Planers statt Uhrzeit und Datum.', 'Shows the planner\'s name on the left instead of the time and date.'),
       F('fullscreen_dblclick', 'bool', 'Vollbild per Doppeltippen', 'Fullscreen on double tap', 'Doppeltippen auf eine freie Stelle blendet Kopfzeile und Seitenleiste aus; nochmals doppeltippen holt sie zurück.', 'Double-tap an empty spot to hide header and sidebar; double-tap again to bring them back.'),
       F('fullscreen_auto', 'bool', 'Beim Öffnen automatisch Vollbild', 'Fullscreen automatically when opened', 'Ideal für ein Wandtablet.', 'Ideal for a wall tablet.'),
+      F('default_view', 'select', 'Standard-Ansicht des Planers', 'Default planner view', 'Heute: nur der aktuelle Tag, Personen nebeneinander. Woche: die ganze Woche. Diese Ansicht kommt nach der Ruhezeit und beim Zurückkehren aus einem Menü.', 'Today: the current day only, people side by side. Week: the whole week. This view comes back after the idle time and when returning from a menu.',
+        { opts: [['today', { de: 'Heute', en: 'Today' }], ['week', { de: 'Woche', en: 'Week' }]] }),
       F('idle_seconds', 'num', 'Zurück zur Startansicht nach', 'Return to the start view after', 'Angetippter Tag / Person springt danach zurück zu heute.', 'A tapped day / person jumps back to today afterwards.', { min: 10, max: 600, unit: 's' }),
       F('panel', 'bool', 'Eintrag in der Seitenleiste', 'Sidebar entry', 'Öffnet den kompletten Planer ohne eigenes Dashboard.', 'Opens the complete planner without a dashboard of your own.'),
       F('panel_title', 'text', 'Titel in der Seitenleiste', 'Sidebar title', 'Leer = Name der Integration.', 'Empty = name of the integration.', { max: 40 }),
@@ -84,10 +86,18 @@
       F('confirm', 'bool', 'Erledigen bestätigen', 'Confirm completion', 'To-dos werden erst nach der Frage „Als erledigt markieren?“ abgehakt.', 'To-dos are only ticked off after the question "Mark as done?".'),
       F('size', 'select', 'Standard-Grösse', 'Default size', 'Gross = Punkte für einen ganzen Tag, Mittel = ⅔, Klein = ⅓ (aufgerundet). Eine andere Grösse beim Anlegen braucht die Eltern-PIN. Zählt nicht zum fairen Tageswert.', 'Large = points for a full day, medium = ⅔, small = ⅓ (rounded up). Another size when adding needs the parent PIN. Does not count towards the fair day value.',
         { opts: [['none', { de: 'Ohne Punkte', en: 'No points' }], ['s', { de: 'Klein', en: 'Small' }], ['m', { de: 'Mittel', en: 'Medium' }], ['l', { de: 'Gross', en: 'Large' }]] }),
+      F('max_shown', 'num', 'To-dos pro Person im Planer', 'To-dos per person in the planner', 'Die ältesten zuerst; weitere erscheinen als „+3 weitere“ und lassen sich aufklappen.', 'Oldest first; more show as "+3 more" and can be expanded.', { min: 1, max: 20 }),
+      F('show_age', 'bool', 'Zeigen, seit wann ein To-do offen ist', 'Show how long a to-do has been open', '„seit 3 T.“ unter dem To-do.', '"for 3 d" below the to-do.'),
       F('keep_days', 'num', 'Erledigte anzeigen für', 'Show finished ones for', '0 = bis zum nächsten Tageswechsel.', '0 = until the next day change.', { min: 0, max: 30, unit: { de: 'Tage', en: 'days' } }),
     ] },
     { id: 'announce', icon: 'mdi:bullhorn-outline', label: { de: 'Ansagen', en: 'Announcements' }, fields: [
-      F('enabled', 'bool', 'Ansagen einschalten', 'Enable announcements', 'Sagt bei Bewegung an, wer noch Ämtli offen hat.', 'Announces on motion who still has chores open.'),
+      F('enabled', 'bool', 'Ansagen einschalten', 'Enable announcements', 'Sagt bei Bewegung an, wer noch Ämtli offen hat – ohne Bewegungsmelder zu festen Zeiten. Keine Ansagen, wenn im Ferien-Check „weg“ bestätigt ist.', 'Announces on motion who still has chores open – without a motion sensor at fixed times. No announcements when "away" is confirmed in the holiday check.'),
+      F('fixed', 'bool', 'Ohne Bewegungsmelder: zu festen Zeiten', 'Without motion sensor: at fixed times', 'Gilt nur, solange kein Bewegungsmelder gewählt ist.', 'Only while no motion sensor is chosen.'),
+      F('times', 'words', 'Feste Zeiten', 'Fixed times', 'Mit Komma getrennt, z. B. 12:30, 18:30.', 'Comma separated, e.g. 12:30, 18:30.'),
+      F('evening', 'bool', 'Abends sagen, was noch offen ist', 'Say in the evening what is still open', 'Kurze Zusammenfassung pro Person (höchstens so viele Ämtli wie unten eingestellt).', 'Short summary per person (at most as many chores as set below).'),
+      F('evening_time', 'time', 'Abend-Ansage um', 'Evening announcement at', '', ''),
+      F('praise', 'bool', 'Ab und zu ein Lob', 'Now and then some praise', 'Höchstens einmal am Tag, wenn jemand alles erledigt hat.', 'At most once a day when someone has done everything.'),
+      F('birthday', 'bool', 'Lustige Geburtstags-Ansagen', 'Funny birthday announcements', 'Fünf verschiedene Sprüche fürs Geburtstagskind, über den Tag verteilt.', 'Five different lines for the birthday child, spread over the day.'),
       F('motion', 'entities', 'Bewegungsmelder', 'Motion sensors', 'Bewegung, Präsenz oder Anwesenheit.', 'Motion, presence or occupancy.', { domain: 'binary_sensor', classes: ['motion', 'occupancy', 'presence'] }),
       F('notify', 'entities', 'Ansage über (Alexa)', 'Announce via (Alexa)', 'Benachrichtigungs-Entität „Ankündigen“ oder „Sprechen“ der Integration Alexa Devices.', 'Notify entity "Announce" or "Speak" of the Alexa Devices integration.', { domain: 'notify' }),
       F('tts', 'entity', 'Sprachausgabe (TTS)', 'Text-to-speech (TTS)', 'Alternativ zu Alexa, zusammen mit Lautsprechern.', 'Alternative to Alexa, together with speakers.', { domain: 'tts' }),
@@ -105,6 +115,34 @@
       F('reward_hours', 'num', 'Belohnungs-Meldung gültig für', 'Reward message valid for', '0 = bis zum Tageswechsel.', '0 = until the day change.', { min: 0, max: 48, unit: 'h' }),
       F('queue_special', 'bool', 'Besondere Ämtli ansagen', 'Announce special chores', 'Entfällt, sobald das Ämtli erledigt ist.', 'Dropped once the chore is done.'),
     ] },
+    { id: 'seasons', icon: 'mdi:weather-partly-snowy', label: { de: 'Saisons & Wetter', en: 'Seasons & weather' }, fields: [
+      F('enabled', 'bool', 'Saison-Designs', 'Season designs', 'Weihnachten, Ostern, 1. August, Ferien, Geburtstage … legen sich automatisch über das gewählte Design: Kopfbild, Hintergrund, Farbband, Avatar-Extras.', 'Christmas, Easter, Swiss National Day, holidays, birthdays … are laid over the chosen design automatically: header scene, background, band, avatar extras.'),
+      F('weather', 'entity', 'Wetter-Entität', 'Weather entity', 'Für die animierte Szene oben und die Vorschläge. Leer = nur Saison ohne Wetter.', 'For the animated scene at the top and the suggestions. Empty = season only, no weather.', { domain: 'weather' }),
+      F('intensity', 'select', 'Effekt-Stärke', 'Effect strength', '„Bewegung reduzieren“ im Gerät schaltet alle Partikel aus.', '"Reduce motion" on the device turns all particles off.',
+        { opts: [['calm', { de: 'Ruhig', en: 'Calm' }], ['normal', { de: 'Normal', en: 'Normal' }], ['lots', { de: 'Viel', en: 'Lots' }]] }),
+      F('storm_kmh', 'num', 'Sturm ab', 'Storm from', 'Ab dieser Windgeschwindigkeit biegen sich die Bäume richtig.', 'From this wind speed the trees really bend.', { min: 20, max: 150, unit: 'km/h' }),
+      F('lead_day', 'num', 'Feiertage & Bräuche zeigen ab', 'Show holidays & customs from', 'Tage vorher (z. B. 1. August ab 29. Juli).', 'Days before (e.g. Swiss National Day from 29 July).', { min: 0, max: 30, unit: { de: 'Tage', en: 'days' } }),
+      F('lead_school', 'num', 'Schulferien zeigen ab', 'Show school holidays from', 'Tage vor dem ersten Ferientag. Ferien werden aus den Kalendern erkannt (Sportferien, Frühlingsferien, Pfingst-, Sommer-, Herbst-, Weihnachtsferien).', 'Days before the first day. Holidays are found in the calendars (winter sports, spring, Whitsun, summer, autumn, Christmas holidays).', { min: 0, max: 30, unit: { de: 'Tage', en: 'days' } }),
+      F('christmas_start', 'select', 'Weihnachts-Saison ab', 'Christmas season from', 'Die Adventskerzen zünden sich Sonntag für Sonntag an.', 'The Advent candles light up Sunday by Sunday.',
+        { opts: [['advent', { de: '1. Advent', en: '1st Advent' }], ['dec1', { de: '1. Dezember', en: '1 December' }]] }),
+      F('xmas_snow', 'bool', 'An Weihnachten schneit es immer', 'It always snows at Christmas', 'Das echte Wetter bleibt klein oben rechts.', 'The real weather stays small at the top right.'),
+      F('wedding', 'date', 'Hochzeitstag', 'Wedding anniversary', 'Mit Jahr zeigt der Planer „14 Jahre verheiratet“.', 'With the year the planner shows "14 years married".'),
+      F('couple', 'date', 'Kennenlerntag', 'Couple anniversary', 'Der Tag, an dem ihr ein Paar wurdet.', 'The day you became a couple.'),
+      F('anim_bday', 'bool', 'Geburtstagskind animieren', 'Animate the birthday child', 'Die Zeile des Geburtstagskinds feiert den ganzen Tag; alle seine Punkte zählen doppelt.', 'The birthday child\'s row celebrates all day; all their points count double.'),
+      F('priority', 'prio', 'Vorrang, wenn mehreres zusammenfällt', 'Priority when several things coincide', 'Oben gewinnt.', 'Top wins.'),
+      F('events', 'events', 'Saisons ein- und ausschalten', 'Switch seasons on and off', 'Pro Ereignis; Zahl = eigene Vorlaufzeit in Tagen (leer = Standard).', 'Per event; number = own lead time in days (empty = default).'),
+      F('sug_enabled', 'bool', 'Vorschläge unter dem Wetter', 'Suggestions below the weather', 'Ab Mittag höchstens ein Vorschlag pro Tag, täglich ein anderer (Pool, Jacuzzi, Spieleabend, Velotour …).', 'From noon at most one suggestion a day, a different one every day (pool, hot tub, games night, bike ride …).'),
+      F('sug_from', 'time', 'Vorschläge ab', 'Suggestions from', '', ''),
+      F('pool', 'entity', 'Pool-Temperatur', 'Pool temperature', 'Sensor mit der Wassertemperatur.', 'Sensor with the water temperature.', { domain: 'sensor', classes: ['temperature'] }),
+      F('pool_min', 'num', 'Badi-Wetter ab', 'Swimming weather from', 'Wassertemperatur.', 'Water temperature.', { min: 15, max: 40, unit: '°' }),
+      F('jacuzzi', 'entity', 'Jacuzzi-Temperatur', 'Hot tub temperature', 'Wird von Herbst bis Frühling an trockenen Abenden vorgeschlagen, wenn keine Erwachsenen weg sind.', 'Suggested from autumn to spring on dry evenings when no adult is out.', { domain: 'sensor', classes: ['temperature'] }),
+      F('jacuzzi_min', 'num', 'Jacuzzi bereit ab', 'Hot tub ready from', '', '', { min: 20, max: 42, unit: '°' }),
+    ] },
+    { id: 'sonder', icon: 'mdi:star-shooting-outline', label: { de: 'Sonderämtli', en: 'Special chores' }, fields: [
+      F('enabled', 'bool', 'Sonderämtli', 'Special chores', 'Lustige Extra-Ämtli nur für Bonuspunkte: nicht erledigt oder abgelaufen verschlechtert die Zuverlässigkeit (%) nie.', 'Fun extra chores for bonus points only: not done or expired never lowers the reliability (%).'),
+      F('surprise_per_week', 'num', 'Überraschungs-Ämtli pro Kind', 'Surprise chores per child', 'Pro Woche höchstens so viele zufällig zugeteilte Sonderämtli.', 'At most this many randomly assigned special chores per week.', { min: 0, max: 14 }),
+      F('max_open', 'num', 'Höchstens gleichzeitig offen', 'At most open at the same time', 'Im Freiwillig-Feld.', 'In the volunteer tile.', { min: 1, max: 20 }),
+    ] },
     { id: 'lists', icon: 'mdi:cart-outline', label: { de: 'Listen', en: 'Lists' }, fields: [
       F('optimize_time', 'time', 'Tägliche Optimierung um', 'Daily optimisation at', 'Ordnet Unbekanntes unter „Sonstiges“ neu ein.', 'Re-sorts unknown items from "Other".'),
       F('ai_task', 'entity', 'KI-Aufgabe (optional)', 'AI task (optional)', 'Ordnet auch Unbekanntes ein (OpenAI, Google, Ollama …).', 'Also sorts unknown items (OpenAI, Google, Ollama …).', { domain: 'ai_task' }),
@@ -113,12 +151,23 @@
     { id: 'status', icon: 'mdi:heart-pulse', label: { de: 'Status', en: 'Status' } },
   ];
   // tab order on the page
-  const ORDER = ['pics', 'general', 'persons', 'chores', 'points', 'todos', 'lists', 'vacation', 'announce', 'status'];
+  const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'status'];
   const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', early: 'Frühaufsteher', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', early: 'Early bird', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
   const AWS = { de: { none: 'Ohne Punkte', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
-  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings' };
+  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder' };
+  // season events in the settings (keys from the server's catalogue)
+  const SEV = { weihnachten: ['Advent & Weihnachten', 'Advent & Christmas'], samichlaus: ['Samichlaus', 'St. Nicholas'], heiligabend: ['Heiligabend', 'Christmas Eve'], weihnachtstag: ['Weihnachtstag', 'Christmas Day'], stephanstag: ['Stephanstag', 'Boxing Day'], winteranfang: ['Winteranfang', 'First day of winter'],
+    silvester: ['Silvester', 'New Year\'s Eve'], neujahr: ['Neujahr', 'New Year'], berchtoldstag: ['Berchtoldstag', 'St. Berchtold\'s Day'], dreikoenig: ['Dreikönigstag', 'Epiphany'], winter: ['Winter', 'Winter'],
+    valentin: ['Valentinstag', 'Valentine\'s Day'], fasnacht: ['Fasnacht', 'Carnival'], fruehlingsanfang: ['Frühlingsanfang', 'First day of spring'], fruehling: ['Frühling', 'Spring'], karfreitag: ['Karfreitag', 'Good Friday'],
+    ostersonntag: ['Ostern', 'Easter'], ostermontag: ['Ostermontag', 'Easter Monday'], tag_der_arbeit: ['Tag der Arbeit', 'Labour Day'], auffahrt: ['Auffahrt', 'Ascension'], muttertag: ['Muttertag', 'Mother\'s Day'],
+    pfingstsonntag: ['Pfingsten', 'Whitsun'], pfingstmontag: ['Pfingstmontag', 'Whit Monday'], vatertag: ['Vatertag', 'Father\'s Day'], sommeranfang: ['Sommeranfang', 'First day of summer'], sommer: ['Sommer', 'Summer'],
+    august: ['1. August', 'Swiss National Day'], schulanfang: ['Schulanfang', 'First day of school'], bettag: ['Bettag', 'Federal Fast'], herbstanfang: ['Herbstanfang', 'First day of autumn'], erntedank: ['Erntedank', 'Harvest festival'], herbst: ['Herbst', 'Autumn'],
+    ferien_sport: ['Sportferien', 'Winter sports holidays'], ferien_fruehling: ['Frühlingsferien', 'Spring holidays'], ferien_pfingsten: ['Pfingstferien', 'Whitsun holidays'], ferien_sommer: ['Sommerferien', 'Summer holidays'], ferien_herbst: ['Herbstferien', 'Autumn holidays'], ferien_weihnachten: ['Weihnachtsferien', 'Christmas holidays'],
+    geburtstag: ['Geburtstage', 'Birthdays'], hochzeitstag: ['Hochzeitstag', 'Wedding anniversary'], kennenlerntag: ['Kennenlerntag', 'Couple anniversary'] };
+  const PRIO = { person: ['Geburtstag', 'Birthday'], couple: ['Hochzeits- & Kennenlerntag', 'Anniversaries'], holiday: ['Feiertage', 'Public holidays'], custom: ['Bräuche', 'Customs'], school: ['Schulferien', 'School holidays'], season: ['Lange Saisons', 'Long seasons'] };
+  const BDA = [['Konfetti-Kanone', 'Confetti cannon'], ['Ballon-Fahrt', 'Balloon ride'], ['Seifenblasen', 'Soap bubbles'], ['Regenbogen-Disco', 'Rainbow disco'], ['Sternenregen', 'Star shower']];
 
   class FpSettingsInner extends HTMLElement {
     setConfig(cfg) {
@@ -161,6 +210,7 @@
     }
     _formFor(id) {
       const d = this._data;
+      if (id === 'seasons') { const f = clone(d.seasons); f.priority = f.priority || Object.keys(PRIO); f.events = f.events || {}; return f; }
       if (id === 'general') { const g = clone(d.general); g.mod_week = g.modules.week; g.mod_lists = g.modules.lists; return g; }
       if (id === 'lists') return clone(d.lists_settings);
       if (id === 'points') { const f = clone(d.points); f.early_time = (f.awards || {}).early_time || '12:00'; f.confetti = (f.awards || {}).confetti !== false;
@@ -171,8 +221,11 @@
       const el = e.target; const ds = el.dataset;
       if (ds.avup !== undefined && isChange && el.files && el.files[0]) { const p = this._avPerson(); if (p) this._avUpload(p, el.files[0]); return; }
       if (ds.navtg) { const n = this._forms.general.nav; n.hidden = el.checked ? n.hidden.filter((x) => x !== ds.navtg) : [...n.hidden, ds.navtg]; return; }
+      if (ds.evon || ds.evld) { const ev = this._forms.seasons.events = this._forms.seasons.events || {}; const k = ds.evon || ds.evld; ev[k] = { ...(ev[k] || {}) }; if (ds.evon) ev[k].on = el.checked; else if (el.value === '') delete ev[k].lead; else ev[k].lead = Number(el.value); return; }
+      if (ds.sf) { this._sonderInput(el, ds); return; }
       if (ds.awon || ds.awsz) { const it = this._forms.points.awards.items; const id = ds.awon || ds.awsz; it[id] = { ...(it[id] || {}) }; if (ds.awon) it[id].on = el.checked; else it[id].size = el.value; return; }
       if (ds.pk === 'role') { const p = this._persons[Number(ds.pi)]; if (p) p.role = el.value; return; }
+      if (ds.pk === 'bday_anim') { const p = this._persons[Number(ds.pi)]; if (p) p.bday_anim = el.value === '' ? null : Number(el.value); return; }
       if (ds.k && ds.tab) {
         const f = this._forms[ds.tab]; if (!f) return;
         if (el.type === 'checkbox') f[ds.k] = el.checked;
@@ -200,6 +253,8 @@
       if (t.closest('[data-unlock]')) { this._asked = true; this._load(); return; }
       const ap = t.closest('[data-avp]'); if (ap) { this._avp = ap.dataset.avp; this._render(); return; }
       const at = t.closest('[data-avtab]'); if (at) { this._avtab = at.dataset.avtab; this._render(); return; }
+      const asv = t.closest('[data-avsv]'); if (asv) { this._avsv = asv.dataset.avsv; this._render(); return; }
+      const avs = t.closest('[data-avs]'); if (avs && window.FPAVS) { const p = this._avPerson(); if (p) { const [v, kind, key] = avs.dataset.avs.split('|'); this._avsv = v; this._avSeason(p, window.FPAVS.toggle(p.season_av, v, kind, key)); } return; }
       if (t.closest('[data-avrnd]')) { const p = this._avPerson(); if (p) { const fx = window.FPAV.parse(this._avCode(p)).fx; this._avSave(p, window.FPAV.set(window.FPAV.random(), 'fx', fx)); } return; }
       const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); this._avSave(p, window.FPAV.set(this._avCode(p), part, val)); } return; }
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
@@ -210,6 +265,9 @@
       const pc = t.closest('[data-pchip]');
       if (pc) { const f = this._forms[pc.dataset.tab]; const cur = f[pc.dataset.k] || []; f[pc.dataset.k] = cur.includes(pc.dataset.pchip) ? cur.filter((x) => x !== pc.dataset.pchip) : [...cur, pc.dataset.pchip]; this._render(); return; }
       if (t.closest('[data-savetab]')) { this._saveTab(); return; }
+      const prm = t.closest('[data-prmv]');
+      if (prm) { const [id, d] = prm.dataset.prmv.split('|'); const o = this._forms.seasons.priority; const i = o.indexOf(id); const j = i + Number(d); if (i >= 0 && j >= 0 && j < o.length) { [o[i], o[j]] = [o[j], o[i]]; this._render(); } return; }
+      if (await this._sonderClick(t)) return;
       const nm = t.closest('[data-navmv]');
       if (nm) { const [id, d] = nm.dataset.navmv.split('|'); const o = this._forms.general.nav.order; const i = o.indexOf(id); const j = i + Number(d); if (i >= 0 && j >= 0 && j < o.length) { [o[i], o[j]] = [o[j], o[i]]; this._render(); } return; }
       const pm = t.closest('[data-pmv]');
@@ -226,7 +284,7 @@
       const po = t.closest('[data-popen]'); if (po) { const p = this._persons[Number(po.dataset.popen)]; p.open = !p.open; this._render(); return; }
       const ls = t.closest('[data-lsave]'); if (ls) { this._saveList(Number(ls.dataset.lsave)); return; }
       const ld = t.closest('[data-ldel]'); if (ld) { const l = this._lists[Number(ld.dataset.ldel)]; this._dlg = { kind: 'list', i: Number(ld.dataset.ldel), title: l.name }; this._render(); return; }
-      if (t.closest('[data-ladd]')) { this._lists.push({ id: null, name: '', entity: null, icon: 'mdi:cart-outline', max_categories: 10, auto: true }); this._render(); return; }
+      if (t.closest('[data-ladd]')) { this._lists.push({ id: null, name: '', entity: null, icon: 'mdi:cart-outline', max_categories: 10, auto: true, person_todos: false }); this._render(); return; }
       if (t.closest('[data-yes]') && this._dlg) { const d = this._dlg; this._dlg = null; if (d.kind === 'person') await this._removePerson(d.i); else await this._removeList(d.i); this._render(); return; }
       if (t.closest('[data-close]') || t.classList.contains('ov')) { this._dlg = null; this._render(); }
     }
@@ -236,10 +294,93 @@
       if (id === 'points') { f.awards = { items: (f.awards || {}).items || {}, early_time: f.early_time, confetti: !!f.confetti }; delete f.early_time; delete f.confetti;
         f.levels = { season_start: f.season_start, bonus: !!f.level_bonus }; delete f.season_start; delete f.level_bonus; }
       if (id === 'vacation' && typeof f.words === 'string') f.words = f.words.split(',').map((x) => x.trim()).filter(Boolean);
+      if (id === 'announce' && typeof f.times === 'string') f.times = f.times.split(',').map((x) => x.trim()).filter(Boolean);
       const res = await this._call('family_planer/settings/save', { section: SECTION[id], data: f });
       if (!res) return;
       if (id === 'vacation') this._forms.vacation.rescan = false;
       this._flash(res.reload ? this.T.reloading : this.T.saved);
+    }
+    // ---------------------------------------------------------------- special chores (definitions, catalogue)
+    async _sonderLoad() { const res = await this._call('family_planer/sonder/list', {}); if (res) { this._sonder = res; this._render(); } }
+    _sonderTab() {
+      const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de);
+      if (!this._sonder) { if (!this._sonderBusy) { this._sonderBusy = true; this._sonderLoad().finally(() => { this._sonderBusy = false; }); } return `<div class="hint3">…</div>`; }
+      const S = this._sonder; const ed = this._sEdit;
+      const SZ = { s: lbl('Klein', 'Small'), m: lbl('Mittel', 'Medium'), l: lbl('Gross', 'Large'), own: lbl('Eigene', 'Own') };
+      const MD = { free: lbl('Freiwillig', 'Volunteer'), each: lbl('Jedes Kind', 'Every child'), surprise: lbl('Überraschung', 'Surprise'), fixed: lbl('Fix', 'Fixed') };
+      const WDS = lang === 'en' ? ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] : ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+      const when = (d) => { const a = d.anchor || {}; const off = d.off || 0; const lead = off < 0 ? lbl(` · ${-off} T. vorher`, ` · ${-off} d before`) : '';
+        const span = d.end_md ? lbl(` · bis ${d.end_md.slice(3)}.${d.end_md.slice(0, 2)}.`, ` · until ${d.end_md.slice(3)}/${d.end_md.slice(0, 2)}`) : lbl(` · ${d.span} T. Zeit`, ` · ${d.span} d`);
+        const base = { once: () => a.d, daily: () => lbl('täglich', 'daily'), weekly: () => '↻ ' + (a.days || []).map((x) => WDS[x - 1]).join(', '), every: () => lbl(`alle ${a.n} Tage`, `every ${a.n} days`),
+          yearly: () => `${(a.md || '').slice(3)}.${(a.md || '').slice(0, 2)}.`, event: () => (SEV[a.k] || [a.k, a.k])[lang === 'en' ? 1 : 0], bday: () => lbl('Geburtstag', 'Birthday'), wedding: () => lbl('Hochzeitstag', 'Wedding anniversary'),
+          advent_week: () => lbl('jede Adventswoche', 'every Advent week'), advent_sunday: () => lbl('Advents-Sonntage', 'Advent Sundays'), weather: () => lbl('Wetter: ', 'Weather: ') + a.c, temp: () => lbl(`ab ${a.min}°`, `from ${a.min}°`) }[a.t];
+        return (base ? base() : '') + lead + span + (d.season ? ` · ${d.season.replace('jz:', '').replace('vis:', '')}` : '') + (d.from ? lbl(` · ab ${d.from}`, ` · from ${d.from}`) : '') + (d.until ? lbl(` · bis ${d.until}`, ` · until ${d.until}`) : ''); };
+      const title = (d) => (lang === 'en' && d.title_en ? d.title_en : d.title);
+      const list = S.defs.slice().sort((x, y) => (y.on - x.on) || title(x).localeCompare(title(y))).map((d) => `<div class="sdr${d.on ? '' : ' off'}"><input type="checkbox" class="sw" data-son="${esc(d.id)}" ${d.on ? 'checked' : ''}><span class="si">${esc(d.icon)}</span>
+        <span class="st"><b>${esc(title(d))}${d.secret ? ' 🤫' : ''}</b><small>${esc(when(d))} · ${esc(MD[d.mode] || d.mode)} · ${esc(SZ[d.size])}${d.size === 'own' ? ' ' + esc(d.pts) : ''}</small></span>
+        <button class="sg" data-sedit="${esc(d.id)}">${lbl('Bearbeiten', 'Edit')}</button></div>${ed && ed.id === d.id ? this._sonderForm() : ''}`).join('');
+      const miss = S.missing.length ? `<div class="sec2">${lbl('Vorlagen wieder hinzufügen', 'Add templates again')}</div><div class="vch">${S.missing.map((m) => `<button class="chip" data-stpl="${esc(m.id)}">${esc(m.icon)} ${esc(lang === 'en' && m.title_en ? m.title_en : m.title)}</button>`).join('')}</div>` : '';
+      return `<div class="sec2">${lbl('Sonderämtli & Vorlagen', 'Special chores & templates')}</div><div class="hint3">${esc(lbl('Eingeschaltete erscheinen zur richtigen Zeit – freiwillige im Feld „Freiwillig“ beim Planer: Wer zuerst tippt, bekommt es. Wiederkehrende kommen jedes Mal neu.', 'Switched-on ones appear at the right time – volunteer ones in the "Volunteer" tile in the planner: whoever taps first gets it. Recurring ones come back every time.'))}</div>
+        <button class="addb" data-snew>${lbl('+ Neues Sonderämtli', '+ New special chore')}</button>${ed && !ed.id ? this._sonderForm() : ''}<div class="sdl">${list}</div>${miss}`;
+    }
+    _sonderForm() {
+      const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de); const d = this._sEdit; const a = d.anchor || { t: 'once' };
+      const sel = (k, opts, v) => `<select class="in" data-sf="${k}">${opts.map(([x, l]) => `<option value="${esc(x)}" ${String(v) === String(x) ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+      const row = (label, ctl, hint) => `<div class="row"><span class="lt"><b>${esc(label)}</b>${hint ? `<small>${esc(hint)}</small>` : ''}</span><span class="ctl">${ctl}</span></div>`;
+      const WDS = lang === 'en' ? ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] : ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+      const anchorCtl = sel('anchor.t', [['once', lbl('Einmalig', 'Once')], ['daily', lbl('Täglich', 'Daily')], ['weekly', lbl('Wochentage', 'Weekdays')], ['every', lbl('Alle X Tage', 'Every X days')], ['yearly', lbl('Jährlich', 'Yearly')],
+        ['event', lbl('Bei einem Ereignis', 'At an event')], ['bday', lbl('Geburtstag einer Person', 'A person\'s birthday')], ['wedding', lbl('Hochzeitstag', 'Wedding anniversary')], ['advent_week', lbl('Jede Adventswoche', 'Every Advent week')],
+        ['advent_sunday', lbl('Advents-Sonntage', 'Advent Sundays')], ['weather', lbl('Bei Wetter', 'With weather')], ['temp', lbl('Ab Temperatur', 'From temperature')]], a.t);
+      let extra = '';
+      if (a.t === 'once') extra = `<input class="in" type="date" data-sf="anchor.d" value="${esc(a.d || '')}">`;
+      if (a.t === 'weekly') extra = `<span class="vch">${WDS.map((w, i) => `<button class="chip${(a.days || []).includes(i + 1) ? ' on' : ''}" data-swd="${i + 1}">${w}</button>`).join('')}</span>`;
+      if (a.t === 'every') extra = `<input class="in n" type="number" min="2" max="365" data-sf="anchor.n" value="${esc(a.n || 7)}"> ${lbl('ab', 'from')} <input class="in" type="date" data-sf="anchor.d" value="${esc(a.d || '')}">`;
+      if (a.t === 'yearly') extra = `<input class="in" type="date" data-sf="anchor.md" value="${esc(new Date().getFullYear() + '-' + (a.md || '01-01'))}">`;
+      if (a.t === 'event') extra = sel('anchor.k', Object.entries(SEV).filter(([k]) => !['geburtstag', 'hochzeitstag', 'kennenlerntag'].includes(k)).map(([k, l]) => [k, l[lang === 'en' ? 1 : 0]]), a.k);
+      if (a.t === 'weather') extra = sel('anchor.c', [['rainy', lbl('Regen', 'Rain')], ['snowy', lbl('Schnee', 'Snow')], ['sunny', lbl('Sonne', 'Sun')], ['windy', lbl('Wind', 'Wind')], ['cloudy', lbl('Bewölkt', 'Cloudy')]], a.c);
+      if (a.t === 'temp') extra = `<input class="in n" type="number" min="-20" max="45" data-sf="anchor.min" value="${esc(a.min != null ? a.min : 25)}"> °`;
+      const persons = (this._data.persons || []).map((p) => `<button class="chip${(d.persons || []).includes(p.id) ? ' on' : ''}" style="--c:${COLOR(p.color)}" data-spp="${esc(p.id)}"><i></i>${esc(p.name)}</button>`).join('');
+      const seasons = [['', lbl('Immer', 'Always')], ['jz:fruehling', lbl('Frühling', 'Spring')], ['jz:sommer', lbl('Sommer', 'Summer')], ['jz:herbst', lbl('Herbst', 'Autumn')], ['jz:winter', lbl('Winter', 'Winter')],
+        ...Object.keys((window.FPAVS && window.FPAVS.NAMES) || {}).map((k) => [`vis:${k}`, lbl('Saison: ', 'Season: ') + window.FPAVS.NAMES[k][lang === 'en' ? 1 : 0]])];
+      return `<div class="sform">
+        ${row(lbl('Titel', 'Title'), `<input class="in" maxlength="80" data-sf="title" value="${esc(d.title || '')}">`)}
+        ${row(lbl('Symbol', 'Symbol'), `<input class="in" style="width:80px" maxlength="8" data-sf="icon" value="${esc(d.icon || '⭐')}">`)}
+        ${row(lbl('Punkte', 'Points'), sel('size', [['s', lbl('Klein', 'Small')], ['m', lbl('Mittel', 'Medium')], ['l', lbl('Gross', 'Large')], ['own', lbl('Eigene Zahl', 'Own number')]], d.size) + (d.size === 'own' ? ` <input class="in n" type="number" min="0" max="1000" data-sf="pts" value="${esc(d.pts || 10)}">` : ''), lbl('Nur Bonuspunkte – zählt nie für die Zuverlässigkeit.', 'Bonus points only – never counts for reliability.'))}
+        ${row(lbl('Vergabe', 'Assignment'), sel('mode', [['free', lbl('Freiwillig (wer zuerst kommt)', 'Volunteer (first come)')], ['each', lbl('Jedes Kind bekommt eines', 'Every child gets one')], ['surprise', lbl('Überraschung (zufällig)', 'Surprise (random)')], ['fixed', lbl('Fix für die Gewählten', 'Fixed for those chosen')]], d.mode))}
+        ${row(lbl('Für', 'For'), `<span class="ents">${persons}</span>`, lbl('Leer = alle Kinder.', 'Empty = all children.'))}
+        ${row(lbl('Wann', 'When'), anchorCtl + ' ' + extra)}
+        ${row(lbl('Vorlauf', 'Lead time'), `<span class="nw"><input class="in n" type="number" min="0" max="60" data-sf="lead" value="${esc(Math.max(0, -(d.off || 0)))}"><span class="u">${lbl('Tage vorher', 'days before')}</span></span>`, lbl('So früh erscheint es, z. B. Geburtstagskarte 3 Tage vorher.', 'This early it appears, e.g. a birthday card 3 days before.'))}
+        ${row(lbl('Frist', 'Time to do it'), `<span class="nw"><input class="in n" type="number" min="1" max="60" data-sf="span" value="${esc(d.span || 1)}"><span class="u">${lbl('Tage', 'days')}</span></span>${d.end_md ? `<small> ${lbl('(bis', '(until')} ${esc(d.end_md.slice(3))}.${esc(d.end_md.slice(0, 2))}.)</small>` : ''}`, lbl('Am besten inklusive Samstag, z. B. Laub rechen ab Dienstag 5 Tage.', 'Ideally including Saturday, e.g. raking leaves from Tuesday for 5 days.'))}
+        ${row(lbl('Ab / bis Uhrzeit', 'From / until time'), `<input class="in t" type="time" data-sf="from" value="${esc(d.from || '')}"> – <input class="in t" type="time" data-sf="until" value="${esc(d.until || '')}">`, lbl('Erster Tag ab, letzter Tag bis (leer = ganzer Tag).', 'First day from, last day until (empty = all day).'))}
+        ${row(lbl('Sichtbar', 'Visible'), sel('season', seasons, d.season || ''))}
+        ${row(lbl('Nur bei Wetter', 'Only with weather'), sel('weather', [['', lbl('Egal', 'Any')], ['sunny', lbl('Sonne', 'Sun')], ['rainy', lbl('Regen', 'Rain')], ['snowy', lbl('Schnee', 'Snow')], ['windy', lbl('Wind', 'Wind')], ['cloudy', lbl('Bewölkt', 'Cloudy')]], d.weather || ''))}
+        <label class="row b"><span class="lt"><b>${lbl('Geheim', 'Secret')}</b><small>${esc(lbl('Im Planer steht nur „Geheim-Ämtli“ – antippen zeigt es kurz. Bei Geburtstagen bekommt das Geburtstagskind es nie.', 'The planner only shows "Secret job" – tap to reveal briefly. For birthdays the birthday child never gets it.'))}</small></span><input type="checkbox" class="sw" data-sf="secret" ${d.secret ? 'checked' : ''}></label>
+        <div class="acts">${d.id ? `<button class="sg del" data-sdel>${lbl('Löschen', 'Delete')}</button>` : ''}<span class="sp"></span><button class="sg" data-scancel>${lbl('Abbrechen', 'Cancel')}</button><button class="sg ok" data-ssave>${lbl('Speichern', 'Save')}</button></div></div>`;
+    }
+    _sonderInput(el, ds) {
+      const d = this._sEdit; if (!d) return; const k = ds.sf; let v = el.type === 'checkbox' ? el.checked : el.value;
+      if (el.type === 'number') v = el.value === '' ? '' : Number(el.value);
+      if (k.startsWith('anchor.')) { const sub = k.slice(7); d.anchor = { ...(d.anchor || {}) }; if (sub === 't') d.anchor = { t: v }; else if (sub === 'md') d.anchor.md = String(v).slice(5); else d.anchor[sub] = v; if (sub === 't') this._render(); return; }
+      if (k === 'lead') { d.off = -(Number(v) || 0); return; }
+      if (k === 'span') { d.span = Number(v) || 1; d.end_md = null; return; }
+      d[k] = v; if (k === 'size') this._render();
+    }
+    async _sonderClick(t) {
+      const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de);
+      const on = t.closest('[data-son]');
+      if (on && this._sonder) { const d = this._sonder.defs.find((x) => x.id === on.dataset.son); if (d) { d.on = on.checked; const { id, ...data } = d; await this._call('family_planer/sonder/save', { sonder_id: id, data }); } return true; }
+      const ed = t.closest('[data-sedit]'); if (ed && this._sonder) { const d = this._sonder.defs.find((x) => x.id === ed.dataset.sedit); this._sEdit = this._sEdit && this._sEdit.id === d.id ? null : clone(d); this._render(); return true; }
+      if (t.closest('[data-snew]')) { this._sEdit = { id: null, title: '', icon: '⭐', size: 'm', mode: 'free', persons: [], anchor: { t: 'once', d: new Date().toISOString().slice(0, 10) }, off: 0, span: 3, from: '', until: '', season: '', weather: '', secret: false, on: true }; this._render(); return true; }
+      if (t.closest('[data-scancel]')) { this._sEdit = null; this._render(); return true; }
+      const wd = t.closest('[data-swd]'); if (wd && this._sEdit) { const a = this._sEdit.anchor; const n = Number(wd.dataset.swd); a.days = (a.days || []).includes(n) ? a.days.filter((x) => x !== n) : [...(a.days || []), n]; this._render(); return true; }
+      const pp = t.closest('[data-spp]'); if (pp && this._sEdit) { const c = this._sEdit.persons || []; this._sEdit.persons = c.includes(pp.dataset.spp) ? c.filter((x) => x !== pp.dataset.spp) : [...c, pp.dataset.spp]; this._render(); return true; }
+      if (t.closest('[data-ssave]') && this._sEdit) {
+        const { id, ...data } = this._sEdit; if (!String(data.title || '').trim()) { this._flash(lbl('Bitte einen Titel eingeben.', 'Please enter a title.'), true); return true; }
+        const res = await this._call('family_planer/sonder/save', { ...(id ? { sonder_id: id } : {}), data }); if (res) { this._sEdit = null; this._sonder = null; this._flash(this.T.saved); } return true;
+      }
+      if (t.closest('[data-sdel]') && this._sEdit && this._sEdit.id) { const res = await this._call('family_planer/sonder/delete', { sonder_id: this._sEdit.id }); if (res !== null) { this._sEdit = null; this._sonder = null; this._flash(this.T.saved); } return true; }
+      const tp = t.closest('[data-stpl]'); if (tp) { const res = await this._call('family_planer/sonder/template', { template: tp.dataset.stpl }); if (res) { this._sonder = null; this._flash(this.T.saved); } return true; }
+      return false;
     }
     async _savePerson(i) {
       const p = this._persons[i]; const times = {};
@@ -248,14 +389,15 @@
         if (spans.some((s) => s && ((s[0] && !s[1]) || (!s[0] && s[1])))) { this._flash(this.T.errors.bad_times, true); return; }
         if (ok.length) times[day] = ok;
       }
-      const data = { name: p.name, color: p.color, role: p.role === 'adult' ? 'adult' : 'kid', calendar: p.calendar, aliases: p.aliases || [], school: { calendar: p.school.calendar, times, travel: p.school.travel || 0 } };
+      const data = { name: p.name, color: p.color, role: p.role === 'adult' ? 'adult' : 'kid', calendar: p.calendar, aliases: p.aliases || [], school: { calendar: p.school.calendar, times, travel: p.school.travel || 0 },
+        birthday: p.birthday || '', bday_anim: p.bday_anim == null ? null : p.bday_anim };
       const res = await this._call('family_planer/settings/person', { ...(p.id ? { person_id: p.id } : {}), data });
       if (!res) return; p.id = res.person_id; p.open = false; this._flash(res.reload ? this.T.reloading : this.T.saved);
     }
     async _removePerson(i) { const p = this._persons[i]; if (!p.id) { this._persons.splice(i, 1); return; } const res = await this._call('family_planer/settings/person_remove', { person_id: p.id }); if (res) { this._persons.splice(i, 1); this._flash(this.T.reloading); } }
     async _saveList(i) {
       const l = this._lists[i];
-      const res = await this._call('family_planer/settings/list', { ...(l.id ? { list_id: l.id } : {}), data: { name: l.name, entity: l.entity, icon: l.icon, max_categories: l.max_categories, auto: l.auto } });
+      const res = await this._call('family_planer/settings/list', { ...(l.id ? { list_id: l.id } : {}), data: { name: l.name, entity: l.entity, icon: l.icon, max_categories: l.max_categories, auto: l.auto, person_todos: !!l.person_todos } });
       if (res) { l.id = res.list_id; this._flash(this.T.saved); }
     }
     async _removeList(i) { const l = this._lists[i]; if (!l.id) { this._lists.splice(i, 1); return; } const res = await this._call('family_planer/settings/list_remove', { list_id: l.id }); if (res !== null) { this._lists.splice(i, 1); this._flash(this.T.saved); } }
@@ -281,6 +423,16 @@
           return `<div class="nr${off ? ' off' : ''}"><span class="nn">${esc(NAVL[lang][id] || id)}</span><button class="ar" data-navmv="${esc(id)}|-1" ${i ? '' : 'disabled'} aria-label="up">▲</button><button class="ar" data-navmv="${esc(id)}|1" ${i < n.order.length - 1 ? '' : 'disabled'} aria-label="down">▼</button>
             <input type="checkbox" class="sw" data-navtg="${esc(id)}" ${n.hidden.includes(id) ? '' : 'checked'} ${id === 'einstellungen' ? 'disabled' : ''}></div>`; }).join('')}</div></div>`;
       }
+      if (fd.type === 'prio') {
+        const pr = Array.isArray(v) ? v : Object.keys(PRIO);
+        return `<div class="row col1">${head}<div class="navl">${pr.map((id, i) => `<div class="nr"><span class="nn">${i + 1}. ${esc(PRIO[id] ? PRIO[id][lang === 'en' ? 1 : 0] : id)}</span><button class="ar" data-prmv="${esc(id)}|-1" ${i ? '' : 'disabled'} aria-label="up">▲</button><button class="ar" data-prmv="${esc(id)}|1" ${i < pr.length - 1 ? '' : 'disabled'} aria-label="down">▼</button></div>`).join('')}</div></div>`;
+      }
+      if (fd.type === 'events') {
+        const ev = v || {}; const up = (this._data.season_upcoming || []);
+        const when = (k) => { const u = up.find((x) => x.key === k); return u ? u.start.slice(8, 10) + '.' + u.start.slice(5, 7) + '.' : ''; };
+        return `<div class="row col1">${head}<div class="evl">${Object.keys(SEV).map((k) => { const x = ev[k] || {}; const on = x.on !== false;
+          return `<div class="evr${on ? '' : ' off'}"><input type="checkbox" class="sw" data-evon="${k}" ${on ? 'checked' : ''}><span class="nn">${esc(SEV[k][lang === 'en' ? 1 : 0])}</span><small>${esc(when(k))}</small><input class="in n" type="number" min="0" max="30" placeholder="–" data-evld="${k}" value="${x.lead != null ? esc(x.lead) : ''}"></div>`; }).join('')}</div></div>`;
+      }
       if (fd.type === 'awards') {
         const it = (v && v.items) || {}; const pts = this._snap().award_points || {};
         return `<div class="row col1">${head}<div class="awl">${Object.keys(AWN.de).map((id) => { const x = it[id] || { on: true, size: 's' };
@@ -293,6 +445,7 @@
       if (fd.type === 'num') ctl = `<span class="nw"><input class="in n" type="number" inputmode="${fd.step && fd.step < 1 ? 'decimal' : 'numeric'}" min="${fd.min}" max="${fd.max}" step="${fd.step || 1}" ${a} value="${esc(v)}">${unit}</span>`;
       else if (fd.type === 'md') ctl = `<input class="in" style="width:170px" type="date" ${a} value="${esc(new Date().getFullYear() + '-' + String(v || '08-01'))}">`;
       else if (fd.type === 'time') ctl = `<input class="in t" type="time" ${a} value="${esc(String(v || '').slice(0, 5))}">`;
+      else if (fd.type === 'date') ctl = `<input class="in" style="width:170px" type="date" ${a} value="${esc(/^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : '')}">`;
       else if (fd.type === 'text') ctl = `<input class="in" maxlength="${fd.max || 80}" ${a} value="${esc(v)}">`;
       else if (fd.type === 'words') ctl = `<input class="in" maxlength="600" ${a} value="${esc(Array.isArray(v) ? v.join(', ') : v)}">`;
       else if (fd.type === 'select') ctl = `<select class="in" ${a}>${fd.opts.map(([k, l]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${esc(typeof l === 'string' ? l : L(l, lang))}</option>`).join('')}</select>`;
@@ -323,6 +476,8 @@
             <div class="row"><span class="lt"><b>${lbl('Rolle', 'Role')}</b><small>${lbl('Kinder stehen oben im Planer und zählen für die Prognosen. Erwachsene können trotzdem Ämtli und Pokale haben.', 'Children are listed first in the planner and count for the forecasts. Adults can still have chores and trophies.')}</small></span><span class="ctl"><select class="in" data-pk="role" data-pi="${i}"><option value="kid" ${p.role !== 'adult' ? 'selected' : ''}>${lbl('Kind', 'Child')}</option><option value="adult" ${p.role === 'adult' ? 'selected' : ''}>${lbl('Erwachsen', 'Adult')}</option></select></span></div>
             <div class="row"><span class="lt"><b>${lbl('Farbe', 'Colour')}</b><small>${lbl('Gilt auch für den Kalender der Person.', 'Also used for the person\'s calendar.')}</small></span><span class="ctl"><input class="col" type="color" data-pk="color" data-pi="${i}" value="${esc(COLOR(p.color))}"></span></div>
             <div class="row"><span class="lt"><b>${lbl('Kalender', 'Calendar')}</b><small>${lbl('Termine dieser Person.', 'Events of this person.')}</small></span><span class="ctl">${this._entSelect(`data-pk="calendar" data-pi="${i}"`, 'calendar', null, p.calendar)}</span></div>
+            <div class="row"><span class="lt"><b>${lbl('Geburtstag', 'Birthday')}</b><small>${lbl('Am Geburtstag feiert der Planer: eigene Saison, animierte Zeile, doppelte Punkte. Das Jahr ist freiwillig (für „wird 10“).', 'On the birthday the planner celebrates: own season, animated row, double points. The year is optional (for "turns 10").')}</small></span><span class="ctl"><input class="in" style="width:170px" type="date" data-pk="birthday" data-pi="${i}" value="${esc(/^\d{4}-\d{2}-\d{2}$/.test(p.birthday || '') ? p.birthday : (p.birthday ? '2000-' + p.birthday : ''))}"></span></div>
+            <div class="row"><span class="lt"><b>${lbl('Geburtstags-Animation', 'Birthday animation')}</b><small>${lbl('Automatisch = jedes Jahr eine andere, und bei allen verschieden.', 'Automatic = a different one every year, and different for everybody.')}</small></span><span class="ctl"><select class="in" data-pk="bday_anim" data-pi="${i}"><option value="">${lbl('Automatisch', 'Automatic')}</option>${BDA.map((b, n) => `<option value="${n}" ${p.bday_anim === n ? 'selected' : ''}>${esc(b[lang === 'en' ? 1 : 0])}</option>`).join('')}</select></span></div>
             <div class="row"><span class="lt"><b>${lbl('Spitznamen', 'Nicknames')}</b><small>${lbl('Mit Komma getrennt – Termine mit diesem Namen erscheinen bei der Person.', 'Comma separated – events with this name appear at the person.')}</small></span><span class="ctl"><input class="in" maxlength="300" data-pk="aliases" data-pi="${i}" value="${esc((p.aliases || []).join(', '))}"></span></div>
             <div class="sec2">${lbl('Schule & Stundenplan', 'School & timetable')}</div>
             <div class="row"><span class="lt"><b>${lbl('Schulkalender', 'School calendar')}</b><small>${lbl('Kalender mit den Lektionen – hat Vorrang vor festen Zeiten.', 'Calendar with the lessons – takes priority over fixed times.')}</small></span><span class="ctl">${this._entSelect(`data-pk="school_calendar" data-pi="${i}"`, 'calendar', null, p.school && p.school.calendar)}</span></div>
@@ -340,6 +495,7 @@
           <input class="in" maxlength="70" placeholder="mdi:cart-outline" data-lk="icon" data-li="${i}" value="${esc(l.icon)}">
           <label class="mini">${lbl('Max. Kategorien', 'Max. categories')} <input class="in n" type="number" min="5" max="20" data-lk="max_categories" data-li="${i}" value="${esc(l.max_categories)}"></label>
           <label class="mini"><input type="checkbox" class="sw" data-lk="auto" data-li="${i}" ${l.auto ? 'checked' : ''}> ${lbl('Kategorien automatisch pflegen', 'Maintain categories automatically')}</label>
+          <label class="mini" title="${esc(lbl('„Lea Zimmer aufräumen gross“ wird ein To-do für Lea (Grösse am Schluss: klein, mittel, gross). Abhaken geht in beide Richtungen.', '"Lea tidy room large" becomes a to-do for Lea (size at the end: small, medium, large). Ticking off works both ways.'))}"><input type="checkbox" class="sw" data-lk="person_todos" data-li="${i}" ${l.person_todos ? 'checked' : ''}> ${lbl('Namen → To-do der Person', 'Names → to-do of the person')}</label>
           <span class="acts"><button class="sg del" data-ldel="${i}">${esc(T.del)}</button><button class="sg ok" data-lsave="${i}">${esc(T.save)}</button></span></div>`).join('')}
         <button class="addb" data-ladd>${esc(T.newList)}</button>`;
     }
@@ -402,6 +558,10 @@
         .upl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}.upl label{display:inline-flex;align-items:center}.upl small{font-size:12px;color:#8a8a8a}
         .tb.pin{color:${G};border-color:${G}}
         .hint3{font-size:13px;color:#999;margin:0 2px 10px;max-width:980px}
+        .evl{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px;margin-top:8px}.evr{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;background:#232323;border:1px solid #2a2a2a}.evr .nn{flex:1;font-size:13px}.evr small{color:#8a8a8a;font-size:11px}.evr .in.n{width:58px}.evr.off{opacity:.55}
+        .sdl{display:flex;flex-direction:column;gap:6px;max-width:980px;margin-top:10px}.sdr{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:#232323;border:1px solid #2a2a2a}.sdr.off{opacity:.6}
+        .sdr .si{font-size:22px}.sdr .st{flex:1;min-width:0}.sdr .st b{display:block;font-size:14px;font-weight:500}.sdr .st small{display:block;font-size:12px;color:#8a8a8a;margin-top:2px}
+        .sform{padding:10px 12px;border-radius:12px;border:1px solid #3a3a3a;background:#1e1e1e;max-width:980px}
         .vch{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.vch .chip{height:30px;font-size:12px}.vbt{display:flex;gap:6px;flex-wrap:wrap}
         .vrl,.stl{display:flex;flex-direction:column;gap:8px;max-width:980px;margin-bottom:8px}.vr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:#232323;border:1px solid #2a2a2a}.vr .lt{flex:1;min-width:200px}
         .str{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:#232323;border:1px solid #2a2a2a}.str ha-icon{color:${G}}.str.bad{border-color:#E06B6B}.str.bad ha-icon{color:#E06B6B}
@@ -419,6 +579,7 @@
       else if (tab.id === 'persons') body = this._personsTab();
       else if (tab.id === 'chores') body = `<div class="hint3">${esc(lang === 'en' ? 'Tap a day to assign a chore. Special chores and to-dos: buttons at the top of the chore plan.' : 'Tag antippen, um ein Ämtli zuzuteilen. Besondere Ämtli und To-dos: Knöpfe oben im Ämtliplan.')}</div><div class="planhost"></div>`;
       else if (tab.id === 'status') body = this._statusTab();
+      else if (tab.id === 'sonder') { const f = this._forms.sonder; body = `<div class="rows">${tab.fields.map((fd) => this._field('sonder', fd, f[fd.k])).join('')}</div><div class="bar"><button class="sg ok" data-savetab>${esc(T.save)}</button></div>` + this._sonderTab(); }
       else {
         const f = this._forms[tab.id];
         body = `<div class="rows">${tab.fields.map((fd) => this._field(tab.id, fd, f[fd.k])).join('')}</div><div class="bar"><button class="sg ok" data-savetab>${esc(T.save)}</button></div>`;
@@ -428,7 +589,7 @@
       const d = this._dlg;
       const dlg = d ? `<div class="ov"><div class="dlg"><div class="dh">${esc(T.delAsk.replace('{t}', d.title || ''))}</div><div class="acts"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg del" data-yes>${esc(T.del)}</button></div></div></div>` : '';
       const mods = this._data.general.modules;
-      const tabs = ORDER.map((id) => TABS.find((x) => x.id === id)).filter((x) => x && !((x.id === 'lists' && !mods.lists) || (['persons', 'chores', 'vacation', 'points', 'todos', 'announce'].includes(x.id) && !mods.week)));
+      const tabs = ORDER.map((id) => TABS.find((x) => x.id === id)).filter((x) => x && !((x.id === 'lists' && !mods.lists) || (['persons', 'chores', 'vacation', 'points', 'todos', 'announce', 'seasons', 'sonder'].includes(x.id) && !mods.week)));
       this.shadowRoot.innerHTML = `${style}<div class="card">
         <div class="top"><h2>${esc(T.title)}</h2><button class="tb" data-chpin><ha-icon icon="mdi:form-textbox-password"></ha-icon>${esc(T.pin)}</button><button class="tb" data-lock><ha-icon icon="mdi:lock-outline"></ha-icon>${esc(T.lock)}</button></div>
         <div class="tabs">${tabs.map((x) => `<button class="tab${x.id === tab.id ? ' on' : ''}" data-tabsel="${x.id}"><ha-icon icon="${x.icon}"></ha-icon>${esc(L(x.label, lang))}</button>`).join('')}</div>
@@ -447,6 +608,11 @@
       if (img.startsWith('av2:')) return img;
       if (img.startsWith('av:')) return A.from1(img);
       return A.code({ ...A.parse(''), fig: p.role === 'adult' ? 'f' : 'm' });
+    }
+    async _avSeason(p, sel) {
+      p.season_av = sel; this._render();
+      try { await this._store.ws('family_planer/person/update', { person_id: p.id, season_av: sel }); }
+      catch (er) { this._flash(this._errText(er), true); }
     }
     async _avSave(p, code) {
       this._avLocal = { ...(this._avLocal || {}), [p.id]: code }; this._render();
@@ -474,7 +640,7 @@
         return FX.avatarHtml ? FX.avatarHtml({ name: q.name, farbe: COLOR(q.color), ...(/^(av2?:|svg:|img:)/.test(img) ? { bild: img } : {}) }, size) : ''; };
       return `<div class="hint3">${esc(lbl('Jede und jeder darf hier ein Bild zusammenstellen – ohne PIN. Alles andere öffnet die Eltern-PIN oben rechts.', 'Anyone may build a picture here – no PIN needed. Everything else opens with the parent PIN at the top right.'))}</div>
         <div class="avps">${ps.map((q) => `<button class="avpb${q.id === p.id ? ' on' : ''}" style="--c:${COLOR(q.color)}" data-avp="${esc(q.id)}">${pic(q, 40)}<span>${esc(q.name)}</span></button>`).join('')}</div>
-        <div class="avwrap">${A.builder(this._avCode(p), COLOR(p.color), lang, this._avtab, ((s.points || {})[p.id] || {}).unlocked || [])}</div>
+        <div class="avwrap">${A.builder(this._avCode(p), COLOR(p.color), lang, this._avtab, ((s.points || {})[p.id] || {}).unlocked || [], { name: p.name, vis: this._avsv })}</div>
         <div class="upl"><label class="sg">${esc(lbl('Eigenes Foto hochladen', 'Upload own photo'))}<input type="file" accept="image/*" data-avup hidden></label><small>${esc(lbl('Wird quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.', 'Cropped to a square and stored only in your Home Assistant.'))}</small></div>`;
     }
     _vacChoice(key) {
