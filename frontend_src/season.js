@@ -338,7 +338,7 @@
       svg += '<g transform="translate(470 102)"><path d="M0 0 L0 -34 M0 -20 L-18 -38 M0 -26 L16 -44" stroke="#7A5233" stroke-width="6" stroke-linecap="round"/><g class="sw" style="transform-origin:0 -30px">';
       for (let i = 0; i < 26; i++) svg += `<circle cx="${(r() - 0.5) * 60}" cy="${-34 - r() * 30}" r="${3 + r() * 4}" fill="${r() > 0.3 ? '#ffc4dc' : '#ffe6f0'}"/>`;
       svg += '</g></g>';
-      for (let i = 0; i < 9; i++) { const x = 560 + i * 26; svg += `<path d="M${x} 104 v-14" stroke="#3f8f3a" stroke-width="2"/><path d="M${x - 5} 92 q5 -10 10 0 q-5 4 -10 0z" fill="${['#FF5A7A', '#FFD84D', '#FF8A3C', '#C77DFF'][i % 4]}"/>`; }
+      for (let i = 0; i < 9; i++) { const x = hasHouse ? (i < 4 ? CX - 140 + i * 13 : CX + 70 + (i - 4) * 13) : 560 + i * 26; svg += `<path d="M${x} 104 v-14" stroke="#3f8f3a" stroke-width="2"/><path d="M${x - 5} 92 q5 -10 10 0 q-5 4 -10 0z" fill="${['#FF5A7A', '#FFD84D', '#FF8A3C', '#C77DFF'][i % 4]}"/>`; }
       for (let i = 0; i < 3; i++) svg += `<g class="fly" style="animation-duration:${(26 + r() * 14).toFixed(0)}s;animation-delay:-${(r() * 20).toFixed(0)}s"><path d="M0 ${24 + i * 9} q5 -5 10 0 q5 -5 10 0" stroke="#33415c" stroke-width="2" fill="none"/></g>`;
       if (vis === 'ostern') { svg += emo(380, 104, '🐰', 24, 'bob'); for (let i = 0; i < 6; i++) svg += `<ellipse cx="${200 + i * 140 + r() * 40}" cy="${104 + r() * 6}" rx="6" ry="8" fill="${['#FF7AB6', '#FFD84D', '#5CE1E6', '#9EDC9E', '#B07CFF', '#FF8A3C'][i]}"/>`; }
       if (s.key === 'muttertag') { svg += emo(380, 106, '💐', 24); P.push(['hearts', 8]); svg += banner(lang === 'en' ? 'Thank you, Mum!' : 'Danke, Mami!', '#FF6B9B', BX); }
