@@ -383,6 +383,114 @@ Aufbau von oben nach unten, mit grosser Live-Vorschau links (auf dem Handy oben)
 - README (EN/DE) gesammelt nachführen: Levels, Freischaltungen, Planer-Ansicht „To-dos & Spezial“, Bilder ohne PIN, Ferien-Check v2
 - Release-Checkliste unten an die sparsame Arbeitsweise anpassen (README nur alle paar Releases)
 
+> **15.11.: Grosses Konzept „Saisons, Wetter & Avatare“ (Ideen 29–40).** Entwurf mit Bildern liegt beim Maintainer. Status aller Punkte: 💡 Idee – Code erst nach „mach es“. Beispielnamen: Lea, Mia, Nina, Sarah, Tom.
+
+### 29. Wetter-Szene oben in der Navigation
+**Status:** 💡 Idee
+
+- Die oberste Leiste bekommt eine **animierte Szene** hinter Uhr, Navigation und Knöpfen (ohne Event: ein Haus mit Garten).
+- Das Wetter aus einer **HA-Wetter-Entität** läuft dort immer als Animation: Sonne, teilweise bewölkt (mit Regenbogen), bewölkt, Regen, Starkregen, Gewitter (Blitz), Schnee, Nebel, Sturm, klare Nacht (Mond, Sterne).
+- Klein oben rechts: Wetter-Symbol, Temperatur, Text.
+- Das Haus ändert sich mit der **Jahreszeit**: Frühling Blüten, Sommer sattes Grün, Herbst orange Bäume und fallendes Laub, Winter kahle Bäume und Schnee.
+- Wind bewegt Bäume, Wolken und Kaminrauch; Sturm-Schwelle einstellbar (Standard 50 km/h).
+
+**Einstellungen:** Wetter-Entität, Sturm ab, Effekt-Stärke (dezent/normal/viel), „Bewegung reduzieren“ = keine Partikel.
+
+### 30. Saisons, Feiertage, Bräuche und Ferien als Design-Schicht
+**Status:** 💡 Idee
+
+- Jede Saison ist eine **Schicht über dem gewählten Design** (Standard, Hell, Dunkel, Regenbogen, Weltall × Standard/Transparent/Glas): eigene Kopfzeilen-Szene, eigener Seitenhintergrund (wie Regenbogen), Band oben, Planer-Details (z. B. Schnee auf Kacheln, Eiszapfen-Rand), eigener Häkchen-Effekt.
+- **Kein Halloween, kein Räbeliechtli, kein Martinstag.**
+- **Aktivierung (Standard):** eintägige Feiertage und Bräuche 3 Tage vorher; Ferien 3 Tage vor dem ersten Ferientag; lange Saisons mit festem Start (Weihnachten ab 1. Advent, Winter ab 7.1., Frühling ab 20.3., Sommer ab 21.6., Herbst ab 23.9.).
+- **Priorität bei Überschneidungen:** Geburtstag (nur Person) → Jahrestag → Feiertag → Ferien → lange Saison; per Ziehen änderbar.
+- **Untersaisons** ändern Details: 1.–4. Advent (Kerzen zünden sich an), Samichlaus, Heiligabend, Dreikönig, Fasnacht, Ostern, 1. August (Fahnen, ab 21 Uhr Höhenfeuer, 22 Uhr Feuerwerk) usw.
+- **Weihnachten: es schneit immer** in der Kopfzeile; echtes Wetter klein oben rechts.
+- **Wildheit pro Saison** (ruhig bis wild, z. B. Silvester wild), global dämpfbar.
+- Ferien kommen aus dem Kalender (Titel wie „Sportferien“, „Frühlingsferien“, „Pfingstferien“, „Sommerferien“, „Herbstferien“, „Weihnachtsferien“, auch mit Emoji). Familienferien und Ämtli-Pause bleiben wie bisher **von Hand im Ferien-Check**.
+- Feiertage aus der HA-Integration „Holiday“ (Kanton wählbar) statt fest im Code.
+
+**Liste:** Ferien (6) · Feiertage: Neujahr, Berchtoldstag, Karfreitag, Ostermontag, Tag der Arbeit, Auffahrt, Pfingstmontag, 1. August, Weihnachtstag, Stephanstag · Bräuche: Dreikönigstag, Valentinstag, Fasnacht, Frühlingsanfang, Ostersonntag, Muttertag, Pfingstsonntag, Vatertag, Sommeranfang, Schulanfang, Bettag, Herbstanfang, Erntedank, 1.–4. Advent, Samichlaus, Winteranfang, Heiligabend, Silvester · Lange Saisons: Weihnachten, Winter, Frühling, Sommer, Herbst · Persönlich: Geburtstage, Hochzeitstag, Kennenlerntag, eigene Familien-Events.
+
+**Szenen (Auswahl):** Winterdorf mit Adventskranz · Silvester-Feuerwerk · Dreikönige mit Stern · Fasnacht als Konfetti-Bild mit Masken · Frühling mit Kirschbaum, Tulpen, Vögeln (Eier nur an Ostern) · Vatertag: Garten mit Hängematte, Papierflieger, „Danke, Papi!“ · Sommerferien am Strand (Palme, Wellen, Wasserball, Krebs, Möwen) · 1. August rot-weiss · Herbst mit Laub und Drachen.
+
+### 31. Avatar-Extras und Avatar-Effekte pro Saison
+**Status:** 💡 Idee
+
+- Neues Register **„Saison“** im Avatar-Baukasten (ohne PIN): pro Event ein Kopf-Extra und eine Aura oder ein Begleiter. Kinder wählen selbst; die Wahl bleibt fürs nächste Jahr.
+- **86 Saison-Extras** (5–10 pro Saison, gut die Hälfte animiert wie die Level-Effekte), z. B. Zipfelmütze mit wippendem Bommel, Rentier mit Blinknase, Hasenohren, Schweizerfahne, Strohhut, Skibrille, Partyhut, Superpapi-Umhang.
+- **57 Saison-Effekte** (3–4 pro Saison) als Aura wie bei den Levels, z. B. Goldsterne-Kranz, Schneegestöber, Blütenregen, Sonnenkranz, Schweizerkreuz-Kranz, Blätterwirbel, Herz-Kranz.
+- Extras und Effekte sind eine **eigene Ebene**: nach dem Event ist automatisch wieder der normale Avatar da.
+- Begleiter müssen gut sichtbar im runden Bild sitzen (Test über alle Kombinationen erweitern).
+
+### 32. Geburtstag als eigene Saison
+**Status:** 💡 Idee
+
+- Geburtsdatum pro Person in den Einstellungen.
+- Am Geburtstag: Wimpelgirlande, Ballone und Banner „Happy Birthday“ in der Kopfzeile; die Zeile des Geburtstagskinds ist voll animiert.
+- **5 Animationen**, eine pro Geburtstag den ganzen Tag, jede Person eine andere, wechselt jedes Jahr: Konfetti-Kanone, Ballon-Fahrt, Seifenblasen, Regenbogen-Disco, Sternenregen. Die Animation kommt **aus der Mitte hinter der Person**.
+- Alle Punkte des Geburtstagskinds zählen **doppelt**.
+
+### 33. Hochzeitstag und Kennenlerntag
+**Status:** 💡 Idee
+
+- Zwei Datumsfelder in den Einstellungen; eigene Paar-Saison mit Herzen, Extras für beide Erwachsenen, Anzeige „X Jahre verheiratet / zusammen“.
+
+### 34. Vorschläge unter dem Wetter
+**Status:** 💡 Idee
+
+- Kleiner animierter Vorschlag oben rechts, **ab 12:00**, höchstens einer pro Tag, jeden Tag ein anderer.
+- Gewählt (26): Pool Badi-Wetter, Pool-Abendschwumm, Pool-Party, Jacuzzi am Abend (Okt–Apr, Abend trocken, Erwachsene ohne Abendtermin), Jacuzzi unter Sternen, Jacuzzi im Schnee, Eltern-Jacuzzi (ab 21 Uhr, nur Erwachsene), Homecinema, Spieleabend, Backen (nur Weihnachts-Saison), Basteln, Puzzle (höchstens alle 14 Tage), Lego-Challenge, Fotoalbum (höchstens alle 14 Tage), Grillabend, Velotour, Spaziergang (oft, auch abends), Pergola-Znacht (Sommer/warm), Schlitteln, Heisse Schoggi, Adventsfenster, Ostereier suchen, Badi am See, Glace (tagsüber Sommer), Familien-Teamwork-Belohnung, Ruhiger Abend.
+
+**Einstellungen:** ab Uhrzeit, Pool- und Jacuzzi-Sensor (Wassertemperatur) mit Schwelle, jeder Vorschlag ein/aus mit Bedingung und Häufigkeit. Sensoren werden ausgewählt, nie fest im Code.
+
+### 35. Neue Ansicht „Heute“
+**Status:** 💡 Idee
+
+- Nur der aktuelle Tag, **Personen nebeneinander** (links nach rechts): Schule, Termine mit Jetzt-Linie, Ämtli (offene zuerst), To-dos. ‹ › für gestern/morgen, Filter.
+- Einstellung **Standard-Ansicht** (Heute = Standard, oder Woche): erscheint beim Zurückkommen aus einem Menü (z. B. Avatar) und nach der Ruhezeit.
+
+### 36. Viele To-dos: nur die 4 ältesten
+**Status:** 💡 Idee
+
+- Pro Person höchstens 4 To-dos (die ältesten), Rest als „+3 weitere“; jedes To-do zeigt, seit wann es offen ist. Anzahl einstellbar.
+
+### 37. Alexa-To-dos bei der richtigen Person
+**Status:** 💡 Idee
+
+- Steht ein Name oder Spitzname (aus Personen) im Alexa-To-do, erscheint es bei dieser Person zum Abhaken; Punkte nach Grösse wie manuelle To-dos. „gross“/„klein“ am Ende setzt die Grösse. Abhaken wird mit Alexa abgeglichen. Mehrere Namen → je ein To-do.
+
+### 38. Ansagen ohne Bewegungsmelder
+**Status:** 💡 Idee
+
+- Solange kein Bewegungsmelder eingetragen ist: feste Ansagen um **12:30** und **18:30**, um **20:00** was heute noch offen ist (max. 3 pro Person).
+- Ab und zu ein **Lob** (höchstens 1× pro Tag): 100 %, Serien, Pokale, fast erreichte Belohnung.
+- **Geburtstag:** 5 lustige Sonderansagen über den Tag verteilt, an das Geburtstagskind gerichtet, aus einem Pool, nie zweimal am selben Tag.
+- Keine Ansagen, wenn im Ferien-Check „weg“ bestätigt ist.
+
+### 39. Sonderämtli: freiwillig, Überraschung, Katalog
+**Status:** 💡 Idee
+
+- Neue Kachel **„Freiwillig“** neben den Personen, nur sichtbar, wenn etwas offen ist. Wer zuerst „Ich nehm's!“ tippt und sich auswählt, bekommt es in den eigenen Plan.
+- Vergabe: freiwillig (wer zuerst) · jedes Kind · Überraschung (Zufall, Standard 2 pro Kind und Woche) · fix für eine Person.
+- Erfassen (Eltern-PIN): Titel, Punkte, einmalig oder wiederkehrend (täglich, Wochentage, alle X Tage, jährlich), **Vorlauf** und **Frist** (oft inkl. Samstag), sichtbar immer / in einer Saison / bei Wetter, für wen, **geheim** (die gefeierte Person sieht nur „Geheim-Ämtli“).
+- Wiederkehrende erscheinen jedes Mal wieder bei „Freiwillig“.
+- **Nur Bonuspunkte:** nicht erledigt oder abgelaufen verschlechtert die Zuverlässigkeit (%) nie. Keine Sonderämtli mit dem Geschirrspüler.
+- **Katalog mit 56 Vorlagen**, saisonal automatisch angeboten, z. B. Socken-Detektiv, Witz des Tages, Weihnachtslied vorsingen, Christbaumkugeln (jedes Kind, ab 10.12. bis 24.12.), Samichlaus-Versli, Maske basteln, Eier färben, Frühstück ans Bett (geheim), Laubhaufen rechen (ab Di, 5 Tage inkl. Samstag), Geburtstagskarte (3 Tage vorher, geheim).
+
+### 40. Einstellungen dazu (alles hinter der Eltern-PIN)
+**Status:** 💡 Idee
+
+- Register **„Saisons & Wetter“**: Saisons an/aus, Vorlauf-Regeln, pro Event an/aus, Vorlauf, Priorität, Extras; Wetter-Entität; „Weihnachten immer Schnee“; Sturm ab; Wildheit; Vorschläge.
+- **Personen:** Geburtstag + Animation (automatisch wechselnd oder fest); Hochzeitstag; Kennenlerntag.
+- **Allgemein:** Standard-Ansicht, To-dos pro Person.
+- **Ansagen:** feste Zeiten, Tagesabschluss 20:00, Lob, Geburtstags-Sonderansagen.
+- **Sonderämtli:** Überraschungen pro Woche, Saison-Vorlagen, Kachel nur wenn offen.
+- Jede Einstellung mit Beschreibung auf Deutsch und Englisch.
+
+**Offene Fragen:**
+- Reihenfolge der Umsetzung (Vorschlag: 29 Wetter-Szene → 35 Heute → 30 Saisons → 31/32 Avatare & Geburtstag → 39 Sonderämtli → 34/38/37/36).
+- Zweite Wetter-Entität für den Ferienort (Skiferien)?
+
 ---
 
 ## Release-Checkliste (bei jedem Update)
