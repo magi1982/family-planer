@@ -520,3 +520,7 @@ Aufbau von oben nach unten, mit grosser Live-Vorschau links (auf dem Handy oben)
 - [ ] CHANGELOG-Eintrag auf Englisch (`## x.y.z – Datum`); Version in `const.py` und `manifest.json` erhöht
 - [ ] **Vor dem Release fragen** – erst nach Freigabe Version erhöhen und hochladen
 - [ ] Release entsteht automatisch (`release.yml`), sobald Validate und Security grün sind – Text aus dem CHANGELOG
+
+### 41. Eigenes Haus in der Kopfszene
+Einstellung unter *Saisons & Wetter*: „Standard-Haus“ oder „Haus mit Pool & Pergola“. Entwurf freigegeben (2D, im Stil der Landschaft): zweistöckiges, hohes Haus mit Giebel zur Gartenseite, roter Dachrand, Kamin; oben zwei gleich grosse Fenster, unten drei bodenebene Fenster; schlichte Pergola (Dach, zwei Pfosten, Tisch); Garage direkt links angebaut mit Flachdach und Milchglas-Geländer; Strohschirm; Pool vorne im Süden. Passt sich an: Schnee auf Dach/Geländer/Pergola, Poolabdeckung im Winter, Fenster und Pergola-Licht am Abend, Lichterkette im Advent, **Eiszapfen unter −5°**. Adventskranz auf die Wiese neben das Haus.
+**Status:** 💡 Idee – Entwurf freigegeben
