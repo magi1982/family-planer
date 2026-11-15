@@ -94,9 +94,20 @@ CATALOGUE = [
     ("bdayplakat", "🌈", "Kompliment-Plakat für das Geburtstagskind", "Compliment poster for the birthday child", "m", {"t": "bday"}, -3, 4, {"secret": True}),
     ("ballone", "🎈", "Ballone aufblasen", "Blow up the balloons", "m", {"t": "bday"}, -1, 2, {"from": "12:00", "until": "07:00", "secret": True}),
     ("bdaytisch", "🎁", "Geburtstagstisch dekorieren", "Decorate the birthday table", "m", {"t": "bday"}, -1, 1, {"from": "12:00", "until": "21:00", "secret": True}),
-    ("wegznacht", "🍝", "Beim Znacht helfen – heute ist jemand weg", "Help with dinner – someone is away today", "m", {"t": "daily"}, 0, 1, {"from": "12:00", "until": "19:00", "away": ["any"]}),
-    ("wegbild", "💌", "Ein Bild oder Briefli malen für wer gerade weg ist", "Draw a picture or write a note for whoever is away", "s", {"t": "daily"}, 0, 1, {"away": ["any"]}),
-    ("wegabend", "🛋️", "Einen gemütlichen Abend für wer daheim ist vorbereiten", "Prepare a cosy evening for whoever is at home", "m", {"t": "daily"}, 0, 1, {"from": "15:00", "until": "20:00", "away": ["any"], "secret": True}),
+    # while a parent is away (switched off – switch on and pick under "Only while away" who is away)
+    ("wegznacht", "🍝", "Beim Znacht helfen – heute ist jemand weg", "Help with dinner – someone is away today", "m", {"t": "daily"}, 0, 1, {"from": "12:00", "until": "19:00", "away": ["any"], "on": False}),
+    ("wegbild", "💌", "Ein Bild oder Briefli malen für wer gerade weg ist", "Draw a picture or write a note for whoever is away", "s", {"t": "daily"}, 0, 1, {"away": ["any"], "on": False}),
+    ("wegabend", "🛋️", "Einen gemütlichen Abend für wer daheim ist vorbereiten", "Prepare a cosy evening for whoever is at home", "m", {"t": "daily"}, 0, 1, {"from": "15:00", "until": "20:00", "away": ["any"], "secret": True, "on": False}),
+    ("wegkochen", "🍳", "Abendessen machen (mit Mama)", "Make dinner (with Mum)", "l", {"t": "daily"}, 0, 1, {"from": "15:00", "until": "19:30", "away": ["any"], "on": False}),
+    ("wegaufraeumen", "🧹", "Im Haus aufräumen", "Tidy up the house", "m", {"t": "daily"}, 0, 1, {"until": "19:00", "away": ["any"], "on": False}),
+    ("wegwaesche", "👕", "Mama bei der Wäsche helfen", "Help Mum with the laundry", "m", {"t": "daily"}, 0, 1, {"until": "20:00", "away": ["any"], "on": False}),
+    ("wegwc", "🚽", "Gäste-WC putzen", "Clean the guest toilet", "m", {"t": "daily"}, 0, 1, {"until": "19:00", "away": ["any"], "on": False}),
+    ("weghelfen", "🙋", "Mama fragen, wie du helfen kannst", "Ask Mum how you can help", "s", {"t": "daily"}, 0, 1, {"until": "20:00", "away": ["any"], "mode": "each", "on": False}),
+    ("wegbett", "🌙", "Mama ins Bett bringen", "Tuck Mum into bed", "s", {"t": "daily"}, 0, 1, {"from": "19:00", "until": "22:00", "away": ["any"], "on": False}),
+    ("wegtee", "☕", "Mama fragen, ob sie einen Tee oder Kaffee möchte", "Ask Mum if she would like a tea or coffee", "s", {"t": "daily"}, 0, 1, {"from": "14:00", "until": "21:00", "away": ["any"], "on": False}),
+    ("weglieb", "💗", "Den ganzen Tag lieb sein mit Mama", "Be kind to Mum all day", "m", {"t": "daily"}, 0, 1, {"until": "21:00", "away": ["any"], "mode": "each", "on": False}),
+    ("wegkompliment", "🌟", "Mama ein Kompliment machen", "Pay Mum a compliment", "s", {"t": "daily"}, 0, 1, {"until": "21:00", "away": ["any"], "mode": "each", "on": False}),
+    ("weggutmachen", "👏", "Mama etwas sagen, das sie gut macht", "Tell Mum something she does well", "s", {"t": "daily"}, 0, 1, {"until": "21:00", "away": ["any"], "mode": "each", "on": False}),
     ("bdaylied", "🎵", "Geburtstagslied am Morgen singen", "Sing happy birthday in the morning", "s", {"t": "bday"}, -1, 2, {"until": "09:00", "secret": True}),
 ]
 TEMPLATES = {t[0]: t for t in CATALOGUE}

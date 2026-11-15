@@ -3,7 +3,7 @@
 ## 0.13.0 – 2026-11-15
 
 ### New
-- **Special chores while a grown-up is away**: a special chore can be limited to days when a chosen grown-up (or any grown-up) is away – e.g. "make Mum a cosy evening" while Dad is on a trip. Away uses the same detection as pausing chores: holiday or absence in the calendar, or confirmed in the holiday check. Whoever is away never gets the chore. New templates: help with dinner, a picture or note for whoever is away, a secret cosy evening for whoever is at home.
+- **Special chores while a grown-up is away**: a special chore can be limited to days when a chosen grown-up (or any grown-up) is away – e.g. "make Mum a cosy evening" while Dad is on a trip. Away uses the same detection as pausing chores: holiday or absence in the calendar, or confirmed in the holiday check. Whoever is away never gets the chore. 13 new templates for these days, all switched off so you create your own from them – switch one on, pick under *Only while away* who is away and adjust the text: help with dinner, a picture or note for whoever is away, a secret cosy evening, make dinner, tidy up the house, help with the laundry, clean the guest toilet, ask Mum how to help, tuck Mum into bed, offer her a tea or coffee, be kind all day, pay her a compliment, tell her something she does well.
 - **Needs a grown-up**: chores like lighting the Advent candles or shovelling snow with a grown-up no longer appear while every grown-up is away.
 
 ## 0.12.1 – 2026-11-15

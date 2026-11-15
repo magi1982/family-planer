@@ -125,7 +125,8 @@ def test_only_while_a_grown_up_is_away():
     assert SO.desired({"x": df}, persons, today, ctx(today)) == {}
     w = SO.desired({"x": df}, persons, today, ctx(today, away={"d"}))
     assert list(w.values())[0]["elig"] == ["a", "b"]
-    anyone = SO.from_template("wegznacht")
+    anyone = {**SO.from_template("wegznacht"), "on": True}
+    assert SO.from_template("wegznacht")["on"] is False  # templates for away days start switched off
     assert SO.desired({"y": anyone}, persons, today, ctx(today, away={"c"}))
     assert SO.desired({"y": anyone}, persons, today, ctx(today, away={"a"})) == {}  # a child away is not enough
 
