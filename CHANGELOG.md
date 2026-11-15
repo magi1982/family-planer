@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Secret special chores:** revealing the title is now a separate eye button on the right (avatar-builder style, no wiggle). Before, the small "tap to reveal" label sat inside the chore button, so tapping it often ticked the chore off.
+- **No more "already defined" error** after an update when the old and the new card bundle are both loaded (e.g. iOS app cache).
+
 ## 0.13.1 – 2026-11-15
 
 ### Fixed

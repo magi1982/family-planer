@@ -945,11 +945,11 @@ const SOON_T = ['in {n} Min', 'in {n} Std'];
 const FPL = 'de';
 const TX = {
   de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: '👀 Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
+    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
-    secret: '🤫 Secret job', reveal: '👀 Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
+    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
@@ -1179,6 +1179,8 @@ const daysLabel = (t) => {
   return (t || []).length ? [...t].sort((a, b) => a - b).map((d) => WD[d - 1]).join(', ') : 'Nie';
 };
 
+// one big friendly eye with lashes, drawn like the avatar builder's eyes
+const REVEAL_EYE = '<svg viewBox="0 0 34 24" width="32" height="23" aria-hidden="true"><path d="M2 13C6.5 6 11.5 4 17 4s10.5 2 15 9c-4.5 7-9.5 9-15 9S6.5 20 2 13z" fill="#fff" stroke="#3b2a1e" stroke-width="1.8" stroke-linejoin="round"/><circle cx="17" cy="13" r="6" fill="#4f86d9"/><circle cx="17" cy="13" r="3" fill="#1a110b"/><circle cx="19.2" cy="10.8" r="1.5" fill="#fff"/><path d="M6 7.5 4 5M11 5 10 2.8M17 4V1.8M23 5 24 2.8M28 7.5 30 5" stroke="#3b2a1e" stroke-width="1.4" stroke-linecap="round"/></svg>';
 class FpBase extends HTMLElement {
   setConfig(config) {
     this._cfg = this._normalize(config || {});
@@ -1356,7 +1358,7 @@ class LoxWochenplanerCard extends FpBase {
   }
   // separate, calm button on the right – far from the tick, so revealing never ticks the job off
   _revealBtn(it) {
-    return it.secret && this._reveal !== it.id ? `<button class="rvb" data-reveal="${esc(it.id)}">${TX.reveal}</button>` : '';
+    return it.secret && this._reveal !== it.id ? `<button class="rvb" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
   }
   _sonderBtns(snap, pid, tStr) {
     const pts = snap.sonder_points || {};
@@ -1826,7 +1828,7 @@ class LoxWochenplanerCard extends FpBase {
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
       .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542}
       .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
-      .rvb{flex:none;border:1px solid #444;background:transparent;color:var(--fp-text2,#aaa);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+      .rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),var(--fp-bg2,#232323) 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--fp-bg3,#2b2b2b);font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
       .vs2{font-size:11px;color:var(--fp-text3,#8a8a8a);margin-top:3px}.c.vc2{display:flex;flex-direction:column;gap:6px}
       .vcard{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
@@ -2204,11 +2206,11 @@ const SOON_T = ['in {n} min', 'in {n} h'];
 const FPL = 'en';
 const TX = {
   de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: '👀 Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
+    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
-    secret: '🤫 Secret job', reveal: '👀 Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
+    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
@@ -2438,6 +2440,8 @@ const daysLabel = (t) => {
   return (t || []).length ? [...t].sort((a, b) => a - b).map((d) => WD[d - 1]).join(', ') : 'Never';
 };
 
+// one big friendly eye with lashes, drawn like the avatar builder's eyes
+const REVEAL_EYE = '<svg viewBox="0 0 34 24" width="32" height="23" aria-hidden="true"><path d="M2 13C6.5 6 11.5 4 17 4s10.5 2 15 9c-4.5 7-9.5 9-15 9S6.5 20 2 13z" fill="#fff" stroke="#3b2a1e" stroke-width="1.8" stroke-linejoin="round"/><circle cx="17" cy="13" r="6" fill="#4f86d9"/><circle cx="17" cy="13" r="3" fill="#1a110b"/><circle cx="19.2" cy="10.8" r="1.5" fill="#fff"/><path d="M6 7.5 4 5M11 5 10 2.8M17 4V1.8M23 5 24 2.8M28 7.5 30 5" stroke="#3b2a1e" stroke-width="1.4" stroke-linecap="round"/></svg>';
 class FpBase extends HTMLElement {
   setConfig(config) {
     this._cfg = this._normalize(config || {});
@@ -2615,7 +2619,7 @@ class LoxWochenplanerCard extends FpBase {
   }
   // separate, calm button on the right – far from the tick, so revealing never ticks the job off
   _revealBtn(it) {
-    return it.secret && this._reveal !== it.id ? `<button class="rvb" data-reveal="${esc(it.id)}">${TX.reveal}</button>` : '';
+    return it.secret && this._reveal !== it.id ? `<button class="rvb" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
   }
   _sonderBtns(snap, pid, tStr) {
     const pts = snap.sonder_points || {};
@@ -3085,7 +3089,7 @@ class LoxWochenplanerCard extends FpBase {
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
       .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542}
       .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
-      .rvb{flex:none;border:1px solid #444;background:transparent;color:var(--fp-text2,#aaa);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+      .rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),var(--fp-bg2,#232323) 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--fp-bg3,#2b2b2b);font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
       .vs2{font-size:11px;color:var(--fp-text3,#8a8a8a);margin-top:3px}.c.vc2{display:flex;flex-direction:column;gap:6px}
       .vcard{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
