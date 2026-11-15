@@ -527,4 +527,4 @@ Einstellung unter *Saisons & Wetter*: „Standard-Haus“ oder „Haus mit Pool 
 
 ### 44. Abzeichen „weg“ am Avatar
 Wenn eine Person als weg gilt (gleiche Erkennung wie „Ämtli pausieren“: Kalender oder Ferien-Check), zeigt ihr Avatar im Planer (Heute und Woche) ein kleines Abzeichen: am Vortag „✈️ ab morgen weg“, während der Abwesenheit „✈️ weg bis Mi“ (letzter Tag). Bei Ferien 🌴 statt ✈️.
-**Status:** 💡 Idee
+**Status:** ✅ umgesetzt in 0.13.0

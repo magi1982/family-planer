@@ -131,6 +131,8 @@ Per child (or person, e.g. university/work):
 
 ### Holidays pause chores
 
+**Away badge**: from the day before, a small badge below the name shows *✈️ away from tomorrow*, then *✈️ away until Wed* (🌴 for holidays), so everybody sees who is away.
+
 - An **all-day** (or at least 20-hour) event with a **holiday word** in a person's calendar pauses their chores – they count **neither as done nor as missed**; reliability and streak are not affected.
 - Word endings count: "holiday" finds "ski holiday" and "summer holiday" – in German "Ferien" finds "Skiferien" but not "Ferienplanung".
 - **Automatic detection**: on the first sync of a calendar, one year back and ahead is searched for how you name holidays (e.g. *Vacation, Holiday, OOO*). The words end up in the settings field (editable) and you get a notification.

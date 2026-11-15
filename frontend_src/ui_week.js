@@ -37,10 +37,12 @@ const FPL = 'de';
 const TX = {
   de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
     secret: '🤫 Geheim-Ämtli', reveal: 'antippen zum Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
-    school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant' },
+    school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
+    awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
     secret: '🤫 Secret job', reveal: 'tap to reveal', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
-    school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned' },
+    school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
+    awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
 // birthday animations behind the birthday child (one per day, chosen by the server)
 const BDAY_FX = (n) => {
@@ -457,6 +459,13 @@ class LoxWochenplanerCard extends FpBase {
       return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${who}</div>`;
     }).join('');
   }
+  // badge "away" next to the person: the day before and while away (same detection as pausing chores)
+  _awBadge(snap, pid) {
+    const b = ((snap || {}).away_badge || {})[pid]; if (!b) return '';
+    const ic = b.kind === 'holiday' ? '🌴' : '✈️'; let txt = TX.awTom;
+    if (b.state === 'now') { const t = ymd(startOfDay(new Date())); txt = b.until === t ? TX.awToday : TX.awNow.replace('{d}', TX.wd[new Date(b.until + 'T12:00:00').getDay()]); }
+    return `<div class="awb${b.state === 'now' ? ' now' : ''}">${ic} ${esc(txt)}</div>`;
+  }
   _lvBadge(name) {
     const v = this._lvState(name); if (!v) return '';
     const g = v.up && v.taps < 20 ? (v.taps < 5 ? 'glow' : 'fade') : '';
@@ -663,7 +672,7 @@ class LoxWochenplanerCard extends FpBase {
       const seX = snapX.season || {}; const isBday = (seX.birthdays || []).includes(pidOf[k.name]);
       const label = `<div class="lab${isBday ? ' bday' : ''}" data-person="${esc(k.name)}" style="box-shadow:inset 3px 0 0 ${k.farbe}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:${AVS}px;height:${AVS}px"><span class="ava">${avatarHtml(k, AVS)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
-          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div><div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, phone ? 3 : 6).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}${aw.length > (phone ? 3 : 6) ? `<span class="mdm">+${aw.length - (phone ? 3 : 6)}</span>` : ''}</div>
+          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, phone ? 3 : 6).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}${aw.length > (phone ? 3 : 6) ? `<span class="mdm">+${aw.length - (phone ? 3 : 6)}</span>` : ''}</div>
           </div>
           </div>`;
       const injectEv = (d, html) => {
@@ -765,7 +774,7 @@ class LoxWochenplanerCard extends FpBase {
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores) + sec(TX.todos, tdh)) || `<div class="none">${TX.none}</div>`;
         return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pid]) || 0) : ''}
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
-          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div><div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
+          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
       if (volHtml && isT && !['termine', 'schule'].includes(modeX)) cols.push(`<div class="tcol volc"><div class="lab th vol"><div class="ring vr" style="width:64px;height:64px"><span>🙋</span></div><div class="lt"><div class="nm">${TX.vol}</div><div class="vs2">${TX.volSub}</div></div></div><div class="tbody">${volHtml}</div></div>`);
@@ -907,6 +916,7 @@ class LoxWochenplanerCard extends FpBase {
       @keyframes fpvin{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
       @keyframes fpwig{0%,86%,100%{transform:rotate(0)}90%{transform:rotate(-4deg)}95%{transform:rotate(4deg)}}
       .x2{font-size:11px;font-weight:700;color:#FF7AB6;margin-left:4px;white-space:nowrap}
+      .awb{display:inline-block;max-width:100%;box-sizing:border-box;margin:3px 0 2px;padding:1px 8px;border-radius:10px;font-size:11px;line-height:1.3;background:#2b2b2b;border:1px dashed #555;color:#bbb}.awb.now{border-style:solid;border-color:#4FA3E0;color:#cfe6fa;background:rgba(79,163,224,.14)}
       .lab.bday{position:relative;overflow:visible;background:linear-gradient(120deg,rgba(255,122,182,.22),rgba(255,216,77,.18),rgba(92,225,230,.18),rgba(176,124,255,.22));background-size:300% 300%;animation:fpbdg 6s ease-in-out infinite}
       .lab.bday .ring,.lab.bday .lt{position:relative;z-index:2}
       .tcol.bday{background:linear-gradient(160deg,rgba(255,122,182,.20),rgba(255,216,77,.14),rgba(92,225,230,.14),rgba(176,124,255,.20));background-size:300% 300%;animation:fpbdg 6s ease-in-out infinite}.tcol.bday .lab.th{animation:none;background:transparent}

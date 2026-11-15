@@ -144,6 +144,25 @@ def decision(raw) -> dict:
             "at": str(raw.get("at") or "")[:10]}
 
 
+def absence_kinds(events_by_owner: dict[str | None, list[dict]], persons: dict, words: list[str], scope: str,
+                  min_hours: float = 20, decisions: dict | None = None) -> dict[str, dict[str, str]]:
+    """{person_id: {iso date: "holiday" | "trip"}} – same rules as absences(); "trip" = a long event confirmed as away."""
+    decisions = decisions or {}
+    out: dict[str, dict[str, str]] = {}
+    for ev in found(events_by_owner, persons, words, scope, min_hours, long_events=True):
+        dec = decision(decisions.get(ev["key"]))
+        if dec.get("d") == "home" or (ev["kind"] == "long" and dec.get("d") != "away"):
+            continue
+        who_ = list(persons) if dec.get("family") else [p for p in dec.get("persons", []) if p in persons] or ev["persons"]
+        kind = "holiday" if ev["kind"] == "holiday" else "trip"
+        for pid in who_:
+            days = out.setdefault(pid, {})
+            for d in ev["days"]:
+                if days.get(d) != "holiday":
+                    days[d] = kind
+    return out
+
+
 def absences(events_by_owner: dict[str | None, list[dict]], persons: dict, words: list[str], scope: str,
              min_hours: float = 20, decisions: dict | None = None) -> dict[str, set[str]]:
     """{person_id: {iso dates}} from calendar events grouped by the calendar owner.
@@ -151,16 +170,21 @@ def absences(events_by_owner: dict[str | None, list[dict]], persons: dict, words
     Holiday events pause chores unless decided "home"; long events without a holiday word only when decided "away".
     A decision can name the whole family or single persons instead of the detected ones.
     """
-    decisions = decisions or {}
-    out: dict[str, set[str]] = {}
-    for ev in found(events_by_owner, persons, words, scope, min_hours, long_events=True):
-        dec = decision(decisions.get(ev["key"]))
-        if dec.get("d") == "home" or (ev["kind"] == "long" and dec.get("d") != "away"):
-            continue
-        who_ = list(persons) if dec.get("family") else [p for p in dec.get("persons", []) if p in persons] or ev["persons"]
-        for pid in who_:
-            out.setdefault(pid, set()).update(ev["days"])
-    return out
+    return {pid: set(days) for pid, days in absence_kinds(events_by_owner, persons, words, scope, min_hours, decisions).items()}
+
+
+def badge(days: dict[str, str], today: date) -> dict | None:
+    """Avatar badge: away today (until the last day in a row) or from tomorrow; None otherwise."""
+    t = today.isoformat()
+    tm = (today + timedelta(days=1)).isoformat()
+    if t in days:
+        end = today
+        while (end + timedelta(days=1)).isoformat() in days:
+            end += timedelta(days=1)
+        return {"state": "now", "until": end.isoformat(), "kind": days[t]}
+    if tm in days:
+        return {"state": "tomorrow", "kind": days[tm]}
+    return None
 
 
 def review(entries: list[dict], decisions: dict, today: date, ahead_days: int = 14, keep_days: int = 28) -> list[dict]:

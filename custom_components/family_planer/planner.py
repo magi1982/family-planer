@@ -118,6 +118,7 @@ class FamilyPlanner:
         self.announcer = Announcer(hass, self)
         self.owns_panel = False
         self.away: dict[str, set[str]] = {}
+        self.away_kind: dict[str, dict[str, str]] = {}
         self.vacation_review: list[dict] = []  # holidays found in the calendars, waiting for "away / at home"
         self._away_known = False
         self._pin_fail: list[datetime] = []
@@ -473,12 +474,14 @@ class FamilyPlanner:
                     by_owner.setdefault(pid, []).extend(events)
             words = v["words"] or vacation.DEFAULT_WORDS
             decisions = self.settings.get("vacation_decisions") or {}
-            away = vacation.absences(by_owner, self.data["persons"], words, v["scope"], v["min_hours"], decisions)
+            self.away_kind = vacation.absence_kinds(by_owner, self.data["persons"], words, v["scope"], v["min_hours"], decisions)
+            away = {pid: set(days) for pid, days in self.away_kind.items()}
             every = vacation.found(by_owner, self.data["persons"], words, v["scope"], v["min_hours"], long_events=True)
             self._vac_keys = {e["key"] for e in every}
             self.vacation_review = vacation.review(every, decisions, now.date())
         else:
             self.vacation_review = []
+            self.away_kind = {}
         changed = away != self.away
         self.away = away
         if changed and self.module_on(MODULE_WEEK):
@@ -1420,6 +1423,7 @@ class FamilyPlanner:
                            if k in ("weather", "storm_kmh", "intensity", "sug_enabled", "sug_from", "pool", "pool_min",
                                     "jacuzzi", "jacuzzi_min", "xmas_snow", "anim_bday", "house")},
             "busy": self.busy,
+            "away_badge": {pid: b for pid, days in self.away_kind.items() if (b := vacation.badge(days, self.today()))},
             "sonder": sonder.view(self.data["sonder_inst"], self.data["sonder"], self.lang),
             "sonder_points": {iid: self.sonder_points(i) for iid, i in self.data["sonder_inst"].items()},
             "todos": sorted(({"id": tid, **t} for tid, t in self.data["todos"].items()),

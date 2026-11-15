@@ -95,3 +95,12 @@ def test_upcoming_lists_events():
 def test_house_setting():
     assert S.clean_settings({"house": "pool"})["house"] == "pool"
     assert S.clean_settings({"house": "<x>"})["house"] == "standard"
+
+
+def test_away_badge():
+    V = importlib.import_module("fpkg.vacation")
+    days = {"2026-11-16": "trip", "2026-11-17": "trip", "2026-11-18": "trip"}
+    assert V.badge(days, date(2026, 11, 15)) == {"state": "tomorrow", "kind": "trip"}
+    assert V.badge(days, date(2026, 11, 16)) == {"state": "now", "until": "2026-11-18", "kind": "trip"}
+    assert V.badge(days, date(2026, 11, 19)) is None
+    assert V.badge({"2026-07-01": "holiday"}, date(2026, 7, 1))["kind"] == "holiday"

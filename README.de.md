@@ -130,6 +130,8 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 
 ### Ferien pausieren Ämtli
 
+**Abzeichen „weg“**: Ab dem Vortag zeigt ein kleines Abzeichen unter dem Namen „✈️ ab morgen weg“, danach „✈️ weg bis Mi“ (🌴 bei Ferien) – so sehen alle, wer weg ist.
+
 - Ein **ganztägiger** (oder mindestens 20 Stunden langer) Termin mit einem **Ferien-Wort** im Kalender einer Person pausiert ihre Ämtli – sie zählen **weder als erledigt noch als verpasst**, Zuverlässigkeit und Serie bleiben unberührt.
 - Wortenden zählen: „Ferien“ findet „Skiferien“ und „Sommerferien“, aber nicht „Ferienplanung“.
 - **Automatische Erkennung**: Beim ersten Sync eines Kalenders wird ein Jahr zurück und voraus gesucht, wie ihr Ferien nennt (z. B. *Ferien, Urlaub, OOO*). Die Wörter landen im Einstellungsfeld (änderbar) und du bekommst eine Mitteilung.
