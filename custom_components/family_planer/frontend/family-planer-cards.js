@@ -1881,7 +1881,7 @@ const fpNavigate = (p) => {
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
 window.FPX = { AWT, AWR, AWCSS, avatarGen, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
-customElements.define('fp-week-inner', LoxWochenplanerCard);
+if (!customElements.get('fp-week-inner')) customElements.define('fp-week-inner', LoxWochenplanerCard);
 
 })();
 // Familienplaner – Ämtliplan v3: pro Ämtli mehrere Personen, pro Person Wochentage mit Rhythmus
@@ -3135,7 +3135,7 @@ const fpNavigate = (p) => {
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
 window.FPX_EN = { AWT, AWR, AWCSS, avatarGen, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
-customElements.define('fp-week-inner-en', LoxWochenplanerCard);
+if (!customElements.get('fp-week-inner-en')) customElements.define('fp-week-inner-en', LoxWochenplanerCard);
 
 })();
 // Familienplaner – Ämtliplan v3: pro Ämtli mehrere Personen, pro Person Wochentage mit Rhythmus

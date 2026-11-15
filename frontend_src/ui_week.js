@@ -972,4 +972,4 @@ const fpNavigate = (p) => {
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
 window.FP = { AWT, AWR, AWCSS, avatarGen, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
-customElements.define('lox-wochenplaner-card', LoxWochenplanerCard);
+if (!customElements.get('lox-wochenplaner-card')) customElements.define('lox-wochenplaner-card', LoxWochenplanerCard);
