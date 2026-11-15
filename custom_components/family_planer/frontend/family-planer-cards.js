@@ -150,7 +150,7 @@
 @keyframes fpcl{from{transform:translateX(-260px)}to{transform:translateX(${W + 60}px)}}
 @keyframes fpfall{from{transform:translate(0,-20px)}to{transform:translate(var(--dx,0px),${H + 20}px)}}
 @keyframes fpsway{0%,100%{transform:rotate(calc(var(--wa,2deg) * -1))}50%{transform:rotate(var(--wa,2deg))}}
-@keyframes fptw{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes fptw{0%,100%{opacity:1}50%{opacity:.25}}@keyframes fpglw{0%,100%{opacity:.55}50%{opacity:.08}}
 @keyframes fpsmk{0%{transform:translate(0,0) scale(.6);opacity:.8}100%{transform:translate(var(--dx,14px),-34px) scale(1.8);opacity:0}}
 @keyframes fpflash{0%,92%,100%{opacity:0}93%,96%{opacity:.8}}
 @keyframes fpfog{0%,100%{transform:translateX(-40px)}50%{transform:translateX(40px)}}
@@ -162,7 +162,7 @@
 @keyframes fpflame{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.25)}}
 @keyframes fppulse{0%,100%{opacity:.85}50%{opacity:1}}
 .scn .cl{animation:fpcl linear infinite}.scn .fl{animation:fpfall linear infinite}.scn .sw{animation:fpsway var(--wd,6s) ease-in-out infinite}
-.scn .tw{animation:fptw 1.8s ease-in-out infinite}.scn .smk{animation:fpsmk 4s ease-out infinite}.scn .flash{animation:fpflash 7s linear infinite}
+.scn .tw{animation:fptw 1.8s ease-in-out infinite}.scn .glw{animation:fpglw 1.8s ease-in-out infinite}.scn .smk{animation:fpsmk 4s ease-out infinite}.scn .flash{animation:fpflash 7s linear infinite}
 .scn .fog{animation:fpfog 14s ease-in-out infinite}.scn .fw{animation:fpfw 2.6s ease-out infinite}.scn .rise{animation:fprise linear infinite}
 .scn .bob{animation:fpbob 3s ease-in-out infinite}.scn .wave{animation:fpwave 4s linear infinite}.scn .fly{animation:fpfly linear infinite}
 .scn .flame{transform-box:fill-box;transform-origin:50% 100%;animation:fpflame .5s ease-in-out infinite}.scn .sun{animation:fppulse 5s ease-in-out infinite}
@@ -310,7 +310,10 @@
     if (vis === 'weihnachten') {
       svg += fir(760 - dx, 104, 1.25, snowGround, true, r);
       // garland of bulbs along the top
-      for (let x = 10; x < W; x += 28) svg += `<circle class="tw" cx="${x}" cy="${(6 + 7 * Math.sin(Math.PI * (x % 300) / 300)).toFixed(1)}" r="3" fill="${['#E5483B', '#F2B33D', '#3FA66B', '#3E8EDE', '#D35FB7'][(x / 28 | 0) % 5]}" style="animation-delay:-${(r() * 2).toFixed(2)}s"/>`;
+      // fairy lights on a sagging wire; every bulb glows and sparkles in its own colour
+      for (let x0 = 0; x0 < W; x0 += 300) svg += `<path d="M${x0} 16 Q ${x0 + 150} 40 ${x0 + 300} 16" stroke="#2c3a2c" stroke-width="1.2" fill="none"/>`;
+      for (let x = 10; x < W; x += 25) { const y = 16 + 12 * Math.sin(Math.PI * (x % 300) / 300); const c = ['#FF4D4D', '#FFC83D', '#3FD07A', '#4FA8FF', '#FF6FD8'][(x / 25 | 0) % 5]; const d = (r() * 2.4).toFixed(2);
+        svg += `<rect x="${(x - 1.3).toFixed(1)}" y="${(y - 1).toFixed(1)}" width="2.6" height="2.6" fill="#2c3a2c"/><circle class="glw" cx="${x}" cy="${(y + 4.5).toFixed(1)}" r="8" fill="${c}" style="animation-delay:-${d}s"/><circle class="tw" cx="${x}" cy="${(y + 4.5).toFixed(1)}" r="2.8" fill="${c}" style="animation-delay:-${d}s"/><circle cx="${(x - 0.8).toFixed(1)}" cy="${(y + 3.6).toFixed(1)}" r=".8" fill="#fff" opacity=".8"/>`; }
       // Advent wreath with 1–4 candles lit
       const a = s.advent || 0;
       if (a) {
@@ -360,7 +363,10 @@
       svg += emo(640, 110, '🏐', 14, 'bob') + emo(980, 110, '🏰', 18) + emo(1080, 112, '🩴', 14) + `<g class="fly" style="animation-duration:40s"><path d="M0 56 l60 0" stroke="#fff" stroke-width="1"/><path d="M0 50 h-22 v12 h22z" fill="#fff"/></g>`;
     }
     if (vis === 'august') {
-      for (let x = 0; x < W; x += 24) svg += `<path d="M${x} 4 l12 0 -6 14z" fill="${(x / 24) % 2 ? '#fff' : '#DA291C'}"/>`;
+      // bunting on a string: red pennants with a white cross, white ones with a red cross
+      for (let x0 = 0; x0 < W; x0 += 240) svg += `<path d="M${x0} 12 Q ${x0 + 120} 32 ${x0 + 240} 12" stroke="#8a8f96" stroke-width="1" fill="none"/>`;
+      for (let x = 4; x < W - 10; x += 20) { const y = 12 + 10 * Math.sin(Math.PI * ((x + 7) % 240) / 240); const red = (x / 20 | 0) % 2 === 0; const f = red ? '#DA291C' : '#ffffff'; const k = red ? '#ffffff' : '#DA291C';
+        svg += `<g class="sw" style="transform-origin:${x + 7}px ${y.toFixed(1)}px;animation-delay:-${(r() * 3).toFixed(1)}s"><path d="M${x} ${y.toFixed(1)} h14 l-7 15z" fill="${f}" stroke="${red ? 'none' : '#d9d9d9'}" stroke-width=".5"/><path d="M${x + 7} ${(y + 2).toFixed(1)} v6 M${x + 4} ${(y + 5).toFixed(1)} h6" stroke="${k}" stroke-width="1.8"/></g>`; }
       svg += '<g transform="translate(560 40)"><path d="M0 64 V0" stroke="#999" stroke-width="2"/><g class="sw" style="transform-origin:0 0"><rect x="0" y="0" width="30" height="30" fill="#DA291C"/><path d="M15 6 v18 M6 15 h18" stroke="#fff" stroke-width="6"/></g></g>';
       if (hour >= 21) { svg += '<g transform="translate(380 104)"><path d="M-22 0 L22 0" stroke="#6b4a2e" stroke-width="5"/><path class="flame" d="M-16 0 Q -8 -36 0 -46 Q 8 -36 16 0Z" fill="#FF8A3C"/><path class="flame" d="M-8 0 Q 0 -24 8 0Z" fill="#FFD24A"/></g>'; P.push(['sparks', 12]); }
     }

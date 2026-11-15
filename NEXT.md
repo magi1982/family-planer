@@ -545,3 +545,10 @@ To-dos geben schon Punkte (nach Grösse S/M/L oder fixem Wert), aber die Kachel 
 ### 47. Kopfszene auf dem Tablet (iPad Air)
 Auf 1180 px quer verdeckt der Vorschlag (z. B. „Familien-Spaziergang“) die untere Hälfte vom Haus, hochkant (820 px) liegt das Haus fast ganz hinter Vorschlag und Navigationsknöpfen. Idee: bei Tablet-Breite den Vorschlag nur als kleines Symbol neben dem Wetter zeigen (antippen = Text) und die Szene so verschieben, dass das Haus in der Lücke rechts neben der Navigation steht; hochkant die Navigation nur mit Symbolen.
 **Status:** 🟡 teilweise: Haus ist jetzt in der Mitte (Navigation links, Szene verschoben) – auf iPad quer und hochkant frei sichtbar. Vorschlag als Symbol bleibt offen.
+
+### 48. Zuverlässigkeit rechts neben dem Avatar
+Die Prozentzahl (heute grünes Bändeli unter dem Namen) auf die gleiche Höhe wie der Avatar, aber rechts. Drei Vorschläge (Screenshot rel_vorschlaege):
+1. **Ring** – Kreis-Fortschritt mit Zahl in der Mitte, Farbe nach Stufe.
+2. **Grosse Zahl** – „82 %“ gross in der Stufenfarbe, darunter „zuverlässig“ und ein dünner Balken.
+3. **Fähnchen** – hängendes Fähnchen oben rechts an der Karte mit der Zahl (braucht am wenigsten Platz, Name und Abzeichen bleiben einzeilig).
+**Status:** 💡 Idee – Michael wählt einen Vorschlag
