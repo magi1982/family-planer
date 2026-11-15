@@ -5,6 +5,10 @@
 ### Fixed
 - On phones the header only showed the middle of the landscape (sky, rainbow), so the house was out of view. Narrow screens now centre the scene on the house.
 
+### Changed
+- Avatar builder: the *Season* register only appears while a season, holiday or birthday is on, and only shows the extras and effects of that season.
+- *Settings → Seasons & weather → Switch seasons on and off*: every event shows its default lead time next to the field (e.g. *default 3 d*, *on the day* for birthdays), taken from the fields above; the empty field shows the same number in grey instead of a dash.
+
 ## 0.12.0 – 2026-11-15
 
 ### New
