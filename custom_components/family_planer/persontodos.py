@@ -16,29 +16,35 @@ def _re(name: str) -> re.Pattern:
 def match(summary: str, persons: dict) -> tuple[list[str], str, str | None]:
     """(person ids, title, size or None). Several names -> one to-do for each of them.
 
-    Like calendar events, a name anywhere assigns the item. Only names at the start ("Lea und Mia Tisch decken")
-    are removed from the title; a name in the middle stays part of it ("Fotos für Mia bearbeiten").
+    Names at the start decide ("Lea und Mia Tisch decken" -> both) and are removed from the title; a name later in
+    the text only counts when none stands at the start ("Lea Kalender für Mia machen" -> Lea only). Without a
+    leading name the first name in the text assigns it and stays part of the title ("Fotos für Mia bearbeiten").
     """
     text = " ".join(str(summary or "").split())[:200]
-    hits: list[str] = []
+    first: dict[str, int] = {}  # pid -> position of its first mention
     names: list[tuple[str, str]] = []
     for pid, p in persons.items():
         for n in {n.strip() for n in [p.get("name") or ""] + list(p.get("aliases") or []) if n and len(n.strip()) >= 2}:
             names.append((pid, n))
-            if _re(n).search(text) and pid not in hits:
-                hits.append(pid)
+            m = _re(n).search(text)
+            if m:
+                first[pid] = min(first.get(pid, len(text)), m.start())
+    lead_pids: list[str] = []
     names.sort(key=lambda x: len(x[1]), reverse=True)
     clean = text
     lead = re.compile(r"^\s*(?:und|and|&|\+|,|:|-|–)?\s*", re.I)
     while True:  # strip leading names and joiners
         stripped = lead.sub("", clean, count=1)
-        for _pid, n in names:
+        for pid_, n in names:
             m = re.match(re.escape(n) + r"s?(?![\w])[\s,:;\-–]*", stripped, re.I | re.U)
             if m:
                 clean = stripped[m.end():]
+                if pid_ not in lead_pids:
+                    lead_pids.append(pid_)
                 break
         else:
             break
+    hits = lead_pids or ([min(first, key=first.get)] if first else [])
     size = None
     m = re.search(r"[\s,(\-]*\(?\b(" + "|".join(SIZE_WORDS) + r")\)?\s*[.!]*$", clean, re.I | re.U)
     if m and hits:

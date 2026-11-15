@@ -206,7 +206,7 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 
 ### To-dos ohne Datum
 
-Im Planer stehen pro Person höchstens die **4 ältesten** offenen To-dos (einstellbar), „+2 weitere“ klappt den Rest auf; unter jedem To-do steht, seit wann es offen ist. **To-dos aus einer geteilten Liste** (z. B. der Alexa-To-do-Liste): die Liste unter *Einstellungen → To-dos → To-do-Listen mit Namen* wählen (oder bei einer smarten Liste *Namen → To-do der Person* einschalten). Ein Eintrag mit Name oder Spitzname („Lea Zimmer aufräumen gross“) wird ein To-do dieser Person; *klein / mittel / gross* am Schluss bestimmt Grösse und Punkte, mehrere Namen ergeben je ein To-do, und Abhaken geht in beide Richtungen.
+Im Planer stehen pro Person höchstens die **4 ältesten** offenen To-dos (einstellbar), „+2 weitere“ klappt den Rest auf; unter jedem To-do steht, seit wann es offen ist. **To-dos aus einer geteilten Liste** (z. B. der Alexa-To-do-Liste): die Liste unter *Einstellungen → To-dos → To-do-Listen mit Namen* wählen (oder bei einer smarten Liste *Namen → To-do der Person* einschalten). Ein Eintrag mit Name oder Spitzname („Lea Zimmer aufräumen gross“) wird ein To-do dieser Person; *klein / mittel / gross* am Schluss bestimmt Grösse und Punkte, mehrere Namen am Anfang ergeben je ein To-do („Lea und Mia Tisch decken“); ein Name weiter hinten bleibt Teil des Titels („Lea Kalender für Mia“ → nur Lea); ohne Namen am Anfang zählt der erste Name im Text; und Abhaken geht in beide Richtungen.
 
 ![To-dos](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/todos.png)
 

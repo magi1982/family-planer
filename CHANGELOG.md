@@ -6,6 +6,8 @@
 - **Points on every task in the planner:** chores show *+N* next to the title (fair mode: their share of the day's points), to-dos and special chores show it in their label. The values come from the server, so they always match what gets booked.
 
 ### Fixed
+- **Shopping list *Optimise* no longer hangs:** reading the list is limited to 15 s and the AI to 30 s (at most 60 items per request); if it takes longer, the planner sorts by keywords only and the button shows *taking too long* after 60 s at the latest.
+- **To-dos from a list with several names:** a name at the start decides ("Lea calendar for Mia" → only Lea, the title keeps "for Mia"). Without a leading name the first name in the text assigns it. Before, every name got its own to-do.
 - **Secret special chores:** revealing the title is now a separate eye button on the right (avatar-builder style, no wiggle) – yellow like *I'll take it* in the volunteer tile, subtle grey once somebody has taken the job. Before, the small "tap to reveal" label sat inside the chore button, so tapping it often ticked the chore off.
 - **No more "already defined" error** after an update when the old and the new card bundle are both loaded (e.g. iOS app cache).
 

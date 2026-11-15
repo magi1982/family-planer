@@ -1,6 +1,7 @@
 """Runtime object of one Family Planer config entry: storage, timers, mutations, snapshots."""
 from __future__ import annotations
 
+import asyncio
 import base64
 import copy
 import json
@@ -101,6 +102,12 @@ def parse_hhmm(value: str | None, default: str = "00:00") -> tuple[int, int]:
     except (ValueError, AttributeError):
         h, m = default.split(":")
         return int(h), int(m)
+
+
+# shopping list "optimise": never let a slow list or AI keep the button spinning
+LIST_READ_TIMEOUT = 15
+AI_TIMEOUT = 30
+AI_MAX_ITEMS = 60
 
 
 class FamilyPlanner:
@@ -924,10 +931,11 @@ class FamilyPlanner:
         if self.hass.states.get(entity) is None:
             return []
         try:
-            res = await self.hass.services.async_call(
-                "todo", "get_items", {"entity_id": entity, "status": ["needs_action", "completed"]},
-                blocking=True, return_response=True)
-        except Exception as err:
+            async with asyncio.timeout(LIST_READ_TIMEOUT):
+                res = await self.hass.services.async_call(
+                    "todo", "get_items", {"entity_id": entity, "status": ["needs_action", "completed"]},
+                    blocking=True, return_response=True)
+        except Exception as err:  # includes TimeoutError: a slow cloud list must never block the planner
             _LOGGER.debug("Cannot read %s: %s", entity, err)
             return []
         return (res or {}).get(entity, {}).get("items", [])
@@ -937,11 +945,15 @@ class FamilyPlanner:
         if not ai_entity or not names or self.hass.states.get(ai_entity) is None:
             return {}
         try:
-            res = await self.hass.services.async_call(
-                "ai_task", "generate_data",
-                {"task_name": "Family Planer categories", "entity_id": ai_entity,
-                 "instructions": lists.ai_prompt(lst, names, self.lang)},
-                blocking=True, return_response=True)
+            async with asyncio.timeout(AI_TIMEOUT):
+                res = await self.hass.services.async_call(
+                    "ai_task", "generate_data",
+                    {"task_name": "Family Planer categories", "entity_id": ai_entity,
+                     "instructions": lists.ai_prompt(lst, names[:AI_MAX_ITEMS], self.lang)},
+                    blocking=True, return_response=True)
+        except TimeoutError:
+            _LOGGER.warning("AI categorisation took longer than %s s – skipped, keywords only", AI_TIMEOUT)
+            return {}
         except Exception as err:
             _LOGGER.warning("AI categorisation failed: %s", err)
             return {}

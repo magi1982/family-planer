@@ -100,6 +100,10 @@ def test_person_todos_from_names():
     assert PT.match("Milch kaufen", PERSONS)[0] == []
     assert PT.match("Miaus Futter", PERSONS)[0] == []
     assert PT.match("Fotos für Mia bearbeiten", PERSONS) == (["b"], "Fotos für Mia bearbeiten", None)
+    # a leading name decides; a name later in the text is only part of the title
+    assert PT.match("Lea Kalender für Mia machen", PERSONS) == (["a"], "Kalender für Mia machen", None)
+    # no leading name: the first name in the text wins
+    assert PT.match("Kalender für Mia und Lea machen", PERSONS)[0] == ["b"]
 
 
 def test_speech_birthday_and_praise():
