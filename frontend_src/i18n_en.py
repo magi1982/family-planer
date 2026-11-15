@@ -6,7 +6,7 @@ Every phrase must occur in the source (build.py checks this), so the list stays 
 WEEK = [
     ("const FPL = 'de';", "const FPL = 'en';"),
     ("'Nochmals tippen zum Erledigen'", "'Tap again to finish'"),
-    ('<em class="tag">⭐ Spezial</em>', '<em class="tag">⭐ Special</em>'),
+    ('<em class="tag">⭐ Spezial${', '<em class="tag">⭐ Special${'),
     ("const SOON_T = ['in {n} Min', 'in {n} Std'];", "const SOON_T = ['in {n} min', 'in {n} h'];"),
     ("trophy: ['Pokal des Monats', 'Beste Quote im letzten Monat.'],",
      "trophy: ['Trophy of the month', 'Best rate last month.'],"),

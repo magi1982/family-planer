@@ -715,6 +715,15 @@ class FamilyPlanner:
         mode = (self.settings.get("gamification") or {}).get("mode")
         return mode if mode in rewards.MODES else "fair"
 
+    def item_points(self) -> dict[str, int]:
+        """Points each of today's chores is worth (shown on the chore button)."""
+        today, fair, out = self.today(), self.points_mode() == "fair", {}
+        day = self.gamification()["day_points"]
+        for pid in self.data["persons"]:
+            items = [(iid, self.chore_points(it.get("chore_id"))) for iid, it in engine.active_items(self.data["items"], pid, today)]
+            out.update(rewards.item_points(items, fair, day))
+        return out
+
     @callback
     def book_points(self, person_ids=None) -> None:
         """Fair mode: everybody can earn the same per day – a complete day counts, not the number of chores."""
@@ -1468,6 +1477,8 @@ class FamilyPlanner:
             "sonder_points": {iid: self.sonder_points(i) for iid, i in self.data["sonder_inst"].items()},
             "todos": sorted(({"id": tid, **t} for tid, t in self.data["todos"].items()),
                             key=lambda t: (t.get("done"), t.get("created") or "")),
+            "todo_points": {tid: self.todo_points(t) for tid, t in self.data["todos"].items()},
+            "item_points": self.item_points(),
             "todo_settings": self.todo_settings(),
             "sizes": self.sizes(),
             "pin_default": self.pin_default,

@@ -538,6 +538,6 @@ Heute: Reihenfolge der gespeicherten Liste (Vorlagen zuerst), wer drin ist, blei
 Dazu: die Korrektur gegen den Ladefehler nach Updates (Week-View-Element doppelt registriert) ist schon im Code und kommt mit diesem Update.
 **Status:** 💡 Idee – fürs nächste Update
 
-### 46. Punkte bei To-dos im Planer anzeigen
+### 46. Punkte bei To-dos, Ämtli und Sonderämtli im Planer anzeigen
 To-dos geben schon Punkte (nach Grösse S/M/L oder fixem Wert), aber die Kachel zeigt sie nicht. Neu: im Etikett „☑ To-do · +N“ wie bei den Sonderämtli, in der Heute-Ansicht und in der Wochenansicht. Ohne Punkte bleibt das Etikett wie heute.
-**Status:** 💡 Idee – fürs nächste Update
+**Status:** ✅ umgesetzt (lokal, noch nicht veröffentlicht)

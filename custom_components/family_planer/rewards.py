@@ -153,6 +153,17 @@ def fair_shares(items: list[tuple[str, int, bool]], day_points: int) -> dict[str
     return out
 
 
+def item_points(items: list[tuple[str, int]], fair: bool, day_points: int) -> dict[str, int]:
+    """Points one person's chores of today are worth – what the planner shows next to each chore.
+
+    items: (item id, chore weight). Fair mode: the share of day_points (same as rebook_fair books);
+    per-chore mode: the chore's own weight.
+    """
+    if fair:
+        return fair_shares([(iid, w, False) for iid, w in items], day_points)
+    return {iid: max(0, int(w)) for iid, w in items}
+
+
 def rebook_fair(data: dict, pid: str, items: list[tuple[str, dict, int]], day_points: int, ts: str) -> None:
     """Re-book the chore points of one person's current items (done ones get their fair share)."""
     shares = fair_shares([(iid, w, bool(it.get("done"))) for iid, it, w in items], day_points)

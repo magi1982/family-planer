@@ -447,9 +447,13 @@ class LoxWochenplanerCard extends FpBase {
   _sonderTitle(it) {
     return !it.secret || this._reveal === it.id ? esc(it.title) : TX.secret;
   }
+  // points a chore / to-do is worth (from the snapshot); 0 = show nothing
+  _pts(kind, id) { const s = (this.fpStore && this.fpStore.snap) || {}; const n = Math.round(Number((s[kind] || {})[id]) || 0); return n > 0 ? n : 0; }
+  _ptTag(kind, id) { const n = this._pts(kind, id); return n ? ` · +${n}` : ''; }
+  _ptPill(kind, id) { const n = this._pts(kind, id); return n ? `<small class="ptp">+${n}</small>` : ''; }
   // separate, calm button on the right – far from the tick, so revealing never ticks the job off
-  _revealBtn(it) {
-    return it.secret && this._reveal !== it.id ? `<button class="rvb" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
+  _revealBtn(it, hot) {
+    return it.secret && this._reveal !== it.id ? `<button class="rvb${hot ? ' y' : ''}" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
   }
   _sonderBtns(snap, pid, tStr) {
     const pts = snap.sonder_points || {};
@@ -462,7 +466,7 @@ class LoxWochenplanerCard extends FpBase {
     const open = (snap.sonder || []).filter((it) => it.pid == null && !it.done && this._sonderVisible(it, tStr));
     return open.map((it) => {
       const who = this._claim === it.id ? `<div class="who"><span>${TX.who}</span>${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="wp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 26)}<b>${esc(p.name)}</b></button>`).join('')}<button class="wp x" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${this._revealBtn(it)}<button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${who}</div>`;
+      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${this._revealBtn(it, true)}<button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${who}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -674,7 +678,7 @@ class LoxWochenplanerCard extends FpBase {
       const tds = this._tdMore === k.name ? tdAll : [...tdOpen.slice(0, maxTd), ...tdAll.filter((t) => t.done)];
       const tdRest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
       const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
-      const tdBtns = tds.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}${ageOf(t)}</span></button>`).join('')
+      const tdBtns = tds.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}${ageOf(t)}</span></button>`).join('')
         + (tdRest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', tdRest)}</button>` : this._tdMore === k.name && tdOpen.length > maxTd ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.less}</button>` : '')
         + (showTodos ? this._sonderBtns(snapX, pidOf[k.name], tStr) : '');
       const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
@@ -717,7 +721,7 @@ class LoxWochenplanerCard extends FpBase {
           if (!mine.length) return `<div class="c t"><div class="bg">${tdBtns}</div></div>`;
           const all = tDone === mine.length;
           return `<div class="c t"><div class="prog"><span>${tDone} von ${mine.length} erledigt</span>${all ? '<span class="gr">Super!</span>' : ''}</div><div class="bg">` +
-            mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? '<em class="tag">⭐ Spezial</em>' : ''}${esc(i.summary)}${dueTag(i.m, tStr)}</span></button>`).join('') + tdBtns + `</div></div>`;
+            mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Spezial${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + tdBtns + `</div></div>`;
         }
         if (ds < tStr) {
           const s = h[ds] && h[ds].s[k.name];
@@ -768,7 +772,7 @@ class LoxWochenplanerCard extends FpBase {
           if (isT) {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
-            chores = mine.length ? `<div class="prog"><span>${TX.of.replace('{a}', dn).replace('{b}', mine.length)}</span>${dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''}</div><div class="bg one">` + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? '<em class="tag">⭐ Spezial</em>' : ''}${esc(i.summary)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
+            chores = mine.length ? `<div class="prog"><span>${TX.of.replace('{a}', dn).replace('{b}', mine.length)}</span>${dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''}</div><div class="bg one">` + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Spezial${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
@@ -779,7 +783,7 @@ class LoxWochenplanerCard extends FpBase {
           const list = this._tdMore === k.name ? tdAll : [...tdOpen.slice(0, maxTd), ...tdAll.filter((t) => t.done)];
           const rest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
           const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
-          tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}${ageOf(t)}</span></button>`).join('')
+          tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}${ageOf(t)}</span></button>`).join('')
             + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '') + this._sonderBtns(snapX, pid, tStr);
           if (tdh) tdh = `<div class="bg one">${tdh}</div>`;
         }
@@ -919,7 +923,8 @@ class LoxWochenplanerCard extends FpBase {
       .tdmore{background:none;border:1px dashed #3a3a3a;color:#999;border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
       .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#F5C542}
       .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
-      .rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}
+      .rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#F5C542;background:#F5C542}
+      .ptp{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:#F5C542;opacity:.85;vertical-align:middle}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),#232323 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:#2b2b2b;font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
       .vs2{font-size:11px;color:#8a8a8a;margin-top:3px}.c.vc2{display:flex;flex-direction:column;gap:6px}
       .vcard{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#2b2b2b;border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}

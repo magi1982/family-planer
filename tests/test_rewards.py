@@ -162,3 +162,13 @@ def test_pace_per_day_since_first_booking():
     p = R.pace(ledger, ["a", "b"], today)
     assert p["persons"]["a"] == 40.0  # 80 points over 2 days, spending ignored
     assert p["persons"]["b"] == 0.0 and p["family"] == 40.0
+
+
+def test_item_points_shown_on_chores():
+    # fair mode: today's chores share the day points and add up exactly
+    fair = R.item_points([("a", 10), ("b", 10), ("c", 10)], True, 30)
+    assert fair == {"a": 10, "b": 10, "c": 10}
+    assert sum(R.item_points([("a", 10), ("b", 20)], True, 31).values()) == 31
+    # per-chore mode: each chore shows its own points, never negative
+    assert R.item_points([("a", 15), ("b", -3)], False, 30) == {"a": 15, "b": 0}
+    assert R.item_points([], True, 30) == {}

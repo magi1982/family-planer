@@ -321,7 +321,7 @@ Lustige Extra-Ämtli, die nur **Bonuspunkte** geben – nicht erledigt oder abge
 - **Freiwillig**: Das Ämtli wartet in der Kachel *Freiwillig* neben den Personen (nur sichtbar, wenn etwas offen ist). Das schnellste Kind tippt *Ich nehm's!*, wählt sich aus, und das Ämtli wandert in seine Zeile. Wiederkehrende kommen jedes Mal neu.
 - **Jedes Kind**, **Überraschung** (zufällig, standardmässig höchstens 2 pro Kind und Woche) oder **Fix**.
 - **Nur wenn weg**: ein Ämtli nur an Tagen, an denen ein bestimmter Erwachsener (oder irgendein Erwachsener) weg ist – gleiche Erkennung wie beim Pausieren der Ämtli (Kalender oder Ferien-Check). *Braucht einen Erwachsenen* blendet ein Ämtli aus, solange alle Erwachsenen weg sind.
-- **Geheim**: Im Planer steht „Geheim-Ämtli“, antippen zeigt es 5 Sekunden. Bei Geburtstagen bekommt das Geburtstagskind es nie.
+- **Geheim**: Im Planer steht „Geheim-Ämtli“, ein Tipp auf den Augen-Knopf rechts zeigt es 5 Sekunden (gelb, solange es niemand genommen hat, danach grau). Bei Geburtstagen bekommt das Geburtstagskind es nie.
 
 ## Navigation
 

@@ -2,8 +2,11 @@
 
 ## Unreleased
 
+### Added
+- **Points on every task in the planner:** chores show *+N* next to the title (fair mode: their share of the day's points), to-dos and special chores show it in their label. The values come from the server, so they always match what gets booked.
+
 ### Fixed
-- **Secret special chores:** revealing the title is now a separate eye button on the right (avatar-builder style, no wiggle). Before, the small "tap to reveal" label sat inside the chore button, so tapping it often ticked the chore off.
+- **Secret special chores:** revealing the title is now a separate eye button on the right (avatar-builder style, no wiggle) – yellow like *I'll take it* in the volunteer tile, subtle grey once somebody has taken the job. Before, the small "tap to reveal" label sat inside the chore button, so tapping it often ticked the chore off.
 - **No more "already defined" error** after an update when the old and the new card bundle are both loaded (e.g. iOS app cache).
 
 ## 0.13.1 – 2026-11-15

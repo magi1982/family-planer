@@ -322,7 +322,7 @@ Fun extra jobs that only give **bonus points** – not done or expired never low
 - **Volunteer**: the job waits in the *Volunteer* tile next to the people (only visible while something is open). The fastest child taps *I'll take it!*, picks themselves and the job moves into their row. Recurring ones come back every time.
 - **Every child**, **Surprise** (random, default at most 2 per child and week) or **Fixed**.
 - **Only while away**: limit a chore to days when a chosen grown-up (or any grown-up) is away – same detection as pausing chores (calendar or holiday check). *Needs a grown-up* hides a chore while every grown-up is away.
-- **Secret**: the planner shows *Secret job*; a tap reveals it for 5 seconds. For birthdays the birthday child never gets it.
+- **Secret**: the planner shows *Secret job*; a tap on the eye button on the right reveals it for 5 seconds (yellow while nobody has taken the job, grey after). For birthdays the birthday child never gets it.
 
 ## Navigation
 
