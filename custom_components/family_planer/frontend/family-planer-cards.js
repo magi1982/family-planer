@@ -945,11 +945,11 @@ const SOON_T = ['in {n} Min', 'in {n} Std'];
 const FPL = 'de';
 const TX = {
   de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: 'antippen zum Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
+    secret: '🤫 Geheim-Ämtli', reveal: '👀 Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
-    secret: '🤫 Secret job', reveal: 'tap to reveal', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
+    secret: '🤫 Secret job', reveal: '👀 Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
@@ -1352,20 +1352,24 @@ class LoxWochenplanerCard extends FpBase {
     return true;
   }
   _sonderTitle(it) {
-    if (!it.secret || this._reveal === it.id) return esc(it.title);
-    return `${TX.secret} <span class="rvl" data-reveal="${esc(it.id)}">${TX.reveal}</span>`;
+    return !it.secret || this._reveal === it.id ? esc(it.title) : TX.secret;
+  }
+  // separate, calm button on the right – far from the tick, so revealing never ticks the job off
+  _revealBtn(it) {
+    return it.secret && this._reveal !== it.id ? `<button class="rvb" data-reveal="${esc(it.id)}">${TX.reveal}</button>` : '';
   }
   _sonderBtns(snap, pid, tStr) {
     const pts = snap.sonder_points || {};
     return (snap.sonder || []).filter((it) => it.pid === pid && (it.done ? (it.done_at || '').slice(0, 10) === tStr : this._sonderVisible(it, tStr)))
-      .map((it) => `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span><span class="bt"><em class="tag">${esc(it.icon)} ${TX.spc}${pts[it.id] ? ` · +${pts[it.id]}` : ''}</em>${this._sonderTitle(it)}</span></button>`).join('');
+      .map((it) => { const b = `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span><span class="bt"><em class="tag">${esc(it.icon)} ${TX.spc}${pts[it.id] ? ` · +${pts[it.id]}` : ''}</em>${this._sonderTitle(it)}</span></button>`;
+        const r = it.done ? '' : this._revealBtn(it); return r ? `<div class="spw">${b}${r}</div>` : b; }).join('');
   }
   _volCards(snap, tStr, persons) {
     const pts = snap.sonder_points || {};
     const open = (snap.sonder || []).filter((it) => it.pid == null && !it.done && this._sonderVisible(it, tStr));
     return open.map((it) => {
       const who = this._claim === it.id ? `<div class="who"><span>${TX.who}</span>${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="wp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 26)}<b>${esc(p.name)}</b></button>`).join('')}<button class="wp x" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${who}</div>`;
+      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${this._revealBtn(it)}<button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${who}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -1821,7 +1825,8 @@ class LoxWochenplanerCard extends FpBase {
       .age{display:block;font-size:10px;color:var(--fp-text3,#8a8a8a);font-weight:400;margin-top:2px}
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
       .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542}
-      .rvl{display:inline-block;font-size:10px;color:var(--fp-text2,#999);border:1px solid #444;border-radius:8px;padding:0 6px;margin-left:4px}
+      .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
+      .rvb{flex:none;border:1px solid #444;background:transparent;color:var(--fp-text2,#aaa);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),var(--fp-bg2,#232323) 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--fp-bg3,#2b2b2b);font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
       .vs2{font-size:11px;color:var(--fp-text3,#8a8a8a);margin-top:3px}.c.vc2{display:flex;flex-direction:column;gap:6px}
       .vcard{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
@@ -2199,11 +2204,11 @@ const SOON_T = ['in {n} min', 'in {n} h'];
 const FPL = 'en';
 const TX = {
   de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: 'antippen zum Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
+    secret: '🤫 Geheim-Ämtli', reveal: '👀 Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
-    secret: '🤫 Secret job', reveal: 'tap to reveal', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
+    secret: '🤫 Secret job', reveal: '👀 Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
@@ -2606,20 +2611,24 @@ class LoxWochenplanerCard extends FpBase {
     return true;
   }
   _sonderTitle(it) {
-    if (!it.secret || this._reveal === it.id) return esc(it.title);
-    return `${TX.secret} <span class="rvl" data-reveal="${esc(it.id)}">${TX.reveal}</span>`;
+    return !it.secret || this._reveal === it.id ? esc(it.title) : TX.secret;
+  }
+  // separate, calm button on the right – far from the tick, so revealing never ticks the job off
+  _revealBtn(it) {
+    return it.secret && this._reveal !== it.id ? `<button class="rvb" data-reveal="${esc(it.id)}">${TX.reveal}</button>` : '';
   }
   _sonderBtns(snap, pid, tStr) {
     const pts = snap.sonder_points || {};
     return (snap.sonder || []).filter((it) => it.pid === pid && (it.done ? (it.done_at || '').slice(0, 10) === tStr : this._sonderVisible(it, tStr)))
-      .map((it) => `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span><span class="bt"><em class="tag">${esc(it.icon)} ${TX.spc}${pts[it.id] ? ` · +${pts[it.id]}` : ''}</em>${this._sonderTitle(it)}</span></button>`).join('');
+      .map((it) => { const b = `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span><span class="bt"><em class="tag">${esc(it.icon)} ${TX.spc}${pts[it.id] ? ` · +${pts[it.id]}` : ''}</em>${this._sonderTitle(it)}</span></button>`;
+        const r = it.done ? '' : this._revealBtn(it); return r ? `<div class="spw">${b}${r}</div>` : b; }).join('');
   }
   _volCards(snap, tStr, persons) {
     const pts = snap.sonder_points || {};
     const open = (snap.sonder || []).filter((it) => it.pid == null && !it.done && this._sonderVisible(it, tStr));
     return open.map((it) => {
       const who = this._claim === it.id ? `<div class="who"><span>${TX.who}</span>${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="wp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 26)}<b>${esc(p.name)}</b></button>`).join('')}<button class="wp x" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${who}</div>`;
+      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${this._revealBtn(it)}<button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${who}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -3075,7 +3084,8 @@ class LoxWochenplanerCard extends FpBase {
       .age{display:block;font-size:10px;color:var(--fp-text3,#8a8a8a);font-weight:400;margin-top:2px}
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
       .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542}
-      .rvl{display:inline-block;font-size:10px;color:var(--fp-text2,#999);border:1px solid #444;border-radius:8px;padding:0 6px;margin-left:4px}
+      .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
+      .rvb{flex:none;border:1px solid #444;background:transparent;color:var(--fp-text2,#aaa);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),var(--fp-bg2,#232323) 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--fp-bg3,#2b2b2b);font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
       .vs2{font-size:11px;color:var(--fp-text3,#8a8a8a);margin-top:3px}.c.vc2{display:flex;flex-direction:column;gap:6px}
       .vcard{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
