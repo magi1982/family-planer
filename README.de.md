@@ -130,7 +130,7 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 
 ### Ferien pausieren Ämtli
 
-**Abzeichen „weg“**: Mit den echten Uhrzeiten aus dem Kalender zeigt ein kleines Abzeichen unter dem Namen „✈️ morgen ab 15:00 weg“, am Tag selbst „✈️ ab 15:00 weg“, danach „✈️ weg bis Di 23:30“ (🌴 bei Ferien) – so sehen alle, wer weg ist. Der Ferien-Check-Knopf (Strand-Symbol) ist immer da: Er zeigt, wer weg ist, und alle erkannten Einträge; Antworten lassen sich später ändern.
+**Abzeichen „weg“**: Mit den echten Uhrzeiten aus dem Kalender zeigt ein kleines Abzeichen unter dem Namen „✈️ morgen ab 15:00 weg“, am Tag selbst „✈️ ab 15:00 weg“, danach „✈️ weg bis Di 23:30“ (🌴 bei Ferien) – so sehen alle, wer weg ist. Der Ferien-Check-Knopf (Strand-Symbol) ist immer da: Er zeigt, wer weg ist, und alle erkannten Einträge; Antworten lassen sich später ändern. Direkt darunter holt der **Aktualisieren-Knopf** alle Kalender und Listen auf einmal neu (ohne PIN, höchstens alle 20 s); links daneben sitzt der Design-Knopf.
 
 - Ein **ganztägiger** (oder mindestens 20 Stunden langer) Termin mit einem **Ferien-Wort** im Kalender einer Person pausiert ihre Ämtli – sie zählen **weder als erledigt noch als verpasst**, Zuverlässigkeit und Serie bleiben unberührt.
 - Wortenden zählen: „Ferien“ findet „Skiferien“ und „Sommerferien“, aber nicht „Ferienplanung“.

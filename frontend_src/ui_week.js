@@ -289,11 +289,14 @@ class FpBase extends HTMLElement {
   getGridOptions() { return { columns: 'full', min_rows: 6 }; }
   _teardown() {
     (this._unsubs || []).forEach((p) => p.then((u) => u && u()).catch(() => {}));
+    if (this._onFpRefresh) { window.removeEventListener('fp-refresh', this._onFpRefresh); this._onFpRefresh = null; }
     this._unsubs = null;
     if (this._timer) { clearInterval(this._timer); this._timer = null; }
   }
   _ensure() {
     if (!this._hass || !this._cfg || !this.isConnected || this._unsubs) return;
+    // header refresh button: pull the calendars again and reload the events
+    this._onFpRefresh = () => { if (this._syncCal) this._syncCal(); }; window.addEventListener('fp-refresh', this._onFpRefresh);
     this._unsubs = this._lists().map(([key, ent]) => this._hass.connection.subscribeMessage(
       (m) => { this._data[key] = m.items || []; this._render(); },
       { type: 'todo/item/subscribe', entity_id: ent }

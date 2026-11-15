@@ -334,11 +334,11 @@
   const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', einstellungen: 'settings' };
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-      design: 'Design', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+      design: 'Design', refresh: 'Kalender und Listen aktualisieren', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
       away: 'Weg – Ämtli pausieren', home: 'Hier – Ämtli laufen weiter', close: 'Schliessen', open: 'offen', all: 'alle', fam: 'Ganze Familie', opt: 'Optional – lange Termine', optHint: 'Keine Ferien-Wörter, aber länger als die eingestellte Stundenzahl. Ohne Entscheid laufen die Ämtli weiter.',
       miss: 'Ansicht „{p}“ fehlt in diesem Dashboard. Ansicht mit diesem Pfad anlegen oder in der Navigationskarte unter paths: anpassen.' },
     en: { wd: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], mon: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-      design: 'Design', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays in the next two weeks. Who do they apply to, and are you away or here?', vacEmpty: 'No absence in the calendar for the next two weeks.', awWho: 'Who is away?', awNone: 'Nobody is away right now.', awUntil: 'away until {d}', awAt: 'away from {t} today', awTomAt: 'away tomorrow from {t}', awTom: 'away from tomorrow', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      design: 'Design', refresh: 'Refresh calendars and lists', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays in the next two weeks. Who do they apply to, and are you away or here?', vacEmpty: 'No absence in the calendar for the next two weeks.', awWho: 'Who is away?', awNone: 'Nobody is away right now.', awUntil: 'away until {d}', awAt: 'away from {t} today', awTomAt: 'away tomorrow from {t}', awTom: 'away from tomorrow', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       away: 'Away – pause chores', home: 'Here – chores go on', close: 'Close', open: 'open', all: 'all', fam: 'Whole family', opt: 'Optional – long events', optHint: 'No holiday words, but longer than the set number of hours. Without a decision chores go on.',
       miss: 'View "{p}" is missing in this dashboard. Add a view with this path or change it under paths: in the navigation card.' } };
   const NAV_POPCSS = `.pop .aw{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;margin:4px 0;border-radius:10px;background:var(--fp-bg2);font-size:13px}.pop .vb button.sel{outline:2px solid var(--fp-accent)}
@@ -374,6 +374,7 @@
           if (b && this._views && !this._views.has(b.dataset.go)) { this._flash(NAV_T[this._lang()].miss.replace('{p}', b.dataset.go)); return; }
           if (b && window.FPX) { window.FPX.fpNavigate(b.dataset.go); return; }
           if (e.target.closest('[data-themes]')) { this._open = this._open === 'theme' ? null : 'theme'; this._render(); return; }
+          if (e.target.closest('[data-refresh]')) { this._refresh(); return; }
           if (e.target.closest('[data-vac]')) { this._open = this._open === 'vac' ? null : 'vac'; this._render(); return; }
           if (e.target.closest('[data-x]')) { this._open = null; this._render(); return; }
           const th = e.target.closest('[data-theme]'); if (th) { this._save({ theme: th.dataset.theme }); return; }
@@ -462,6 +463,14 @@
       try { await window.FPPIN.call(this._store, 'family_planer/theme/set', data, { lang: this._lang(), host: this }); }
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
+    // header refresh: the server pulls all calendars and lists, the week view reloads its events
+    async _refresh() {
+      if (this._busyR || !this._store) return;
+      this._busyR = true; this._render();
+      try { await Promise.race([this._store.ws('family_planer/refresh', {}), new Promise((res) => setTimeout(res, 45000))]); } catch (e) { /* shown by the status page */ }
+      window.dispatchEvent(new Event('fp-refresh'));
+      setTimeout(() => { this._busyR = false; this._render(); }, 600);
+    }
     async _decide(key, decision) {
       const c = this._vacChoice(key);
       try { await window.FPPIN.call(this._store, 'family_planer/vacation/decide', { key, decision, family: !!c.family, persons: c.family ? [] : c.persons }, { lang: this._lang(), host: this }); delete this._vc[key]; }
@@ -503,12 +512,14 @@
         button.menu{padding:0 10px}
         button ha-icon{--mdc-icon-size:20px}
         .rt{display:flex;justify-content:flex-end;align-items:center;gap:8px;position:relative}
+        .stk{display:flex;flex-direction:column;gap:4px}.stk button{height:32px;justify-content:center;min-width:40px;padding:0 10px}.stk button ha-icon{--mdc-icon-size:18px}
+        button.rf.spin ha-icon{animation:fprot 1s linear infinite}@keyframes fprot{to{transform:rotate(360deg)}}
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
         button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}button.vac.quiet{color:inherit;border-color:var(--fp-line)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
         @media (max-width:700px){.mid button span.l{display:none}.mid button{padding:0 12px}.clk span{display:none}.bar{grid-template-columns:auto 1fr auto}}
         .bar.sc{min-height:96px;padding-top:10px;padding-bottom:10px}.bar.sc > :not(.scn){position:relative;z-index:1}.bar.sc .clk b,.bar.sc .clk span,.bar.sc .ttl{text-shadow:0 1px 3px rgba(0,0,0,.55)}
-        .bar.sc .mid button:not(.on),.bar.sc .rt > button{background:color-mix(in srgb,var(--fp-bg3) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+        .bar.sc .mid button:not(.on),.bar.sc .rt > button,.bar.sc .stk button{background:color-mix(in srgb,var(--fp-bg3) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
         .wxc{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-right:4px;min-width:0}
         .wxn{display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:14px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:13px;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}.wxn b{font-size:15px}.wxn i{font-style:normal;font-size:18px}
         .sug{display:flex;align-items:center;gap:8px;max-width:280px;padding:4px 10px 4px 6px;border-radius:12px;background:color-mix(in srgb,var(--fp-accent) 22%,var(--fp-bg1));border:1px solid color-mix(in srgb,var(--fp-accent) 50%,transparent);font-size:12px;line-height:1.25;animation:fpsugin .6s ease-out}
@@ -562,7 +573,8 @@
               <div class="vb"><button class="away${v.decision === 'away' ? ' sel' : ''}" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
               <button class="home${v.decision === 'home' ? ' sel' : ''}" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`; }).join(''); }).join('')}</div></div>` : '';
       this._popHtml = pop;
-      return `<span class="rt">${this._wxCorner(s, lang)}${vac}${this._cfg.theme_picker === false ? '' : `<button class="ic${this._open === 'theme' ? ' on' : ''}" data-themes title="${T.design}" aria-expanded="${this._open === 'theme'}">${themeSwatch(cur)}<ha-icon icon="mdi:palette-outline"></ha-icon></button>`}
+      const rf = `<button class="ic rf${this._busyR ? ' spin' : ''}" data-refresh title="${escN(T.refresh)}" aria-label="${escN(T.refresh)}"><ha-icon icon="mdi:refresh"></ha-icon></button>`;
+      return `<span class="rt">${this._wxCorner(s, lang)}${this._cfg.theme_picker === false ? '' : `<button class="ic${this._open === 'theme' ? ' on' : ''}" data-themes title="${T.design}" aria-expanded="${this._open === 'theme'}">${themeSwatch(cur)}<ha-icon icon="mdi:palette-outline"></ha-icon></button>`}<span class="stk">${vac}${rf}</span>
         ${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;
     }
   }

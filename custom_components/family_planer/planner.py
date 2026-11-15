@@ -108,6 +108,7 @@ def parse_hhmm(value: str | None, default: str = "00:00") -> tuple[int, int]:
 LIST_READ_TIMEOUT = 15
 AI_TIMEOUT = 30
 AI_MAX_ITEMS = 60
+REFRESH_MIN_GAP = 20
 
 
 class FamilyPlanner:
@@ -133,6 +134,7 @@ class FamilyPlanner:
         self._away_known = False
         self._pin_fail: list[datetime] = []
         self._ai_last: dict[str, datetime] = {}
+        self._refresh_last: datetime | None = None
         self.closing = False
         self.busy: dict[str, list[list]] = {}  # today's timed events per person (suggestions)
         self._wx: dict[str, Any] = {}  # weather condition and today's maximum (special chores)
@@ -1050,6 +1052,35 @@ class FamilyPlanner:
         if done and pts > 0:
             rewards._add(self.data["ledger"], todo["person_id"], pts, "todo", ref, todo["title"],
                          dt_util.now().isoformat())
+
+    async def async_refresh_all(self) -> bool:
+        """Refresh button in the header: pull all calendars and lists now, then recompute away, season and lists.
+
+        At most once every REFRESH_MIN_GAP seconds (several tablets / impatient taps); returns False when skipped.
+        """
+        now = dt_util.now()
+        if self._refresh_last and (now - self._refresh_last).total_seconds() < REFRESH_MIN_GAP:
+            return False
+        self._refresh_last = now
+        ents = {p["calendar"] for p in self.data["persons"].values() if p.get("calendar")}
+        ents |= {lst["entity"] for lst in self.data["lists"].values() if lst.get("entity")}
+        ents |= set(self.todo_settings()["name_lists"])
+        ents = sorted(e for e in ents if self.hass.states.get(e) is not None)
+        if ents:
+            try:
+                async with asyncio.timeout(LIST_READ_TIMEOUT):
+                    await self.hass.services.async_call("homeassistant", "update_entity", {"entity_id": ents},
+                                                        blocking=True)
+            except Exception as err:  # a calendar or list without polling must not stop the rest
+                _LOGGER.debug("Refresh of %s failed: %s", ents, err)
+        if self.module_on(MODULE_WEEK):
+            await self.async_refresh_away(apply=True)
+            await self.async_refresh_season(force=True)
+        for lid in list(self.data["lists"]):
+            await self.async_refresh_list(lid)
+        await self.async_sync_name_lists()
+        self._changed()
+        return True
 
     async def async_optimize_all(self, use_ai: bool) -> None:
         for lid in list(self.data["lists"]):

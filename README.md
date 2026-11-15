@@ -131,7 +131,7 @@ Per child (or person, e.g. university/work):
 
 ### Holidays pause chores
 
-**Away badge**: with the real times from the calendar, a small badge below the name shows *✈️ away tomorrow from 15:00*, on the day *✈️ away from 15:00*, then *✈️ away until Tue 23:30* (🌴 for holidays), so everybody sees who is away. The holiday check button (beach icon) is always there: it shows who is away and every detected entry, and answers can be changed later.
+**Away badge**: with the real times from the calendar, a small badge below the name shows *✈️ away tomorrow from 15:00*, on the day *✈️ away from 15:00*, then *✈️ away until Tue 23:30* (🌴 for holidays), so everybody sees who is away. The holiday check button (beach icon) is always there: it shows who is away and every detected entry, and answers can be changed later. Right below it, the **refresh button** pulls all calendars and lists at once (no PIN, at most every 20 s); the design button sits to their left.
 
 - An **all-day** (or at least 20-hour) event with a **holiday word** in a person's calendar pauses their chores – they count **neither as done nor as missed**; reliability and streak are not affected.
 - Word endings count: "holiday" finds "ski holiday" and "summer holiday" – in German "Ferien" finds "Skiferien" but not "Ferienplanung".

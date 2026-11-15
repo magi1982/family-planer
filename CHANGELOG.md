@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Added
+- **Refresh button in the header:** pulls all person calendars, smart lists and to-do lists with names right away, then recomputes absences, the season scene and the list categories; the week view reloads its events. No PIN (it only reads), at most once every 20 s. It sits below the holiday check; the design button moved to their left.
 - **Points on every task in the planner:** chores show *+N* next to the title (fair mode: their share of the day's points), to-dos and special chores show it in their label. The values come from the server, so they always match what gets booked.
 
 ### Fixed
