@@ -132,7 +132,7 @@
       F('couple', 'date', 'Kennenlerntag', 'Couple anniversary', 'Der Tag, an dem ihr ein Paar wurdet.', 'The day you became a couple.'),
       F('anim_bday', 'bool', 'Geburtstagskind animieren', 'Animate the birthday child', 'Die Zeile des Geburtstagskinds feiert den ganzen Tag; alle seine Punkte zählen doppelt.', 'The birthday child\'s row celebrates all day; all their points count double.'),
       F('priority', 'prio', 'Vorrang, wenn mehreres zusammenfällt', 'Priority when several things coincide', 'Oben gewinnt.', 'Top wins.'),
-      F('events', 'events', 'Saisons ein- und ausschalten', 'Switch seasons on and off', 'Pro Ereignis; Zahl = eigene Vorlaufzeit in Tagen (leer = Standard).', 'Per event; number = own lead time in days (empty = default).'),
+      F('events', 'events', 'Saisons ein- und ausschalten', 'Switch seasons on and off', 'Pro Ereignis. Leer lassen = Standard (rechts daneben, aus den Feldern oben). Eigene Zahl = so viele Tage vorher.', 'Per event. Leave empty = default (shown on the right, from the fields above). Own number = that many days before.'),
       F('sug_enabled', 'bool', 'Vorschläge unter dem Wetter', 'Suggestions below the weather', 'Ab Mittag höchstens ein Vorschlag pro Tag, täglich ein anderer (Pool, Jacuzzi, Spieleabend, Velotour …).', 'From noon at most one suggestion a day, a different one every day (pool, hot tub, games night, bike ride …).'),
       F('sug_from', 'time', 'Vorschläge ab', 'Suggestions from', '', ''),
       F('pool', 'entity', 'Pool-Temperatur', 'Pool temperature', 'Sensor mit der Wassertemperatur.', 'Sensor with the water temperature.', { domain: 'sensor', classes: ['temperature'] }),
@@ -432,8 +432,13 @@
       if (fd.type === 'events') {
         const ev = v || {}; const up = (this._data.season_upcoming || []);
         const when = (k) => { const u = up.find((x) => x.key === k); return u ? u.start.slice(8, 10) + '.' + u.start.slice(5, 7) + '.' : ''; };
+        const lbl2 = (de, en) => (lang === 'en' ? en : de); const f = this._forms.seasons || {};
+        // default lead time of every event, live from the two fields above (same rules as the server)
+        const defLead = (k) => { if (k === 'geburtstag') return 'day'; if (['weihnachten', 'winter', 'fruehling', 'sommer', 'herbst'].includes(k)) return 0;
+          if (k.startsWith('ferien_')) return Number(f.lead_school != null && f.lead_school !== '' ? f.lead_school : 3); return Number(f.lead_day != null && f.lead_day !== '' ? f.lead_day : 3); };
         return `<div class="row col1">${head}<div class="evl">${Object.keys(SEV).map((k) => { const x = ev[k] || {}; const on = x.on !== false;
-          return `<div class="evr${on ? '' : ' off'}"><input type="checkbox" class="sw" data-evon="${k}" ${on ? 'checked' : ''}><span class="nn">${esc(SEV[k][lang === 'en' ? 1 : 0])}</span><small>${esc(when(k))}</small><input class="in n" type="number" min="0" max="30" placeholder="–" data-evld="${k}" value="${x.lead != null ? esc(x.lead) : ''}"></div>`; }).join('')}</div></div>`;
+          const def = defLead(k);
+          return `<div class="evr${on ? '' : ' off'}"><input type="checkbox" class="sw" data-evon="${k}" ${on ? 'checked' : ''}><span class="nn">${esc(SEV[k][lang === 'en' ? 1 : 0])}</span><small>${esc(when(k))}</small><input class="in n" type="number" min="0" max="30" placeholder="${def}" data-evld="${k}" value="${x.lead != null ? esc(x.lead) : ''}" title="${esc(lbl2('Leer = Standard', 'Empty = default'))}"><small class="dl">${esc(def === 'day' ? lbl2('am Tag', 'on the day') : lbl2(`Standard ${def} T.`, `default ${def} d`))}</small></div>`; }).join('')}</div></div>`;
       }
       if (fd.type === 'awards') {
         const it = (v && v.items) || {}; const pts = this._snap().award_points || {};
@@ -560,7 +565,7 @@
         .upl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}.upl label{display:inline-flex;align-items:center}.upl small{font-size:12px;color:#8a8a8a}
         .tb.pin{color:${G};border-color:${G}}
         .hint3{font-size:13px;color:#999;margin:0 2px 10px;max-width:980px}
-        .evl{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px;margin-top:8px}.evr{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;background:#232323;border:1px solid #2a2a2a}.evr .nn{flex:1;font-size:13px}.evr small{color:#8a8a8a;font-size:11px}.evr .in.n{width:58px}.evr.off{opacity:.55}
+        .evl{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px;margin-top:8px}.evr{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;background:#232323;border:1px solid #2a2a2a}.evr .nn{flex:1;font-size:13px}.evr small{color:#8a8a8a;font-size:11px}.evr .in.n{width:58px}.evr small.dl{min-width:86px;text-align:left;color:#7a7a7a}.evr.off{opacity:.55}
         .sdl{display:flex;flex-direction:column;gap:6px;max-width:980px;margin-top:10px}.sdr{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:#232323;border:1px solid #2a2a2a}.sdr.off{opacity:.6}
         .sdr .si{font-size:22px}.sdr .st{flex:1;min-width:0}.sdr .st b{display:block;font-size:14px;font-weight:500}.sdr .st small{display:block;font-size:12px;color:#8a8a8a;margin-top:2px}
         .sform{padding:10px 12px;border-radius:12px;border:1px solid #3a3a3a;background:#1e1e1e;max-width:980px}
