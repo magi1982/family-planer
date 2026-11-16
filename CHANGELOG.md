@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **Absences after a restart or update:** cloud calendars often deliver their events only a little after Home Assistant has started, so absences and the holiday check could stay empty until the next regular refresh. The planner now reads the calendars again 1, 3 and 10 minutes after the start.
+
 ## 0.13.3 – 2026-11-16
 
 ### Added

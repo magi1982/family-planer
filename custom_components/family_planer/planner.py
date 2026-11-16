@@ -109,6 +109,7 @@ LIST_READ_TIMEOUT = 15
 AI_TIMEOUT = 30
 AI_MAX_ITEMS = 60
 REFRESH_MIN_GAP = 20
+AWAY_RETRY_AFTER_START = (60, 180, 600)  # seconds after the start: read the calendars again
 
 
 class FamilyPlanner:
@@ -229,11 +230,20 @@ class FamilyPlanner:
     async def _handle_started(self, _hass: HomeAssistant) -> None:
         if self.module_on(MODULE_WEEK):
             await self.async_refresh_away()
+            # cloud calendars (Outlook, Google …) often deliver their events only a little after the start:
+            # read the absences again after 1, 3 and 10 minutes, so nobody is shown as "here" by mistake
+            for delay in AWAY_RETRY_AFTER_START:
+                self._unsubs.append(async_call_later(self.hass, delay, self._handle_away_retry))
             await self.async_refresh_season(force=True)
             await self.async_sync_name_lists()
         await self.async_rollover()
         if self.module_on(MODULE_LISTS):
             await self.async_optimize_all(use_ai=False)
+
+    @callback
+    def _handle_away_retry(self, _now: datetime) -> None:
+        if not self.closing:
+            self.hass.async_create_task(self.async_refresh_away(apply=True))
 
     @callback
     def _handle_away_timer(self, _now: datetime) -> None:
