@@ -585,3 +585,47 @@ Der Info-Knopf (ⓘ) neben dem Datum gibt es heute nur an den besonderen Tagen. 
 Kandidaten: Samichlaus, Heiligabend/Weihnachten, Silvester, Neujahr/Berchtoldstag, Dreikönigstag, Fasnacht, Valentinstag, Karfreitag/Ostern, Tag der Arbeit, Auffahrt, Pfingsten, Muttertag, Vatertag, 1. August, Bettag, Erntedank, Frühlings-/Sommer-/Herbst-/Winteranfang.
 Nicht nötig: Wetter, Jahreszeiten, Ferien, Geburtstag, Hochzeitstag (selbsterklärend).
 **Status:** Idee
+
+### 53. 40 Ideen zum Antippen (Click me)
+Wie Titanic und Mondfähre: in jeder Szene etwas, das beim Antippen eine kleine Geschichte abspielt; dazu der goldene „Tipp!“-Hinweis. Vorschau: Artefakt „Family Planer – 40 Ideen zum Antippen“.
+1. **Sonne mit Sonnenbrille** (die Sonne): Die Sonne setzt eine Sonnenbrille auf, zwinkert und lässt die Luft über dem Boden kurz flimmern.
+2. **Eigene Regenwolke** (eine Wolke): Nur aus dieser Wolke regnet es – genau auf eine Blume, die dabei gross wird und aufblüht.
+3. **Goldtopf am Regenbogen** (den Regenbogen): Am Ende des Regenbogens taucht ein funkelnder Topf voller Goldtaler auf, Münzen springen heraus.
+4. **Donnerschlag** (eine Gewitterwolke): Ein grosser Blitz schlägt ein, das ganze Bild wackelt, die Katze auf dem Dach springt erschrocken hoch.
+5. **Schneekugel** (den Himmel): Das Bild wird zur Schneekugel: es schüttelt sich und ein dichtes Schneegestöber wirbelt durch die Szene.
+6. **Nebel wegpusten** (den Nebel): Ein Windstoss bläst den Nebel weg – dahinter steht plötzlich ein Reh, das kurz schaut und davonspringt.
+7. **Drachen steigen lassen** (einen Baum bei Wind): Die Blätter fliegen davon, ein bunter Drachen steigt auf und tanzt im Wind.
+8. **Müder Mond** (den Mond): Der Mond gähnt, zieht eine Schlafmütze an und schnarcht kleine Zzz – nach ein paar Sekunden wacht er auf.
+9. **Wünsch dir was** (den Sternenhimmel): Eine grosse Sternschnuppe saust quer über den Himmel und zerplatzt in viele kleine funkelnde Sterne.
+10. **Licht im Fenster** (ein Fenster (nachts)): Das Licht geht an, eine Silhouette winkt kurz – dann geht das Licht wieder aus.
+11. **Rauchringe** (den Kamin): Aus dem Kamin steigen statt Rauch drei Rauchringe und ein kleines Herz aus Rauch.
+12. **Arschbombe** (den Pool): Jemand macht eine Arschbombe – riesige Wasserfontäne, Tropfen spritzen bis auf die Wiese.
+13. **Apfel fällt** (den Apfelbaum): Ein Apfel fällt, hüpft zweimal über den Rasen, und ein kleiner Wurm schaut heraus und winkt.
+14. **Eichhörnchen** (einen Herbstbaum): Ein Blätterwirbel – ein Eichhörnchen flitzt den Stamm hinunter, schnappt eine Nuss und verschwindet.
+15. **Wasserschlacht** (einen Rasensprenger): Der Sprenger dreht durch, ein Kind rennt kreischend durch den Wasserstrahl, darin leuchtet ein kleiner Regenbogen.
+16. **Eidechsen-Liegestütze** (die Eidechse): Die Eidechse bleibt stehen, macht drei Liegestütze wie echte Eidechsen und flitzt dann davon.
+17. **Eiskunstlauf** (den gefrorenen Boden): Ein Kind auf Schlittschuhen gleitet über das Eis, dreht eine Pirouette und landet im Schnee.
+18. **Kerze anzünden** (den Adventskranz): Ein Streichholz zündet kurz die nächste Kerze an – Glitzer steigt auf, dann wartet sie wieder auf ihren Sonntag.
+19. **Samichlaus-Sack** (den Samichlaus): Der Samichlaus öffnet den Sack: Nüsse, Mandarinen und Grittibänze purzeln heraus, der Esel wackelt mit den Ohren.
+20. **Christkind fliegt** (den Weihnachtsbaum): Das Christkind fliegt aus dem Baum, streut Sterne über das Haus, die Geschenke wackeln.
+21. **Geschenk öffnen** (ein Geschenk): Der Deckel springt auf – ein Schachtelteufel (Springteufel) schnellt heraus und wackelt lachend.
+22. **Grosses Finale** (den Himmel an Silvester): Alle Raketen auf einmal: ein riesiges Finale, das neue Jahr in grossen goldenen Ziffern.
+23. **Glück vom Dach** (den Kaminfeger): Der Kaminfeger rutscht auf der Leiter vom Dach und wirft Kleeblätter, das Glücksschwein hüpft vor Freude.
+24. **Dem Stern folgen** (den Stern): Die drei Könige laufen dem Stern nach; ein Dreikönigskuchen erscheint, und der kleine König springt heraus.
+25. **Sprung von der Schanze** (das Bähnli): Das Bähnli saust nach oben, ein Skifahrer fährt die Piste hinunter, springt über eine Schanze und macht einen Salto.
+26. **Hungriger Hase** (den Schneemann): Der Hut des Schneemanns kippt, ein Hase hoppelt heran und knabbert die Rüebli-Nase ab.
+27. **Konfettikanone** (irgendwo an Fasnacht): Eine Konfettikanone schiesst eine riesige bunte Wolke ab, die Luftschlangen tanzen wild.
+28. **Herz aus Herzen** (ein Herz): Das Herz zerspringt in viele kleine Herzen, die sich zu einem grossen Herz um das Haus formen.
+29. **Küken schlüpft** (ein Osterei): Das Ei wackelt, bekommt Risse – ein flauschiges Küken schlüpft und piept.
+30. **Hase versteckt Ei** (ein Hasenloch): Der Hase springt ganz heraus, versteckt schnell ein Ei im Gras und taucht wieder ab.
+31. **Tauben-Formation** (eine Taube): Alle Tauben fliegen zusammen und formen am Himmel ein Herz, bevor sie weiterziehen.
+32. **Blumen für Mama** (die Wiese am Muttertag): Aus dem Boden wächst ein riesiger Blumenstrauss, die Blüten öffnen sich nacheinander.
+33. **Mammut-Steak** (das Lagerfeuer): Papa brät ein riesiges Mammut-Steak – der Säbelzahntiger schleicht heran und klaut es.
+34. **Höhlenmalerei** (die Höhle): In der Höhle leuchten Höhlenmalereien auf – ein Mammut, Jäger, Handabdrücke.
+35. **Falscher Hai** (die Haiflosse): Die Flosse taucht auf – darunter ist kein Hai, sondern ein Kind mit Flossen-Mütze, das lacht und abtaucht.
+36. **Krabben-Tanz** (eine Krabbe): Die Krabbe klappert mit den Scheren, tanzt seitwärts im Kreis und gräbt sich wieder ein.
+37. **Looping** (das Flugzeug): Das Flugzeug fliegt einen Looping und schreibt mit weissem Rauch ein Herz in den Himmel.
+38. **Alphorn** (die Schweizerfahne): Ein Alphornbläser erscheint und bläst, Noten schweben übers Bild, das Höhenfeuer lodert auf.
+39. **Kerzen auspusten** (den Geburtstagskuchen): Die Kerzen werden ausgepustet (kleine Rauchfahnen), dann gehen sie mit Konfetti wieder an.
+40. **Ring ring!** (das Ur-Handy): Das Handy klingelt und vibriert, dann verwandelt es sich kurz in ein modernes Smartphone und zurück.
+**Status:** Idee
