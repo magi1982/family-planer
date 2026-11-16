@@ -628,4 +628,16 @@ Wie Titanic und Mondfähre: in jeder Szene etwas, das beim Antippen eine kleine 
 38. **Alphorn** (die Schweizerfahne): Ein Alphornbläser erscheint und bläst, Noten schweben übers Bild, das Höhenfeuer lodert auf.
 39. **Kerzen auspusten** (den Geburtstagskuchen): Die Kerzen werden ausgepustet (kleine Rauchfahnen), dann gehen sie mit Konfetti wieder an.
 40. **Ring ring!** (das Ur-Handy): Das Handy klingelt und vibriert, dann verwandelt es sich kurz in ein modernes Smartphone und zurück.
-**Status:** Prototyp im Artefakt „Family Planer – 40 Tipp-Animationen“ (alle 40 antippbar, 11 davon grosse Geschichten: 4, 8, 12, 19, 22, 25, 27, 33, 37, 38, 40). Noch nicht im Planer eingebaut.
+**Status:** Prototyp im Artefakt „Family Planer – 40 Tipp-Animationen“: alle 40 sind jetzt grosse Geschichten (12–22 s, Beschreibungen dort aktuell), Tipp-Fläche gross in der Szenenmitte, Hinweis „Tipp!“ eher mittig. Noch nicht im Planer eingebaut.
+
+### 54. Punkte als Coin („Kerben-Taler“)
+Punkte werden überall (Ämtli-Plakette, Punktestand, Belohnungen) mit einem eigenen Coin statt nur einer Zahl gezeigt. Gewählt: „Kerben-Taler ohne Doppelrand“ – flach (2D), Silberscheibe, Goldkern, ein geprägter Buchstabe in der Mitte und 5 eingeprägte Kerben im Silberring. Kein Dauerglanz: nur alle 5–9 s blitzt ein kleiner Stern kurz an einer Stelle auf (wie Sonne auf Metall), jeder Coin in eigenem Takt.
+Details:
+- Reines SVG, keine Bilder; bei „weniger Bewegung“ kein Aufblitzen.
+- Bis 24 px (Ämtli-Plakette) bleibt der Buchstabe gut lesbar; Grössen-Test 14–40 px ok.
+- Anzahl Kerben = Anzahl Personen (statt fix 5).
+- Beim Abhaken fliegt der Coin von der Plakette zum Punktestand, die Zahl hüpft kurz (wie im Prototyp).
+Einstellungen (mit Beschreibung DE/EN): „Buchstabe auf dem Coin“ (1 Zeichen, Standard: leer → kleiner Stern statt Buchstabe; Eingabe wird auf einen Buchstaben/Ziffer begrenzt) und „Coin anzeigen“ ein/aus (aus = Zahl wie bisher).
+Datenschutz: kein Familienname im Code oder in Beispielen – der Buchstabe kommt nur aus der Einstellung.
+Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
+**Status:** Idee (Design gewählt)
