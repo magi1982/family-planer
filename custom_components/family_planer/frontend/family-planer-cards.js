@@ -130,12 +130,14 @@
     if (jz === 'fruehling') for (let i = 0; i < 7; i++) g += `<circle cx="${((r() - 0.5) * 40).toFixed(1)}" cy="${(-8 - r() * 8).toFixed(1)}" r="1.8" fill="${i % 2 ? '#ffffff' : '#c7a4ef'}"/>`;
     return g + '</g>';
   };
-  const house = (x, y, night, snow, lit, smoke, wind) => {
-    const win = lit || night ? '#FFD86B' : '#bfe0ff';
-    let g = `<g transform="translate(${x} ${y})"><rect x="-46" y="-44" width="92" height="44" rx="2" fill="#f1e3c8"/><path d="M-54 -42 L0 -76 L54 -42Z" fill="#b5523b"/>`;
+  const house = (x, y, night, snow, lit, smoke, wind, hour) => {
+    const late = hour != null && (hour >= 23 || hour < 6); const wc = late ? '#2e4c86' : '#FFD86B';
+    const win = night ? '#2c3648' : lit ? '#FFD86B' : '#bfe0ff';
+    let g = `<g transform="translate(${x} ${y})"><rect x="-46" y="-44" width="92" height="44" rx="2" fill="${night ? '#8f8574' : '#f1e3c8'}"/><path d="M-54 -42 L0 -76 L54 -42Z" fill="${night ? '#6e3326' : '#b5523b'}"/>`;
     if (snow) g += '<path d="M-50 -44 L0 -75 L50 -44 L44 -44 L0 -70 L-44 -44Z" fill="#fff"/>';
     g += `<rect x="24" y="-78" width="10" height="20" fill="#8a3b2b"/><rect x="-8" y="-24" width="16" height="24" rx="2" fill="#7a4a2a"/>
       <rect x="-36" y="-34" width="18" height="14" rx="2" fill="${win}"/><rect x="18" y="-34" width="18" height="14" rx="2" fill="${win}"/>`;
+    if (night) g += `<rect class="wl" x="-36" y="-34" width="18" height="14" rx="2" fill="${wc}" style="animation-duration:21s;animation-delay:-4s"/><rect class="wl" x="18" y="-34" width="18" height="14" rx="2" fill="${wc}" style="animation-duration:29s;animation-delay:-17s"/>`;
     if (smoke) for (let i = 0; i < 3; i++) g += `<circle class="smk" cx="29" cy="-82" r="5" fill="#dfe3e8" style="--dx:${Math.round(12 + wind / 3)}px;animation-delay:-${i * 1.3}s"/>`;
     return g + '</g>';
   };
@@ -150,7 +152,7 @@
 @keyframes fpcl{from{transform:translateX(-260px)}to{transform:translateX(${W + 60}px)}}
 @keyframes fpfall{from{transform:translate(0,-20px)}to{transform:translate(var(--dx,0px),${H + 20}px)}}
 @keyframes fpsway{0%,100%{transform:rotate(calc(var(--wa,2deg) * -1))}50%{transform:rotate(var(--wa,2deg))}}
-@keyframes fptw{0%,100%{opacity:1}50%{opacity:.25}}@keyframes fpglw{0%,100%{opacity:.55}50%{opacity:.08}}
+@keyframes fptw{0%,100%{opacity:1}50%{opacity:.25}}@keyframes fpth2{0%,70%,100%{opacity:0}74%,96%{opacity:1}}@keyframes fptharr{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}@keyframes fpthring{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.8);opacity:0}}@keyframes fpthsp{0%,100%{transform:scale(.3);opacity:.2}50%{transform:scale(1.2);opacity:1}}@keyframes fplm{0%,6%{transform:translateY(0)}35%{transform:translateY(-150px)}60%{transform:translateY(-150px)}80%{transform:translateY(-14px)}88%,100%{transform:translateY(0)}}@keyframes fplmfl{0%,2%{opacity:0;transform:scaleY(.3)}6%,34%{opacity:1;transform:scaleY(1.3)}38%,60%{opacity:0}64%,88%{opacity:1;transform:scaleY(1)}92%,100%{opacity:0;transform:scaleY(.3)}}@keyframes fpldust{0%,2%,78%{opacity:0;transform:translate(0,0)}10%,90%{opacity:.9}24%,100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.8)}}@keyframes fplring{0%,78%{opacity:0;transform:scale(.3)}84%{opacity:.9}100%{opacity:0;transform:scale(2.4)}}@keyframes fpwbob{0%,100%{transform:translateY(0)}50%{transform:translateY(1.2px)}}@keyframes fpfloe2{from{transform:translateX(60px)}to{transform:translateX(-60px)}}@keyframes fptnight{0%{opacity:0}8%,84%{opacity:.84}95%,100%{opacity:0}}@keyframes fptsky{0%,6%{opacity:0}14%,84%{opacity:1}93%,100%{opacity:0}}@keyframes fptice{0%,14%{transform:translateX(420px);opacity:0}16%{opacity:1}32%,80%{transform:translateX(0);opacity:1}90%,100%{transform:translateX(0);opacity:0}}@keyframes fptflash{0%,31%{opacity:0;transform:scale(.4)}33%{opacity:1;transform:scale(1.2)}37%,100%{opacity:0;transform:scale(1.6)}}@keyframes fpshake{0%,31%,37%,100%{transform:translate(0,0)}32%{transform:translate(-3px,1px)}33%{transform:translate(3px,-1px)}34%{transform:translate(-2px,1px)}35%{transform:translate(2px,0)}}@keyframes fpstern{0%,38%{transform:rotate(0) translate(0,0);opacity:1}52%{transform:rotate(-12deg) translate(0,-2px)}68%{transform:rotate(-30deg) translate(-6px,80px)}72%,92%{transform:rotate(-30deg) translate(-6px,110px);opacity:0}93%{transform:none;opacity:0}100%{transform:none;opacity:1}}@keyframes fpbow{0%,38%{transform:rotate(0) translate(0,0);opacity:1}50%{transform:rotate(14deg) translate(2px,8px)}64%{transform:rotate(34deg) translate(8px,90px)}70%,92%{transform:rotate(34deg) translate(8px,120px);opacity:0}93%{transform:none;opacity:0}100%{transform:none;opacity:1}}@keyframes fpsbub{0%,40%{opacity:0}46%,74%{opacity:1}82%,100%{opacity:0}}@keyframes fptboats{0%,62%{transform:translateX(0);opacity:0}66%{opacity:1}90%{transform:translateX(-520px);opacity:1}92%,100%{transform:translateX(-520px);opacity:0}}@keyframes fpbub2{0%{transform:translateY(0);opacity:0}30%{opacity:1}100%{transform:translateY(-12px);opacity:0}}@keyframes fptossx{0%,8%{transform:translateX(0)}42%,58%{transform:translateX(48px)}92%,100%{transform:translateX(0)}}@keyframes fptossy{0%,8%,42%,58%,92%,100%{transform:translateY(0)}25%,75%{transform:translateY(-24px)}}@keyframes fpmjump{0%,55%,100%{transform:translate(0,0)}68%{transform:translate(18px,-26px)}82%,92%{transform:translate(36px,0)}}@keyframes fpdust{0%,80%,100%{opacity:0;transform:scaleX(.4)}84%{opacity:.8;transform:scaleX(1)}96%{opacity:0;transform:scaleX(1.6)}}@keyframes fpfloe{0%,100%{transform:translate(0,0)}50%{transform:translate(-18px,1px)}}@keyframes fppace{0%,100%{transform:translateX(0)}45%,55%{transform:translateX(-30px)}}@keyframes fpsig2{0%{opacity:0;transform:translateX(0)}20%{opacity:1}100%{opacity:0;transform:translateX(30px)}}@keyframes fpsprk{0%,100%{transform:rotate(-38deg)}50%{transform:rotate(38deg)}}@keyframes fpdrip{to{stroke-dashoffset:-10}}@keyframes fpbounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}@keyframes fpnote{0%{transform:translate(0,0);opacity:0}20%{opacity:1}100%{transform:translate(6px,-22px);opacity:0}}@keyframes fpmhop{0%,100%{transform:translate(0,0)}25%{transform:translate(14px,-12px)}50%{transform:translate(28px,0)}75%{transform:translate(14px,-12px)}}@keyframes fpufo{0%,100%{transform:translate(0,0)}25%{transform:translate(120px,-6px)}50%{transform:translate(200px,6px)}75%{transform:translate(80px,4px)}}@keyframes fpshipb{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(1.4px) rotate(.4deg)}}@keyframes fpdolph{0%,70%,100%{transform:translate(0,14px) rotate(0);opacity:0}74%{opacity:1}80%{transform:translate(12px,-6px) rotate(-20deg)}88%{transform:translate(26px,6px) rotate(30deg);opacity:1}92%{opacity:0}}@keyframes fplava{0%{transform:translate(0,0);opacity:1}45%{transform:translate(calc(var(--lx) * .5),var(--ly))}100%{transform:translate(var(--lx),24px);opacity:0}}@keyframes fpplume{0%{transform:translate(0,0) scale(.6);opacity:.85}100%{transform:translate(var(--dx,-20px),-40px) scale(2.2);opacity:0}}@keyframes fpsig{0%{transform:scale(.6);opacity:1}100%{transform:scale(2.4);opacity:0}}@keyframes fppop1{0%,40%,100%{opacity:0;transform:scale(.6)}48%,80%{opacity:1;transform:scale(1)}}@keyframes fpgrd{0%,40%,100%{transform:translateX(0)}50%,70%{transform:translateX(14px)}}@keyframes fpliz{0%{transform:translateX(0);opacity:0}5%{opacity:1}18%,30%{transform:translateX(70px)}42%,52%{transform:translateX(110px)}70%{transform:translateX(200px);opacity:1}76%,100%{transform:translateX(220px);opacity:0}}@keyframes fplzleg{0%,100%{transform:scaleX(1)}50%{transform:scaleX(-1)}}@keyframes fpsput{0%{transform:translateX(-40px)}100%{transform:translateX(1260px)}}@keyframes fpconc{0%{transform:translateX(-80px)}60%,100%{transform:translateX(1300px)}}@keyframes fpwl{0%,100%{opacity:0}6%,34%{opacity:1}40%{opacity:0}}@keyframes fppeek3{0%,22%,100%{transform:translateX(0)}30%,90%{transform:translateX(-30px)}34%{transform:translateX(-26px)}}@keyframes fpdove2{0%,14%{transform:translate(0,0)}100%{transform:translate(var(--tx),var(--ty))}}@keyframes fpcable2{0%,8%{transform:translate(0,0)}27%{transform:translate(var(--mx),var(--my))}46%,54%{transform:translate(var(--cx),var(--cy))}73%{transform:translate(var(--mx),var(--my))}92%,100%{transform:translate(0,0)}}@keyframes fpchole{0%,4%{opacity:0}9%,36%{opacity:1}46%,100%{opacity:0}}@keyframes fpcrab2{0%,10%{transform:translate(0,3px) scaleY(0)}17%{transform:translate(0,0) scaleY(1)}62%,68%{transform:translate(46px,0) scaleY(1)}78%,100%{transform:translate(46px,3px) scaleY(0)}}@keyframes fpcmnd{0%,70%{opacity:0}76%,84%{opacity:1}96%,100%{opacity:0}}@keyframes fpstr{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}@keyframes fpyr{0%,38%,100%{opacity:0;transform:scale(.6)}46%{opacity:1;transform:scale(1.08)}52%,78%{opacity:1;transform:scale(1)}90%{opacity:0;transform:scale(1)}}@keyframes fphop2{0%,58%,100%{transform:translateY(16px)}64%{transform:translateY(-1px)}68%,88%{transform:translateY(0)}}@keyframes fppeek2{0%,64%,100%{transform:translateY(14px)}70%,88%{transform:translateY(0)}}@keyframes fpcrab{0%{transform:translateX(0);opacity:0}8%{opacity:1}40%{transform:translateX(55px)}55%{transform:translateX(35px)}85%{transform:translateX(80px);opacity:1}100%{transform:translateX(90px);opacity:0}}@keyframes fpdove{0%,12%{transform:translate(0,0);opacity:1}100%{transform:translate(300px,-130px);opacity:0}}@keyframes fpflap{0%,100%{transform:scaleY(1)}50%{transform:scaleY(-.5)}}@keyframes fpdrone{0%,100%{transform:translate(0,0)}25%{transform:translate(90px,-12px)}50%{transform:translate(160px,4px)}75%{transform:translate(70px,14px)}}@keyframes fprot{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.2)}}@keyframes fpball1{0%,10%{transform:translate(0,0);opacity:0}14%{opacity:1}50%{transform:translate(66px,-20px)}86%{transform:translate(132px,6px);opacity:1}90%,100%{transform:translate(132px,6px);opacity:0}}@keyframes fpball2{0%,50%{transform:translate(0,0);opacity:0}54%{opacity:1}75%{transform:translate(-66px,-20px)}96%{transform:translate(-132px,6px);opacity:1}100%{opacity:0;transform:translate(-132px,6px)}}@keyframes fppeek{0%,62%,100%{transform:translateX(0)}70%,86%{transform:translateX(-30px)}74%{transform:translateX(-26px)}}@keyframes fpnod{0%,100%{transform:rotate(0)}50%{transform:rotate(9deg)}}@keyframes fpwave2{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(20deg)}}@keyframes fpplane{0%,55%{transform:translateX(-80px)}100%{transform:translateX(1300px)}}@keyframes fpfin{0%,60%,100%{transform:translate(0,14px);opacity:0}64%{transform:translate(0,0);opacity:1}88%{transform:translate(110px,0);opacity:1}92%{transform:translate(120px,14px);opacity:0}}@keyframes fpcable{0%,8%{transform:translate(0,0)}46%,54%{transform:translate(var(--cx),var(--cy))}92%,100%{transform:translate(0,0)}}@keyframes fpski{0%{transform:translate(0,0);opacity:0}6%{opacity:1}25%{transform:translate(calc(var(--sx) * .3),calc(var(--sy) * .25)) rotate(-8deg)}50%{transform:translate(calc(var(--sx) * .55),calc(var(--sy) * .55)) rotate(8deg)}75%{transform:translate(calc(var(--sx) * .8),calc(var(--sy) * .78)) rotate(-8deg)}92%{transform:translate(var(--sx),var(--sy));opacity:1}100%{transform:translate(var(--sx),var(--sy));opacity:0}}@keyframes fphop{0%,58%,100%{transform:translateY(26px)}64%{transform:translateY(-2px)}68%,86%{transform:translateY(0)}70%{transform:translateY(-3px)}}@keyframes fpleg{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(22deg)}}@keyframes fprocket{0%{transform:translateY(70px);opacity:0}5%{opacity:1}30%{transform:translateY(0);opacity:1}34%,100%{transform:translateY(0);opacity:0}}@keyframes fpflare{0%,82%,100%{opacity:.15;transform:scale(.35)}88%{opacity:1;transform:scale(1.15)}94%{opacity:.4;transform:scale(.6)}}@keyframes fpshoot{0%,88%{opacity:0;transform:translate(0,0)}89%{opacity:1}96%{opacity:0;transform:translate(190px,66px)}100%{opacity:0;transform:translate(190px,66px)}}@keyframes fpglw{0%,100%{opacity:.55}50%{opacity:.08}}
 @keyframes fpsmk{0%{transform:translate(0,0) scale(.6);opacity:.8}100%{transform:translate(var(--dx,14px),-34px) scale(1.8);opacity:0}}
 @keyframes fpflash{0%,92%,100%{opacity:0}93%,96%{opacity:.8}}
 @keyframes fpfog{0%,100%{transform:translateX(-40px)}50%{transform:translateX(40px)}}
@@ -162,7 +164,7 @@
 @keyframes fpflame{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.25)}}
 @keyframes fppulse{0%,100%{opacity:.85}50%{opacity:1}}
 .scn .cl{animation:fpcl linear infinite}.scn .fl{animation:fpfall linear infinite}.scn .sw{animation:fpsway var(--wd,6s) ease-in-out infinite}
-.scn .tw{animation:fptw 1.8s ease-in-out infinite}.scn .glw{animation:fpglw 1.8s ease-in-out infinite}.scn .smk{animation:fpsmk 4s ease-out infinite}.scn .flash{animation:fpflash 7s linear infinite}
+.scn .tw{animation:fptw 1.8s ease-in-out infinite}.scn .glw{animation:fpglw 1.8s ease-in-out infinite}.scn [data-tap]{pointer-events:auto;cursor:pointer}.scn .taph2{animation:fpth2 11s ease-in-out infinite;opacity:0}.scn .th-lm{animation-delay:-5s}.scn .tharr{animation:fptharr .7s ease-in-out infinite}.scn .thring{animation:fpthring 1.4s ease-out infinite;transform-box:fill-box;transform-origin:center}.scn .thsp{animation:fpthsp 1s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.scn svg.t-titanic .th-titanic,.scn svg.t-lm .th-lm{display:none}.scn .lmflame,.scn .ldust,.scn .lring{opacity:0}.scn .lmflame{transform-box:fill-box;transform-origin:50% 0}.scn .lring,.scn .ldust{transform-box:fill-box;transform-origin:center}.scn svg.t-lm .lm{animation:fplm 9s cubic-bezier(.45,0,.4,1) forwards}.scn svg.t-lm .lmflame{animation:fplmfl 9s linear forwards}.scn svg.t-lm .ldust{animation:fpldust 9s ease-out forwards}.scn svg.t-lm .lring{animation:fplring 9s ease-out forwards}.scn svg.t-lm .ufo{animation-play-state:running}.scn .wbob{animation:fpwbob 3s ease-in-out infinite}.scn .floe2{animation:fpfloe2 40s linear infinite}.scn .tnight,.scn .tsky,.scn .tice,.scn .tflash,.scn .sbub,.scn .tboats{opacity:0}.scn .stern,.scn .bow{transform-box:fill-box;transform-origin:47% 89%}.scn svg.t-titanic .tnight{animation:fptnight 34s linear forwards}.scn svg.t-titanic .tsky{animation:fptsky 34s linear forwards}.scn svg.t-titanic .tice{animation:fptice 34s ease-out forwards}.scn svg.t-titanic .tflash{animation:fptflash 34s linear forwards;transform-box:fill-box;transform-origin:center}.scn svg.t-titanic .ship{animation:fpshake 34s linear forwards}.scn svg.t-titanic .stern{animation:fpstern 34s ease-in forwards}.scn svg.t-titanic .bow{animation:fpbow 34s ease-in forwards}.scn svg.t-titanic .sbub{animation:fpsbub 34s linear forwards}.scn svg.t-titanic .tboats{animation:fptboats 34s linear forwards}.scn svg.t-titanic .bowsplash{display:none}.scn .bub2{animation:fpbub2 1.6s ease-out infinite}.scn .tossx{animation:fptossx 3.2s linear infinite}.scn .tossy{animation:fptossy 3.2s infinite;animation-timing-function:cubic-bezier(.3,0,.7,1)}.scn .mjump{animation:fpmjump 9s ease-in-out infinite}.scn .dust{animation:fpdust 9s linear infinite;transform-box:fill-box;transform-origin:center;opacity:0}.scn .floe{animation:fpfloe 14s ease-in-out infinite}.scn .pace{animation:fppace 16s ease-in-out infinite}.scn .sig2{animation:fpsig2 1.8s ease-out infinite}.scn .sprk{animation:fpsprk 4s ease-in-out infinite}.scn .drip{animation:fpdrip .5s linear infinite}.scn .bounce{animation:fpbounce 1.6s ease-in-out infinite}.scn .note{animation:fpnote 2.4s ease-out infinite}.scn .mhop{animation:fpmhop 5s ease-in-out infinite}.scn .ufo{animation:fpufo 16s ease-in-out infinite}.scn .shipb{animation:fpshipb 5s ease-in-out infinite}.scn .dolph{animation:fpdolph 9s ease-in-out infinite}.scn .lava{animation:fplava 2s ease-in infinite}.scn .plume{animation:fpplume 7s ease-out infinite;transform-box:fill-box;transform-origin:center}.scn .sig{animation:fpsig 2.1s ease-out infinite;transform-box:view-box}.scn .pop1{animation:fppop1 6s ease-in-out infinite;transform-box:fill-box;transform-origin:0 100%}.scn .grd{animation:fpgrd 12s ease-in-out infinite}.scn .liz{animation:fpliz 20s ease-in-out infinite}.scn .lzleg{animation:fplzleg .34s linear infinite;transform-box:fill-box;transform-origin:center}.scn .sput{animation:fpsput 44s linear infinite}.scn .conc{animation:fpconc 26s linear infinite}.scn .wl{animation:fpwl 23s linear infinite;opacity:0}.scn .peek3{animation:fppeek3 14s ease-in-out infinite}.scn .dove2{animation:fpdove2 11s ease-in infinite}.scn .cable2{animation:fpcable2 18s ease-in-out infinite}.scn .chole{animation:fpchole 16s linear infinite;opacity:0}.scn .crab2{animation:fpcrab2 16s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}.scn .cmnd{animation:fpcmnd 16s linear infinite;opacity:0}.scn .str{animation:fpstr 3.6s ease-in-out infinite}.scn .yr{animation:fpyr 7s ease-out infinite}.scn .hop2{animation:fphop2 9s ease-in-out infinite}.scn .peek2{animation:fppeek2 10s ease-in-out infinite}.scn .crab{animation:fpcrab 12s linear infinite}.scn .dove{animation:fpdove 9s ease-in infinite}.scn .flap{animation:fpflap .32s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}.scn .drone{animation:fpdrone 10s ease-in-out infinite}.scn .rot{animation:fprot .12s linear infinite;transform-box:fill-box;transform-origin:center}.scn .ball1{animation:fpball1 3s linear infinite}.scn .ball2{animation:fpball2 3s linear infinite}.scn .peek{animation:fppeek 11s ease-in-out infinite}.scn .nod{animation:fpnod 2.8s ease-in-out infinite}.scn .wave2{animation:fpwave2 1.6s ease-in-out infinite}.scn .plane{animation:fpplane 30s linear infinite}.scn .fin{animation:fpfin 19s ease-in-out infinite}.scn .cable{animation:fpcable 16s ease-in-out infinite}.scn .ski{animation:fpski 9s linear infinite}.scn .hop{animation:fphop 9s ease-in-out infinite}.scn .leg{animation:fpleg .9s ease-in-out infinite}.scn .step{animation:fpbob .45s ease-in-out infinite}.scn .rocket{animation:fprocket 2.6s ease-out infinite}.scn .flare{animation:fpflare 11s ease-in-out infinite}.scn .shoot{animation:fpshoot 17s linear infinite}.scn .smk{animation:fpsmk 4s ease-out infinite;transform-box:fill-box;transform-origin:center}.scn .flash{animation:fpflash 7s linear infinite}
 .scn .fog{animation:fpfog 14s ease-in-out infinite}.scn .fw{animation:fpfw 2.6s ease-out infinite}.scn .rise{animation:fprise linear infinite}
 .scn .bob{animation:fpbob 3s ease-in-out infinite}.scn .wave{animation:fpwave 4s linear infinite}.scn .fly{animation:fpfly linear infinite}
 .scn .flame{transform-box:fill-box;transform-origin:50% 100%;animation:fpflame .5s ease-in-out infinite}.scn .sun{animation:fppulse 5s ease-in-out infinite}
@@ -174,7 +176,8 @@
   // snow, pool cover in winter, lights in the evening, fairy lights in Advent, icicles below -5°
   const TILE = '#C9CDD2';
   const pool = (o, x1, x2, y1, y2, persp) => {
-    const winter = o.snow || o.jz === 'winter';
+    // covered in winter and every night: closed at 22:00 at the latest, open again from 8:00
+    const winter = o.snow || o.jz === 'winter' || (o.hour != null && (o.hour >= 22 || o.hour < 8));
     const shape = persp ? `M${x1 + persp} ${y1} H${x2 - persp} L${x2} ${y2} H${x1}Z` : `M${x1} ${y1} H${x2} V${y2} H${x1}Z`;
     let g = `<path d="${persp ? `M${x1 + persp - 8} ${y1 - 3} H${x2 - persp + 8} L${x2 + 10} ${y2 + 4} H${x1 - 10}Z` : `M${x1 - 8} ${y1 - 3} H${x2 + 8} V${y2 + 4} H${x1 - 8}Z`}" fill="${o.snow ? '#eef4fa' : TILE}"/>`;
     if (winter) return g + `<path d="${shape}" fill="#3f4f5c"/>` + [0.25, 0.5, 0.75].map((f) => `<line x1="${x1 + (x2 - x1) * f}" y1="${y1}" x2="${x1 + (x2 - x1) * f}" y2="${y2}" stroke="#6c7c88" stroke-width="1.2"/>`).join('') + (o.snow ? `<path d="${shape}" fill="#fff" opacity=".55"/>` : '');
@@ -196,30 +199,36 @@
   const houseS = (o) => {
     const cold = typeof o.temp === 'number' && o.temp < -5;
     const lit = o.night || o.vis === 'weihnachten';
-    const glass = o.night ? '#FFD86B' : '#bfe0ff';
+    const glass = o.night ? '#2c3648' : '#bfe0ff';
+    const wall = o.night ? '#8f8574' : '#f1e3c8'; const roof = o.night ? '#6e3326' : '#b5523b';
+    const late = o.hour != null && (o.hour >= 23 || o.hour < 6);
+    const on = (x, y, w, h, dur, dl) => `<rect class="wl" x="${x}" y="${y}" width="${w}" height="${h}" rx="1" fill="${late ? '#2e4c86' : '#FFD86B'}" style="animation-duration:${dur}s;animation-delay:-${dl}s"/>`;
     const icicles = (x1, x2, y) => { let g = ''; for (let x = x1 + 3; x < x2 - 2; x += 6) { const l = 3 + ((x * 7) % 5); g += `<path d="M${x - 1.5} ${y} L${x} ${y + l} L${x + 1.5} ${y}Z" fill="#e8f7ff" opacity=".95"/>`; } return g; };
     let g = '';
     // garage, joined to the house; flat roof with frosted glass railing
-    g += '<rect x="852" y="68" width="48" height="30" fill="#f1e3c8"/><rect x="850" y="66" width="52" height="3" fill="#a7adb5"/>';
+    g += `<rect x="852" y="68" width="48" height="30" fill="${wall}"/><rect x="850" y="66" width="52" height="3" fill="#a7adb5"/>`;
     g += `<rect x="852" y="56" width="48" height="10" fill="#fff" opacity="${o.night ? 0.3 : 0.6}"/><rect x="852" y="55" width="48" height="1.6" fill="#a7adb5"/>`;
     if (o.snow) g += '<rect x="850" y="53" width="52" height="2.5" rx="1.2" fill="#fff"/><rect x="850" y="64.5" width="52" height="2" fill="#fff"/>';
     if (cold) g += icicles(850, 902, 69);
     // house: tall body, gable to the front
-    g += '<rect x="900" y="40" width="112" height="58" fill="#f1e3c8"/>';
+    g += `<rect x="900" y="40" width="112" height="58" fill="${wall}"/>`;
     g += `<rect x="988" y="10" width="9" height="20" fill="#8a3b2b"/>` + smoke(o, 992, 8);
-    g += '<path d="M900 40 L956 8 L1012 40Z" fill="#f1e3c8"/><path d="M892 44 L956 6 L1020 44" fill="none" stroke="#b5523b" stroke-width="7" stroke-linejoin="round"/>';
+    g += `<path d="M900 40 L956 8 L1012 40Z" fill="${wall}"/><path d="M892 44 L956 6 L1020 44" fill="none" stroke="${roof}" stroke-width="7" stroke-linejoin="round"/>`;
     if (o.snow) g += '<path d="M890 41 L956 3 L1022 41" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>';
     if (cold) g += '<g>' + Array.from({ length: 7 }, (_, i) => { const x = 896 + i * 9.5; const y = 44 - (x - 892) * 0.59; const l = 3 + (i % 3) * 2; return `<path d="M${x - 1.4} ${y} L${x} ${y + l} L${x + 1.4} ${y}Z" fill="#e8f7ff"/>`; }).join('') + Array.from({ length: 7 }, (_, i) => { const x = 960 + i * 9.5; const y = 6 + (x - 956) * 0.59; const l = 3 + (i % 3) * 2; return `<path d="M${x - 1.4} ${y + 4} L${x} ${y + 4 + l} L${x + 1.4} ${y + 4}Z" fill="#e8f7ff"/>`; }).join('') + '</g>';
     // upper floor: smaller window left, wider window right; ground floor glass front
     g += `<rect x="916" y="46" width="28" height="16" rx="1" fill="${glass}" stroke="#fff" stroke-width="2"/><line x1="930" y1="46" x2="930" y2="62" stroke="#fff" stroke-width="1.5"/><rect x="968" y="46" width="28" height="16" rx="1" fill="${glass}" stroke="#fff" stroke-width="2"/><line x1="982" y1="46" x2="982" y2="62" stroke="#fff" stroke-width="1.5"/>`;
-    g += `<rect x="910" y="76" width="38" height="22" fill="${glass}" stroke="#fff" stroke-width="1.5"/><rect x="954" y="76" width="22" height="22" fill="${glass}" stroke="#fff" stroke-width="1.5"/><rect x="982" y="76" width="24" height="22" fill="${glass}" stroke="#fff" stroke-width="1.5"/>`;
+    // ground floor: either every pane is lit or none (lit in the evening, dark late at night)
+    const low = o.night && !late ? '#FFD86B' : glass;
+    g += `<rect x="910" y="76" width="38" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/><rect x="954" y="76" width="22" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/><rect x="982" y="76" width="24" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/>`;
+    if (o.night) g += on(917, 47, 26, 14, 19, 3) + on(969, 47, 26, 14, 27, 14);
     // pergola: roof bar and posts only, table silhouette
     g += '<rect x="902" y="69" width="108" height="5" fill="#4a5058"/><rect x="903" y="69" width="3" height="29" fill="#4a5058"/><rect x="1006" y="69" width="3" height="29" fill="#4a5058"/><path d="M944 90 h22 M948 90 v8 M962 90 v8" stroke="#3a3f46" stroke-width="2"/>';
     if (o.snow) g += '<rect x="901" y="67" width="110" height="2.5" rx="1.2" fill="#fff"/>';
     if (o.night) g += '<rect x="906" y="74" width="100" height="1.2" fill="#FFE7A8"/>';
     if (o.vis === 'weihnachten') for (let x = 908; x < 1006; x += 7) g += `<circle class="tw" cx="${x}" cy="75.5" r="1.5" fill="${['#E5483B', '#F2B33D', '#3FA66B', '#3E8EDE'][(x / 7 | 0) % 4]}" style="animation-delay:-${(x % 7) / 3}s"/>`;
     if (cold) g += icicles(901, 1011, 74);
-    if (o.jz === 'sommer') g += parasol(o, 836, 98);
+    if (o.jz === 'sommer' && o.vis !== 'liebe') g += parasol(o, 836, 98);
     g += pool(o, 872, 1040, 102, 113);
     return g;
   };
@@ -228,11 +237,15 @@
 
   // ------------------------------------------------------------------------------ the scene
   // o: { season, wx (weather()), hour, lang, intensity ('calm'|'normal'|'lots'), storm (km/h), still (bool) }
-  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [o.top || 0, o.dusk, s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5, o.narrow].join('|'); };
+  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [o.hour < 8 || o.hour >= 22, o.top || 0, o.dusk, s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, o.house, w.temp != null && w.temp < -5, o.narrow, !!o.frost, o.hour >= 23 || o.hour < 6, (s.fun || {}).key, w.temp != null && w.temp > 30, w.temp != null && w.temp >= 20].join('|'); };
   api.scene = (o) => {
-    const s = o.season || { vis: 'alltag', jz: 'sommer' }; const vis = s.vis || 'alltag'; const jz = s.jz || 'sommer'; const lang = o.lang === 'en' ? 'en' : 'de';
+    const s = o.season || { vis: 'alltag', jz: 'sommer' }; const fun = s.fun || null; const vis = fun && fun.scene ? fun.key : (s.vis || 'alltag'); const jz = s.jz || 'sommer'; const lang = o.lang === 'en' ? 'en' : 'de';
     const w = o.wx || { kind: 'partlycloudy', wind: 8 }; let kind = w.kind || 'partlycloudy';
-    const hour = o.hour; const night = o.night != null ? o.night : (hour < 6 || hour >= 20 || kind === 'clear-night');
+    if (vis === 'moon') kind = 'clear-night';
+    const hour = o.hour; const night = vis === 'moon' ? true : o.night != null ? o.night : (hour < 6 || hour >= 20 || kind === 'clear-night');
+    const temp = typeof w.temp === 'number' ? w.temp : null;
+    // these motifs take the place of the house
+    const noHouse = ['sommer', 'vatertag', 'mobile', 'volcano', 'uk', 'moon', 'titanic', 'dino'].includes(vis); const wild = ['moon', 'titanic', 'dino', 'volcano'].includes(vis);
     const xmasSnow = vis === 'weihnachten' && s.snow;
     const mul = { calm: 0.45, normal: 1, lots: 1.7 }[o.intensity] || 1; const wildMul = 0.7 + 0.15 * (s.wild || 1);
     const r = rng(([...String(s.key || vis)].reduce((a, c) => a + c.charCodeAt(0), 0) + new Date().getDate()) * 7919);
@@ -246,23 +259,34 @@
     // sunset / sunrise glow when the sun can be seen (sunny, a few clouds, wind)
     const glowSun = !night && o.dusk && ['sunny', 'partlycloudy', 'windy'].includes(kind);
     if (glowSun) sky = o.dusk === 'dawn' ? ['#7d8fd6', '#ffc7a8'] : ['#5b4f9e', '#ff9a5c'];
-    if (vis === 'silvester') sky = ['#090d24', '#2b1e52'];
-    if (vis === 'fasnacht' && !night) sky = ['#6e3fd1', '#ff8ac1'];
+    if (vis === 'silvester' && night) sky = ['#090d24', '#2b1e52'];
     if (vis === 'sommer' && !night && ['sunny', 'partlycloudy', 'windy'].includes(kind)) sky = ['#1e9ef0', '#bfeaff'];
+    if (vis === 'moon') sky = ['#000004', '#0d1128'];
+    if (vis === 'volcano') sky = night ? ['#1c0a10', '#4f1a16'] : ['#b9654a', '#ffd2a0'];
+    if (vis === 'dino' && !night) sky = ['#7cc4e4', '#e6f5d6'];
     // the main motif (house, or the beach / carnival scene) sits in the middle of the header: the landscape is
     // shifted by dx and repeated at the right edge, so nothing is cut; phones show a slice around the same centre
-    const hasHouse = vis !== 'sommer' && vis !== 'fasnacht';
+    const hasHouse = vis !== 'sommer';
     const focus = hasHouse ? (o.house === 'pool' ? 888 : 900) : vis === 'sommer' ? 760 : 600;
+    const frost = !!o.frost;
     const TOP = Math.max(0, Math.min(40, Number(o.top) || 0)); // top of the visible part (garlands hang from there)
     const dx = focus - CX; const sdx = hasHouse ? 0 : -dx; const BX = hasHouse ? CX - 215 : 600; // banners: left of the house, below the navigation
     const vb = o.narrow ? `${CX - 160} 0 320 ${H}` : `0 0 ${W} ${H}`;
     let svg = `<svg viewBox="${vb}" preserveAspectRatio="xMidYMax slice" style="--wa:${wa.toFixed(1)}deg;--wd:${wd.toFixed(1)}s" aria-hidden="true">
-      <defs><linearGradient id="fpsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient><radialGradient id="fpglow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset=".6" stop-color="#ffd27a" stop-opacity=".18"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient></defs>
-      <rect width="${W}" height="${H}" fill="url(#fpsky)"/><g transform="translate(${-dx} 0)"><g id="fpb">`;
+      <defs><linearGradient id="fpsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient>${frost ? '<filter id="fpfrz" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values=".42 .2 .08 0 .26  .12 .48 .12 0 .3  .1 .2 .5 0 .36  0 0 0 1 0"/></filter>' : ''}</defs>
+      <rect width="${W}" height="${H}" fill="url(#fpsky)"/><g transform="translate(${-dx} 0)"><g id="fpb">${frost ? '<g filter="url(#fpfrz)">' : ''}`;
     // sun, moon, stars
+    const lateNight = night && (hour >= 23 || hour < 5) && !['rainy', 'pouring', 'lightning'].includes(kind);
+    if (night && (lateNight || !['rainy', 'pouring', 'lightning', 'snowy', 'fog', 'cloudy'].includes(kind))) {
+      // now and then a star flares up, and every so often a shooting star crosses the sky
+      for (let i = 0; i < 4; i++) { const x = 120 + r() * 960; const y = TOP + 8 + r() * 34; const k = (n) => n.toFixed(1);
+        svg += `<g class="flare" style="transform-origin:${k(x)}px ${k(y)}px;animation-delay:-${k(r() * 11)}s;animation-duration:${k(9 + r() * 6)}s"><path d="M${k(x)} ${k(y - 6)} L${k(x + 1.2)} ${k(y - 1.2)} L${k(x + 6)} ${k(y)} L${k(x + 1.2)} ${k(y + 1.2)} L${k(x)} ${k(y + 6)} L${k(x - 1.2)} ${k(y + 1.2)} L${k(x - 6)} ${k(y)} L${k(x - 1.2)} ${k(y - 1.2)}Z" fill="#fff"/><circle cx="${k(x)}" cy="${k(y)}" r="1.4" fill="#fff"/></g>`; }
+      svg += `<g transform="translate(${(260 + r() * 420).toFixed(0)} ${TOP + 6})"><g class="shoot" style="animation-delay:-${(r() * 18).toFixed(1)}s"><line x1="0" y1="0" x2="-34" y2="-12" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".9"/><line x1="-8" y1="-3" x2="-60" y2="-21" stroke="#cfe0ff" stroke-width="1" stroke-linecap="round" opacity=".45"/></g></g>`;
+    }
     if (night) {
-      svg += fall(Math.round(26 * mul), r, (x, k) => `<circle class="tw" cx="${x.toFixed(0)}" cy="${(k * 60).toFixed(0)}" r="${(0.6 + r()).toFixed(1)}" fill="#fff" style="animation-delay:-${(r() * 3).toFixed(1)}s"/>`);
-      if (!['rainy', 'pouring', 'lightning', 'snowy', 'fog', 'cloudy'].includes(kind) || vis === 'silvester') svg += '<circle cx="640" cy="26" r="13" fill="#f6f1d5"/><circle cx="646" cy="22" r="12" fill="#22365e" opacity=".9"/>';
+      svg += fall(Math.round((lateNight ? 60 : 26) * mul), r, (x, k) => `<circle class="tw" cx="${x.toFixed(0)}" cy="${(k * 60).toFixed(0)}" r="${(0.6 + r()).toFixed(1)}" fill="#fff" style="animation-delay:-${(r() * 3).toFixed(1)}s"/>`);
+      if (vis === 'moon') svg += '<circle cx="610" cy="28" r="22" fill="#6fb6ff" opacity=".18"/><circle cx="610" cy="28" r="14" fill="#2f6fd0"/><path d="M600 20 q6 -4 10 2 q-2 6 -8 5 q-4 -2 -2 -7z M612 30 q6 -2 8 4 q-4 6 -10 3z M603 34 q3 -1 4 2 q-2 2 -4 0z" fill="#4fae5a"/><path d="M598 26 q8 -3 16 0 M606 37 q6 1 10 -2" stroke="#fff" stroke-width="1.4" fill="none" opacity=".8"/><path d="M610 14 a14 14 0 0 1 0 28 a9 14 0 0 0 0 -28z" fill="#00010a" opacity=".45"/>';
+      else if (!['rainy', 'pouring', 'lightning', 'snowy', 'fog', 'cloudy'].includes(kind) || vis === 'silvester') svg += '<circle cx="640" cy="26" r="13" fill="#f6f1d5"/><circle cx="646" cy="22" r="12" fill="#22365e" opacity=".9"/>';
     } else if (glowSun) svg += `<circle cx="600" cy="88" r="40" fill="#FFB25C" opacity=".35"/><circle cx="600" cy="88" r="20" fill="#FF8A3C"/>`;
     else if (['sunny', 'partlycloudy', 'windy'].includes(kind)) svg += '<circle class="sun" cx="610" cy="28" r="17" fill="#FFE27A"/><circle cx="610" cy="28" r="30" fill="#FFE27A" opacity=".25"/>';
     if (kind === 'partlycloudy' && !night && !glowSun) [['#ff5a5a', 52], ['#ffb23d', 47], ['#ffe94d', 42], ['#55d16b', 37], ['#4aa8ff', 32], ['#8f6bff', 27]].forEach(([c, rr]) => { svg += `<path d="M${470 - rr * 2} 100 A ${rr * 2} ${rr * 1.7} 0 0 1 ${470 + rr * 2} 100" stroke="${c}" stroke-width="5" fill="none" opacity=".45"/>`; });
@@ -270,50 +294,98 @@
     if (vis === 'sport' || (jz === 'winter' && vis === 'winter')) {
       svg += `<path d="M0 92 L120 40 L210 78 L330 26 L460 84 L560 48 L700 90 L820 34 L960 86 L1080 44 L1200 92 V120 H0Z" fill="${night ? '#33415c' : '#6f86a3'}"/>`;
       [[120, 40], [330, 26], [560, 48], [820, 34], [1080, 44]].forEach(([x, y]) => { svg += `<path d="M${x - 22} ${y + 12} L${x} ${y} L${x + 22} ${y + 12} L${x + 12} ${y + 9} L${x + 5} ${y + 14} L${x - 4} ${y + 9} L${x - 12} ${y + 13}Z" fill="#f4f8fc"/>`; });
+      // summit cross on the high peak
+      svg += '<path d="M330 26 V14 M325.5 18 H334.5" stroke="#5a3b22" stroke-width="1.6" stroke-linecap="round"/>';
+      if (vis === 'sport') {
+        // ski runs on the cable-car mountain (right slope), a red and a blue run, with little poles
+        svg += '<path d="M1086 48 C 1104 56 1092 64 1112 70 S 1128 82 1146 90" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".95"/><path d="M1086 48 C 1104 56 1092 64 1112 70 S 1128 82 1146 90" stroke="#e8eef6" stroke-width="2" fill="none" stroke-dasharray="1 5"/>'
+          + '<path d="M1092 50 C 1120 58 1136 64 1150 74 S 1166 86 1182 92" stroke="#ffffff" stroke-width="2.6" fill="none" stroke-linecap="round"/>'
+          + [[1100, 56, '#E5483B'], [1114, 72, '#E5483B'], [1132, 84, '#E5483B'], [1140, 66, '#3E8EDE'], [1166, 84, '#3E8EDE']].map(([x, y, c]) => `<path d="M${x} ${y} v-4" stroke="${c}" stroke-width="1.2"/>`).join('');
+      }
     }
     // clouds
-    const cN = { sunny: 1, 'clear-night': 0, partlycloudy: 3, cloudy: 6, rainy: 6, pouring: 7, lightning: 7, snowy: 5, fog: 2, windy: 4 }[kind] || 2;
+    const cN = { sunny: 1, 'clear-night': 0, partlycloudy: 3, cloudy: 6, rainy: 6, pouring: 7, lightning: 7, snowy: 5, fog: 2, windy: 4 }[kind]; const cN2 = vis === 'moon' ? 0 : cN == null ? 2 : cN;
     const cCol = ['rainy', 'pouring', 'lightning'].includes(kind) ? '#6b7682' : night ? '#3c4b68' : '#ffffff';
-    for (let i = 0; i < cN; i++) svg += cloud(4 + r() * 34, 70 + r() * 90, cCol, (0.55 + r() * 0.4).toFixed(2), (cloudDur * (0.8 + r() * 0.5)).toFixed(0), (r() * cloudDur).toFixed(0));
+    for (let i = 0; i < cN2; i++) svg += cloud(4 + r() * 34, 70 + r() * 90, cCol, (0.55 + r() * 0.4).toFixed(2), (cloudDur * (0.8 + r() * 0.5)).toFixed(0), (r() * cloudDur).toFixed(0));
     // ground
-    const snowGround = xmasSnow || kind === 'snowy' || vis === 'sport' || (vis === 'winter' && jz === 'winter' && (o.wx || {}).temp != null && o.wx.temp <= 0);
-    const gCol = snowGround ? '#eef4fa' : vis === 'fasnacht' ? '#5b3fa0' : ({ fruehling: '#8fcb6a', sommer: '#6fbf4f', herbst: '#b98a45', winter: '#7d8f6a' })[jz];
-    if (vis === 'sommer') {
+    const snowGround = !wild ? (xmasSnow || kind === 'snowy' || vis === 'sport' || (vis === 'winter' && jz === 'winter' && (o.wx || {}).temp != null && o.wx.temp <= 0)) : false;
+    const gCol = vis === 'dino' ? '#4f9a3a' : vis === 'volcano' ? '#4a423c' : snowGround ? '#eef4fa' : ({ fruehling: '#8fcb6a', sommer: '#6fbf4f', herbst: '#b98a45', winter: '#7d8f6a' })[jz];
+    if (vis === 'moon') {
+      // grey moon ground with craters, a far ridge
+      svg += `<path d="M0 90 C 140 78 300 88 460 80 C 620 72 820 88 1000 80 C 1100 76 1160 86 1200 90 V120 H0Z" fill="#5f646c"/><path d="M0 98 C 200 92 400 102 600 96 C 800 90 1000 102 1200 98 V120 H0Z" fill="#a3a8b0"/>`;
+      for (let i = 0; i < 16; i++) { const cx = (i * 83 + r() * 50) % W; const cy = 104 + r() * 12; const rx = 6 + r() * 16;
+        svg += `<ellipse cx="${cx.toFixed(0)}" cy="${cy.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${(rx * 0.28).toFixed(1)}" fill="#7f848c"/><path d="M${(cx - rx).toFixed(0)} ${cy.toFixed(1)} a${rx.toFixed(1)} ${(rx * 0.28).toFixed(1)} 0 0 0 ${(rx * 2).toFixed(1)} 0" stroke="#c4c8ce" stroke-width="1" fill="none"/>`; }
+    } else if (vis === 'titanic') {
+      // open sea up to the horizon
+      svg += `<rect y="78" width="${W}" height="42" fill="#1f73ad"/><rect y="78" width="${W}" height="6" fill="#4aa3d8"/><g class="wbob">${fall(40, r, (x, k) => `<path d="M${(x | 0) % 1200} ${(88 + (k * 30) % 30).toFixed(0)} q8 -4 16 0" stroke="#bfe8ff" stroke-width="1.6" fill="none" opacity=".8"/>`)}</g>`;
+    } else if (vis === 'sommer') {
       svg += `<rect y="84" width="${W}" height="20" fill="#2aa7df"/><g class="wave">${fall(26, r, (x, k) => `<path d="M${(k * 0 + (x | 0) % 1200)} 88 q8 -4 16 0" stroke="#bff0ff" stroke-width="2" fill="none"/>`)}</g>`;
       svg += `<path d="M0 100 C 200 92 400 104 600 98 C 800 92 1000 104 1200 100 V120 H0Z" fill="#f2d48f"/>`;
     } else {
       svg += `<path d="M0 98 C 160 90 340 104 520 96 C 700 89 900 104 1200 98 V120 H0Z" fill="${gCol}"/>`;
       // grass tufts everywhere and a few round stones (spring / summer green, autumn straw, winter only stones)
-      const gr = snowGround ? null : vis === 'fasnacht' ? null : ({ fruehling: ['#5fae46', '#7cc35c'], sommer: ['#4c9a36', '#6cb84a'], herbst: ['#a88a3e', '#c2a252'], winter: ['#7c8a5a', '#93a06a'] })[jz];
+      const gr = vis === 'dino' ? ['#2f7f2f', '#5fae46'] : vis === 'volcano' ? ['#5f7f3a', '#7a9a4a'] : snowGround ? null : ({ fruehling: ['#5fae46', '#7cc35c'], sommer: ['#4c9a36', '#6cb84a'], herbst: ['#a88a3e', '#c2a252'], winter: ['#7c8a5a', '#93a06a'] })[jz];
       if (gr) for (let i = 0; i < 46; i++) { const x = (i * 26 + r() * 18) % W; const y = 104 + r() * 12; const c = gr[i % 2];
         svg += `<path d="M${x.toFixed(0)} ${y.toFixed(0)} q-3 -7 -5 -9 M${(x + 2).toFixed(0)} ${y.toFixed(0)} q0 -8 1 -11 M${(x + 4).toFixed(0)} ${y.toFixed(0)} q3 -6 6 -8" stroke="${c}" stroke-width="1.6" stroke-linecap="round" fill="none"/>`; }
       [[330, 110, 1], [345, 112, 0.7], [700, 112, 0.9], [1175, 109, 1.1], [1190, 112, 0.7], [520, 114, 0.8]].forEach(([x, y, k]) => {
         svg += `<ellipse cx="${x}" cy="${y}" rx="${(8 * k).toFixed(1)}" ry="${(5 * k).toFixed(1)}" fill="${night ? '#59606b' : '#9aa1ab'}"/><ellipse cx="${x - 2 * k}" cy="${y - 2 * k}" rx="${(4 * k).toFixed(1)}" ry="${(2 * k).toFixed(1)}" fill="${night ? '#6d7480' : '#c3c8cf'}"/>`
           + (snowGround ? `<ellipse cx="${x}" cy="${y - 4 * k}" rx="${(7 * k).toFixed(1)}" ry="${(2.4 * k).toFixed(1)}" fill="#fff"/>` : ''); });
     }
+    if (night && vis !== 'moon') svg += vis === 'sommer' || vis === 'titanic' ? `<rect y="78" width="${W}" height="42" fill="#0b1430" opacity=".45"/>`
+      : `<path d="M0 98 C 160 90 340 104 520 96 C 700 89 900 104 1200 98 V120 H0Z" fill="#0b1430" opacity="${snowGround ? '.35' : '.5'}"/>`;
+    if (vis === 'sport') {
+      const vx = 992; const vy = 92; const mx = 1036; const my = 50; const tx = 1080; const ty = 38;
+      svg += `<path d="M${vx} ${vy} L${mx} ${my} L${tx} ${ty}" stroke="#2b2b2b" stroke-width=".9" fill="none"/>`
+        + `<path d="M${mx} 61 V${my - 2} M${mx - 5} ${my} H${mx + 5}" stroke="#5b6470" stroke-width="2"/><path d="M${mx - 2.5} 61 l2.5 -6 l2.5 6" stroke="#5b6470" stroke-width="1" fill="none"/>`
+        + `<rect x="${vx - 9}" y="${vy}" width="18" height="10" fill="#c9a77a"/><path d="M${vx - 11} ${vy} h22 l-3 -5 h-16z" fill="#7a4a2a"/><rect x="${vx - 4}" y="${vy + 3}" width="8" height="5" fill="#bfe0ff"/>`
+        + `<rect x="${tx - 8}" y="${ty}" width="16" height="9" fill="#c9a77a"/><path d="M${tx - 10} ${ty} h20 l-3 -4 h-14z" fill="#7a4a2a"/><rect x="${tx - 3}" y="${ty + 3}" width="6" height="4" fill="#bfe0ff"/>`
+        + `<g class="cable2" style="--mx:${mx - vx}px;--my:${my - vy}px;--cx:${tx - vx}px;--cy:${ty - vy}px"><g transform="translate(${vx} ${vy - 1})"><path d="M0 0 v4" stroke="#2b2b2b" stroke-width="1"/><rect x="-5" y="4" width="10" height="8" rx="2" fill="#E5483B"/><rect x="-3.6" y="5.4" width="7.2" height="3.4" rx="1" fill="#bfe8ff"/></g></g>`;
+    }
     // everyday house and trees (a little different every season)
     const lit = vis === 'weihnachten' || night;
     const smokeOn = ['herbst', 'winter'].includes(jz) || vis === 'weihnachten';
-    const own = o.house === 'pool' && vis !== 'sommer' && vis !== 'fasnacht';
+    const own = o.house === 'pool' && !noHouse;
     if (own) {
-      svg += poolHouse({ night, snow: snowGround, smoke: smokeOn, wind, jz, vis, temp: w.temp });
+      svg += poolHouse({ night, snow: snowGround, smoke: smokeOn, wind, jz, vis, temp: w.temp, hour });
       const gz = vis === 'ostern' || vis === 'fruehling' ? 'fruehling' : vis === 'herbst' ? 'herbst' : ['weihnachten', 'sport', 'silvester', 'dreikoenig'].includes(vis) ? 'winter' : jz;
-      svg += redMaple(1112, 103, 0.95, gz, snowGround) + appleTree(1042, 104, 1.25, gz, snowGround, r) + flowerBed(978, 106, gz, snowGround, r);
+      svg += redMaple(1112, 103, 0.95, gz, snowGround) + (vis === 'sport' ? '' : appleTree(1042, 104, 1.25, gz, snowGround, r)) + flowerBed(978, 106, gz, snowGround, r);
     }
-    else if (vis !== 'sommer' && vis !== 'fasnacht') svg += house(900, 100, night, snowGround, lit, smokeOn, wind);
+    else if (!noHouse) svg += house(900, 100, night, snowGround, lit, smokeOn, wind, hour);
+    const hot = temp != null && temp > 30 && !night && !wild && jz !== 'winter' && !['weihnachten', 'sport'].includes(vis);
+    if (hot) {
+      // sprinkler on the lawn left of the house, swinging its fan of water
+      // five sprinklers across the lawn, each swinging its fan of water at its own pace
+      (own ? [180, 330, 470, 610, 1150] : [180, 330, 470, 640, 1150]).forEach((sx, k) => {
+        svg += `<ellipse cx="${sx}" cy="110" rx="30" ry="4.4" fill="#3f8a2e" opacity=".45"/><rect x="${sx - 2.6}" y="104.6" width="5.2" height="5.4" rx="1" fill="${['#3E8EDE', '#F5C542', '#E5483B', '#3FA66B', '#B07CFF'][k]}"/>`
+          + `<g class="sprk" style="transform-origin:${sx}px 105px;animation-duration:${(3.2 + k * 0.6).toFixed(1)}s;animation-delay:-${(k * 1.1).toFixed(1)}s">${[-26, -13, 0, 13, 26].map((a) => `<path d="M${sx} 105 q${a} -24 ${a * 2} -2" stroke="#cdeeff" stroke-width="1.1" fill="none" stroke-dasharray="2 3" class="drip"/>`).join('')}</g>`; });
+      svg += `<path d="M150 112 q60 -4 180 0 t280 -2" stroke="#2f9a46" stroke-width="1.6" fill="none" opacity=".7"/>`;
+      if (own && hour >= 8 && hour < 22) {
+        // pool party: flamingo and donut floats, swimmers splashing, a beach ball and music
+        svg += `<g class="bob" style="animation-duration:3s"><ellipse cx="846" cy="105" rx="9" ry="3.4" fill="#FF7AB6"/><ellipse cx="846" cy="105" rx="4.4" ry="1.4" fill="#4fd0e0"/><path d="M852 104 q4 -8 0 -12 q-3 -3 1 -6" stroke="#FF7AB6" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M853 86 l4 1.4 -3 1z" fill="#2b2b2b"/></g>`
+          + `<g class="bob" style="animation-duration:3.6s;animation-delay:-1s"><ellipse cx="905" cy="105" rx="8.4" ry="3.2" fill="#F5C542"/><ellipse cx="905" cy="104.6" rx="7.4" ry="2.6" fill="#FF8FB3"/><ellipse cx="905" cy="105" rx="3.6" ry="1.2" fill="#4fd0e0"/>${[-5, -2, 2, 5].map((d, i) => `<path d="M${905 + d} ${104 - (i % 2)} h1.6" stroke="${['#fff', '#3E8EDE', '#7CFF8A', '#FFD84D'][i]}" stroke-width=".8"/>`).join('')}</g>`
+          + [[876, '#8B5A2B', '#F3CDA6'], [932, '#F5C542', '#C99167']].map(([x, h, sk], i) => `<g class="bob" style="animation-duration:${2.2 + i * 0.5}s"><circle cx="${x}" cy="104" r="3.4" fill="${sk}"/><path d="M${x - 3.4} 103 q3.4 -5 6.8 0z" fill="${h}"/><path d="M${x - 4} 105 l-4 -5 M${x + 4} 105 l4 -5" stroke="${sk}" stroke-width="1.4" stroke-linecap="round" class="wave2" style="transform-origin:${x}px 105px"/></g><circle class="tw" cx="${x - 7}" cy="101" r="1" fill="#fff"/><circle class="tw" cx="${x + 7}" cy="100" r="1.2" fill="#fff" style="animation-delay:-.6s"/>`).join('')
+          + `<g class="tossx"><g class="tossy"><circle cx="880" cy="99" r="3.4" fill="#fff"/><path d="M876.6 99 a3.4 3.4 0 0 1 6.8 0z" fill="#E5483B"/><path d="M880 95.6 v6.8" stroke="#3E8EDE" stroke-width="1.4"/></g></g>`
+          + `<rect x="958" y="99" width="7" height="9" rx="1.4" fill="#2b2f36"/><circle cx="961.5" cy="103.5" r="2" fill="#555"/>${[0, 1, 2].map((i) => `<text class="note" x="${962 + i * 4}" y="98" font-size="7" fill="#FF7AB6" style="animation-delay:-${i * 0.8}s">♪</text>`).join('')}`;
+      }
+    }
     if (vis === 'weihnachten' || vis === 'winter' || vis === 'sport') {
       (own ? [[150, 102, 1], [250, 104, 0.8], [720, 104, 0.85]] : [[150, 102, 1], [250, 104, 0.8], [1060, 102, 0.95], [1150, 104, 0.75]]).forEach(([x, y, sc]) => { svg += fir(x, y, sc, snowGround, false, r); });
-    } else if (vis !== 'sommer' && vis !== 'fasnacht') {
+    } else if (vis !== 'sommer' && !wild) {
       (own ? [[150, 100, 1], [260, 102, 0.8], [720, 102, 0.85]] : [[150, 100, 1], [260, 102, 0.8], [1060, 100, 0.95], [1150, 102, 0.8]]).forEach(([x, y, sc]) => { svg += leafTree(x, y, sc, vis === 'fruehling' || vis === 'ostern' ? 'fruehling' : vis === 'herbst' ? 'herbst' : jz, r, true); });
     }
-    if (night && hasHouse) {
-      const spots = own ? [[150, 1], [250, 0.8], [720, 0.85], [978, 0.6], [1042, 1.25], [1112, 0.95]] : [[150, 1], [260, 0.8], [1060, 0.95], [1150, 0.8]];
-      spots.forEach(([x, k]) => { svg += `<ellipse cx="${x}" cy="${(104 - 42 * k).toFixed(0)}" rx="${(32 * k).toFixed(0)}" ry="${(30 * k).toFixed(0)}" fill="url(#fpglow)"/><ellipse cx="${x}" cy="106" rx="${(14 * k).toFixed(0)}" ry="3" fill="#ffd77a" opacity=".45"/><circle class="tw" cx="${x}" cy="105" r="1.8" fill="#fff2c4"/>`; });
+    if (frost) {
+      // everything frozen: hoarfrost on the ground, frozen puddles and glittering ice crystals
+      svg += `<path d="M0 99 C 160 92 340 105 520 97 C 700 90 900 105 1200 99 V120 H0Z" fill="#e8f2fb" opacity=".55"/>`;
+      for (let i = 0; i < 5; i++) { const px = 60 + i * 250 + r() * 60; svg += `<ellipse cx="${px.toFixed(0)}" cy="${(110 + r() * 6).toFixed(1)}" rx="${(16 + r() * 12).toFixed(0)}" ry="3" fill="#bfe3f7" stroke="#ffffff" stroke-width=".6" opacity=".9"/><path d="M${(px - 8).toFixed(0)} 111 l6 -1.4 M${(px + 2).toFixed(0)} 112 l7 -2" stroke="#fff" stroke-width=".6" opacity=".9"/>`; }
+      svg += '</g>';
     }
-    svg += `</g><use href="#fpb" x="${W}"/></g><g transform="translate(${sdx} 0)"><g id="fps">`;
+    svg += `</g><use href="#fpb" x="${W}"/><use href="#fpb" x="${-W}"/></g><g transform="translate(${sdx} 0)"><g id="fps">`;
+    if (frost) for (let i = 0; i < 46; i++) { const fx = r() * W; const fy = TOP + 6 + r() * (110 - TOP); const k = 1 + r() * 1.6;
+      svg += `<g class="flare" style="transform-origin:${fx.toFixed(0)}px ${fy.toFixed(0)}px;animation-delay:-${(r() * 3).toFixed(2)}s;animation-duration:${(1.6 + r() * 2).toFixed(1)}s"><path d="M${(fx - k * 2).toFixed(1)} ${fy.toFixed(1)} h${(k * 4).toFixed(1)} M${fx.toFixed(1)} ${(fy - k * 2).toFixed(1)} v${(k * 4).toFixed(1)} M${(fx - k * 1.4).toFixed(1)} ${(fy - k * 1.4).toFixed(1)} l${(k * 2.8).toFixed(1)} ${(k * 2.8).toFixed(1)} M${(fx + k * 1.4).toFixed(1)} ${(fy - k * 1.4).toFixed(1)} l${(-k * 2.8).toFixed(1)} ${(k * 2.8).toFixed(1)}" stroke="${i % 3 ? '#ffffff' : '#bfe8ff'}" stroke-width=".6" stroke-linecap="round"/></g>`; }
     // ---- season layer (items that belong to the house move with it: - dx)
     const P = [];
     if (vis === 'weihnachten') {
+      if (s.sub === 'heiligabend') svg += `<g class="peek3" style="animation-delay:-4s"><g transform="translate(${760 - dx} 0)"><path d="M-6 104 l2 -20 h8 l2 20z" fill="#fff"/><path d="M-6 88 q-10 -6 -12 4 q6 -2 12 2z M6 88 q10 -6 12 4 q-6 -2 -12 2z" fill="#eef4ff" opacity=".9"/><circle cx="0" cy="79" r="5" fill="#FBE3CF"/><path d="M-5.4 79 q0 -8 5.4 -8 q5.4 0 5.4 8 q-1 -4 -5.4 -4 q-4.4 0 -5.4 4z" fill="#EBC55A"/><ellipse cx="0" cy="70" rx="6" ry="1.6" fill="none" stroke="#FFD24A" stroke-width="1.2"/><circle cx="-1.8" cy="79.6" r=".7" fill="#2b2b2b"/><circle cx="1.8" cy="79.6" r=".7" fill="#2b2b2b"/><path d="M-1.6 82 q1.6 1.4 3.2 0" stroke="#c2546a" stroke-width=".8" fill="none"/></g></g>`;
       svg += fir(760 - dx, 104, 1.25, snowGround, true, r);
       // garland of bulbs along the top
       // fairy lights on a sagging wire; every bulb glows and sparkles in its own colour
@@ -327,66 +399,404 @@
         [-18, -6, 6, 18].forEach((cx, i) => { svg += `<rect x="${cx - 3}" y="-18" width="6" height="16" rx="1" fill="#c8302e"/>${i < a ? `<path class="flame" d="M${cx} -27 q3 5 0 8 q-3 -3 0 -8z" fill="#FFC23D"/>` : ''}`; });
         svg += '</g>';
       }
-      if (s.sub === 'samichlaus') svg += emo(340, 104, '🎅', 26) + emo(372, 106, '🎁', 18) + emo(306, 106, '🍊', 14);
-      if (s.sub === 'heiligabend') svg += '<path class="sun" d="M560 22 l4 9 10 1 -7.5 7 2 10 -8.5 -5 -8.5 5 2 -10 -7.5 -7 10 -1z" fill="#FFD24A"/>' + emo(700 - dx, 106, '🎁', 20);
+      if (s.sub === 'samichlaus') {
+        const sx = CX - 300;
+        // Samichlaus: red bishop's robe, white beard, mitre with a golden cross, crozier
+        svg += `<g class="bob" style="animation-duration:4s"><path d="M${sx - 13} 108 l4 -30 h18 l4 30z" fill="#c8302e"/><path d="M${sx - 4} 78 v30 M${sx + 4} 78 v30" stroke="#F5C542" stroke-width="1.6"/><circle cx="${sx}" cy="72" r="6.5" fill="#F3CDA6"/><path d="M${sx - 7} 72 q7 14 14 0 q-2 6 -7 9 q-5 -3 -7 -9z" fill="#fff"/><path d="M${sx - 6} 67 l6 -12 l6 12z" fill="#c8302e" stroke="#F5C542" stroke-width="1"/><path d="M${sx} 57 v7 M${sx - 2.4} 60 h4.8" stroke="#F5C542" stroke-width="1.2"/><circle cx="${sx - 2.3}" cy="71" r=".8" fill="#2b2b2b"/><circle cx="${sx + 2.3}" cy="71" r=".8" fill="#2b2b2b"/><path d="M${sx + 15} 108 V62 q0 -6 5 -6 q5 0 5 5 q0 4 -4 4" stroke="#d9b14a" stroke-width="2" fill="none"/></g>`;
+        // donkey with two sacks, nodding
+        const dx2 = sx + 55;
+        svg += `<g><path d="M${dx2 - 16} 108 v-10 M${dx2 - 8} 108 v-10 M${dx2 + 8} 108 v-10 M${dx2 + 15} 108 v-10" stroke="#7d7f86" stroke-width="3"/><ellipse cx="${dx2}" cy="92" rx="20" ry="9" fill="#9a9ca3"/><path d="M${dx2 - 20} 92 q-6 2 -6 9" stroke="#7d7f86" stroke-width="2" fill="none"/><path d="M${dx2 - 9} 84 q-4 8 0 12 h8 q4 -4 0 -12z" fill="#b8915a"/><path d="M${dx2 + 2} 84 q-3 8 0 12 h8 q3 -4 0 -12z" fill="#a37c48"/>`
+          + `<g class="nod" style="transform-origin:${dx2 + 16}px 88px"><path d="M${dx2 + 14} 90 l8 -12 q6 -4 9 2 l-3 8 q-4 4 -9 3z" fill="#9a9ca3"/><ellipse cx="${dx2 + 30}" cy="82" rx="4" ry="3" fill="#c9cbd1"/><path d="M${dx2 + 22} 78 l-2 -10 l3 1 l2 8z M${dx2 + 25} 77 l1 -10 l3 2 l-1 8z" fill="#7d7f86"/><circle cx="${dx2 + 26}" cy="80" r=".9" fill="#2b2b2b"/></g></g>`;
+        // Schmutzli: dark hooded robe, black beard, big grin, bundle of twigs – and he waves
+        const mx = sx + 115;
+        svg += `<g class="bob" style="animation-duration:2.2s;animation-delay:-.7s"><path d="M${mx - 12} 108 l3 -30 h18 l3 30z" fill="#4a3424"/><path d="M${mx - 10} 70 q10 -16 20 0 v8 h-20z" fill="#3a281b"/><circle cx="${mx}" cy="73" r="5.6" fill="#E3B48A"/><path d="M${mx - 6} 74 q6 12 12 0 q-2 7 -6 9 q-4 -2 -6 -9z" fill="#1d1d1d"/><path d="M${mx - 3} 75.5 q3 2.6 6 0" stroke="#fff" stroke-width="1.2" fill="none"/><circle cx="${mx - 2.2}" cy="71.6" r=".9" fill="#1d1d1d"/><circle cx="${mx + 2.2}" cy="71.6" r=".9" fill="#1d1d1d"/><circle cx="${mx - 3.4}" cy="74" r="1" fill="#e98a7a" opacity=".7"/><circle cx="${mx + 3.4}" cy="74" r="1" fill="#e98a7a" opacity=".7"/>`
+          + `<g class="wave2" style="transform-origin:${mx + 9}px 84px"><path d="M${mx + 9} 84 l9 -8" stroke="#4a3424" stroke-width="3" stroke-linecap="round"/><path d="M${mx + 17} 77 l6 -14 M${mx + 18} 77 l9 -12 M${mx + 16} 77 l3 -15" stroke="#7a5233" stroke-width="1.2"/></g></g>`;
+        svg += emo(sx + 90, 108, '🍊', 10) + emo(sx + 100, 108, '🥜', 10) + emo(sx + 30, 108, '🍫', 10);
+      }
+      if (s.sub === 'heiligabend') {
+        // glitter everywhere on the ground, presents all around
+        // glitter in a few patches, each sparkling strongly
+        const spots = [[CX - 360, 112], [CX - 230, 110], [CX - 90, 114], [CX + 150, 112], [CX + 270, 110], [CX + 420, 114], [90, 112], [CX - 520, 110]];
+        svg += spots.map(([sx, sy]) => `<ellipse cx="${sx}" cy="${sy}" rx="22" ry="5" fill="#fff6d6" opacity=".55"/>`).join('');
+        for (let i = 0; i < 96; i++) { const [sx, sy] = spots[i % spots.length]; const gx = sx + (r() - 0.5) * 44; const gy = sy + (r() - 0.5) * 9; const k = 2.4 + r() * 3; const c = ['#ffffff', '#FFE27A', '#ffffff', '#cfe8ff'][i % 4];
+          svg += `<circle cx="${gx.toFixed(1)}" cy="${gy.toFixed(1)}" r="${(k * 0.9).toFixed(1)}" fill="#fff" opacity=".35" class="tw" style="animation-duration:.9s;animation-delay:-${(r() * 0.9).toFixed(2)}s"/>`;
+          svg += `<g class="flare" style="transform-origin:${gx.toFixed(0)}px ${gy.toFixed(1)}px;animation-delay:-${(r() * 3).toFixed(2)}s;animation-duration:${(1.4 + r() * 1.6).toFixed(1)}s"><path d="M${gx.toFixed(1)} ${(gy - k).toFixed(1)} L${(gx + k * 0.25).toFixed(1)} ${(gy - k * 0.25).toFixed(1)} L${(gx + k).toFixed(1)} ${gy.toFixed(1)} L${(gx + k * 0.25).toFixed(1)} ${(gy + k * 0.25).toFixed(1)} L${gx.toFixed(1)} ${(gy + k).toFixed(1)} L${(gx - k * 0.25).toFixed(1)} ${(gy + k * 0.25).toFixed(1)} L${(gx - k).toFixed(1)} ${gy.toFixed(1)} L${(gx - k * 0.25).toFixed(1)} ${(gy - k * 0.25).toFixed(1)}Z" fill="${c}"/></g>`; }
+        const gift = (x, k, c1, c2) => `<g transform="translate(${x} 108) scale(${k})"><rect x="-8" y="-12" width="16" height="12" fill="${c1}"/><rect x="-9" y="-15" width="18" height="4" fill="${c1}" opacity=".85"/><path d="M0 -15 v15 M-9 -13 h18" stroke="${c2}" stroke-width="2.2"/><path d="M0 -15 q-6 -6 -6 -1 q0 2 6 1 q6 1 6 -1 q0 -5 -6 1z" fill="${c2}"/></g>`;
+        [[CX - 320, 1, '#E5483B', '#FFD24A'], [CX - 296, 0.75, '#3E8EDE', '#fff'], [CX - 270, 1.1, '#3FA66B', '#E5483B'], [CX - 175, 0.8, '#B07CFF', '#FFD24A'], [CX - 152, 0.65, '#FFD24A', '#E5483B'],
+          [CX + 112, 0.8, '#E5483B', '#fff'], [CX + 205, 0.9, '#FF7AB6', '#fff'], [CX + 228, 0.7, '#3E8EDE', '#FFD24A'], [CX + 300, 1, '#3FA66B', '#FFD24A'], [CX + 340, 0.8, '#E5483B', '#3FA66B'], [80, 0.9, '#B07CFF', '#fff'], [CX - 420, 0.8, '#FFD24A', '#3E8EDE']]
+          .forEach(([x, k, a, b]) => { svg += gift(x, k, a, b); });
+        svg += '<path class="sun" d="M560 22 l4 9 10 1 -7.5 7 2 10 -8.5 -5 -8.5 5 2 -10 -7.5 -7 10 -1z" fill="#FFD24A"/>';
+      }
       if (xmasSnow && kind !== 'snowy') kind = 'snowy-x';
     }
-    if (vis === 'silvester' || (vis === 'august' && hour >= 22)) {
-      const cols = vis === 'august' ? ['#DA291C', '#ffffff', '#FFD24A'] : ['#FFD24A', '#FF7AB6', '#8F6BFF', '#4FD1C5', '#ffffff'];
-      const n = Math.round(6 * mul * (vis === 'silvester' ? 1.5 : 1));
-      for (let i = 0; i < n; i++) svg += burstRays(80 + r() * (W - 160), 18 + r() * 40, cols[i % cols.length], (r() * 2.6).toFixed(2));
+    if ((vis === 'silvester' && night) || (vis === 'august' && hour >= 22)) {
+      // a whole sky of fireworks; New Year's Eve in glittering silver and gold with the coming year in it
+      const silv = vis === 'silvester';
+      const cols = silv ? ['#FFD24A', '#fff3c4', '#f5f5f5', '#cfd8e3', '#FFC83D', '#e8eef6'] : ['#DA291C', '#ffffff', '#FFD24A'];
+      const n = Math.round((silv ? 20 : 10) * mul);
+      for (let i = 0; i < n; i++) {
+        const side = r() < 0.5; const x = side ? 40 + r() * (CX - 170) : CX + 130 + r() * (W - CX - 170); const y = TOP + 10 + r() * 26; const d = (r() * 2.6).toFixed(2); const c = cols[i % cols.length];
+        svg += `<line class="rocket" x1="${x.toFixed(0)}" y1="${(y + 8).toFixed(0)}" x2="${x.toFixed(0)}" y2="${(y + 18).toFixed(0)}" stroke="${c}" stroke-width="1.6" stroke-linecap="round" style="animation-delay:-${d}s"/>`;
+        svg += burstRays(x, y, c, d);
+        if (silv) for (let k = 0; k < 7; k++) svg += `<circle class="tw" cx="${(x + (r() - 0.5) * 44).toFixed(0)}" cy="${(y + (r() - 0.3) * 36).toFixed(0)}" r="${(0.8 + r() * 0.8).toFixed(1)}" fill="${k % 2 ? '#fff' : '#FFD24A'}" style="animation-delay:-${(r() * 1.8).toFixed(2)}s;animation-duration:.7s"/>`;
+      }
+      if (silv) {
+        const now = new Date(); const yr = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
+        [[CX - 300, TOP + 30, 0], [CX + 300, TOP + 26, 3.5]].forEach(([x, y, dl]) => {
+          svg += burstRays(x, y - 4, '#FFD24A', String(dl)) + `<g class="yr" style="transform-origin:${x}px ${y}px;animation-delay:-${dl}s"><text x="${x}" y="${y + 6}" text-anchor="middle" font-size="19" font-weight="800" font-family="system-ui,sans-serif" fill="#FFE27A" stroke="#b8860b" stroke-width=".6" letter-spacing="1">${yr}</text></g>`; });
+      }
     }
-    if (vis === 'dreikoenig') svg += '<path class="sun" d="M600 20 l5 11 12 1 -9 8 3 12 -11 -6 -11 6 3 -12 -9 -8 12 -1z" fill="#FFD24A"/><path d="M590 30 L470 70" stroke="#FFD24A" stroke-width="2" opacity=".6"/>' + emo(560, 106, '👑', 18) + emo(600, 106, '👑', 18) + emo(640, 106, '👑', 18);
+    if (vis === 'silvester' && !night) {
+      // the morning after: the chimney sweep brings luck from the roof, a lucky pig, clover and a toadstool, the night's rockets and streamers on the ground
+      const sweep = (x, y) => `<g class="bob" style="animation-duration:3.2s"><g transform="translate(${x} ${y}) scale(.9)"><path d="M-3 0 l-1 -9 M3 0 l1 -9" stroke="#1d1d1d" stroke-width="2.4" stroke-linecap="round"/><rect x="-4.5" y="-20" width="9" height="12" rx="2" fill="#1d1d1d"/><path d="M-2 -20 v12 M2 -20 v12" stroke="#d9d9d9" stroke-width=".5"/>`
+        + `<circle cx="0" cy="-24" r="4.2" fill="#F3CDA6"/><circle cx="-1.4" cy="-24.4" r=".55" fill="#2b2b2b"/><circle cx="1.4" cy="-24.4" r=".55" fill="#2b2b2b"/><path d="M-1.4 -22.2 q1.4 1 2.8 0" stroke="#7a3b22" stroke-width=".6" fill="none"/><circle cx="2.4" cy="-23" r="1" fill="#2b2b2b" opacity=".35"/>`
+        + `<rect x="-3.6" y="-35" width="7.2" height="8" fill="#1d1d1d"/><rect x="-5.6" y="-27.6" width="11.2" height="1.4" fill="#1d1d1d"/><g class="wave2" style="transform-origin:4px -18px"><path d="M4 -18 l7 -10" stroke="#1d1d1d" stroke-width="2.2" stroke-linecap="round"/><path d="M11 -28 v-8" stroke="#7a5233" stroke-width="1"/><circle cx="11" cy="-37" r="3.2" fill="#2b2b2b"/></g>`
+        + `<path d="M-4 -18 l-7 7" stroke="#1d1d1d" stroke-width="2.2" stroke-linecap="round"/><path d="M-16 -4 l8 -16 M-12 -2 l8 -16 M-15 -7 h4 M-13 -11 h4 M-11 -15 h4" stroke="#a87a4a" stroke-width="1"/></g></g>`;
+      svg += own ? sweep(CX + 36, 52) : sweep(CX - 120, 106);
+      const pig = (x) => `<g class="bob" style="animation-duration:2.6s"><ellipse cx="${x}" cy="102" rx="10" ry="7" fill="#FFB3C7"/><circle cx="${x + 9}" cy="99" r="5.4" fill="#FFB3C7"/><ellipse cx="${x + 13}" cy="100" rx="2.4" ry="2" fill="#FF8FB0"/><circle cx="${x + 12.4}" cy="100" r=".45" fill="#b0566f"/><circle cx="${x + 13.8}" cy="100" r=".45" fill="#b0566f"/><circle cx="${x + 9}" cy="97" r=".7" fill="#2b2b2b"/><path d="M${x + 6} 94 l1 -3 2 2z M${x + 10} 94 l2 -3 1 3z" fill="#FF8FB0"/><path d="M${x - 10} 100 q-4 -3 -1 -5 q2 2 -1 3" stroke="#FF8FB0" stroke-width="1" fill="none"/><path d="M${x - 5} 108 v3 M${x - 1} 108 v3 M${x + 4} 108 v3 M${x + 7} 108 v3" stroke="#FF9DB8" stroke-width="2" stroke-linecap="round"/><path d="M${x - 2} 98 h4" stroke="#F5C542" stroke-width="1.6"/><circle cx="${x}" cy="98" r="1.6" fill="#F5C542"/></g>`;
+      const clover = (x, y, k) => `<g transform="translate(${x} ${y}) scale(${k})"><path d="M0 0 q1 6 -1 9" stroke="#2f8a3a" stroke-width="1" fill="none"/>${[0, 90, 180, 270].map((a) => `<path d="M0 0 c-4 -2 -5 -7 -1 -7 c1 0 1 1 1 2 c0 -1 0 -2 1 -2 c4 0 3 5 -1 7z" fill="#3FA65A" transform="rotate(${a + 45})"/>`).join('')}</g>`;
+      const shroom = (x) => `<rect x="${x - 2}" y="98" width="4" height="9" rx="1.5" fill="#f4efe4"/><path d="M${x - 9} 99 q9 -13 18 0z" fill="#E5483B"/><circle cx="${x - 4}" cy="95" r="1.2" fill="#fff"/><circle cx="${x + 2}" cy="93" r="1.4" fill="#fff"/><circle cx="${x + 5}" cy="97" r="1" fill="#fff"/>`;
+      svg += pig(CX - 300) + clover(CX - 262, 100, 1.1) + clover(CX - 230, 104, 0.8) + shroom(CX - 205) + clover(CX + 190, 103, 0.9) + shroom(CX + 230) + clover(CX - 380, 104, 0.8);
+      for (let i = 0; i < 6; i++) { const x = 60 + r() * (W - 120); svg += `<path d="M${x.toFixed(0)} 112 l${(r() * 18 - 9).toFixed(0)} -3" stroke="#7a5233" stroke-width="1"/><rect x="${(x - 1.4).toFixed(0)}" y="108" width="2.8" height="5" fill="${['#E5483B', '#3E8EDE', '#F5C542'][i % 3]}" transform="rotate(${(r() * 60 - 30).toFixed(0)} ${x.toFixed(0)} 112)"/>`; }
+      for (let i = 0; i < 14; i++) { const x = r() * W; const y = 104 + r() * 12; svg += `<path d="M${x.toFixed(0)} ${y.toFixed(0)} q3 -3 6 0 t6 0" stroke="${['#FFD24A', '#cfd8e3', '#FF7AB6', '#5CE1E6'][i % 4]}" stroke-width="1" fill="none"/>`; }
+    }
+    if (vis === 'dreikoenig') {
+      svg += `<g class="flare" style="transform-origin:${CX}px ${TOP + 22}px;animation-duration:6s"><path d="M${CX} ${TOP + 14} l2.4 6 6.4.6 -4.8 4.2 1.4 6.2 -5.4 -3.2 -5.4 3.2 1.4 -6.2 -4.8 -4.2 6.4 -.6z" fill="#FFD24A"/></g>`;
+      const king = (x, robe, cape, skin, beard, gift, dl) => `<g class="bob" style="animation-delay:-${dl}s;animation-duration:3.6s"><g transform="translate(${x} 0) scale(.74 1) translate(${-x} 0)"><path d="M${x - 13} 108 l4 -30 h18 l4 30z" fill="${robe}"/><path d="M${x - 12} 80 q-4 14 -2 28 h4 l3 -28z M${x + 12} 80 q4 14 2 28 h-4 l-3 -28z" fill="${cape}"/>`
+        + `<circle cx="${x}" cy="72" r="6.4" fill="${skin}"/>${beard ? `<path d="M${x - 6} 74 q6 10 12 0 q-2 6 -6 7 q-4 -1 -6 -7z" fill="${beard}"/>` : ''}<circle cx="${x - 2.2}" cy="71" r=".8" fill="#2b2b2b"/><circle cx="${x + 2.2}" cy="71" r=".8" fill="#2b2b2b"/><path d="M${x - 2} 75 q2 1.6 4 0" stroke="#7a3b22" stroke-width=".8" fill="none"/>`
+        + `<path d="M${x - 7} 66 l1.4 -9 3 4 2.6 -6 2.6 6 3 -4 1.4 9z" fill="#F5C542" stroke="#c9961f" stroke-width=".8"/><circle cx="${x}" cy="59" r="1.2" fill="#E5483B"/>`
+        + `<g transform="translate(${x + 10} 90)">${gift}</g></g></g>`;
+      const box = '<rect x="-4" y="-4" width="8" height="7" rx="1" fill="#F5C542"/><path d="M0 -4 v7 M-4 -1 h8" stroke="#c9961f" stroke-width="1"/>';
+      const jar = '<path d="M-3 3 q-2 -4 0 -7 h6 q2 3 0 7z" fill="#cfd8e3"/><rect x="-2" y="-6" width="4" height="2" fill="#9aa7b4"/>';
+      const urn = '<path d="M-3.5 3 q-1 -5 1 -7 h5 q2 2 1 7z" fill="#B07CFF"/><circle cx="0" cy="-5" r="1.2" fill="#F5C542"/>';
+      svg += king(CX - 330, '#7a3fb0', '#4f2780', '#F3CDA6', '#e9e4dc', box, 0) + king(CX - 285, '#2f7f4f', '#1f5a37', '#C99167', '#3a2a1e', jar, 1.2) + king(CX - 240, '#c8302e', '#8f1f1d', '#6B4129', '', urn, 2.4);
+    }
     if (vis === 'fasnacht') {
-      // streamers and confetti everywhere
-      ['#FFD84D', '#5CE1E6', '#FF7AB6', '#9EDC9E'].forEach((c, i) => { svg += `<path d="M-10 ${18 + i * 14} C 200 ${4 + i * 14} 400 ${40 + i * 12} 600 ${18 + i * 14} S 1000 ${2 + i * 14} 1220 ${24 + i * 12}" stroke="${c}" stroke-width="3" fill="none" opacity=".8"/>`; });
-      svg += emo(300, 96, '🎭', 30, 'bob') + emo(900, 96, '🎭', 30, 'bob', 'style="animation-delay:-1.5s"') + emo(600, 100, '🥁', 22) + emo(160, 100, '🎺', 20);
-      P.push(['confetti', 70]);
+      // waving streamers, swinging lanterns, rising balloons, a marching Guggenmusik and confetti everywhere
+      svg += `<path d="M0 ${TOP + 3} H${W}" stroke="#8a8f96" stroke-width="1"/>`;
+      for (let x = 18; x < W; x += 48) { const c = ['#FFD84D', '#5CE1E6', '#FF7AB6', '#9EDC9E', '#B07CFF', '#FF8A3C'][(x / 48 | 0) % 6]; const len = 2 + ((x * 7) % 3); let d = `M${x} ${TOP + 3}`;
+        for (let k = 0; k < len; k++) d += ` c 5 2 5 6 0 7 c -5 1 -5 5 0 7`;
+        svg += `<g class="str" style="transform-origin:${x}px ${TOP + 3}px;animation-delay:-${(r() * 3.6).toFixed(1)}s;animation-duration:${(3 + r() * 1.6).toFixed(1)}s"><path d="${d}" stroke="${c}" stroke-width="1.8" fill="none" stroke-linecap="round"/></g>`; }
+      for (let x = 40; x < W; x += 110) { const c = ['#FF5A7A', '#FFD84D', '#5CE1E6', '#B07CFF', '#7CFF8A'][(x / 110 | 0) % 5];
+        svg += `<g class="sw" style="transform-origin:${x}px ${TOP + 4}px;animation-delay:-${(r() * 3).toFixed(1)}s"><path d="M${x} ${TOP + 4} v10" stroke="#555" stroke-width="1"/><ellipse cx="${x}" cy="${TOP + 22}" rx="7" ry="9" fill="${c}"/><path d="M${x - 7} ${TOP + 22} h14" stroke="#fff" stroke-width="1" opacity=".6"/></g>`; }
+      for (let i = 0; i < 10; i++) { const x = 30 + r() * (W - 60); const c = ['#FF5A7A', '#FFD84D', '#5CE1E6', '#B07CFF', '#7CFF8A', '#FF8A3C'][i % 6];
+        svg += `<g class="rise" style="animation-duration:${(9 + r() * 7).toFixed(1)}s;animation-delay:-${(r() * 14).toFixed(1)}s"><path d="M${x.toFixed(0)} ${H + 26} q-3 10 1 20" stroke="#fff" stroke-width=".8" fill="none" opacity=".7"/><ellipse cx="${x.toFixed(0)}" cy="${H + 16}" rx="7" ry="9" fill="${c}"/></g>`; }
+      for (let i = 0; i < 16; i++) svg += `<circle class="tw" cx="${(r() * W).toFixed(0)}" cy="${(TOP + 8 + r() * 60).toFixed(0)}" r="1.6" fill="${['#fff', '#FFD84D', '#5CE1E6', '#FF7AB6'][i % 4]}" style="animation-delay:-${(r() * 1.8).toFixed(2)}s;animation-duration:1s"/>`;
+      for (let i = 0; i < 60; i++) { const cx = r() * W; const cy = 102 + r() * 16; svg += `<rect x="${cx.toFixed(0)}" y="${cy.toFixed(1)}" width="3" height="2" rx=".5" fill="${['#FF5A7A', '#FFD84D', '#5CE1E6', '#B07CFF', '#7CFF8A', '#FF8A3C'][i % 6]}" transform="rotate(${(r() * 180).toFixed(0)} ${cx.toFixed(0)} ${cy.toFixed(1)})"/>`; }
+      for (let i = 0; i < 4; i++) { const x = i % 2 ? CX + 180 + r() * 260 : 120 + r() * (CX - 320); const y = TOP + 22 + r() * 22; const d = (i * 0.65).toFixed(2);
+        ['#FF5A7A', '#FFD84D', '#5CE1E6', '#B07CFF', '#7CFF8A', '#FF8A3C'].forEach((c, k) => { svg += burstRays(x + (k % 3 - 1) * 4, y + (k > 2 ? 3 : -3), c, d); }); }
+      P.push(['confetti', 170]);
     }
-    if (vis === 'liebe') { P.push(['hearts', 14]); if (s.anniversary) svg += banner(lang === 'en' ? annText(s, 'en') : annText(s, 'de'), '#FF6B9B', BX); }
+    if (vis === 'liebe') {
+      P.push(['hearts', s.anniversary ? 30 : 14]);
+      if (s.anniversary || ['hochzeitstag', 'kennenlerntag'].includes(s.key)) { const bx = CX - 118; const gx = CX - 96;
+        for (let i = 0; i < 130; i++) { const fx = r() * W; const fy = 103 + r() * 15; let g = `<path d="M${fx.toFixed(0)} ${fy.toFixed(0)} q-1 -5 -3 -7 M${fx.toFixed(0)} ${fy.toFixed(0)} q1 -6 3 -8 M${fx.toFixed(0)} ${fy.toFixed(0)} v-6" stroke="#7fae6a" stroke-width=".5" fill="none"/>`;
+          [[-3, -7], [3, -8], [0, -6.5], [-1.6, -8.4], [1.6, -9.6], [-4, -5.6], [4.4, -6.6]].forEach(([a, b]) => { g += `<circle cx="${(fx + a).toFixed(1)}" cy="${(fy + b).toFixed(1)}" r="${(0.6 + r() * 0.5).toFixed(2)}" fill="#ffffff"/>`; });
+          svg += g; }
+        svg += `<g class="bob" style="animation-duration:3.4s"><path d="M${bx - 12} 108 q4 -22 12 -26 q8 4 12 26z" fill="#ffffff"/><path d="M${bx - 5} 82 h10 l-2 6 h-6z" fill="#f3f3f3"/><circle cx="${bx}" cy="76" r="5" fill="#F3CDA6"/><path d="M${bx - 5.4} 76 q0 -8 5.4 -8 q5.4 0 5.4 8 q-1 -4 -5.4 -4 q-4.4 0 -5.4 4z" fill="#8B5A2B"/><path d="M${bx + 3} 70 q9 6 6 30" stroke="#ffffff" stroke-width="4" fill="none" opacity=".75"/><circle cx="${bx - 1.8}" cy="76.4" r=".7" fill="#2b2b2b"/><circle cx="${bx + 1.8}" cy="76.4" r=".7" fill="#2b2b2b"/><path d="M${bx - 1.4} 78.6 q1.4 1.2 2.8 0" stroke="#c2546a" stroke-width=".7" fill="none"/><circle cx="${bx - 7}" cy="90" r="3" fill="#FF7AB6"/><circle cx="${bx - 9}" cy="88" r="2" fill="#ffd0dc"/></g>`
+          + `<g class="bob" style="animation-duration:3.4s;animation-delay:-.3s"><path d="M${gx - 4} 108 v-12 M${gx + 4} 108 v-12" stroke="#22252b" stroke-width="3.4"/><rect x="${gx - 7}" y="82" width="14" height="16" rx="3" fill="#2b2f36"/><path d="M${gx - 2} 82 l2 6 l2 -6z" fill="#fff"/><path d="M${gx - 1.6} 83 h3.2 l-1.6 1.6z" fill="#E5483B"/><circle cx="${gx}" cy="76" r="5" fill="#E3B48A"/><path d="M${gx - 5} 75 q0 -6 5 -6 q5 0 5 6 q-2 -3 -5 -3 q-3 0 -5 3z" fill="#3a2a1e"/><circle cx="${gx - 1.8}" cy="76.4" r=".7" fill="#2b2b2b"/><circle cx="${gx + 1.8}" cy="76.4" r=".7" fill="#2b2b2b"/><path d="M${gx - 1.4} 78.6 q1.4 1.2 2.8 0" stroke="#7a3b22" stroke-width=".7" fill="none"/></g>`
+          + `<g class="bob" style="animation-duration:2s">${emo(CX - 107, 62, '💕', 14)}</g>`; }
+    }
     if (vis === 'fruehling' || vis === 'ostern') {
       svg += '<g transform="translate(470 102)"><path d="M0 0 L0 -34 M0 -20 L-18 -38 M0 -26 L16 -44" stroke="#7A5233" stroke-width="6" stroke-linecap="round"/><g class="sw" style="transform-origin:0 -30px">';
       for (let i = 0; i < 26; i++) svg += `<circle cx="${(r() - 0.5) * 60}" cy="${-34 - r() * 30}" r="${3 + r() * 4}" fill="${r() > 0.3 ? '#ffc4dc' : '#ffe6f0'}"/>`;
       svg += '</g></g>';
       for (let i = 0; i < 9; i++) { const x = hasHouse ? (i < 4 ? CX - 140 + i * 13 : CX + 70 + (i - 4) * 13) : 560 + i * 26; svg += `<path d="M${x} 104 v-14" stroke="#3f8f3a" stroke-width="2"/><path d="M${x - 5} 92 q5 -10 10 0 q-5 4 -10 0z" fill="${['#FF5A7A', '#FFD84D', '#FF8A3C', '#C77DFF'][i % 4]}"/>`; }
       for (let i = 0; i < 3; i++) svg += `<g class="fly" style="animation-duration:${(26 + r() * 14).toFixed(0)}s;animation-delay:-${(r() * 20).toFixed(0)}s"><path d="M0 ${24 + i * 9} q5 -5 10 0 q5 -5 10 0" stroke="#33415c" stroke-width="2" fill="none"/></g>`;
-      if (vis === 'ostern') { svg += emo(380, 104, '🐰', 24, 'bob'); for (let i = 0; i < 6; i++) svg += `<ellipse cx="${200 + i * 140 + r() * 40}" cy="${104 + r() * 6}" rx="6" ry="8" fill="${['#FF7AB6', '#FFD84D', '#5CE1E6', '#9EDC9E', '#B07CFF', '#FF8A3C'][i]}"/>`; }
-      if (s.key === 'muttertag') { svg += emo(380, 106, '💐', 24); P.push(['hearts', 8]); svg += banner(lang === 'en' ? 'Thank you, Mum!' : 'Danke, Mami!', '#FF6B9B', BX); }
+      if (vis === 'ostern') {
+        // bunny holes: now and then a little white bunny peeks out and hops back in
+        [[CX - 330, 0], [CX - 255, 3.1], [CX + 165, 5.7]].forEach(([x, dl]) => {
+          svg += `<ellipse cx="${x}" cy="108" rx="11" ry="3.6" fill="#3b2a1e"/>`
+            + `<g class="hop2" style="animation-delay:-${dl}s"><ellipse cx="${x - 2.6}" cy="94" rx="1.7" ry="5.4" fill="#fff" transform="rotate(-10 ${x - 2.6} 94)"/><ellipse cx="${x + 2.6}" cy="94" rx="1.7" ry="5.4" fill="#fff" transform="rotate(10 ${x + 2.6} 94)"/><ellipse cx="${x - 2.6}" cy="94.4" rx=".7" ry="3.6" fill="#ffc4dc" transform="rotate(-10 ${x - 2.6} 94)"/><ellipse cx="${x + 2.6}" cy="94.4" rx=".7" ry="3.6" fill="#ffc4dc" transform="rotate(10 ${x + 2.6} 94)"/><circle cx="${x}" cy="103" r="5.6" fill="#fff"/><circle cx="${x - 2}" cy="102" r=".9" fill="#2b2b2b"/><circle cx="${x + 2}" cy="102" r=".9" fill="#2b2b2b"/><circle cx="${x}" cy="104.2" r=".9" fill="#ff8fb3"/><path d="M${x - 1.4} 105.4 q1.4 1 2.8 0" stroke="#c78a9a" stroke-width=".5" fill="none"/><circle cx="${x - 3.4}" cy="104.4" r="1" fill="#ffd0dc" opacity=".8"/><circle cx="${x + 3.4}" cy="104.4" r="1" fill="#ffd0dc" opacity=".8"/></g>`
+            + `<path d="M${x - 14} 108 h28 v12 h-28z" fill="${gCol}"/><path d="M${x - 11} 108 a11 3.6 0 0 0 22 0" fill="#2a1e15" opacity=".55"/>`; });
+        for (let i = 0; i < 6; i++) { const ex = 200 + i * 140 + r() * 40; const ey = 104 + r() * 6; svg += `<ellipse cx="${ex.toFixed(0)}" cy="${ey.toFixed(1)}" rx="6" ry="8" fill="${['#FF7AB6', '#FFD84D', '#5CE1E6', '#9EDC9E', '#B07CFF', '#FF8A3C'][i]}" transform="rotate(${(i % 2 ? 1 : -1) * (14 + r() * 18)} ${ex.toFixed(0)} ${ey.toFixed(1)})"/><path d="M${(ex - 5).toFixed(0)} ${(ey - 1).toFixed(1)} q5 3 10 0" stroke="#fff" stroke-width="1.2" fill="none" opacity=".75" transform="rotate(${(i % 2 ? 1 : -1) * 20} ${ex.toFixed(0)} ${ey.toFixed(1)})"/>`; }
+        // chocolate bunnies hide behind bushes and peek out now and then
+        const choco = (x) => `<path d="M${x} 108 q-8 0 -8 -8 q0 -6 5 -7 l-1 -9 q1 -2 2 0 l1 7 l1 -8 q1 -2 2 0 l0 9 q4 2 4 7 q0 9 -6 9z" fill="#7a4a2a"/><path d="M${x - 2} 92 l0 -6" stroke="#a0683e" stroke-width=".8"/><circle cx="${x + 1}" cy="96" r=".8" fill="#2b1a10"/><path d="M${x - 6} 102 h10" stroke="#E5483B" stroke-width="1.6"/><circle cx="${x - 1}" cy="102" r="1.3" fill="#F5C542"/>`;
+        [[CX - 210, 0], [CX + 245, 4.5], [70, 8]].forEach(([x, dl], k) => { svg += `<clipPath id="fpcb${k}"><rect x="${x - 20}" y="0" width="40" height="104"/></clipPath><g clip-path="url(#fpcb${k})"><g class="peek2" style="animation-delay:-${dl}s">${choco(x)}</g></g><ellipse cx="${x}" cy="104" rx="15" ry="9" fill="#4f9a3e"/><ellipse cx="${x - 7}" cy="101" rx="8" ry="7" fill="#5fae46"/><ellipse cx="${x + 7}" cy="100" rx="8" ry="7" fill="#58a542"/>`; });
+      }
+      if (s.key === 'muttertag') { svg += mumHearts(); P.push(['hearts', 24]); }
     }
     if (vis === 'pfingsten') {
-      svg += '<g class="bob"><path d="M560 20 L580 34 L560 52 L540 34Z" fill="#FF8A3C"/><path d="M560 20 L560 52 M540 34 L580 34" stroke="#fff" stroke-width="1.2"/><path d="M560 52 q10 14 -4 24 q-12 10 2 22" stroke="#33415c" stroke-width="1.4" fill="none"/></g>';
-      if (s.key === 'muttertag') { svg += emo(380, 106, '💐', 24); P.push(['hearts', 8]); svg += banner(lang === 'en' ? 'Thank you, Mum!' : 'Danke, Mami!', '#FF6B9B', BX); }
-      else if (s.key === 'auffahrt') svg += emo(380, 106, '🧺', 20);
+      const kk = s.key || '';
+      // Ascension and Whitsun: a small hill with an empty cross; Whitsun: white doves across the sky; Mother's Day: hearts
+      if (['auffahrt', 'pfingstsonntag', 'pfingstmontag'].includes(kk)) { const hx = CX - 300;
+        svg += `<path d="M${hx - 60} 110 Q ${hx} 84 ${hx + 60} 110z" fill="#7cbf5a"/><path d="M${hx} 92 V60 M${hx - 10} 70 H${hx + 10}" stroke="#7a5233" stroke-width="4" stroke-linecap="round"/>`; }
+      const dove = () => '<path d="M-9 1 l-6 -3 l1 4 l-1 3 z" fill="#eef2f7"/><ellipse cx="0" cy="0" rx="9" ry="4.6" fill="#ffffff"/><circle cx="8" cy="-3" r="3.2" fill="#ffffff"/><path d="M11 -3.4 l3 1 -3 .9z" fill="#F5A623"/><circle cx="9" cy="-3.8" r=".6" fill="#2b2b2b"/>'
+        + '<g class="flap"><path d="M-1 -2 q-4 -11 -14 -9 q6 4 7 9z" fill="#f4f7fb" stroke="#d6dde6" stroke-width=".5"/></g><g class="flap" style="animation-delay:-.08s"><path d="M1 -2 q2 -12 12 -12 q-4 5 -5 12z" fill="#ffffff" stroke="#d6dde6" stroke-width=".5"/></g>';
+      if (kk !== 'muttertag' && kk !== 'tag_der_arbeit') for (let i = 0; i < 6; i++) { const x0 = CX - 360 + i * 70 + (i > 2 ? 420 : 0);
+        const dir = [[-380, -150], [-120, -170], [260, -160], [-260, -160], [140, -170], [400, -140]][i]; const left = dir[0] < 0;
+        svg += `<g class="dove2" style="--tx:${dir[0]}px;--ty:${dir[1]}px;animation-delay:-${(i * 1.9).toFixed(1)}s"><g transform="translate(${x0} 104) scale(${left ? -1.15 : 1.15} 1.15)">${dove()}</g></g>`; }
+      if (kk === 'muttertag') { svg += mumHearts(); P.push(['hearts', 24]); }
     }
     if (vis === 'vatertag') {
-      svg += '<path d="M360 104 L360 62 M520 104 L520 62" stroke="#6b4a2e" stroke-width="6"/><path d="M360 70 Q 440 100 520 70" stroke="#e8c27a" stroke-width="8" fill="none"/><path d="M360 70 Q 440 96 520 70" stroke="#d9534f" stroke-width="2" fill="none" stroke-dasharray="6 6"/>';
-      svg += emo(440, 88, '😎', 18) + `<g class="fly" style="animation-duration:24s"><path d="M0 30 l22 6 -22 6 6 -6z" fill="#fff" stroke="#9aa7b4"/></g>`;
-      svg += banner(lang === 'en' ? 'Thank you, Dad!' : 'Danke, Papi!', '#3E8EDE', BX);
+      // the house becomes a man cave: rock with a dark entrance, a glow inside; Dad the caveman next to a smoking campfire
+      const cx = CX;
+      svg += `<g transform="translate(${cx} 106) scale(.72) translate(${-cx} -106)">`;
+      svg += `<path d="M${cx - 92} 106 C ${cx - 96} 76 ${cx - 70} 46 ${cx - 30} 40 C ${cx + 4} 30 ${cx + 52} 38 ${cx + 76} 60 C ${cx + 94} 76 ${cx + 98} 96 ${cx + 94} 106Z" fill="#8a8173"/>`
+        + `<path d="M${cx - 70} 70 q16 -10 34 -6 M${cx + 30} 52 q18 2 28 14 M${cx - 40} 90 q10 -4 22 0 M${cx + 50} 86 q12 -2 22 4" stroke="#6f675b" stroke-width="2" fill="none"/>`
+        + `<path d="M${cx - 34} 106 V82 C ${cx - 34} 56 ${cx + 30} 56 ${cx + 30} 82 V106Z" fill="#241c16"/><path d="M${cx - 26} 106 V84 C ${cx - 26} 66 ${cx + 22} 66 ${cx + 22} 84 V106Z" fill="#FF9A3C" opacity=".22" class="glw" style="animation-duration:2.6s"/>`
+        + `<path d="M${cx - 24} 62 l3 7 3 -7 M${cx - 6} 58 l2 6 2 -6 M${cx + 12} 60 l3 7 3 -7" fill="#6f675b"/>`
+        + `<path d="M${cx - 60} 58 l10 -4 2 6 z" fill="#5a3b22"/><path d="M${cx + 40} 50 h18 v10 h-18z" fill="#c9a77a" transform="rotate(-6 ${cx + 49} 55)"/><path d="M${cx + 43} 55 h12" stroke="#5a3b22" stroke-width="1.2" transform="rotate(-6 ${cx + 49} 55)"/>`
+        + `<path d="M${cx - 80} 104 q8 -10 18 0" fill="#5f8f45"/><path d="M${cx + 70} 104 q10 -12 22 0" fill="#5f8f45"/></g>`;
+      // stones and bones all around
+      [[cx - 240, 108, 1.2], [cx - 205, 112, 0.7], [cx - 60, 110, 0.9], [cx + 60, 111, 1], [cx + 140, 108, 1.3], [cx + 175, 112, 0.7], [cx + 260, 110, 1.1], [cx - 320, 111, 0.9], [cx + 330, 109, 0.8]].forEach(([x, y, k]) => {
+        svg += `<ellipse cx="${x}" cy="${y}" rx="${(8 * k).toFixed(1)}" ry="${(5 * k).toFixed(1)}" fill="#8d939b"/><ellipse cx="${x - 2 * k}" cy="${y - 2 * k}" rx="${(4 * k).toFixed(1)}" ry="${(2 * k).toFixed(1)}" fill="#a9afb6"/>`; });
+      svg += `<path d="M${cx - 28} 112 h12 M${cx - 30} 110.6 l2 1.4 -2 1.4 M${cx - 14} 110.6 l-2 1.4 2 1.4" stroke="#f1ebdd" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+      // sabre-toothed tiger lying in front of the cave, flicking its tail
+      const tx = cx + 92;
+      svg += `<g><g class="sw" style="transform-origin:${tx - 22}px 104px"><path d="M${tx - 22} 104 q-14 -2 -16 -12" stroke="#d9862f" stroke-width="3" fill="none" stroke-linecap="round"/></g><ellipse cx="${tx - 6}" cy="104" rx="18" ry="7" fill="#e8963a"/>`
+        + [-14, -8, -2, 4].map((d) => `<path d="M${tx + d} 97.5 q1 4 0 8" stroke="#7a4a1e" stroke-width="1.4" fill="none"/>`).join('')
+        + `<path d="M${tx - 18} 109 v3 M${tx + 6} 109 v3" stroke="#d9862f" stroke-width="4" stroke-linecap="round"/><g class="nod" style="transform-origin:${tx + 12}px 100px"><circle cx="${tx + 14}" cy="98" r="7" fill="#e8963a"/><path d="M${tx + 9} 92 l1 -4 3 3z M${tx + 17} 92 l2 -4 2 4z" fill="#c97424"/>`
+        + `<ellipse cx="${tx + 17}" cy="101" rx="4" ry="3" fill="#f6dcb2"/><circle cx="${tx + 12}" cy="96" r="1" fill="#2b2b2b"/><circle cx="${tx + 17}" cy="96" r="1" fill="#2b2b2b"/><circle cx="${tx + 17.6}" cy="99" r=".9" fill="#5a2a1a"/><path d="M${tx + 15} 102 l.8 5 1 -5 M${tx + 19} 102 l.8 5 1 -5" fill="#ffffff" stroke="#ddd" stroke-width=".3"/></g></g>`;
+      // caveman dad: wild hair, big beard, fur tunic with spots, club over the shoulder
+      const dx2 = cx - 140;
+      svg += `<g class="bob" style="animation-duration:3.4s"><path d="M${dx2 - 4} 108 l-1 -12 M${dx2 + 4} 108 l1 -12" stroke="#C99167" stroke-width="3.6" stroke-linecap="round"/><path d="M${dx2 - 11} 98 l3 -20 h16 l3 20 l-5 -2 -3 3 -4 -3 -4 3 -3 -3z" fill="#B8742F"/>`
+        + `<circle cx="${dx2 - 4}" cy="86" r="1.6" fill="#5a3412"/><circle cx="${dx2 + 4}" cy="91" r="1.4" fill="#5a3412"/><circle cx="${dx2 + 1}" cy="82" r="1.2" fill="#5a3412"/><path d="M${dx2 - 8} 78 l12 16" stroke="#9a5a22" stroke-width="2.4"/>`
+        + `<circle cx="${dx2}" cy="71" r="6" fill="#C99167"/><path d="M${dx2 - 7} 70 q-1 -9 7 -9 q8 0 7 9 l-2 -3 -2 2 -3 -3 -3 3 -2 -2z" fill="#3a2414"/><path d="M${dx2 - 6} 72 q0 11 6 12 q6 -1 6 -12 q-3 3 -6 3 q-3 0 -6 -3z" fill="#4a2e18"/>`
+        + `<circle cx="${dx2 - 2}" cy="70" r=".8" fill="#2b2b2b"/><circle cx="${dx2 + 2}" cy="70" r=".8" fill="#2b2b2b"/><path d="M${dx2 - 3.4} 67.6 h2.4 M${dx2 + 1} 67.6 h2.4" stroke="#3a2414" stroke-width="1.2"/><path d="M${dx2 - 2} 74.4 q2 1.6 4 0" stroke="#7a3b22" stroke-width=".8" fill="none"/>`
+        + `<g class="wave2" style="transform-origin:${dx2 + 8}px 84px"><path d="M${dx2 + 8} 84 l6 -8" stroke="#C99167" stroke-width="3" stroke-linecap="round"/><path d="M${dx2 + 13} 78 l7 -16" stroke="#8a5a2b" stroke-width="2.4" stroke-linecap="round"/><ellipse cx="${dx2 + 21}" cy="59" rx="4" ry="6" fill="#8a5a2b" transform="rotate(22 ${dx2 + 21} 59)"/></g></g>`;
+      // campfire with logs, stones, flames and smoke
+      const fx = cx - 104;
+      svg += [-9, -4, 2, 7].map((o2) => `<ellipse cx="${fx + o2 * 1.2}" cy="109" rx="3.2" ry="2.2" fill="#8d939b"/>`).join('')
+        + `<path d="M${fx - 9} 108 l18 -5 M${fx + 9} 108 l-18 -5" stroke="#6b4a2e" stroke-width="3" stroke-linecap="round"/>`
+        + `<path class="flame" d="M${fx - 7} 106 Q ${fx - 4} 92 ${fx} 86 Q ${fx + 4} 92 ${fx + 7} 106Z" fill="#FF8A3C"/><path class="flame" d="M${fx - 4} 106 Q ${fx} 96 ${fx + 4} 106Z" fill="#FFD24A" style="animation-delay:-.3s"/>`
+        + smoke({ smoke: true, wind }, fx, 82) + smoke({ smoke: true, wind }, fx + 2, 78);
     }
     if (vis === 'sommer') {
-      svg += '<g class="sw" style="transform-origin:180px 104px"><path d="M180 104 Q 186 70 176 40" stroke="#8a5a2b" stroke-width="6" fill="none"/>' + ['M176 40 q-30 -6 -44 12', 'M176 40 q30 -8 44 10', 'M176 40 q-18 -22 -40 -18', 'M176 40 q18 -24 40 -16'].map((d) => `<path d="${d}" stroke="#2f9a46" stroke-width="7" fill="none" stroke-linecap="round"/>`).join('') + '</g>';
-      svg += '<path d="M760 104 L780 60" stroke="#8a5a2b" stroke-width="3"/><path d="M738 66 Q 780 36 822 54Z" fill="#ff5a5a"/><path d="M752 60 Q 780 44 806 56" stroke="#fff" stroke-width="5" fill="none"/>';
-      svg += emo(640, 110, '🏐', 14, 'bob') + emo(980, 110, '🏰', 18) + emo(1080, 112, '🩴', 14) + `<g class="fly" style="animation-duration:40s"><path d="M0 56 l60 0" stroke="#fff" stroke-width="1"/><path d="M0 50 h-22 v12 h22z" fill="#fff"/></g>`;
+      const palm = (x, k, dl) => `<g class="sw" style="transform-origin:${x}px 104px;animation-delay:-${dl}s"><path d="M${x} 104 Q ${x + 6 * k} ${104 - 34 * k} ${x - 4 * k} ${104 - 64 * k}" stroke="#8a5a2b" stroke-width="${(6 * k).toFixed(1)}" fill="none"/>`
+        + [[-30, -6, -44, 12], [30, -8, 44, 10], [-18, -22, -40, -18], [18, -24, 40, -16], [2, -26, 4, -30]].map(([a, b, c, d]) => `<path d="M${x - 4 * k} ${104 - 64 * k} q${a * k} ${b * k} ${c * k} ${d * k}" stroke="#2f9a46" stroke-width="${(7 * k).toFixed(1)}" fill="none" stroke-linecap="round"/>`).join('')
+        + `<circle cx="${x - 2 * k}" cy="${104 - 60 * k}" r="${(3 * k).toFixed(1)}" fill="#7a4f25"/></g>`;
+      svg += palm(180, 1, 0) + palm(560, 0.85, 1.2) + palm(960, 1.05, 2.1);
+      // bungalow on stilts with a palm-leaf roof
+      const bx = 760;
+      svg += `<path d="M${bx - 34} 104 V86 M${bx - 12} 104 V86 M${bx + 12} 104 V86 M${bx + 34} 104 V86" stroke="#7a5233" stroke-width="3"/>`
+        + `<rect x="${bx - 40}" y="83" width="80" height="4" fill="#a87a4a"/><rect x="${bx - 34}" y="58" width="68" height="26" fill="#c8995f"/>`
+        + Array.from({ length: 8 }, (_, i) => `<path d="M${bx - 34 + i * 9.7} 58 v26" stroke="#a87a4a" stroke-width="1"/>`).join('')
+        + `<rect x="${bx - 6}" y="66" width="13" height="18" fill="#6b4a2e"/><rect x="${bx - 28}" y="64" width="14" height="10" fill="#bfe8ff" stroke="#6b4a2e" stroke-width="1.4"/><rect x="${bx + 15}" y="64" width="14" height="10" fill="#bfe8ff" stroke="#6b4a2e" stroke-width="1.4"/>`
+        + `<path d="M${bx - 52} 60 L${bx} 32 L${bx + 52} 60z" fill="#b8905a"/>` + Array.from({ length: 13 }, (_, i) => `<path d="M${bx} 33 L${bx - 50 + i * 8.3} 60 l${i % 2 ? 1.5 : -1.5} 4" stroke="${i % 2 ? '#8d6a3c' : '#d2ae72'}" stroke-width="2" fill="none" stroke-linecap="round"/>`).join('')
+        + `<path d="M${bx + 40} 85 l14 19 M${bx + 46} 85 l14 19 M${bx + 43} 91 h6 M${bx + 47} 97 h6" stroke="#7a5233" stroke-width="2"/>`
+        + `<path d="M${bx + 30} 50 l8 -3 v7z" fill="#ff5a5a"/>`;
+      svg += '<path d="M1040 104 L1060 60" stroke="#8a5a2b" stroke-width="3"/><path d="M1018 66 Q 1060 36 1102 54Z" fill="#ff5a5a"/><path d="M1032 60 Q 1060 44 1086 56" stroke="#fff" stroke-width="5" fill="none"/>';
+      svg += emo(640, 110, '🏐', 14, 'bob') + emo(1120, 110, '🏰', 18) + emo(1160, 112, '🩴', 14) ;
+      svg += `<g class="plane"><g transform="translate(0 ${TOP + 26})"><path d="M0 0 h26 q6 0 8 3 q-2 3 -8 3 h-26 l-4 -3z" fill="#fff"/><path d="M10 0 l-6 -8 h4 l9 8z M10 6 l-6 8 h4 l9 -8z M-2 1 l-3 -5 h3 l3 4z" fill="#dbe4ee"/><circle cx="27" cy="2" r="1" fill="#5fa8e8"/><circle cx="23" cy="2" r="1" fill="#5fa8e8"/><circle cx="19" cy="2" r="1" fill="#5fa8e8"/></g></g>`;
+      [[300, 0]].forEach(([fx, dl]) => { svg += `<g class="fin" style="animation-delay:-${dl}s"><path d="M${fx} 89 l5 -8 q2 4 4 8z" fill="#4b5563"/></g><rect x="${fx - 6}" y="89" width="130" height="6" fill="#2aa7df"/>`; });
+      const crab = (x, dl) => `<g style="animation-delay:-${dl}s"><ellipse class="chole" cx="${x}" cy="112" rx="5" ry="1.8" fill="#8a6a35" style="animation-delay:-${dl}s"/><ellipse class="cmnd" cx="${x + 46}" cy="112" rx="6" ry="2.2" fill="#e2bf74" style="animation-delay:-${dl}s"/>`
+        + `<g class="crab2" style="animation-delay:-${dl}s"><path d="M${x - 6} 110 l-3 2.4 M${x - 4} 111 l-2 2.6 M${x + 6} 110 l3 2.4 M${x + 4} 111 l2 2.6" stroke="#c8302e" stroke-width="1"/><ellipse cx="${x}" cy="109" rx="6" ry="3.4" fill="#E5483B"/><path d="M${x - 6} 107.6 q-4 -3 -2 -6 q2 1 1 3z M${x + 6} 107.6 q4 -3 2 -6 q-2 1 -1 3z" fill="#E5483B"/><circle cx="${x - 2}" cy="105.6" r="1" fill="#fff"/><circle cx="${x + 2}" cy="105.6" r="1" fill="#fff"/><circle cx="${x - 2}" cy="105.6" r=".45" fill="#2b2b2b"/><circle cx="${x + 2}" cy="105.6" r=".45" fill="#2b2b2b"/></g></g>`;
+      svg += crab(430, 0) + crab(900, 8);
     }
     if (vis === 'august') {
       // bunting on a string: red pennants with a white cross, white ones with a red cross
       for (let x0 = 0; x0 < W; x0 += 240) svg += `<path d="M${x0} ${TOP + 3} Q ${x0 + 120} ${TOP + 63} ${x0 + 240} ${TOP + 3}" stroke="#8a8f96" stroke-width="1" fill="none"/><circle cx="${x0}" cy="${TOP + 4}" r="2" fill="#8a8f96"/>`;
       for (let x = 4; x < W - 10; x += 20) { const t = ((x + 7) % 240) / 240; const y = TOP + 3 + 60 * t * (1 - t); const red = (x / 20 | 0) % 2 === 0; const f = red ? '#DA291C' : '#ffffff'; const k = red ? '#ffffff' : '#DA291C';
         svg += `<g class="sw" style="transform-origin:${x + 7}px ${y.toFixed(1)}px;animation-delay:-${(r() * 3).toFixed(1)}s"><path d="M${x} ${y.toFixed(1)} h14 l-7 15z" fill="${f}" stroke="${red ? 'none' : '#d9d9d9'}" stroke-width=".5"/><path d="M${x + 7} ${(y + 2).toFixed(1)} v6 M${x + 4} ${(y + 5).toFixed(1)} h6" stroke="${k}" stroke-width="1.8"/></g>`; }
-      svg += '<g transform="translate(560 40)"><path d="M0 64 V0" stroke="#999" stroke-width="2"/><g class="sw" style="transform-origin:0 0"><rect x="0" y="0" width="30" height="30" fill="#DA291C"/><path d="M15 6 v18 M6 15 h18" stroke="#fff" stroke-width="6"/></g></g>';
+      svg += '<g transform="translate(' + (CX - 235) + ' 40)"><path d="M0 64 V0" stroke="#999" stroke-width="2"/><g class="sw" style="transform-origin:0 0"><rect x="0" y="0" width="30" height="30" fill="#DA291C"/><path d="M15 6 v18 M6 15 h18" stroke="#fff" stroke-width="6"/></g></g>';
       if (hour >= 21) { svg += '<g transform="translate(380 104)"><path d="M-22 0 L22 0" stroke="#6b4a2e" stroke-width="5"/><path class="flame" d="M-16 0 Q -8 -36 0 -46 Q 8 -36 16 0Z" fill="#FF8A3C"/><path class="flame" d="M-8 0 Q 0 -24 8 0Z" fill="#FFD24A"/></g>'; P.push(['sparks', 12]); }
     }
-    if (vis === 'schule') svg += emo(380, 104, '🎒', 26, 'bob') + emo(430, 106, '✏️', 18) + emo(470, 106, '📚', 20) + emo(600, 40, '🔤', 18, 'bob');
+    if (vis === 'schule') {
+      // children with school bags walk along the path, one after the other
+      const kid = (shirt, bag, hair, sk) => `<g class="step" style="animation-duration:.45s"><g class="leg" style="transform-origin:0px 96px"><path d="M-2 96 l-2 10" stroke="#34495e" stroke-width="2.6" stroke-linecap="round"/></g><g class="leg" style="transform-origin:0px 96px;animation-delay:-.45s"><path d="M2 96 l2 10" stroke="#2c3e50" stroke-width="2.6" stroke-linecap="round"/></g><rect x="-4.5" y="84" width="9" height="13" rx="3" fill="${shirt}"/><rect x="-9" y="84.5" width="6" height="10" rx="1.6" fill="${bag}"/><circle cx="0.5" cy="79" r="5" fill="${sk}"/><path d="M-4.5 78 q5 -7 10 0" fill="${hair}"/><circle cx="2.6" cy="79" r=".7" fill="#2b2b2b"/></g>`;
+      [['#4FA3E0', '#E5483B', '#6b4a2e', '#F3CDA6', 0], ['#F5C542', '#3FA66B', '#2b2b2b', '#C99167', 7], ['#E06B9B', '#3E8EDE', '#D4A63B', '#FBE3CF', 14]].forEach(([a, b, c, d, dl]) => { svg += `<g class="fly" style="animation-duration:30s;animation-delay:-${dl}s"><g transform="translate(0 -45) scale(1.42)">${kid(a, b, c, d)}</g></g>`; });
+      svg += emo(CX - 250, 106, '🏫', 22) + emo(CX - 210, 106, '✏️', 13);
+    }
     if (vis === 'herbst') { P.push(['leaves', 14]); if (s.key === 'erntedank') svg += emo(380, 106, '🎃', 22) + emo(420, 106, '🍎', 16) + emo(450, 106, '🌻', 20); }
-    if (vis === 'sport') svg += `<g class="fly" style="animation-duration:22s"><text x="0" y="100" font-size="20">⛷️</text></g><path d="M0 30 L1200 16" stroke="#444" stroke-width="1"/>` + `<g class="fly" style="animation-duration:60s"><text x="0" y="36" font-size="18">🚡</text></g>`;
+    if (snowGround && jz === 'winter' && ['winter', 'sport', 'alltag'].includes(vis)) {
+      const sx = CX - 250;
+      svg += `<g><circle cx="${sx}" cy="101" r="8" fill="#fff" stroke="#dfe7ef" stroke-width=".6"/><circle cx="${sx}" cy="89" r="6" fill="#fff" stroke="#dfe7ef" stroke-width=".6"/><circle cx="${sx}" cy="80" r="4.4" fill="#fff" stroke="#dfe7ef" stroke-width=".6"/><path d="M${sx} 80 l5 1 -5 1z" fill="#FF8A3C"/><circle cx="${sx - 1.6}" cy="78.6" r=".7" fill="#2b2b2b"/><circle cx="${sx + 1.2}" cy="78.6" r=".7" fill="#2b2b2b"/><rect x="${sx - 4}" y="72" width="8" height="4" fill="#2b2b2b"/><rect x="${sx - 6}" y="75.5" width="12" height="1.4" fill="#2b2b2b"/><path d="M${sx - 5} 84 h10" stroke="#E5483B" stroke-width="2"/><path d="M${sx - 6} 88 l-8 -6 M${sx + 6} 88 l8 -6" stroke="#7a5233" stroke-width="1.2"/><circle cx="${sx}" cy="88" r=".8" fill="#2b2b2b"/><circle cx="${sx}" cy="91" r=".8" fill="#2b2b2b"/></g>`;
+      const kidW = (x, shirt, hat, flip) => `<g transform="translate(${x} 0) scale(${flip ? -1.3 : 1.3} 1.3) translate(0 -24)"><path d="M-2 96 l-2 10 M2 96 l2 10" stroke="#34495e" stroke-width="2.6" stroke-linecap="round"/><rect x="-4.5" y="84" width="9" height="13" rx="3" fill="${shirt}"/><g class="wave2" style="transform-origin:3px 87px"><path d="M3 87 l6 -6" stroke="${shirt}" stroke-width="2.6" stroke-linecap="round"/></g><circle cx=".5" cy="79" r="5" fill="#F3CDA6"/><path d="M-4.6 77.6 q5 -8 10 0z" fill="${hat}"/><circle cx="2.6" cy="79" r=".7" fill="#2b2b2b"/></g>`;
+      if (!night) svg += kidW(CX - 330, '#E5483B', '#3E8EDE', false) + kidW(CX - 170, '#3E8EDE', '#F5C542', true);
+      if (!night) svg += `<circle class="ball1" cx="${CX - 316}" cy="82" r="2.2" fill="#fff" stroke="#dfe7ef" stroke-width=".4"/><circle class="ball2" cx="${CX - 184}" cy="82" r="2.2" fill="#fff" stroke="#dfe7ef" stroke-width=".4"/>`;
+    }
     if (vis === 'geburtstag') {
-      for (let x = 0; x < W; x += 22) svg += `<path d="M${x} 4 l14 0 -7 16z" fill="${['#FF7AB6', '#FFD84D', '#5CE1E6', '#9EDC9E', '#B07CFF'][(x / 22) % 5]}"/>`;
-      ['#FF7AB6', '#FFD84D', '#5CE1E6', '#9EDC9E', '#B07CFF'].forEach((c, i) => { const x = 300 + i * 150; svg += `<g class="bob" style="animation-delay:-${i * 0.6}s"><path d="M${x} ${60 + (i % 2) * 8} q-4 20 2 38" stroke="#fff" stroke-width="1" fill="none" opacity=".7"/><ellipse cx="${x}" cy="${46 + (i % 2) * 8}" rx="13" ry="16" fill="${c}"/></g>`; });
-      svg += banner('Happy Birthday!', '#FF7AB6', BX);
+      for (let x = 0; x < W; x += 22) svg += `<g class="sw" style="transform-origin:${x + 7}px ${TOP + 4}px;animation-delay:-${(r() * 3).toFixed(1)}s"><path d="M${x} ${TOP + 4} l14 0 -7 16z" fill="${['#FF7AB6', '#FFD84D', '#5CE1E6', '#9EDC9E', '#B07CFF'][(x / 22) % 5]}"/></g>`;
+      // balloons keep floating up, party poppers burst, presents and a cake with a flickering candle
+      for (let i = 0; i < 14; i++) { const x = 30 + r() * (W - 60); const c = ['#FF7AB6', '#FFD84D', '#5CE1E6', '#9EDC9E', '#B07CFF', '#FF8A3C'][i % 6];
+        svg += `<g class="rise" style="animation-duration:${(8 + r() * 6).toFixed(1)}s;animation-delay:-${(r() * 12).toFixed(1)}s"><path d="M${x.toFixed(0)} ${H + 28} q-4 10 1 22" stroke="#fff" stroke-width=".8" fill="none" opacity=".7"/><ellipse cx="${x.toFixed(0)}" cy="${H + 16}" rx="9" ry="12" fill="${c}"/><ellipse cx="${(x - 3).toFixed(0)}" cy="${H + 11}" rx="2" ry="3" fill="#fff" opacity=".5"/></g>`; }
+      for (let i = 0; i < 5; i++) svg += burstRays(120 + r() * (W - 240), TOP + 20 + r() * 30, ['#FF7AB6', '#FFD84D', '#5CE1E6', '#B07CFF', '#9EDC9E'][i], (r() * 2.6).toFixed(2));
+      svg += emo(CX - 300, 106, '🎁', 18, 'bob') + emo(CX - 270, 107, '🎁', 14, 'bob', 'style="animation-delay:-1s"') + emo(CX + 185, 106, '🎂', 20) + `<path class="flame" d="M${CX + 185} 88 q2 3 0 5 q-2 -2 0 -5z" fill="#FFC23D"/>`;
+      P.push(['confetti', 90]);
+    }
+    // "tap me": now and then a bouncing double arrow with a word and sparkles over something you can tap
+    const tapHint = (x, y, nm) => `<g class="taph2 th-${nm}"><g transform="translate(${x} ${y}) scale(1.5) translate(${-x} ${-y})"><ellipse class="thring" cx="${x}" cy="${y + 4}" rx="14" ry="5" fill="none" stroke="#FFE27A" stroke-width="1.2"/>`
+      + `<g class="tharr"><path d="M${x - 5} ${y - 8} l5 6 l5 -6" stroke="#FFE27A" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M${x - 5} ${y - 14} l5 6 l5 -6" stroke="#FFE27A" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/></g>`
+      + `<text x="${x}" y="${y - 19}" text-anchor="middle" font-size="8" font-weight="800" font-family="system-ui,sans-serif" fill="#FFE27A" stroke="#3a2a00" stroke-width=".5">${lang === 'en' ? 'Tap!' : 'Tipp!'}</text>`
+      + [[-16, -16], [16, -12], [-12, 4], [14, 6]].map(([a, b], i) => `<path class="thsp" d="M${x + a} ${y + b - 3} l.8 2.2 2.2 .8 -2.2 .8 -.8 2.2 -.8 -2.2 -2.2 -.8 2.2 -.8z" fill="#fff" style="animation-delay:-${(i * 0.25).toFixed(2)}s"/>`).join('') + '</g></g>';
+    const ujack = (x, y, k) => `<g transform="translate(${x} ${y}) scale(${k})"><rect width="20" height="12" fill="#012169"/><path d="M0 0 L20 12 M20 0 L0 12" stroke="#fff" stroke-width="2.4"/><path d="M0 0 L20 12 M20 0 L0 12" stroke="#C8102E" stroke-width=".9"/><path d="M10 0 V12 M0 6 H20" stroke="#fff" stroke-width="4"/><path d="M10 0 V12 M0 6 H20" stroke="#C8102E" stroke-width="2.2"/></g>`;
+    const tPalm = (x, k, dl) => `<g class="sw" style="transform-origin:${x}px 106px;animation-delay:-${dl}s"><path d="M${x} 106 Q ${x + 5 * k} ${106 - 30 * k} ${x - 3 * k} ${106 - 56 * k}" stroke="#7a5a2b" stroke-width="${(5 * k).toFixed(1)}" fill="none"/>`
+      + [[-26, -6, -38, 12], [26, -8, 38, 10], [-16, -20, -34, -16], [16, -22, 34, -14], [2, -24, 4, -26]].map(([a, b, c, d]) => `<path d="M${x - 3 * k} ${106 - 56 * k} q${a * k} ${b * k} ${c * k} ${d * k}" stroke="#2f8a3a" stroke-width="${(6 * k).toFixed(1)}" fill="none" stroke-linecap="round"/>`).join('') + '</g>';
+    const fern = (x, y, k, c) => `<g transform="translate(${x} ${y}) scale(${k})">${[-60, -35, -12, 12, 35, 60].map((a) => `<path d="M0 0 q${(a / 4).toFixed(1)} -10 ${(a / 2.2).toFixed(1)} -16" stroke="${c}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`).join('')}</g>`;
+    if (vis === 'moon') {
+      // lunar module, flag, a hopping astronaut with footprints and a small UFO with a green alien
+      const lx = CX;
+      // Apollo lunar module: gold-foil descent stage on four legs with round footpads and a ladder,
+      // the faceted grey ascent stage with two triangular windows, hatch, docking tunnel, thruster quads and antennas
+      svg += `<g class="lm" data-tap="lm"><rect x="${lx - 40}" y="40" width="80" height="68" fill="transparent"/><path class="lmflame" d="M${lx - 6} 95 l6 16 l6 -16z" fill="#ffd27a"/><path class="lmflame" d="M${lx - 3} 95 l3 9 l3 -9z" fill="#fff6d8"/><path d="M${lx - 20} 90 L${lx - 34} 104 M${lx + 20} 90 L${lx + 34} 104 M${lx - 20} 84 L${lx - 30} 100 M${lx + 20} 84 L${lx + 30} 100" stroke="#b8bec6" stroke-width="1.6"/>`
+        + `<path d="M${lx - 12} 92 L${lx - 16} 106 M${lx + 12} 92 L${lx + 16} 106" stroke="#a9b0b9" stroke-width="1.6"/>`
+        + [[-34, 104], [34, 104], [-16, 106.4], [16, 106.4]].map(([a, b]) => `<ellipse cx="${lx + a}" cy="${b}" rx="4.4" ry="1.4" fill="#cdd2d8"/><ellipse cx="${lx + a}" cy="${b - 0.4}" rx="3" ry=".7" fill="#e4e7ec"/>`).join('')
+        + `<path d="M${lx - 22} 92 L${lx - 22} 80 L${lx - 16} 76 H${lx + 16} L${lx + 22} 80 V92 L${lx + 16} 95 H${lx - 16}Z" fill="#c9971c"/>`
+        + `<path d="M${lx - 16} 76 V95 M${lx + 16} 76 V95" stroke="#8a6410" stroke-width=".8"/><path d="M${lx - 22} 80 L${lx - 16} 82 H${lx + 16} L${lx + 22} 80" stroke="#f1c94a" stroke-width=".8" fill="none"/>`
+        + `<rect x="${lx - 14}" y="83" width="9" height="9" fill="#1d1d1f" opacity=".8"/><rect x="${lx + 5}" y="83" width="9" height="9" fill="#e8c35a"/><path d="M${lx - 4} 79 l2 15 M${lx + 2} 78 l-1 16 M${lx + 9} 80 l1 12" stroke="#f6dc84" stroke-width=".7" opacity=".9"/>`
+        + `<path d="M${lx - 10} 95 L${lx - 22} 104" stroke="#9aa1aa" stroke-width="1"/><path d="M${lx - 12} 97 l-3 2 M${lx - 14.6} 99 l-3 2 M${lx - 17.2} 101 l-3 2" stroke="#9aa1aa" stroke-width=".8"/><path d="M${lx - 6} 92 h8 v2 h-8z" fill="#b8bec6"/>`
+        + `<path d="M${lx - 18} 76 L${lx - 19} 66 L${lx - 12} 58 H${lx - 2} L${lx + 2} 54 H${lx + 12} L${lx + 18} 60 L${lx + 19} 72 L${lx + 15} 76Z" fill="#c4c9d0"/>`
+        + `<path d="M${lx - 19} 66 L${lx + 1} 66 L${lx + 2} 76 M${lx + 2} 54 L${lx + 2} 76" stroke="#9aa1aa" stroke-width=".7" fill="none"/><path d="M${lx + 3} 60 H${lx + 17} V71 H${lx + 3}Z" fill="#8f97a2"/><path d="M${lx - 17} 67 H${lx} V75 H${lx - 17}Z" fill="#d9dde2"/>`
+        + `<path d="M${lx - 13} 60 L${lx - 6} 60 L${lx - 10} 65Z M${lx - 4} 60 L${lx + 1} 60 L${lx - 1} 65Z" fill="#141a26"/><rect x="${lx - 11}" y="68" width="7" height="7" rx="1" fill="#aab1ba" stroke="#7d858f" stroke-width=".5"/>`
+        + `<rect x="${lx - 2}" y="50" width="8" height="4" fill="#b8bec6"/><rect x="${lx - 3}" y="49" width="10" height="1.4" fill="#9aa1aa"/>`
+        + [[-20, 63], [19, 63]].map(([a, b]) => `<path d="M${lx + a - 3} ${b} h6 M${lx + a} ${b - 3} v6" stroke="#6f7782" stroke-width="1.2"/><rect x="${lx + a - 1.4}" y="${b - 1.4}" width="2.8" height="2.8" fill="#9aa1aa"/>`).join('')
+        + `<path d="M${lx + 12} 56 L${lx + 20} 46" stroke="#b8bec6" stroke-width="1"/><path d="M${lx + 15} 44 a6 6 0 0 1 10 4 l-10 -4z" fill="#e6e9ee" stroke="#9aa1aa" stroke-width=".5"/><path d="M${lx - 8} 58 V48 M${lx - 11} 48 h6" stroke="#b8bec6" stroke-width=".8"/>`;
+      svg += `</g>` + Array.from({ length: 14 }, (_, k) => { const a = k < 7 ? -1 : 1; return `<circle class="ldust" cx="${lx + a * (8 + (k % 7) * 3)}" cy="${104 - (k % 3)}" r="${(2 + (k % 3)).toFixed(0)}" fill="#c9cdd3" style="--dx:${a * (30 + (k % 7) * 10)}px;--dy:-${4 + (k % 4) * 3}px"/>`; }).join("") + `<ellipse class="lring" cx="${lx}" cy="105" rx="30" ry="4" fill="none" stroke="#d4d8de" stroke-width="2"/>`;
+      svg += tapHint(lx + 2, 50, 'lm');
+      const fx = lx + 46;
+      svg += `<path d="M${fx} 107 V80" stroke="#d0d4da" stroke-width="1.2"/><ellipse cx="${fx}" cy="107" rx="3" ry=".8" fill="#7f848c"/><path d="M${fx} 81 h12" stroke="#d0d4da" stroke-width=".8"/><rect x="${fx}" y="81" width="12" height="12" fill="#DA291C"/><path d="M${fx + 6} 83.6 v6.8 M${fx + 2.6} 87 h6.8" stroke="#fff" stroke-width="2.2"/>`;
+      for (let i = 0; i < 9; i++) svg += `<ellipse cx="${lx - 60 - i * 12}" cy="${108 + (i % 2) * 3}" rx="2" ry="1" fill="#7f848c"/>`;
+      const ax = lx - 150;
+      svg += `<ellipse class="dust" cx="${ax + 36}" cy="104" rx="10" ry="2" fill="#c9cdd3"/><g class="mjump"><g transform="translate(${ax} 0)"><path d="M-3 104 l-1 -8 M3 104 l1 -8" stroke="#eef1f5" stroke-width="3.4" stroke-linecap="round"/><rect x="-6" y="84" width="12" height="13" rx="3" fill="#eef1f5"/><rect x="-9" y="85" width="5" height="10" rx="1.4" fill="#d0d4da"/><circle cx="0" cy="79" r="6" fill="#eef1f5"/><ellipse cx="1.4" cy="79" rx="4" ry="3.4" fill="#D4A017"/><ellipse cx="0" cy="77.6" rx="1.6" ry="1" fill="#fff6c8" opacity=".8"/><g class="wave2" style="transform-origin:5px 88px"><path d="M5 88 l6 -7" stroke="#eef1f5" stroke-width="2.6" stroke-linecap="round"/><circle cx="11.4" cy="80.4" r="1.6" fill="#eef1f5"/></g><path d="M-5 89 l-3 6" stroke="#eef1f5" stroke-width="2.6" stroke-linecap="round"/><rect x="-2" y="88" width="4" height="3" fill="#B22234"/></g></g>`;
+      svg += `<g class="ufo"><g transform="translate(${lx - 260} ${TOP + 30})"><ellipse cx="0" cy="-3" rx="8" ry="7" fill="#bfefff" opacity=".55"/><circle cx="0" cy="-3" r="3.6" fill="#62d65c"/><ellipse cx="-1.4" cy="-3.6" rx="1.1" ry="1.5" fill="#111"/><ellipse cx="1.4" cy="-3.6" rx="1.1" ry="1.5" fill="#111"/><path d="M-1.6 -6.4 l-1.6 -3 M1.6 -6.4 l1.6 -3" stroke="#62d65c" stroke-width=".8"/><circle cx="-3.2" cy="-9.6" r=".9" fill="#62d65c"/><circle cx="3.2" cy="-9.6" r=".9" fill="#62d65c"/>`
+        + `<ellipse cx="0" cy="2" rx="17" ry="5" fill="#9aa3ae"/><ellipse cx="0" cy="1" rx="17" ry="2.6" fill="#c3cad3"/>${[-11, -4, 4, 11].map((x, i) => `<circle class="tw" cx="${x}" cy="3.6" r="1.2" fill="${['#FFD24A', '#FF5A7A', '#5CE1E6', '#7CFF8A'][i]}" style="animation-duration:.8s;animation-delay:-${i * 0.2}s"/>`).join('')}<path d="M-6 7 l-10 18 h32 l-10 -18z" fill="#bfefff" opacity=".12"/></g></g>`;
+    }
+    if (vis === 'titanic') {
+      // the Titanic steams to the right – three of her four funnels smoke (the fourth was a dummy).
+      // Tap her: night falls, the full moon rises, an iceberg drifts in, she breaks in two and sinks,
+      // lifeboats with lanterns row away – then it is day again and she sails on.
+      const tx = CX;
+      const smokeS = (list) => list.map((fx) => Array.from({ length: 4 }, (_, k) => `<circle class="smk" cx="${tx + fx + 3}" cy="42" r="6" fill="${k % 2 ? '#3a3a3a' : '#5a5a5a'}" style="--dx:${-30 - wind}px;animation-delay:-${k}s;animation-duration:4s"/>`).join('')).join('');
+      const body = `<g class="shipb"><path d="M${tx - 140} 84 h262 l18 -6 l-8 22 h-266z" fill="#1d1d1f"/><path d="M${tx - 134} 98 h258 l-2 4 h-254z" fill="#9b2b22"/><path d="M${tx - 132} 84 h246" stroke="#f1ebdd" stroke-width="1.6"/>`
+        + Array.from({ length: 34 }, (_, i) => `<circle cx="${tx - 126 + i * 7.4}" cy="89" r=".8" fill="#e8d9a8"/>`).join('')
+        + `<rect x="${tx - 100}" y="74" width="196" height="10" fill="#f4f1ea"/><rect x="${tx - 86}" y="68" width="166" height="6" fill="#ece8de"/>` + Array.from({ length: 26 }, (_, i) => `<rect x="${tx - 96 + i * 7.4}" y="77" width="3.4" height="3" fill="#3a3f46"/>`).join('')
+        + [-62, -22, 18, 58].map((fx, i) => `<path d="M${tx + fx - 6} 68 l3 -24 h12 l-3 24z" fill="#E8A33D"/><path d="M${tx + fx - 3.2} 44 h12 l-.6 5 h-12z" fill="#1d1d1f"/>`).join('')
+        + `<path d="M${tx - 124} 84 l8 -44 M${tx + 120} 84 l-6 -44" stroke="#5a4a3a" stroke-width="1.6"/><path d="M${tx - 116} 40 L${tx - 62} 44 L${tx + 58} 44 L${tx + 114} 40" stroke="#5a4a3a" stroke-width=".5" fill="none"/>`
+        + `<path d="M${tx + 128} 100 q10 -2 14 -8" stroke="#fff" stroke-width="2" fill="none" opacity=".8"/><path d="M${tx - 150} 100 q-30 2 -60 0" stroke="#fff" stroke-width="2" fill="none" opacity=".55"/></g>`;
+      // big ice floes drifting slowly to the left (the ship passes them)
+      [[tx - 430, 102, 1.8], [tx - 300, 110, 1.2], [tx + 250, 108, 1.5], [tx + 430, 100, 2.2], [tx - 560, 94, 1], [tx + 560, 112, 1.4]].forEach(([x, y, k], i) => {
+        svg += `<g class="floe2" style="animation-delay:-${(i * 7).toFixed(0)}s"><path d="M${x - 14 * k} ${y} l${4 * k} ${-3.4 * k} l${8 * k} ${-1 * k} l${10 * k} ${0.6 * k} l${6 * k} ${3.8 * k} l${-4 * k} ${2.6 * k} h${-20 * k}z" fill="#f4fbff"/><path d="M${x - 14 * k} ${y} l${2 * k} ${2.6 * k} h${20 * k} l${4 * k} ${-2.6 * k}" fill="#bfe3f7"/><path d="M${x - 6 * k} ${y - 2.6 * k} h${9 * k}" stroke="#dff2fb" stroke-width=".8"/></g>`; });
+      // night falls (only during the story)
+      svg += `<rect class="tnight" x="0" y="0" width="${W}" height="${H}" fill="#070c22"/>`
+        + `<g class="tsky">${Array.from({ length: 36 }, () => `<circle cx="${(r() * W).toFixed(0)}" cy="${(TOP + r() * 60).toFixed(0)}" r="${(0.5 + r() * 0.9).toFixed(1)}" fill="#fff"/>`).join('')}<circle cx="${610 - dx}" cy="28" r="26" fill="#fff8d8" opacity=".18"/><circle cx="${610 - dx}" cy="28" r="15" fill="#fbf6e0"/><circle cx="${606 - dx}" cy="24" r="3" fill="#e8e1c4"/><circle cx="${615 - dx}" cy="32" r="2.2" fill="#e8e1c4"/></g>`;
+      // the ship in two halves (stern | bow), cut at the waterline, so she can break and sink
+      svg += `<clipPath id="fpst"><rect x="${tx - 260}" y="-60" width="252" height="162"/></clipPath><clipPath id="fpbw"><rect x="${tx - 8}" y="-60" width="260" height="162"/></clipPath>`
+        + `<g class="ship" data-tap="titanic"><rect x="${tx - 150}" y="30" width="300" height="74" fill="transparent"/>`
+        + `<g clip-path="url(#fpst)"><g class="stern">${body}${smokeS([-62, -22])}</g></g><g clip-path="url(#fpbw)"><g class="bow">${body}${smokeS([18])}</g></g>`
+        + `<path class="bowsplash" d="M${tx + 130} 100 q8 -4 12 -10 M${tx + 134} 101 q10 -2 16 -6" stroke="#fff" stroke-width="1.6" fill="none" opacity=".85"/>`
+        + `<path class="bowsplash" d="M${tx - 140} 101 q-40 3 -90 0 M${tx - 140} 103 q-50 5 -110 4" stroke="#fff" stroke-width="1.4" fill="none" opacity=".5"/></g>`;
+      // the iceberg drifts in from the right and hits the bow
+      svg += `<g class="tice"><path d="M${tx + 150} 104 l6 -26 l10 -14 l8 6 l10 -22 l12 18 l6 -6 l14 26 l6 18z" fill="#eaf6fc"/><path d="M${tx + 166} 64 l8 6 l10 -22 l4 30 l-10 26 h-26z" fill="#c4e2f1"/><path d="M${tx + 150} 104 h72 l-6 6 h-60z" fill="#9fcbe2" opacity=".8"/></g>`;
+      svg += `<g class="tflash"><circle cx="${tx + 146}" cy="90" r="10" fill="#fff" opacity=".8"/>${[0, 60, 120, 180, 240, 300].map((a) => `<path d="M${tx + 146} 90 l${(Math.cos(a * Math.PI / 180) * 16).toFixed(1)} ${(Math.sin(a * Math.PI / 180) * 16).toFixed(1)}" stroke="#fff" stroke-width="1.4"/>`).join('')}</g>`;
+      // bubbles while she goes down
+      svg += `<g class="sbub">${[0, 1, 2, 3, 4, 5].map((i) => `<circle cx="${tx - 30 + i * 12}" cy="98" r="${1.4 + (i % 2)}" fill="none" stroke="#e6f6ff" stroke-width=".6" class="bub2" style="animation-delay:-${i * 0.4}s"/>`).join('')}</g>`;
+      // lifeboats with lanterns row away to the left
+      svg += `<g class="tboats">${[[-30, 0], [6, 2], [40, -1]].map(([d, y]) => `<g transform="translate(${tx + d} ${100 + y})"><path d="M-9 0 h18 l-3 4 h-12z" fill="#f4f1ea"/><path d="M-9 0 h18" stroke="#8a6a3e" stroke-width="1"/><circle cx="-3" cy="-2.6" r="1.6" fill="#E3B48A"/><circle cx="3" cy="-2.6" r="1.6" fill="#E3B48A"/><path d="M6 0 v-8" stroke="#5a4a3a" stroke-width=".8"/><circle cx="6" cy="-9" r="4" fill="#FFD86B" opacity=".35" class="glw"/><rect x="5" y="-10" width="2.2" height="2.6" fill="#FFD86B"/></g>`).join('')}</g>`;
+      svg += tapHint(tx + 96, 66, 'titanic');
+      for (let i = 0; i < 4; i++) svg += `<g class="fly" style="animation-duration:${24 + i * 6}s;animation-delay:-${i * 7}s"><path d="M0 ${TOP + 20 + i * 8} q4 -4 8 0 q4 -4 8 0" stroke="#f2f2f2" stroke-width="1.4" fill="none"/></g>`;
+      svg += `<g class="dolph" style="transform-origin:${tx + 250}px 96px"><path d="M${tx + 240} 92 q8 -10 18 -4 l4 -4 -1 6 q-8 4 -21 2z" fill="#5f7f99"/></g>`;
+    }
+    if (vis === 'dino') {
+      // a green jungle with a river, ferns, palms, dinosaurs and pterosaurs; a small volcano smokes far away
+      svg += `<path d="M120 84 l40 -36 l14 0 l40 36z" fill="#5d4a3f"/><path d="M160 48 h14 l-3 6 h-8z" fill="#ff8a3c" opacity=".8"/>` + smoke({ smoke: true, wind }, 167, 44);
+      svg += `<path d="M0 96 C 80 74 160 82 240 76 C 320 70 420 84 520 74 C 640 66 760 80 880 72 C 980 66 1100 82 1200 90 V100 H0Z" fill="#2f6f2a"/>`;
+      for (let i = 0; i < 18; i++) { const x = i * 70 + r() * 30; svg += `<ellipse cx="${x.toFixed(0)}" cy="${(80 + r() * 8).toFixed(0)}" rx="${(22 + r() * 16).toFixed(0)}" ry="${(12 + r() * 6).toFixed(0)}" fill="${['#2c6a28', '#3b7f30', '#255f24'][i % 3]}"/>`; }
+      svg += `<path d="M0 110 C 160 104 300 116 480 108 C 640 102 800 116 960 108 C 1060 104 1140 110 1200 108 V114 C 1140 116 1060 110 960 114 C 800 122 640 108 480 114 C 300 122 160 110 0 116Z" fill="#3a9ad0"/>`;
+      svg += [80, 330, 1010, 1150].map((x, i) => tPalm(x, 0.9 + (i % 2) * 0.2, i)).join('') + [[40, 108], [210, 106], [450, 110], [820, 106], [950, 110], [1100, 106]].map(([x, y], i) => fern(x, y, 1 + (i % 3) * 0.2, i % 2 ? '#3f9a36' : '#2f8a2a')).join('');
+      // brachiosaurus in the middle, nodding its long neck
+      const bx = CX;
+      svg += `<path d="M${bx - 30} 98 q-40 4 -62 -6 q30 2 50 -6z" fill="#6f9f5a"/><path d="M${bx - 22} 104 v-10 M${bx - 10} 106 v-10 M${bx + 14} 104 v-10 M${bx + 26} 106 v-10" stroke="#5f8f4a" stroke-width="7" stroke-linecap="round"/><ellipse cx="${bx}" cy="88" rx="36" ry="15" fill="#7fae6a"/>`
+        + `<circle cx="${bx - 10}" cy="82" r="3" fill="#6f9f5a"/><circle cx="${bx + 8}" cy="86" r="2.4" fill="#6f9f5a"/><g class="nod" style="transform-origin:${bx + 26}px 80px;animation-duration:5s"><path d="M${bx + 22} 84 Q ${bx + 46} 64 ${bx + 44} 34" stroke="#7fae6a" stroke-width="10" fill="none" stroke-linecap="round"/><ellipse cx="${bx + 50}" cy="32" rx="9" ry="5" fill="#7fae6a"/><circle cx="${bx + 52}" cy="30" r="1.2" fill="#1d1d1d"/><path d="M${bx + 55} 34 q2 1 4 0" stroke="#3a5a2a" stroke-width=".8" fill="none"/></g>`;
+      // triceratops grazing
+      const tr = CX - 220;
+      svg += `<g class="nod" style="transform-origin:${tr + 14}px 100px;animation-duration:4s"><ellipse cx="${tr}" cy="100" rx="17" ry="8" fill="#c27a3a"/><path d="M${tr - 10} 106 v5 M${tr - 2} 107 v5 M${tr + 6} 107 v5 M${tr + 12} 106 v5" stroke="#a8622a" stroke-width="4" stroke-linecap="round"/><path d="M${tr + 12} 92 q12 -6 12 8 q-6 4 -12 2z" fill="#e0a05a"/><ellipse cx="${tr + 22}" cy="102" rx="6" ry="4" fill="#c27a3a"/><path d="M${tr + 22} 98 l8 -6 M${tr + 18} 96 l6 -8 M${tr + 27} 101 l5 -1" stroke="#f3ead6" stroke-width="1.4" stroke-linecap="round"/><circle cx="${tr + 22}" cy="100" r=".9" fill="#1d1d1d"/><path d="M${tr - 17} 100 l-8 -2" stroke="#c27a3a" stroke-width="3" stroke-linecap="round"/></g>`;
+      // T. rex walking along the river bank
+      svg += `<g class="fly" style="animation-duration:46s"><g class="step" style="animation-duration:.6s"><g transform="translate(0 0)"><path d="M-22 92 q-14 2 -22 -4 q12 0 18 -6z" fill="#8a6f4a"/><ellipse cx="-4" cy="88" rx="16" ry="9" fill="#9a7f52"/><path d="M-8 96 l-2 10 M2 96 l3 10" stroke="#8a6f4a" stroke-width="4" stroke-linecap="round"/><path d="M6 82 q8 -14 16 -10 q4 4 0 8 q-6 4 -14 6z" fill="#9a7f52"/><path d="M12 82 h9" stroke="#5a4a32" stroke-width=".8"/><path d="M13 82 l1 2 1 -2 1 2 1 -2 1 2" stroke="#fff" stroke-width=".6" fill="none"/><circle cx="16" cy="76" r="1" fill="#1d1d1d"/><path d="M8 90 l4 3 M10 88 l4 2" stroke="#8a6f4a" stroke-width="1.6"/></g></g></g>`;
+      // pterosaurs gliding, flapping
+      [[0, 22], [14, 38]].forEach(([dl, y]) => { svg += `<g class="fly" style="animation-duration:32s;animation-delay:-${dl}s"><g transform="translate(0 ${TOP + y})"><g class="flap"><path d="M0 0 l-14 -8 l6 9z M0 0 l14 -8 l-6 9z" fill="#a0603a"/></g><path d="M-2 0 h6 l5 -1 -5 2z" fill="#8a4f2e"/><path d="M-3 -1 l-4 -2" stroke="#8a4f2e" stroke-width="1"/></g></g>`; });
+      svg += `<ellipse cx="${CX + 190}" cy="110" rx="12" ry="4" fill="#8a6a3a"/>${[-6, 0, 6].map((d) => `<ellipse cx="${CX + 190 + d}" cy="107" rx="3" ry="4" fill="#f1ebdd"/>`).join('')}`;
+    }
+    if (vis === 'volcano') {
+      // a volcano where the house stands: lava fountain, glowing flows, a big plume, palms and black sand
+      const vx = CX;
+      svg += `<path d="M${vx - 170} 106 C ${vx - 120} 96 ${vx - 50} 60 ${vx - 26} 38 H${vx + 26} C ${vx + 50} 60 ${vx + 120} 96 ${vx + 170} 106Z" fill="#5a4034"/><path d="M${vx - 26} 38 H${vx + 26} C ${vx + 40} 52 ${vx + 70} 80 ${vx + 120} 100 C ${vx + 60} 96 ${vx + 20} 70 ${vx} 50Z" fill="#4a3329"/>`
+        + `<ellipse cx="${vx}" cy="39" rx="26" ry="4" fill="#ff7a1a"/><ellipse cx="${vx}" cy="39" rx="30" ry="9" fill="#ff8a3c" opacity=".35" class="glw" style="animation-duration:1.4s"/>`
+        + `<path d="M${vx - 10} 40 C ${vx - 18} 58 ${vx - 40} 72 ${vx - 52} 96 C ${vx - 46} 100 ${vx - 40} 98 ${vx - 38} 92 C ${vx - 30} 74 ${vx - 12} 58 ${vx - 4} 42z" fill="#ff6a1a" class="glw" style="animation-duration:2s"/>`
+        + `<path d="M${vx + 8} 40 C ${vx + 20} 60 ${vx + 26} 80 ${vx + 44} 102 C ${vx + 50} 104 ${vx + 54} 100 ${vx + 50} 96 C ${vx + 34} 78 ${vx + 22} 58 ${vx + 14} 40z" fill="#ffb02e" class="glw" style="animation-duration:2.6s;animation-delay:-.7s"/>`;
+      for (let i = 0; i < 14; i++) { const a = (r() - 0.5) * 120; svg += `<circle class="lava" cx="${vx + (r() - 0.5) * 20}" cy="38" r="${(1.6 + r() * 2).toFixed(1)}" fill="${['#ffd23a', '#ff8a1a', '#ff5a1a'][i % 3]}" style="--lx:${a.toFixed(0)}px;--ly:-${(30 + r() * 26).toFixed(0)}px;animation-delay:-${(r() * 2.4).toFixed(2)}s;animation-duration:${(1.8 + r()).toFixed(1)}s"/>`; }
+      for (let k = 0; k < 6; k++) svg += `<circle class="plume" cx="${vx + (k % 3 - 1) * 8}" cy="30" r="${10 + (k % 3) * 4}" fill="${k % 2 ? '#5a5250' : '#77706c'}" style="--dx:${-20 - wind}px;animation-delay:-${k * 1.2}s"/>`;
+      for (let i = 0; i < 20; i++) svg += `<circle class="fl" cx="${(r() * W).toFixed(0)}" cy="0" r="${(0.6 + r() * 0.8).toFixed(1)}" fill="#6a6260" opacity=".7" style="--dx:${(-10 - wind).toFixed(0)}px;animation-duration:${(7 + r() * 5).toFixed(1)}s;animation-delay:-${(r() * 10).toFixed(1)}s"/>`;
+      svg += [80, 240, 1000, 1140].map((x, i) => tPalm(x, 0.9 + (i % 2) * 0.15, i)).join('') + [[vx - 120, 110], [vx + 140, 108], [vx - 200, 112]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="7" ry="4" fill="#2b2522"/><ellipse cx="${x}" cy="${y - 1}" rx="3" ry="1.4" fill="#ff6a1a" class="glw" style="animation-duration:1.6s"/>`).join('');
+      svg += [[vx - 300, 110], [vx + 260, 108], [vx + 340, 112]].map(([x, y], i) => fern(x, y, 0.9, i % 2 ? '#4f8a36' : '#3f7a2e')).join('');
+    }
+    if (vis === 'mobile') {
+      // 3 April 1973, New York: Martin Cooper calls from the street with the first mobile phone
+      // skyline in the back, a radio mast sends to the giant phone, the caller with his brick phone, a yellow cab
+      for (let i = 0; i < 26; i++) { const x = i * 48 + (i % 3) * 8; const h = 22 + ((i * 37) % 30); svg += `<rect x="${x}" y="${96 - h}" width="${30 + (i % 4) * 6}" height="${h + 2}" fill="${['#8b97a8', '#9aa6b6', '#7d899a'][i % 3]}" opacity=".55"/>`; }
+      svg += `<path d="M${CX - 420} 96 V40 M${CX - 410} 96 V40 M${CX - 420} 52 l10 8 M${CX - 410} 52 l-10 8 M${CX - 420} 68 l10 8 M${CX - 410} 68 l-10 8 M${CX - 420} 84 l10 8 M${CX - 410} 84 l-10 8" stroke="#6b7480" stroke-width="1.2"/><path d="M${CX - 415} 40 V30" stroke="#6b7480" stroke-width="1.6"/><circle class="tw" cx="${CX - 415}" cy="29" r="1.8" fill="#E5483B" style="animation-duration:1s"/>`
+        + [0, 1, 2].map((i) => `<path class="sig2" d="M${CX - 405} 26 q8 6 0 12" stroke="#3E8EDE" stroke-width="1.4" fill="none" style="animation-delay:-${i * 0.6}s"/>`).join('');
+      // the giant DynaTAC
+      const px = CX;
+      svg += `<path d="M${px - 13} 104 V50 q0 -6 6 -6 h14 q6 0 6 6 V104z" fill="#d9d3c5" stroke="#a9a293" stroke-width="1"/><path d="M${px - 13} 60 V50 q0 -6 6 -6 h14 q6 0 6 6 V60z" fill="#3f4045"/>`
+        + Array.from({ length: 3 }, (_, r2) => Array.from({ length: 5 }, (_, c) => `<circle cx="${px - 6 + c * 3}" cy="${49 + r2 * 3}" r=".7" fill="#1d1d1f"/>`).join('')).join('')
+        + `<path d="M${px + 6} 44 V22" stroke="#2b2b2f" stroke-width="4.4" stroke-linecap="round"/><rect x="${px + 3.6}" y="30" width="4.8" height="2" fill="#555"/>`
+        + `<rect x="${px - 10}" y="63" width="20" height="8" rx="1" fill="#120c0c"/><text x="${px}" y="69.4" text-anchor="middle" font-size="5.6" font-family="monospace" font-weight="700" fill="#ff3b30" class="tw" style="animation-duration:2.4s">1973</text>`
+        + Array.from({ length: 15 }, (_, i) => `<rect x="${px - 10 + (i % 3) * 7.2}" y="${74 + Math.floor(i / 3) * 5.6}" width="5.4" height="4" rx="1" fill="${i === 12 ? '#3FA66B' : i === 14 ? '#E5483B' : '#efe9dc'}" stroke="#b9b2a2" stroke-width=".4"/>`).join('')
+        + `<path d="M${px - 6} 102 h12" stroke="#a9a293" stroke-width="1.2"/>`
+        + [0, 1, 2].map((i) => `<path class="sig" d="M${px + 1} 17 a7 7 0 0 1 10 0" stroke="#3E8EDE" stroke-width="1.6" fill="none" style="transform-origin:${px + 6}px 21px;animation-delay:-${i * 0.7}s"/>`).join('')
+        + `<g class="pop1"><path d="M${px + 24} 34 h40 a4 4 0 0 1 4 4 v10 a4 4 0 0 1 -4 4 h-30 l-6 5 v-5 h-4 a4 4 0 0 1 -4 -4 v-10 a4 4 0 0 1 4 -4z" fill="#fff"/><text x="${px + 44}" y="46" text-anchor="middle" font-size="8" font-weight="700" font-family="system-ui,sans-serif" fill="#2b2b2b">${lang === 'en' ? 'Hello?' : 'Hallo?'}</text></g>`;
+      // the caller in a 70s suit, the brick phone at his ear, walking up and down
+      const cx2 = CX - 110;
+      svg += `<g class="pace"><g transform="translate(${cx2} 0)"><path d="M-3 108 l-1 -12 M3 108 l1 -12" stroke="#4a3b2e" stroke-width="3" stroke-linecap="round"/><path d="M-6 98 l1 -16 h10 l1 16z" fill="#8a6a3e"/><path d="M-1.4 82 l1.4 6 1.4 -6z" fill="#f4efe4"/><path d="M0 84 v8" stroke="#c0392b" stroke-width="1.2"/>`
+        + `<circle cx="0" cy="76" r="4.6" fill="#E3B48A"/><path d="M-4.6 75 q0 -6 4.6 -6 q5 0 4.6 6 q-2 -3 -4.6 -3 q-2.6 0 -4.6 3z" fill="#6b4a2e"/><path d="M-3.4 72.6 q3 -1.4 6 0" stroke="#4a3220" stroke-width=".8" fill="none"/><circle cx="-1.4" cy="76.4" r=".6" fill="#2b2b2b"/>`
+        + `<path d="M4 84 l3 -6" stroke="#8a6a3e" stroke-width="2.6" stroke-linecap="round"/><rect x="4" y="68" width="4" height="11" rx="1" fill="#d9d3c5" transform="rotate(14 6 73)"/><path d="M7 68 v-4" stroke="#2b2b2f" stroke-width="1.2" transform="rotate(14 6 73)"/><path d="M-5 86 l-3 8" stroke="#8a6a3e" stroke-width="2.6" stroke-linecap="round"/></g></g>`;
+      // kids with a tin-can telephone, a phone box and a yellow cab
+      const k1 = CX - 300; const k2 = CX - 220;
+      const kid2 = (x, shirt, hair, flip) => `<g transform="translate(${x} 0) scale(${flip ? -1 : 1} 1)"><path d="M-2 106 l-1 -9 M2 106 l1 -9" stroke="#34495e" stroke-width="2.6" stroke-linecap="round"/><rect x="-4.5" y="85" width="9" height="13" rx="3" fill="${shirt}"/><circle cx="0" cy="80" r="5" fill="#F3CDA6"/><path d="M-5 79 q5 -9 10 0z" fill="${hair}"/><path d="M3 88 l5 -6" stroke="${shirt}" stroke-width="2.4" stroke-linecap="round"/><rect x="6" y="78" width="4" height="5" rx="1" fill="#c9ced6"/></g>`;
+      svg += kid2(k1, '#E5483B', '#6b4a2e', false) + kid2(k2, '#3E8EDE', '#D4A63B', true) + `<path d="M${k1 + 10} 80 Q ${(k1 + k2) / 2} 88 ${k2 - 10} 80" stroke="#d9c9a0" stroke-width=".7" fill="none"/>`;
+      svg += `<rect x="${CX + 120}" y="62" width="22" height="46" rx="1" fill="#C0392B"/><rect x="${CX + 123}" y="68" width="16" height="32" fill="#bfe0ff" opacity=".85"/><rect x="${CX + 118}" y="58" width="26" height="5" rx="1" fill="#962d22"/><rect x="${CX + 129}" y="76" width="6" height="8" rx="1" fill="#3a3a3f"/><path d="M${CX + 132} 84 q-3 4 -1 8" stroke="#2b2b2b" stroke-width=".8" fill="none"/>`;
+      svg += `<g class="fly" style="animation-duration:26s"><g transform="translate(0 0)"><path d="M-46 106 v-8 q2 -4 8 -5 l6 -7 h20 l8 7 q6 1 6 5 v8z" fill="#F5C542"/><path d="M-36 93 l5 -6 h8 v6z M-20 93 v-6 h6 l6 6z" fill="#bfe0ff"/><rect x="-30" y="83" width="10" height="3" fill="#2b2b2b"/><path d="M-46 100 h48" stroke="#2b2b2b" stroke-width="1" stroke-dasharray="2 2"/><circle cx="-36" cy="106" r="4" fill="#1d1d1d"/><circle cx="-6" cy="106" r="4" fill="#1d1d1d"/></g></g>`;
+    }
+    if (vis === 'uk') {
+      // British Day: Buckingham Palace instead of the house, guards in their sentry boxes, a few Union Jacks
+      const bx = CX;
+      svg += `<rect x="${bx - 150}" y="56" width="300" height="50" fill="#ddd4c2"/><rect x="${bx - 154}" y="52" width="308" height="5" fill="#cbc1ad"/>` + Array.from({ length: 31 }, (_, i) => `<rect x="${bx - 150 + i * 10}" y="49" width="4" height="4" fill="#cbc1ad"/>`).join('')
+        + [60, 74, 88].map((y) => Array.from({ length: 19 }, (_, i) => { const x = bx - 142 + i * 15.6; return Math.abs(x + 3 - bx) < 42 ? '' : `<rect x="${x.toFixed(1)}" y="${y}" width="6" height="${y === 88 ? 11 : 9}" fill="#5a6470"/>`; }).join('')).join('')
+        + `<path d="M${bx - 44} 56 L${bx} 38 L${bx + 44} 56z" fill="#e6dece"/><path d="M${bx - 44} 56 L${bx} 38 L${bx + 44} 56" fill="none" stroke="#cbc1ad" stroke-width="2"/><circle cx="${bx}" cy="48" r="3.4" fill="#d4a017"/>`
+        + [-36, -22, -8, 8, 22, 36].map((d) => `<rect x="${bx + d - 2.4}" y="58" width="4.8" height="40" fill="#efe8da"/>`).join('') + `<rect x="${bx - 40}" y="68" width="80" height="3" fill="#cbc1ad"/><rect x="${bx - 14}" y="62" width="28" height="6" fill="#B71C1C"/>`
+        + `<path d="M${bx} 38 V18" stroke="#8a8f96" stroke-width="1.2"/><g class="sw" style="transform-origin:${bx}px 19px">${ujack(bx, 19, 0.9)}</g>`
+        + `<path d="M${bx - 160} 106 H${bx + 160}" stroke="#1d1d1d" stroke-width="2"/>` + Array.from({ length: 41 }, (_, i) => `<path d="M${bx - 160 + i * 8} 106 v-10" stroke="#1d1d1d" stroke-width="1.2"/><circle cx="${bx - 160 + i * 8}" cy="95.4" r="1.1" fill="#d4a017"/>`).join('')
+        + `<rect x="${bx - 14}" y="92" width="28" height="14" fill="none" stroke="#d4a017" stroke-width="1.2"/><circle cx="${bx}" cy="96" r="3" fill="#d4a017"/>`;
+      const box = (x) => `<path d="M${x - 9} 108 V76 h18 v32z" fill="#1f2730"/><path d="M${x - 11} 76 L${x} 66 L${x + 11} 76z" fill="#2c3540"/><circle cx="${x}" cy="72" r="1.6" fill="#d4a017"/><rect x="${x - 6}" y="79" width="12" height="29" fill="#0f141a"/>`;
+      const guard = (x, dl) => `<g class="grd" style="animation-delay:-${dl}s"><path d="M${x - 2} 108 v-10 M${x + 2} 108 v-10" stroke="#111" stroke-width="2.6"/><rect x="${x - 4.4}" y="86" width="8.8" height="13" rx="1.6" fill="#C8102E"/><path d="M${x - 4.4} 90 h8.8 M${x - 4.4} 94 h8.8" stroke="#f5f5f5" stroke-width=".6"/><path d="M${x} 86 v13" stroke="#d4a017" stroke-width=".7" stroke-dasharray="1 2"/><circle cx="${x}" cy="82.4" r="3.2" fill="#F3CDA6"/><path d="M${x - 4} 82 q-1 -16 4 -16 q5 0 4 16z" fill="#111"/><path d="M${x + 5} 98 V78" stroke="#555" stroke-width="1.2"/><path d="M${x + 5} 78 v-3" stroke="#bbb" stroke-width=".8"/></g>`;
+      svg += box(bx - 186) + guard(bx - 186, 0) + box(bx + 186) + guard(bx + 186, 4);
+      svg += [[bx - 330, 52], [bx + 320, 54]].map(([x, y]) => `<path d="M${x} 108 V${y}" stroke="#8a8f96" stroke-width="1.4"/><g class="sw" style="transform-origin:${x}px ${y}px">${ujack(x, y, 0.8)}</g>`).join('');
+      svg += `<rect x="${bx - 260}" y="82" width="12" height="26" fill="#C8102E"/><path d="M${bx - 261} 82 q7 -6 14 0z" fill="#C8102E"/>` + [0, 1, 2, 3].map((k) => `<path d="M${bx - 258} ${86 + k * 4.6} h8 M${bx - 254} ${86 + k * 4.6} v3.6" stroke="#f3e3a8" stroke-width=".7"/>`).join('');
+      // bunting in red, white and blue along the top
+      for (let x0 = 0; x0 < W; x0 += 200) svg += `<path d="M${x0} ${TOP + 3} Q ${x0 + 100} ${TOP + 26} ${x0 + 200} ${TOP + 3}" stroke="#8a8f96" stroke-width=".8" fill="none"/>`;
+      for (let x = 6; x < W - 8; x += 16) { const t = (x % 200) / 200; const y = TOP + 3 + 46 * t * (1 - t); svg += `<g class="sw" style="transform-origin:${x + 5}px ${y.toFixed(1)}px;animation-delay:-${(r() * 3).toFixed(1)}s"><path d="M${x} ${y.toFixed(1)} h10 l-5 11z" fill="${['#C8102E', '#ffffff', '#012169'][(x / 16 | 0) % 3]}"/></g>`; }
+      // flower beds in front of the railings: red geraniums, white and blue flowers
+      for (let i = 0; i < 60; i++) { const x = CX - 300 + i * 10 + r() * 4; if (Math.abs(x - CX) < 165) continue; const y = 108 + r() * 6; svg += `<circle cx="${x.toFixed(0)}" cy="${y.toFixed(1)}" r="2.2" fill="${['#C8102E', '#ffffff', '#2a52be'][i % 3]}"/>`; }
+      svg += `<path d="M${CX - 160} 113 H${CX + 160}" stroke="#4f8a3a" stroke-width="5"/>` + Array.from({ length: 32 }, (_, i) => `<circle cx="${CX - 155 + i * 10}" cy="111" r="2" fill="${['#C8102E', '#ffffff', '#2a52be'][i % 3]}"/>`).join('');
+      svg += `<rect x="${CX + 250}" y="92" width="8" height="16" rx="1.6" fill="#C8102E"/><rect x="${CX + 249}" y="90" width="10" height="3" rx="1.4" fill="#a00d24"/><rect x="${CX + 251.6}" y="96" width="4.8" height="1.2" fill="#1d1d1d"/>`;
+    }
+    if (vis === 'april') {
+      // April Fools' Day: the famous spaghetti harvest, a flying pig, an April fish on the house and the sun in sunglasses
+      const sp = (x, sc) => `<g transform="translate(${x} 106) scale(${sc})"><path d="M0 0 v-34 M0 -24 l-10 -10 M0 -28 l10 -9" stroke="#7a5233" stroke-width="3" stroke-linecap="round" fill="none"/><ellipse cx="0" cy="-42" rx="22" ry="12" fill="#5fae46"/>${Array.from({ length: 16 }, (_, i) => { const xx = -19 + i * 2.5; return `<path d="M${xx.toFixed(1)} ${-36 + (i % 3)} q2 4 0 8 q-2 4 0 ${6 + (i % 4) * 2}" stroke="#F0D27A" stroke-width="1.1" fill="none" class="sw" style="transform-origin:${xx.toFixed(1)}px -36px;animation-delay:-${(i % 5) * 0.4}s"/>`; }).join('')}</g>`;
+      svg += sp(CX - 250, 1) + sp(CX + 250, 0.9) + sp(CX - 380, 0.8);
+      const fx = CX - 290;
+      svg += `<path d="M${fx - 8} 106 l6 -30 M${fx + 2} 106 l6 -30" stroke="#a87a4a" stroke-width="1.4"/>` + [0, 1, 2, 3, 4].map((k) => `<path d="M${fx - 7 + k * 1.2} ${101 - k * 6} h10" stroke="#a87a4a" stroke-width="1"/>`).join('')
+        + `<g class="wave2" style="transform-origin:${fx + 6}px 80px"><path d="M${fx + 6} 80 l8 -6" stroke="#3E8EDE" stroke-width="2.4" stroke-linecap="round"/></g><rect x="${fx}" y="78" width="9" height="12" rx="2" fill="#3E8EDE"/><circle cx="${fx + 4.5}" cy="73" r="4.4" fill="#F3CDA6"/><path d="M${fx - 1} 71 h11 l-2 -4 h-7z" fill="#d9b25a"/><path d="M${fx + 9} 98 q6 0 10 -4 h-14z" fill="#b8905a"/><path d="M${fx + 10} 95 q4 -3 8 0" stroke="#F0D27A" stroke-width="1" fill="none"/>`;
+      svg += `<g class="fly" style="animation-duration:28s"><g transform="translate(0 ${TOP + 26})"><ellipse cx="0" cy="0" rx="10" ry="6.4" fill="#FFB3C7"/><circle cx="9" cy="-2" r="4.6" fill="#FFB3C7"/><ellipse cx="12.4" cy="-1" rx="2" ry="1.6" fill="#FF8FB0"/><circle cx="9" cy="-4" r=".7" fill="#2b2b2b"/><path d="M-10 -1 q-4 -3 -1 -5" stroke="#FF8FB0" stroke-width="1" fill="none"/><path d="M-4 5 v3 M4 5 v3" stroke="#FF9DB8" stroke-width="2" stroke-linecap="round"/><g class="flap"><path d="M-2 -5 q-6 -12 -14 -8 q6 2 8 9z" fill="#fff" stroke="#ddd" stroke-width=".4"/></g><g class="flap" style="animation-delay:-.1s"><path d="M2 -5 q4 -12 12 -10 q-4 3 -6 10z" fill="#fff" stroke="#ddd" stroke-width=".4"/></g></g></g>`;
+      svg += `<g class="sw" style="transform-origin:${CX - 40}px 72px"><path d="M${CX - 46} 76 q6 -8 14 -2 l5 -4 v10 l-5 -4 q-8 6 -14 0z" fill="#5CE1E6" stroke="#2a9aa8" stroke-width=".6"/><circle cx="${CX - 41}" cy="74" r=".9" fill="#1d1d1d"/><rect x="${CX - 48}" y="70" width="6" height="2" fill="#f1ebdd" transform="rotate(-20 ${CX - 45} 71)"/></g>`;
+      if (!night && ['sunny', 'partlycloudy', 'windy'].includes(kind) && !glowSun) svg += `<g transform="translate(${hasHouse ? 610 - dx : 610} 28)"><rect x="-12" y="-5" width="10" height="6" rx="2" fill="#1d1d1d"/><rect x="2" y="-5" width="10" height="6" rx="2" fill="#1d1d1d"/><path d="M-2 -3 h4 M-12 -3 l-6 -2 M12 -3 l6 -2" stroke="#1d1d1d" stroke-width="1.2"/><path d="M-6 6 q6 5 12 0" stroke="#c97a00" stroke-width="1.4" fill="none"/></g>`;
+    }
+    // a little lizard scurries over the ground on warm days
+    if (!night && (['vatertag', 'volcano', 'dino'].includes(vis) || (temp != null && temp >= 20 && ['alltag', 'fruehling', 'herbst', 'april', 'uk', 'mobile'].includes(vis)))) {
+      const lz = CX - 430;
+      svg += `<g class="liz"><g transform="translate(${lz} 113)"><path d="M-10 0 q-6 2 -10 -1" stroke="#5f9a3a" stroke-width="1.6" fill="none" stroke-linecap="round" class="tail"/><ellipse cx="0" cy="0" rx="8" ry="2.2" fill="#6aa84f"/><ellipse cx="9" cy="-.4" rx="3" ry="2" fill="#6aa84f"/><circle cx="10" cy="-1" r=".5" fill="#1d1d1d"/><path d="M-5 1 l-2 3 M-5 -1 l-2 -3 M4 1 l2 3 M4 -1 l2 -3" stroke="#5f9a3a" stroke-width="1.1" class="lzleg"/><path d="M-6 0 h12" stroke="#4f8a2e" stroke-width=".5" stroke-dasharray="1 1.4"/></g></g>`;
     }
     svg += `</g><use href="#fps" x="${W}"/><use href="#fps" x="${-W}"/></g>`;
+    // sky visitors on special days: Sputnik at night (4–11 October), Concorde by day (26 November)
+    if (fun && fun.key === 'sputnik' && night) svg += `<g class="sput"><g transform="translate(0 ${TOP + 8})"><path d="M-1.6 -.8 l-15 -3 M-1.6 -.3 l-16 -.8 M-1.6 .3 l-16 .8 M-1.6 .8 l-15 3" stroke="#c9ced6" stroke-width=".5"/><circle cx="0" cy="0" r="2.4" fill="#d9dee6"/><circle cx="-.6" cy="-.7" r=".8" fill="#fff"/><circle class="tw" cx="0" cy="0" r="4" fill="#fff" opacity=".35" style="animation-duration:1.2s"/></g></g>`;
+    if (fun && fun.key === 'concorde' && !night) svg += `<g class="conc"><g transform="translate(0 ${TOP + 22})"><path d="M-110 2 h64" stroke="#fff" stroke-width="2.2" opacity=".5" stroke-linecap="round"/><path d="M-110 4.6 h60" stroke="#fff" stroke-width="1.6" opacity=".35" stroke-linecap="round"/>`
+      + `<path d="M-44 4 Q -16 3 8 4 Q -10 7 -36 9 Z" fill="#dfe5ec"/><rect x="-34" y="6" width="16" height="3" rx="1" fill="#c9d1db"/><path d="M-34 9 h16" stroke="#9fb0c2" stroke-width=".6"/>`
+      + `<path d="M-48 0.8 Q -46 -1.4 -40 -1.2 L 34 -0.8 Q 42 -0.4 46 1.6 L 52 3.6 L 44 3.2 Q 40 3.4 34 3.4 L -40 3.4 Q -46 3.2 -48 0.8Z" fill="#f7f9fb"/><path d="M-40 1.4 h72" stroke="#c9d6e6" stroke-width=".5"/>`
+      + Array.from({ length: 12 }, (_, i) => `<rect x="${-30 + i * 5}" y="0" width="1.4" height="1" fill="#6f8aa8"/>`).join('')
+      + `<path d="M36 -0.4 q4 .2 6 1.4 l-5 0z" fill="#2b3446"/><path d="M-44 -0.6 L -52 -12 L -47 -12 L -36 -0.8z" fill="#eef2f6"/><path d="M-48 -9 l3 0" stroke="#C8102E" stroke-width="1.2"/><path d="M-50 -11 l3 0" stroke="#012169" stroke-width="1.2"/></g></g>`;
     // ---- weather layer (Christmas: it always snows – the real weather stays in the corner)
-    if (!o.still) {
+    if (!o.still && vis !== 'moon') {
       const n = (x) => Math.max(0, Math.round(x * mul * wildMul));
       const dx = Math.round(wind * 1.2) + (storm ? 40 : 0);
       if (kind === 'rainy' || kind === 'pouring' || kind === 'lightning') svg += fall(n(kind === 'rainy' ? 40 : 70), r, (x) => `<line class="fl" x1="${x.toFixed(0)}" y1="0" x2="${(x - 2 - wind / 10).toFixed(0)}" y2="9" stroke="#cfe3ff" stroke-width="1.3" opacity=".7" style="--dx:${-dx}px;animation-duration:${(0.6 + r() * 0.5).toFixed(2)}s;animation-delay:-${(r() * 1).toFixed(2)}s"/>`);
@@ -409,6 +819,9 @@
     if (lang === 'en') return y ? `${y} years ${wed ? 'married' : 'together'}` : (wed ? 'Happy anniversary!' : 'Our day!');
     return y ? `${y} Jahre ${wed ? 'verheiratet' : 'zusammen'}` : (wed ? 'Hochzeitstag!' : 'Unser Tag!'); };
   // banner on the meadow below the buttons, so the navigation stays readable
+  const mumHearts = () => { let g = ''; for (let i = 0; i < 9; i++) { const x = 60 + i * 130 + (i % 2) * 30; const y = 40 + (i % 3) * 18; const k = 0.8 + (i % 3) * 0.3;
+    g += `<g class="bob" style="animation-delay:-${(i * 0.4).toFixed(1)}s;animation-duration:${(2.4 + (i % 3) * 0.5).toFixed(1)}s"><path d="M${x} ${(y + 6 * k).toFixed(1)} c${(-7 * k).toFixed(1)} ${(-6 * k).toFixed(1)} ${(-11 * k).toFixed(1)} ${(-12 * k).toFixed(1)} ${(-5 * k).toFixed(1)} ${(-16 * k).toFixed(1)} c${(3 * k).toFixed(1)} ${(-2 * k).toFixed(1)} ${(5 * k).toFixed(1)} 0 ${(5 * k).toFixed(1)} ${(2 * k).toFixed(1)} c0 ${(-2 * k).toFixed(1)} ${(2 * k).toFixed(1)} ${(-4 * k).toFixed(1)} ${(5 * k).toFixed(1)} ${(-2 * k).toFixed(1)} c${(6 * k).toFixed(1)} ${(4 * k).toFixed(1)} ${(2 * k).toFixed(1)} ${(10 * k).toFixed(1)} ${(-5 * k).toFixed(1)} ${(16 * k).toFixed(1)}z" fill="${['#FF6B9B', '#FF8FB3', '#E5483B'][i % 3]}"/></g>`; }
+    return g + emo(380, 106, '💐', 24); };
   const banner = (text, col, x = 600) => `<g transform="translate(${x} 108)"><path d="M-96 -10 H96 L88 0 L96 10 H-96 L-88 0Z" fill="${col}" opacity=".92"/><text x="0" y="4.5" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" font-family="system-ui,sans-serif">${esc(text)}</text></g>`;
 
   // ------------------------------------------------------------------------------ check effect (seasonal mini burst)
@@ -474,8 +887,8 @@
     const allDone = (() => { const it = (snap.items || []).filter((i) => (i.start || '') <= snap.today && (i.due || i.start || '') >= snap.today); return it.length && it.every((i) => i.done); })();
     const c = []; const add = (key, ok, w = 1) => { if (ok) for (let i = 0; i < w; i++) c.push(key); };
     add('pool', poolOk && sunny && t >= 23 && dryDay && hh < 17 && m >= 5 && m <= 9, 3);
-    add('poolabend', poolOk && t >= 24 && dryEve && hh >= 16 && m >= 5 && m <= 9, 2);
-    add('poolparty', poolOk && weekend && t >= 27 && dryDay, 2);
+    add('poolabend', poolOk && t >= 24 && dryEve && hh >= 16 && hh < 21 && m >= 5 && m <= 9, 2);
+    add('poolparty', poolOk && weekend && t >= 27 && dryDay && hh >= 8 && hh < 21, 2);
     add('jacuzzi', jacOk && cold && dryEve && !adultsBusy, 2);
     add('jacuzzisterne', jacOk && cold && dryEve && !adultsBusy && ['clear-night', 'sunny'].includes(condAt(fc, 21) || k));
     add('jacuzzischnee', jacOk && k === 'snowy' && !adultsBusy, 2);
@@ -511,6 +924,13 @@
   };
   api.weather = weather;
   api.LABEL = LABEL;
+  // taps on the scene (the header passes its clicks here): the Titanic sinks and comes back after a while
+  api.tap = (target) => {
+    const el = target && target.closest ? target.closest('[data-tap]') : null; if (!el) return false;
+    const name = el.getAttribute('data-tap'); const ms = { titanic: 34500, lm: 9200 }[name] || 0;
+    const svg = el.ownerSVGElement || el.closest('svg'); if (!svg || !ms || svg.classList.contains('t-' + name)) return true;
+    svg.classList.add('t-' + name); setTimeout(() => svg.classList.remove('t-' + name), ms); return true;
+  };
   api.reduce = reduce;
   window.FPSEASON = api;
 })();
@@ -815,8 +1235,9 @@
     if (o.face !== '0') s += faceArt[o.face](h1);
     if (costume) s += costume[1]();
     if (o.head !== '0') s += headArt[o.head]();
-    if (o.pet !== '0') s += petArt[o.pet]();
-    if (o.fx !== '0') s += fxArt[o.fx]();
+    // companions and small effects sit a bit inside, so nothing is cut off by the round picture
+    if (o.pet !== '0') s += `<g transform="translate(32 34) scale(.84) translate(-32 -34)">${petArt[o.pet]()}</g>`;
+    if (o.fx !== '0') s += ['leuchtaugen', 'goldglanz', 'rubinglanz'].includes(o.fx) ? fxArt[o.fx]() : `<g transform="translate(32 33) scale(.8) translate(-32 -33)">${fxArt[o.fx]()}</g>`;
     return `<svg viewBox="${view || '0 0 64 64'}" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
   };
   // the big-effect layer around a picture: put it inside a position:relative box of the picture's size
@@ -1019,11 +1440,11 @@ const durTxt = (ms, short) => { const m = Math.max(0, Math.round(ms / 60000)); c
 const SOON_T = ['in {n} Min', 'in {n} Std'];
 const FPL = 'de';
 const TX = {
-  de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
+  de: { fer: 'Ferien', awy: 'Nicht da', today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
     secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
-  en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
+  en: { fer: 'Holiday', awy: 'Away', today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
     secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', spcH: 'Special chores', open: '{n} open', rel: 'Reliability', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
@@ -1259,7 +1680,7 @@ const REVEAL_EYE = '<svg viewBox="0 0 34 24" width="32" height="23" aria-hidden=
 class FpBase extends HTMLElement {
   setConfig(config) {
     this._cfg = this._normalize(config || {});
-    if (!this.shadowRoot) { this.attachShadow({ mode: 'open' }); this._bind(); }
+    if (!this.shadowRoot) { this.attachShadow({ mode: 'open' }); this._bind(); if (!this.lang) this.lang = FPL; }
     this._teardown();
     this._data = {};
     this._render(true);
@@ -1274,6 +1695,7 @@ class FpBase extends HTMLElement {
   _teardown() {
     (this._unsubs || []).forEach((p) => p.then((u) => u && u()).catch(() => {}));
     if (this._onFpRefresh) { window.removeEventListener('fp-refresh', this._onFpRefresh); this._onFpRefresh = null; }
+    if (this._onFitResize) { window.removeEventListener('resize', this._onFitResize); this._onFitResize = null; }
     this._unsubs = null;
     if (this._timer) { clearInterval(this._timer); this._timer = null; }
   }
@@ -1281,6 +1703,7 @@ class FpBase extends HTMLElement {
     if (!this._hass || !this._cfg || !this.isConnected || this._unsubs) return;
     // header refresh button: pull the calendars again and reload the events
     this._onFpRefresh = () => { if (this._syncCal) this._syncCal(); }; window.addEventListener('fp-refresh', this._onFpRefresh);
+    this._onFitResize = () => { clearTimeout(this._fitT); this._fitT = setTimeout(() => { if (this._fit) this._fit(); }, 150); }; window.addEventListener('resize', this._onFitResize);
     this._unsubs = this._lists().map(([key, ent]) => this._hass.connection.subscribeMessage(
       (m) => { this._data[key] = m.items || []; this._render(); },
       { type: 'todo/item/subscribe', entity_id: ent }
@@ -1432,28 +1855,48 @@ class LoxWochenplanerCard extends FpBase {
     return true;
   }
   _sonderTitle(it) {
-    return !it.secret || this._reveal === it.id ? esc(it.title) : TX.secret;
+    return !it.secret ? esc(it.title) : this._reveal === it.id ? `<span class="rvx">${esc(it.title)}</span>` : TX.secret;
   }
   // points a chore / to-do is worth (from the snapshot); 0 = show nothing
   _pts(kind, id) { const s = (this.fpStore && this.fpStore.snap) || {}; const n = Math.round(Number((s[kind] || {})[id]) || 0); return n > 0 ? n : 0; }
-  _ptTag(kind, id) { const n = this._pts(kind, id); return n ? ` · +${n}` : ''; }
-  _ptPill(kind, id) { const n = this._pts(kind, id); return n ? `<small class="ptp">+${n}</small>` : ''; }
+  // every task button is built the same: title, then small rounded info chips, points right-aligned
+  // every task button is built the same: left title + time info (seit / heute fällig / bis Mo), right source + points.
+  // Fits on one line → one line; otherwise left: title over time, right: points over source (see _fit()).
+  _bi(title, time, src, pts) {
+    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${time || ''}</span><span class="br">${src || ''}${pts > 0 ? `<b class="ptr">+${pts}</b>` : ''}</span></span>`;
+  }
+  _fit() {
+    const root = this.shadowRoot; if (!root) return;
+    root.querySelectorAll('.bin').forEach((b) => { b.classList.remove('two'); const l = b.firstElementChild; const r = b.lastElementChild;
+      if (l.scrollWidth + r.scrollWidth + 8 > b.clientWidth) b.classList.add('two'); });
+  }
+  _listName(t) {
+    const ent = String(t.src || '').split('|')[0]; const st = ent && this._hass && this._hass.states[ent];
+    return st ? ((st.attributes || {}).friendly_name || ent) : '';
+  }
   // separate, calm button on the right – far from the tick, so revealing never ticks the job off
   _revealBtn(it, hot) {
-    return it.secret && this._reveal !== it.id ? `<button class="rvb${hot ? ' y' : ''}" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
+    // the eye stays while the job is shown: a second tap hides it again (never ticks it off)
+    return it.secret ? `<button class="rvb${hot ? ' y' : ''}${this._reveal === it.id ? ' on' : ''}" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
   }
   _sonderBtns(snap, pid, tStr) {
     const pts = snap.sonder_points || {};
     return (snap.sonder || []).filter((it) => it.pid === pid && (it.done ? (it.done_at || '').slice(0, 10) === tStr : this._sonderVisible(it, tStr)))
-      .map((it) => { const b = `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span><span class="bt"><em class="tag">${esc(it.icon)} ${TX.spc}${pts[it.id] ? ` · +${pts[it.id]}` : ''}</em>${this._sonderTitle(it)}</span></button>`;
+      .map((it) => { const b = `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span>${this._bi(this._sonderTitle(it), '', `<em class="tag">${esc(it.icon)}<span class="tl"> ${TX.spc}</span></em>`, Number(pts[it.id]) || 0)}</button>`;
         const r = it.done ? '' : this._revealBtn(it); return r ? `<div class="spw">${b}${r}</div>` : b; }).join('');
+  }
+  // an absent day: "Holiday" only for real holidays (or when chosen in the check), otherwise "Away"
+  _awayLook(snap, name, ds) {
+    const p = ((snap && snap.persons) || []).find((x) => x.name === name);
+    const kind = p ? (((snap.away_kind || {})[p.id]) || {})[ds] : null;
+    return kind === 'holiday' ? { icon: 'mdi:palm-tree', text: TX.fer } : { icon: 'mdi:airplane', text: TX.awy };
   }
   _volCards(snap, tStr, persons) {
     const pts = snap.sonder_points || {};
     const open = (snap.sonder || []).filter((it) => it.pid == null && !it.done && this._sonderVisible(it, tStr));
     return open.map((it) => {
       const who = this._claim === it.id ? `<div class="who"><span>${TX.who}</span>${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="wp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 26)}<b>${esc(p.name)}</b></button>`).join('')}<button class="wp x" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span><div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
+      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -1532,7 +1975,8 @@ class LoxWochenplanerCard extends FpBase {
     const vw = e.target.closest('[data-view]');
     if (vw) { this._view = vw.dataset.view; this._dayOff = 0; this._week = 0; this._go(0); return; }
     const tm = e.target.closest('[data-tdmore]'); if (tm) { this._tdMore = this._tdMore === tm.dataset.tdmore ? null : tm.dataset.tdmore; this._render(); return; }
-    const rv = e.target.closest('[data-reveal]'); if (rv) { this._reveal = rv.dataset.reveal; clearTimeout(this._rvT); this._rvT = setTimeout(() => { this._reveal = null; this._render(); }, 5000); this._render(); return; }
+    const rv = e.target.closest('[data-reveal]'); if (rv && this._reveal === rv.dataset.reveal) { this._reveal = null; clearTimeout(this._rvT); this._render(); return; }
+    if (rv) { this._reveal = rv.dataset.reveal; try { const b = rv.getBoundingClientRect(); if (window.FPCONFETTI && window.FPCONFETTI.burst) window.FPCONFETTI.burst(b.left + b.width / 2, b.top + b.height / 2, 'silver', '#F5C542', 0.45); } catch (err) { /* no effect */ } clearTimeout(this._rvT); this._rvT = setTimeout(() => { this._reveal = null; this._render(); }, 5000); this._render(); return; }
     const cl = e.target.closest('[data-claim]'); if (cl) { this._claim = this._claim === cl.dataset.claim ? null : cl.dataset.claim; this._render(); return; }
     const cp = e.target.closest('[data-claimp]');
     if (cp && this.fpStore) { const [iid, pid] = cp.dataset.claimp.split('|'); this._claim = null; this.fpStore.ws('family_planer/sonder/claim', { inst_id: iid, person_id: pid }).catch(() => this._render()); return; }
@@ -1665,7 +2109,7 @@ class LoxWochenplanerCard extends FpBase {
       const tds = this._tdMore === k.name ? tdAll : [...tdOpen.slice(0, maxTd), ...tdAll.filter((t) => t.done)];
       const tdRest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
       const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
-      const tdBtns = tds.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}${ageOf(t)}</span></button>`).join('')
+      const tdBtns = tds.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span>${this._bi(esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title), ageOf(t), `<em class="tag">${t.src && this._listName(t) ? `📋<span class="tl"> ${esc(this._listName(t))}</span>` : '☑<span class="tl"> To-do</span>'}</em>`, this._pts('todo_points', t.id))}</button>`).join('')
         + (tdRest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', tdRest)}</button>` : this._tdMore === k.name && tdOpen.length > maxTd ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.less}</button>` : '')
         + (showTodos ? this._sonderBtns(snapX, pidOf[k.name], tStr) : '');
       const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
@@ -1674,8 +2118,8 @@ class LoxWochenplanerCard extends FpBase {
       const lv = level(st.pct); const C = 2 * Math.PI * 24;
       const AVS = phone ? 56 : 72;
       const seX = snapX.season || {}; const isBday = (seX.birthdays || []).includes(pidOf[k.name]);
-      const label = `<div class="lab${isBday ? ' bday' : ''}" data-person="${esc(k.name)}" style="box-shadow:inset 3px 0 0 ${k.farbe}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:${AVS}px;height:${AVS}px"><span class="ava">${avatarHtml(k, AVS)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
+      const label = `<div class="lab${isBday ? ' bday' : ''}" data-person="${esc(k.name)}" style="box-shadow:inset 3px 0 0 ${k.farbe}">
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:${AVS}px;height:${AVS}px"><span class="ava">${avatarHtml(k, AVS)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
           <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, phone ? 3 : 6).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}${aw.length > (phone ? 3 : 6) ? `<span class="mdm">+${aw.length - (phone ? 3 : 6)}</span>` : ''}</div>
           </div>
           </div>`;
@@ -1698,7 +2142,8 @@ class LoxWochenplanerCard extends FpBase {
       const cells = days.map((d) => injectEv(d, ((d) => {
         const ds = ymd(d);
         if (((this._cfg.abwesend || {})[k.name] || []).includes(ds) && !(ds === tStr && mine.length)) {
-          return `<div class="c ${ds < tStr ? 'p' : ds === tStr ? 't' : 'f'} vac${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}"><div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon>${T[ds] === 's' ? '' : '<span>Ferien</span>'}</div></div>`;
+          const aw = this._awayLook(snapX, k.name, ds);
+          return `<div class="c ${ds < tStr ? 'p' : ds === tStr ? 't' : 'f'} vac${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}"><div class="vc"><ha-icon icon="${aw.icon}"></ha-icon>${T[ds] === 's' ? '' : `<span>${aw.text}</span>`}</div></div>`;
         }
         if (ds === tStr && ds !== focus) {
           return mine.length ? `<div class="c t" data-focus="${ds}"><div class="fc"><b>${tDone}/${mine.length}</b></div><div class="bar"><i style="width:${Math.round((tDone / mine.length) * 100)}%;background:${G}"></i></div>${tdOpen.length ? `<div class="tdn2">☑ ${tdOpen.length}</div>` : ''}</div>` : `<div class="c t" data-focus="${ds}">${tdOpen.length ? `<div class="tdn2">☑ ${tdOpen.length}</div>` : ''}</div>`;
@@ -1708,7 +2153,7 @@ class LoxWochenplanerCard extends FpBase {
           if (!mine.length) return `<div class="c t"><div class="bg">${tdBtns}</div></div>`;
           const all = tDone === mine.length;
           return `<div class="c t"><div class="prog"><span>${tDone} von ${mine.length} erledigt</span>${all ? '<span class="gr">Super!</span>' : ''}</div><div class="bg">` +
-            mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Spezial${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + tdBtns + `</div></div>`;
+            mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Spezial</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + tdBtns + `</div></div>`;
         }
         if (ds < tStr) {
           const s = h[ds] && h[ds].s[k.name];
@@ -1739,7 +2184,7 @@ class LoxWochenplanerCard extends FpBase {
     // volunteer tile: only while a special chore is waiting for the fastest child
     const kidsP = kids.map((k) => ({ ...k, id: pidOf[k.name] }));
     const volHtml = this._volCards(snapX, tStr, kidsP);
-    const volRow = !volHtml || !days.some((d) => ymd(d) === tStr) || ['termine', 'schule'].includes(modeX) ? '' : `<div class="lab vol"><div class="ring vr" style="width:${phone ? 56 : 72}px;height:${phone ? 56 : 72}px"><span>🙋</span></div><div class="lt"><div class="nm">${TX.vol}</div><div class="vs2">${TX.volSub}</div></div></div>`
+    const volRow = !volHtml || !days.some((d) => ymd(d) === tStr) || ['termine', 'schule'].includes(modeX) ? '' : `<div class="lab vol"><div class="ring vr" style="width:${phone ? 56 : 72}px;height:${phone ? 56 : 72}px"><span>🙋</span></div><div class="lt"><div class="nm vl1">${TX.vol} <span class="vs2">${TX.volSub}</span></div></div></div>`
       + days.map((d) => (ymd(d) === tStr ? `<div class="c t vc2">${volHtml}</div>` : `<div class="c f${T[ymd(d)] === 's' ? ' sm' : ''}"></div>`)).join('');
     const viewNow = this._view || (snapX.settings || {}).default_view || 'today';
     let todayGrid = '';
@@ -1761,7 +2206,7 @@ class LoxWochenplanerCard extends FpBase {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
             if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
-            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Spezial${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
+            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Spezial</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : '';
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
@@ -1772,20 +2217,21 @@ class LoxWochenplanerCard extends FpBase {
           const list = this._tdMore === k.name ? tdAll : [...tdOpen.slice(0, maxTd), ...tdAll.filter((t) => t.done)];
           const rest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
           const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
-          tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}${ageOf(t)}</span></button>`).join('')
+          tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span>${this._bi(esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title), ageOf(t), `<em class="tag">${t.src && this._listName(t) ? `📋<span class="tl"> ${esc(this._listName(t))}</span>` : '☑<span class="tl"> To-do</span>'}</em>`, this._pts('todo_points', t.id))}</button>`).join('')
             + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '');
           if (tdh) tdh = `<div class="bg one">${tdh}</div>`;
           if (tdOpen.length) tdInfo = TX.open.replace('{n}', tdOpen.length);
           sph = this._sonderBtns(snapX, pid, tStr); if (sph) sph = `<div class="bg one">${sph}</div>`;
         }
-        const body = away ? `<div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon><span>Ferien</span></div>`
+        const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
+        const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || `<div class="none">${TX.none}</div>`;
-        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pid]) || 0) : ''}
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
+        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
           <span class="flg" style="--rc:${lv.c}" title="${TX.rel}">${st.pct}%</span><div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
-      if (volHtml && isT && !['termine', 'schule'].includes(modeX)) cols.push(`<div class="tcol volc"><div class="lab th vol"><div class="ring vr" style="width:64px;height:64px"><span>🙋</span></div><div class="lt"><div class="nm">${TX.vol}</div><div class="vs2">${TX.volSub}</div></div></div><div class="tbody">${volHtml}</div></div>`);
+      if (volHtml && isT && !['termine', 'schule'].includes(modeX)) cols.push(`<div class="tcol volc"><div class="lab th vol"><div class="ring vr" style="width:64px;height:64px"><span>🙋</span></div><div class="lt"><div class="nm vl1">${TX.vol} <span class="vs2">${TX.volSub}</span></div></div></div><div class="tbody">${volHtml}</div></div>`);
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(${cols.length},minmax(0,1fr))`}">${cols.join('')}</div>`;
     }
 
@@ -1797,7 +2243,8 @@ class LoxWochenplanerCard extends FpBase {
       .date{font-size:24px;font-weight:300}.date b{font-weight:600}
       .sub{font-size:12px;color:var(--fp-text3,#7a7a7a);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px}
       .nav{margin-left:auto;display:flex;align-items:center;gap:8px}.tdg{display:flex;gap:6px}
-      .top{flex-wrap:nowrap}.card.phone .top{flex-wrap:wrap}
+      .top{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}.top::-webkit-scrollbar{display:none}
+      .top > *{flex:none}.seg button{white-space:nowrap}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 10px}
       .nb{background:var(--fp-bg3,#262626);border:1px solid var(--fp-line,#333);color:var(--fp-text,#ddd);border-radius:10px;height:42px;min-width:42px;padding:0 14px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:inherit;font-size:14px;-webkit-tap-highlight-color:transparent}
       .nb ha-icon{--mdc-icon-size:22px}.nb.td{gap:6px}.tdn{background:${G};color:var(--fp-on-accent,#141414);border-radius:10px;padding:0 7px;font-size:12px;line-height:20px}.nb.g{color:${G};border-color:color-mix(in srgb,var(--fp-accent) 50%,transparent)}
       .wk{font-size:12px;color:var(--fp-text3,#8a8a8a);padding:0 8px;text-align:center;min-width:150px}.wk b{display:block;color:var(--fp-text,#ececec);font-size:15px;font-weight:600}
@@ -1808,7 +2255,7 @@ class LoxWochenplanerCard extends FpBase {
       .corner{font-size:10px;color:var(--fp-text3,#555);display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;padding:0 4px 6px}
       .corner .leg{background:none;padding:0;margin:0;gap:4px 10px}.corner .lgi{font-size:12px}
       .pev.mid .src{display:none}
-      .hd{padding:4px 10px 6px;font-size:11px;color:var(--fp-text3,#8a8a8a);text-transform:uppercase;letter-spacing:1px}
+      .hd{padding:4px 10px 6px;font-size:12px;font-weight:600;color:#a3a3a3;text-transform:uppercase;letter-spacing:1px}
       .hd{cursor:pointer;border-radius:8px;-webkit-tap-highlight-color:transparent}.hd.fx{background:var(--fp-bg3,#262626)}
       .hd b{display:block;font-size:18px;color:var(--fp-text,#e5e5e5);font-weight:300;letter-spacing:0;text-transform:none;margin-top:2px}
       .hd.t,.hd.t b{color:${G}}.hd.t b{font-weight:500}
@@ -1826,7 +2273,7 @@ class LoxWochenplanerCard extends FpBase {
       .src{display:inline-block;font-size:9px;font-weight:700;color:var(--fp-on-accent,#141414);border-radius:6px;padding:0 5px;margin-right:5px;line-height:15px;vertical-align:1px;white-space:nowrap}
       .leg{display:flex;align-items:center;gap:12px;margin-left:auto;background:var(--fp-bg2,#232323);border-radius:10px;padding:8px 14px;flex-wrap:wrap}
       .leg + .nav{margin-left:0}
-      .lgt{font-size:10px;color:var(--fp-text3,#666);text-transform:uppercase;letter-spacing:1px}
+      .lgt{font-size:11px;color:#8f8f8f;text-transform:uppercase;letter-spacing:1px}
       .tnav{display:flex;gap:6px;margin-left:auto}.tnav + .seg{margin-left:0}
       .seg{display:flex;background:var(--fp-bg2,#232323);border-radius:10px;padding:3px;gap:2px;margin-left:auto}.seg + .leg{margin-left:0}
       .seg button{background:transparent;border:none;color:var(--fp-text2,#999);font:inherit;font-size:13px;padding:0 13px;height:36px;border-radius:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}.seg button.on{background:var(--fp-bg4,#3a3a3a);color:var(--fp-text,#fff);font-weight:600}
@@ -1869,8 +2316,8 @@ class LoxWochenplanerCard extends FpBase {
       .btn.done{background:color-mix(in srgb,var(--fp-accent) 1200%,transparent);border-color:color-mix(in srgb,var(--fp-accent) 45%,transparent)}
       .btn.done .cb{background:${G};border-color:${G}}
       .btn.done .cb::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid var(--fp-line,#1e1e1e);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
-      .btn.done .bt{color:var(--fp-accent)}
-      .btn .tag{display:inline-block;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:7px;margin-right:6px;vertical-align:1px}
+      .btn.done .bx{color:var(--fp-accent)}
+      .btn .tag{display:inline-block;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:7px;margin-right:6px;vertical-align:1px}
       .btn.spc{border-color:rgba(245,197,66,.65);background:rgba(245,197,66,.08)}.btn.spc .tag{background:rgba(245,197,66,.2);color:#f5c542}
       .btn.tdo{border:1px dashed rgba(79,163,224,.7);background:rgba(79,163,224,.07)}.btn.tdo .tag{background:rgba(79,163,224,.2);color:#4fa3e0}.btn.tdo .cb{border-radius:6px}
       .btn.tdo.arm{border-style:solid;border-color:#4fa3e0;background:rgba(79,163,224,.18)}
@@ -1878,7 +2325,7 @@ class LoxWochenplanerCard extends FpBase {
       .btn.pop .cb{animation:fpcheck .5s cubic-bezier(.3,1.6,.5,1)}.btn.pop .cb::before{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid ${G};animation:fpring .6s ease-out forwards}
       @keyframes fpcheck{0%{transform:scale(.55)}60%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes fpring{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.3);opacity:0}}
       @media (prefers-reduced-motion:reduce){.btn.pop .cb,.btn.pop .cb::before{animation:none}}
-      .due{font-style:normal;font-size:10px;font-weight:600;color:#e0a84f;border:1px solid rgba(224,168,79,.5);border-radius:8px;padding:1px 6px;margin-left:6px;white-space:nowrap;display:inline-block}
+      .due{color:#e0a84f;border:1px solid rgba(224,168,79,.6);line-height:15px;border-radius:8px;padding:1px 6px;margin-left:6px;white-space:nowrap;display:inline-block}
       .due.last{color:var(--fp-on-accent,#1e1e1e);background:#e0a84f;border-color:#e0a84f}.btn.done .due{opacity:.5}
       .pl.op{color:#c39a4a}.pl.op::before{display:none}
       .pev.mid .ev{font-size:11px;padding:3px 5px 3px 6px;white-space:normal;line-height:1.3}.pev.mid .et{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fp-text,#ddd)}
@@ -1891,7 +2338,7 @@ class LoxWochenplanerCard extends FpBase {
       .c.p .big{font-size:14px}.c.p .big small{font-size:10px}.c.p .bar{margin:5px 0 4px}
       .fc{font-size:11px;color:var(--fp-text3,#8a8a8a);white-space:nowrap}.fc b{font-size:18px;font-weight:300;color:var(--fp-text,#ddd);margin-right:4px}
       .opn{font-size:11px;color:#c39a4a;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .prog{font-size:11px;color:var(--fp-text3,#8a8a8a);margin-bottom:4px;display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.8px}.gr{color:${G};font-weight:600}
+      .prog{font-size:12px;font-weight:600;color:#a3a3a3;margin-bottom:4px;display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.8px}.gr{color:${G};font-weight:600}
       .free{display:flex;align-items:center;gap:8px;color:var(--fp-text3,#8a8a8a);font-size:14px;padding:6px 2px}.free ha-icon{color:${G}}
       .vc{display:flex;align-items:center;justify-content:center;gap:6px;height:100%;min-height:40px;color:#4fa3e0;font-size:13px;font-weight:600;background:rgba(79,163,224,.08);border-radius:8px}.vc ha-icon{--mdc-icon-size:20px}
       .big{font-size:18px;font-weight:300;line-height:1.1}.big small{font-size:13px;color:var(--fp-text3,#8a8a8a)}
@@ -1911,19 +2358,30 @@ class LoxWochenplanerCard extends FpBase {
       .lab.th .flg{position:absolute;top:-1px;right:24px;width:42px;padding:7px 0 15px;background:var(--rc);color:var(--fp-on-accent,#141414);font-size:13px;font-weight:800;text-align:center;letter-spacing:.2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);z-index:2}
       .lab.th .nm{padding-right:50px}.lab.th .lv2:empty{display:none}
       .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .lab.th .nm{padding-right:0}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
-      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:10px;color:var(--fp-text3,#7a7a7a);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
+      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:600;color:#a3a3a3;text-transform:uppercase;letter-spacing:.9px;margin:4px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
       .bg.one{grid-template-columns:1fr}
-      .age{display:block;font-size:10px;color:var(--fp-text3,#8a8a8a);font-weight:400;margin-top:2px}
+
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
-      .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542}
+      .bin{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l r";align-items:center;column-gap:8px}
+      .bl{grid-area:l;display:flex;align-items:center;gap:6px;min-width:0}.br{grid-area:r;display:flex;align-items:center;gap:5px;justify-content:flex-end}
+      .bx{white-space:nowrap;min-width:0}
+      .bin.two{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"t t p" "m s s";row-gap:4px;align-items:start}.bin.two .bl,.bin.two .br{display:contents}
+      .bin.two .bx{grid-area:t;white-space:normal;overflow-wrap:break-word;hyphens:auto}.bin.two .bl > :not(.bx){grid-area:m;justify-self:start}
+      .bin.two .ptr{grid-area:p;justify-self:end}.c .bg:not(.one) .bin.two .tag .tl,.c .spw .bin.two .tag .tl{display:none}.bin.two .br > .tag{grid-area:s;justify-self:end}
+      .btn .tag,.due,.age,.ptr{display:inline-block;margin:0;font-style:normal;font-size:11px;font-weight:700;line-height:17px;padding:0 8px;border-radius:9px;white-space:nowrap;letter-spacing:.2px}
+      .age{color:#aab2bf;border:1px solid #4a505c;line-height:15px;font-weight:600}
+      .ptr{background:rgba(245,197,66,.18);color:#f5c542}.btn.done .ptr,.btn.done .tag,.btn.done .age{opacity:.6}
+      .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542;background:rgba(245,197,66,.18)}
       .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
-      .rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#f5c542;background:#f5c542}
-      .ptp{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:#f5c542;opacity:.85;vertical-align:middle}
+      .rvb.on{background:rgba(245,197,66,.18);border-color:#f5c542}.rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#f5c542;background:#f5c542}
+      .ptp{display:inline-block;margin-left:6px;padding:0 7px;border-radius:9px;background:rgba(245,197,66,.16);color:#f5c542;font-size:11px;font-weight:700;line-height:17px;vertical-align:middle;white-space:nowrap;font-style:normal}.done .ptp{opacity:.6}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),var(--fp-bg2,#232323) 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--fp-bg3,#2b2b2b);font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
-      .vs2{font-size:11px;color:var(--fp-text3,#8a8a8a);margin-top:3px}.c.vc2{display:flex;flex-direction:column;gap:6px}
-      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
+      .vs2{font-size:11px;font-weight:400;color:var(--fp-text3,#8a8a8a)}.rvx{display:inline-block;animation:fprvx 5s ease-out both;background:linear-gradient(100deg,currentColor 40%,#ffe27a 50%,currentColor 60%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}@keyframes fprvx{0%{opacity:0;filter:blur(8px);transform:scale(.5) rotate(-6deg);background-position:100% 0}12%{opacity:1;filter:blur(0);transform:scale(1.15) rotate(2deg)}20%{transform:scale(1) rotate(0)}40%{background-position:0 0}86%{opacity:1;filter:blur(0)}100%{opacity:.25;filter:blur(4px)}}@media (prefers-reduced-motion:reduce){.rvx{animation:none}}.vl1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
       .vcard .vi{font-size:22px;text-align:center}.vcard .vt{min-width:0;font-size:13px;line-height:1.3}
-      .vcard .vbtn,.vcard .who{grid-column:1 / -1}.vbtn{display:flex;gap:8px}.vbtn .take{flex:1;height:40px;animation:fppul 2.4s ease-in-out infinite}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
+      .vcard .vbtn,.vcard .who{grid-column:1 / -1}.vbtn{display:flex;gap:8px}.vbtn .take{flex:1 1 auto;max-width:200px;height:40px;animation:fppul 2.4s ease-in-out infinite}
+      .c.vc2{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;align-content:flex-start;align-items:flex-start}.c.vc2 .vcard{flex:1 1 240px;max-width:340px}
+      .c .bg:not(.one) > .spw{grid-column:span 2}.c .spw .btn .bin{min-width:0;overflow:hidden}.c .spw .rvb{width:36px;min-width:36px;height:auto;padding:0}.c .spw .rvb svg{width:22px;height:16px}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
       .take{border:none;border-radius:10px;padding:8px 12px;background:#f5c542;color:var(--fp-on-accent,#141414);font:inherit;font-size:13px;font-weight:700;cursor:pointer;animation:fpwig 2.4s ease-in-out infinite}
       .who{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.who span{font-size:12px;color:var(--fp-text2,#aaa);margin-right:4px}
       .wp{display:flex;align-items:center;gap:6px;border:1px solid var(--c,#444);background:var(--fp-bg2,#232323);color:inherit;border-radius:18px;padding:2px 10px 2px 2px;font:inherit;font-size:13px;cursor:pointer}.wp.x{padding:4px 10px;border-color:#444;color:var(--fp-text2,#999)}
@@ -1935,7 +2393,7 @@ class LoxWochenplanerCard extends FpBase {
       .lab.bday .ring,.lab.bday .lt{position:relative;z-index:2}
       .tcol.bday{background:linear-gradient(160deg,rgba(255,122,182,.20),rgba(255,216,77,.14),rgba(92,225,230,.14),rgba(176,124,255,.20));background-size:300% 300%;animation:fpbdg 6s ease-in-out infinite}.tcol.bday .lab.th{animation:none;background:transparent}
       @keyframes fpbdg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-      .bdx{position:absolute;left:46px;top:50%;width:0;height:0;z-index:1;pointer-events:none}.tcol .bdx{left:42px;top:44px}
+      .bdx{position:absolute;left:50%;top:50%;width:0;height:0;z-index:1;pointer-events:none}
       .bdx i{position:absolute;left:0;top:0;display:block}
       .bdx .cf{width:6px;height:10px;border-radius:2px;background:var(--c);animation:fpcf 1.6s ease-out infinite}
       @keyframes fpcf{0%{transform:rotate(var(--a)) translateY(0) scale(.4);opacity:1}80%{opacity:1}100%{transform:rotate(var(--a)) translateY(-64px) rotate(240deg) scale(1);opacity:0}}
@@ -1944,8 +2402,8 @@ class LoxWochenplanerCard extends FpBase {
       @keyframes fpbl{0%{transform:translate(0,10px) scale(.3);opacity:0}15%{opacity:1}100%{transform:translate(var(--x),-80px) scale(1);opacity:0}}
       .bdx .bu{width:var(--s);height:var(--s);border-radius:50%;border:1.5px solid rgba(160,220,255,.9);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.8),rgba(160,220,255,.15) 40%,transparent 70%);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);animation:fpbu 3.4s ease-out infinite}
       @keyframes fpbu{0%{transform:translate(0,0) scale(.2);opacity:0}15%{opacity:1}100%{transform:translate(var(--x),-70px) scale(1.2);opacity:0}}
-      .bdx .rd{width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:conic-gradient(#ff5a5a,#ffb23d,#ffe94d,#55d16b,#4aa8ff,#8f6bff,#ff5a5a);-webkit-mask:radial-gradient(circle,transparent 30px,#000 32px,#000 40px,transparent 42px,transparent 50px,#000 52px,#000 58px,transparent 60px);mask:radial-gradient(circle,transparent 30px,#000 32px,#000 40px,transparent 42px,transparent 50px,#000 52px,#000 58px,transparent 60px);animation:fpspin 3s linear infinite;opacity:.85}
-      .bdx .rd.r2{width:160px;height:160px;margin:-80px 0 0 -80px;background:repeating-conic-gradient(rgba(255,255,255,.18) 0 8deg,transparent 8deg 24deg);-webkit-mask:none;mask:none;animation-duration:9s;animation-direction:reverse}
+      .bdx .rd{width:88px;height:88px;margin:-44px 0 0 -44px;border-radius:50%;background:conic-gradient(#ff5a5a,#ffb23d,#ffe94d,#55d16b,#4aa8ff,#8f6bff,#ff5a5a);-webkit-mask:radial-gradient(circle,transparent 33px,#000 34px,#000 38px,transparent 39px,transparent 40px,#000 41px,#000 43px,transparent 44px);mask:radial-gradient(circle,transparent 33px,#000 34px,#000 38px,transparent 39px,transparent 40px,#000 41px,#000 43px,transparent 44px);animation:fpspin 3s linear infinite;opacity:.85}
+      .bdx .rd.r2{width:104px;height:104px;margin:-52px 0 0 -52px;background:repeating-conic-gradient(rgba(255,255,255,.18) 0 8deg,transparent 8deg 24deg);-webkit-mask:none;mask:none;animation-duration:9s;animation-direction:reverse}
       .bdx .st{color:#ffd84d;font-size:14px;font-style:normal;margin:-8px 0 0 -5px;text-shadow:0 0 6px rgba(255,216,77,.8);animation:fpst 2.1s ease-out infinite}
       @keyframes fpst{0%{transform:rotate(var(--a)) translateY(0) scale(.3);opacity:0}20%{opacity:1}100%{transform:rotate(var(--a)) translateY(-70px) scale(1.1);opacity:0}}
       @media (prefers-reduced-motion:reduce){.bdx,.take,.lab.bday{animation:none}.bdx i{animation:none;opacity:0}}
@@ -1965,10 +2423,11 @@ class LoxWochenplanerCard extends FpBase {
           <button class="nb" data-nav="1"><ha-icon icon="mdi:chevron-right"></ha-icon></button>
         </div>
       </div>
-      ${todayGrid || `<div class="grid">${head}${(!cals.length || cals.some((c) => !c.person)) ? termine : ''}${volRow}${rows}${empty}</div>`}
+      ${todayGrid || `<div class="grid">${head}${(!cals.length || cals.some((c) => !c.person)) ? termine : ''}${rows}${volRow}${empty}</div>`}
       ${this._err ? `<div class="err">${esc(this._err)}</div>` : ''}
       ${this._detail ? this._detailHtml(kids, pre, awards, frames) : ''}
     </div>`;
+    this._fit();
   }
 }
 
@@ -2315,11 +2774,11 @@ const durTxt = (ms, short) => { const m = Math.max(0, Math.round(ms / 60000)); c
 const SOON_T = ['in {n} min', 'in {n} h'];
 const FPL = 'en';
 const TX = {
-  de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
+  de: { fer: 'Ferien', awy: 'Nicht da', today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
     secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
-  en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
+  en: { fer: 'Holiday', awy: 'Away', today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
     secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', spcH: 'Special chores', open: '{n} open', rel: 'Reliability', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
@@ -2555,7 +3014,7 @@ const REVEAL_EYE = '<svg viewBox="0 0 34 24" width="32" height="23" aria-hidden=
 class FpBase extends HTMLElement {
   setConfig(config) {
     this._cfg = this._normalize(config || {});
-    if (!this.shadowRoot) { this.attachShadow({ mode: 'open' }); this._bind(); }
+    if (!this.shadowRoot) { this.attachShadow({ mode: 'open' }); this._bind(); if (!this.lang) this.lang = FPL; }
     this._teardown();
     this._data = {};
     this._render(true);
@@ -2570,6 +3029,7 @@ class FpBase extends HTMLElement {
   _teardown() {
     (this._unsubs || []).forEach((p) => p.then((u) => u && u()).catch(() => {}));
     if (this._onFpRefresh) { window.removeEventListener('fp-refresh', this._onFpRefresh); this._onFpRefresh = null; }
+    if (this._onFitResize) { window.removeEventListener('resize', this._onFitResize); this._onFitResize = null; }
     this._unsubs = null;
     if (this._timer) { clearInterval(this._timer); this._timer = null; }
   }
@@ -2577,6 +3037,7 @@ class FpBase extends HTMLElement {
     if (!this._hass || !this._cfg || !this.isConnected || this._unsubs) return;
     // header refresh button: pull the calendars again and reload the events
     this._onFpRefresh = () => { if (this._syncCal) this._syncCal(); }; window.addEventListener('fp-refresh', this._onFpRefresh);
+    this._onFitResize = () => { clearTimeout(this._fitT); this._fitT = setTimeout(() => { if (this._fit) this._fit(); }, 150); }; window.addEventListener('resize', this._onFitResize);
     this._unsubs = this._lists().map(([key, ent]) => this._hass.connection.subscribeMessage(
       (m) => { this._data[key] = m.items || []; this._render(); },
       { type: 'todo/item/subscribe', entity_id: ent }
@@ -2728,28 +3189,48 @@ class LoxWochenplanerCard extends FpBase {
     return true;
   }
   _sonderTitle(it) {
-    return !it.secret || this._reveal === it.id ? esc(it.title) : TX.secret;
+    return !it.secret ? esc(it.title) : this._reveal === it.id ? `<span class="rvx">${esc(it.title)}</span>` : TX.secret;
   }
   // points a chore / to-do is worth (from the snapshot); 0 = show nothing
   _pts(kind, id) { const s = (this.fpStore && this.fpStore.snap) || {}; const n = Math.round(Number((s[kind] || {})[id]) || 0); return n > 0 ? n : 0; }
-  _ptTag(kind, id) { const n = this._pts(kind, id); return n ? ` · +${n}` : ''; }
-  _ptPill(kind, id) { const n = this._pts(kind, id); return n ? `<small class="ptp">+${n}</small>` : ''; }
+  // every task button is built the same: title, then small rounded info chips, points right-aligned
+  // every task button is built the same: left title + time info (seit / heute fällig / bis Mo), right source + points.
+  // Fits on one line → one line; otherwise left: title over time, right: points over source (see _fit()).
+  _bi(title, time, src, pts) {
+    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${time || ''}</span><span class="br">${src || ''}${pts > 0 ? `<b class="ptr">+${pts}</b>` : ''}</span></span>`;
+  }
+  _fit() {
+    const root = this.shadowRoot; if (!root) return;
+    root.querySelectorAll('.bin').forEach((b) => { b.classList.remove('two'); const l = b.firstElementChild; const r = b.lastElementChild;
+      if (l.scrollWidth + r.scrollWidth + 8 > b.clientWidth) b.classList.add('two'); });
+  }
+  _listName(t) {
+    const ent = String(t.src || '').split('|')[0]; const st = ent && this._hass && this._hass.states[ent];
+    return st ? ((st.attributes || {}).friendly_name || ent) : '';
+  }
   // separate, calm button on the right – far from the tick, so revealing never ticks the job off
   _revealBtn(it, hot) {
-    return it.secret && this._reveal !== it.id ? `<button class="rvb${hot ? ' y' : ''}" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
+    // the eye stays while the job is shown: a second tap hides it again (never ticks it off)
+    return it.secret ? `<button class="rvb${hot ? ' y' : ''}${this._reveal === it.id ? ' on' : ''}" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
   }
   _sonderBtns(snap, pid, tStr) {
     const pts = snap.sonder_points || {};
     return (snap.sonder || []).filter((it) => it.pid === pid && (it.done ? (it.done_at || '').slice(0, 10) === tStr : this._sonderVisible(it, tStr)))
-      .map((it) => { const b = `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span><span class="bt"><em class="tag">${esc(it.icon)} ${TX.spc}${pts[it.id] ? ` · +${pts[it.id]}` : ''}</em>${this._sonderTitle(it)}</span></button>`;
+      .map((it) => { const b = `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span>${this._bi(this._sonderTitle(it), '', `<em class="tag">${esc(it.icon)}<span class="tl"> ${TX.spc}</span></em>`, Number(pts[it.id]) || 0)}</button>`;
         const r = it.done ? '' : this._revealBtn(it); return r ? `<div class="spw">${b}${r}</div>` : b; }).join('');
+  }
+  // an absent day: "Holiday" only for real holidays (or when chosen in the check), otherwise "Away"
+  _awayLook(snap, name, ds) {
+    const p = ((snap && snap.persons) || []).find((x) => x.name === name);
+    const kind = p ? (((snap.away_kind || {})[p.id]) || {})[ds] : null;
+    return kind === 'holiday' ? { icon: 'mdi:palm-tree', text: TX.fer } : { icon: 'mdi:airplane', text: TX.awy };
   }
   _volCards(snap, tStr, persons) {
     const pts = snap.sonder_points || {};
     const open = (snap.sonder || []).filter((it) => it.pid == null && !it.done && this._sonderVisible(it, tStr));
     return open.map((it) => {
       const who = this._claim === it.id ? `<div class="who"><span>${TX.who}</span>${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="wp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 26)}<b>${esc(p.name)}</b></button>`).join('')}<button class="wp x" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span><div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
+      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -2828,7 +3309,8 @@ class LoxWochenplanerCard extends FpBase {
     const vw = e.target.closest('[data-view]');
     if (vw) { this._view = vw.dataset.view; this._dayOff = 0; this._week = 0; this._go(0); return; }
     const tm = e.target.closest('[data-tdmore]'); if (tm) { this._tdMore = this._tdMore === tm.dataset.tdmore ? null : tm.dataset.tdmore; this._render(); return; }
-    const rv = e.target.closest('[data-reveal]'); if (rv) { this._reveal = rv.dataset.reveal; clearTimeout(this._rvT); this._rvT = setTimeout(() => { this._reveal = null; this._render(); }, 5000); this._render(); return; }
+    const rv = e.target.closest('[data-reveal]'); if (rv && this._reveal === rv.dataset.reveal) { this._reveal = null; clearTimeout(this._rvT); this._render(); return; }
+    if (rv) { this._reveal = rv.dataset.reveal; try { const b = rv.getBoundingClientRect(); if (window.FPCONFETTI && window.FPCONFETTI.burst) window.FPCONFETTI.burst(b.left + b.width / 2, b.top + b.height / 2, 'silver', '#F5C542', 0.45); } catch (err) { /* no effect */ } clearTimeout(this._rvT); this._rvT = setTimeout(() => { this._reveal = null; this._render(); }, 5000); this._render(); return; }
     const cl = e.target.closest('[data-claim]'); if (cl) { this._claim = this._claim === cl.dataset.claim ? null : cl.dataset.claim; this._render(); return; }
     const cp = e.target.closest('[data-claimp]');
     if (cp && this.fpStore) { const [iid, pid] = cp.dataset.claimp.split('|'); this._claim = null; this.fpStore.ws('family_planer/sonder/claim', { inst_id: iid, person_id: pid }).catch(() => this._render()); return; }
@@ -2961,7 +3443,7 @@ class LoxWochenplanerCard extends FpBase {
       const tds = this._tdMore === k.name ? tdAll : [...tdOpen.slice(0, maxTd), ...tdAll.filter((t) => t.done)];
       const tdRest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
       const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
-      const tdBtns = tds.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Tap again to finish' : t.title)}${ageOf(t)}</span></button>`).join('')
+      const tdBtns = tds.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span>${this._bi(esc(this._tdArm === t.id ? 'Tap again to finish' : t.title), ageOf(t), `<em class="tag">${t.src && this._listName(t) ? `📋<span class="tl"> ${esc(this._listName(t))}</span>` : '☑<span class="tl"> To-do</span>'}</em>`, this._pts('todo_points', t.id))}</button>`).join('')
         + (tdRest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', tdRest)}</button>` : this._tdMore === k.name && tdOpen.length > maxTd ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.less}</button>` : '')
         + (showTodos ? this._sonderBtns(snapX, pidOf[k.name], tStr) : '');
       const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
@@ -2970,8 +3452,8 @@ class LoxWochenplanerCard extends FpBase {
       const lv = level(st.pct); const C = 2 * Math.PI * 24;
       const AVS = phone ? 56 : 72;
       const seX = snapX.season || {}; const isBday = (seX.birthdays || []).includes(pidOf[k.name]);
-      const label = `<div class="lab${isBday ? ' bday' : ''}" data-person="${esc(k.name)}" style="box-shadow:inset 3px 0 0 ${k.farbe}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:${AVS}px;height:${AVS}px"><span class="ava">${avatarHtml(k, AVS)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
+      const label = `<div class="lab${isBday ? ' bday' : ''}" data-person="${esc(k.name)}" style="box-shadow:inset 3px 0 0 ${k.farbe}">
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:${AVS}px;height:${AVS}px"><span class="ava">${avatarHtml(k, AVS)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
           <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, phone ? 3 : 6).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}${aw.length > (phone ? 3 : 6) ? `<span class="mdm">+${aw.length - (phone ? 3 : 6)}</span>` : ''}</div>
           </div>
           </div>`;
@@ -2994,7 +3476,8 @@ class LoxWochenplanerCard extends FpBase {
       const cells = days.map((d) => injectEv(d, ((d) => {
         const ds = ymd(d);
         if (((this._cfg.abwesend || {})[k.name] || []).includes(ds) && !(ds === tStr && mine.length)) {
-          return `<div class="c ${ds < tStr ? 'p' : ds === tStr ? 't' : 'f'} vac${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}"><div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon>${T[ds] === 's' ? '' : '<span>Holiday</span>'}</div></div>`;
+          const aw = this._awayLook(snapX, k.name, ds);
+          return `<div class="c ${ds < tStr ? 'p' : ds === tStr ? 't' : 'f'} vac${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}"><div class="vc"><ha-icon icon="${aw.icon}"></ha-icon>${T[ds] === 's' ? '' : `<span>${aw.text}</span>`}</div></div>`;
         }
         if (ds === tStr && ds !== focus) {
           return mine.length ? `<div class="c t" data-focus="${ds}"><div class="fc"><b>${tDone}/${mine.length}</b></div><div class="bar"><i style="width:${Math.round((tDone / mine.length) * 100)}%;background:${G}"></i></div>${tdOpen.length ? `<div class="tdn2">☑ ${tdOpen.length}</div>` : ''}</div>` : `<div class="c t" data-focus="${ds}">${tdOpen.length ? `<div class="tdn2">☑ ${tdOpen.length}</div>` : ''}</div>`;
@@ -3004,7 +3487,7 @@ class LoxWochenplanerCard extends FpBase {
           if (!mine.length) return `<div class="c t"><div class="bg">${tdBtns}</div></div>`;
           const all = tDone === mine.length;
           return `<div class="c t"><div class="prog"><span>${tDone} of ${mine.length} done</span>${all ? '<span class="gr">Great!</span>' : ''}</div><div class="bg">` +
-            mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Special${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + tdBtns + `</div></div>`;
+            mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Special</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + tdBtns + `</div></div>`;
         }
         if (ds < tStr) {
           const s = h[ds] && h[ds].s[k.name];
@@ -3035,7 +3518,7 @@ class LoxWochenplanerCard extends FpBase {
     // volunteer tile: only while a special chore is waiting for the fastest child
     const kidsP = kids.map((k) => ({ ...k, id: pidOf[k.name] }));
     const volHtml = this._volCards(snapX, tStr, kidsP);
-    const volRow = !volHtml || !days.some((d) => ymd(d) === tStr) || ['termine', 'schule'].includes(modeX) ? '' : `<div class="lab vol"><div class="ring vr" style="width:${phone ? 56 : 72}px;height:${phone ? 56 : 72}px"><span>🙋</span></div><div class="lt"><div class="nm">${TX.vol}</div><div class="vs2">${TX.volSub}</div></div></div>`
+    const volRow = !volHtml || !days.some((d) => ymd(d) === tStr) || ['termine', 'schule'].includes(modeX) ? '' : `<div class="lab vol"><div class="ring vr" style="width:${phone ? 56 : 72}px;height:${phone ? 56 : 72}px"><span>🙋</span></div><div class="lt"><div class="nm vl1">${TX.vol} <span class="vs2">${TX.volSub}</span></div></div></div>`
       + days.map((d) => (ymd(d) === tStr ? `<div class="c t vc2">${volHtml}</div>` : `<div class="c f${T[ymd(d)] === 's' ? ' sm' : ''}"></div>`)).join('');
     const viewNow = this._view || (snapX.settings || {}).default_view || 'today';
     let todayGrid = '';
@@ -3057,7 +3540,7 @@ class LoxWochenplanerCard extends FpBase {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
             if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
-            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Special${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
+            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Special</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : '';
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
@@ -3068,20 +3551,21 @@ class LoxWochenplanerCard extends FpBase {
           const list = this._tdMore === k.name ? tdAll : [...tdOpen.slice(0, maxTd), ...tdAll.filter((t) => t.done)];
           const rest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
           const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
-          tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Tap again to finish' : t.title)}${ageOf(t)}</span></button>`).join('')
+          tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span>${this._bi(esc(this._tdArm === t.id ? 'Tap again to finish' : t.title), ageOf(t), `<em class="tag">${t.src && this._listName(t) ? `📋<span class="tl"> ${esc(this._listName(t))}</span>` : '☑<span class="tl"> To-do</span>'}</em>`, this._pts('todo_points', t.id))}</button>`).join('')
             + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '');
           if (tdh) tdh = `<div class="bg one">${tdh}</div>`;
           if (tdOpen.length) tdInfo = TX.open.replace('{n}', tdOpen.length);
           sph = this._sonderBtns(snapX, pid, tStr); if (sph) sph = `<div class="bg one">${sph}</div>`;
         }
-        const body = away ? `<div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon><span>Ferien</span></div>`
+        const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
+        const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || `<div class="none">${TX.none}</div>`;
-        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pid]) || 0) : ''}
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
+        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
           <span class="flg" style="--rc:${lv.c}" title="${TX.rel}">${st.pct}%</span><div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
-      if (volHtml && isT && !['termine', 'schule'].includes(modeX)) cols.push(`<div class="tcol volc"><div class="lab th vol"><div class="ring vr" style="width:64px;height:64px"><span>🙋</span></div><div class="lt"><div class="nm">${TX.vol}</div><div class="vs2">${TX.volSub}</div></div></div><div class="tbody">${volHtml}</div></div>`);
+      if (volHtml && isT && !['termine', 'schule'].includes(modeX)) cols.push(`<div class="tcol volc"><div class="lab th vol"><div class="ring vr" style="width:64px;height:64px"><span>🙋</span></div><div class="lt"><div class="nm vl1">${TX.vol} <span class="vs2">${TX.volSub}</span></div></div></div><div class="tbody">${volHtml}</div></div>`);
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(${cols.length},minmax(0,1fr))`}">${cols.join('')}</div>`;
     }
 
@@ -3093,7 +3577,8 @@ class LoxWochenplanerCard extends FpBase {
       .date{font-size:24px;font-weight:300}.date b{font-weight:600}
       .sub{font-size:12px;color:var(--fp-text3,#7a7a7a);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px}
       .nav{margin-left:auto;display:flex;align-items:center;gap:8px}.tdg{display:flex;gap:6px}
-      .top{flex-wrap:nowrap}.card.phone .top{flex-wrap:wrap}
+      .top{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}.top::-webkit-scrollbar{display:none}
+      .top > *{flex:none}.seg button{white-space:nowrap}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 10px}
       .nb{background:var(--fp-bg3,#262626);border:1px solid var(--fp-line,#333);color:var(--fp-text,#ddd);border-radius:10px;height:42px;min-width:42px;padding:0 14px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:inherit;font-size:14px;-webkit-tap-highlight-color:transparent}
       .nb ha-icon{--mdc-icon-size:22px}.nb.td{gap:6px}.tdn{background:${G};color:var(--fp-on-accent,#141414);border-radius:10px;padding:0 7px;font-size:12px;line-height:20px}.nb.g{color:${G};border-color:color-mix(in srgb,var(--fp-accent) 50%,transparent)}
       .wk{font-size:12px;color:var(--fp-text3,#8a8a8a);padding:0 8px;text-align:center;min-width:150px}.wk b{display:block;color:var(--fp-text,#ececec);font-size:15px;font-weight:600}
@@ -3104,7 +3589,7 @@ class LoxWochenplanerCard extends FpBase {
       .corner{font-size:10px;color:var(--fp-text3,#555);display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;padding:0 4px 6px}
       .corner .leg{background:none;padding:0;margin:0;gap:4px 10px}.corner .lgi{font-size:12px}
       .pev.mid .src{display:none}
-      .hd{padding:4px 10px 6px;font-size:11px;color:var(--fp-text3,#8a8a8a);text-transform:uppercase;letter-spacing:1px}
+      .hd{padding:4px 10px 6px;font-size:12px;font-weight:600;color:#a3a3a3;text-transform:uppercase;letter-spacing:1px}
       .hd{cursor:pointer;border-radius:8px;-webkit-tap-highlight-color:transparent}.hd.fx{background:var(--fp-bg3,#262626)}
       .hd b{display:block;font-size:18px;color:var(--fp-text,#e5e5e5);font-weight:300;letter-spacing:0;text-transform:none;margin-top:2px}
       .hd.t,.hd.t b{color:${G}}.hd.t b{font-weight:500}
@@ -3122,7 +3607,7 @@ class LoxWochenplanerCard extends FpBase {
       .src{display:inline-block;font-size:9px;font-weight:700;color:var(--fp-on-accent,#141414);border-radius:6px;padding:0 5px;margin-right:5px;line-height:15px;vertical-align:1px;white-space:nowrap}
       .leg{display:flex;align-items:center;gap:12px;margin-left:auto;background:var(--fp-bg2,#232323);border-radius:10px;padding:8px 14px;flex-wrap:wrap}
       .leg + .nav{margin-left:0}
-      .lgt{font-size:10px;color:var(--fp-text3,#666);text-transform:uppercase;letter-spacing:1px}
+      .lgt{font-size:11px;color:#8f8f8f;text-transform:uppercase;letter-spacing:1px}
       .tnav{display:flex;gap:6px;margin-left:auto}.tnav + .seg{margin-left:0}
       .seg{display:flex;background:var(--fp-bg2,#232323);border-radius:10px;padding:3px;gap:2px;margin-left:auto}.seg + .leg{margin-left:0}
       .seg button{background:transparent;border:none;color:var(--fp-text2,#999);font:inherit;font-size:13px;padding:0 13px;height:36px;border-radius:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}.seg button.on{background:var(--fp-bg4,#3a3a3a);color:var(--fp-text,#fff);font-weight:600}
@@ -3165,8 +3650,8 @@ class LoxWochenplanerCard extends FpBase {
       .btn.done{background:color-mix(in srgb,var(--fp-accent) 1200%,transparent);border-color:color-mix(in srgb,var(--fp-accent) 45%,transparent)}
       .btn.done .cb{background:${G};border-color:${G}}
       .btn.done .cb::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid var(--fp-line,#1e1e1e);border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
-      .btn.done .bt{color:var(--fp-accent)}
-      .btn .tag{display:inline-block;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:7px;margin-right:6px;vertical-align:1px}
+      .btn.done .bx{color:var(--fp-accent)}
+      .btn .tag{display:inline-block;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:7px;margin-right:6px;vertical-align:1px}
       .btn.spc{border-color:rgba(245,197,66,.65);background:rgba(245,197,66,.08)}.btn.spc .tag{background:rgba(245,197,66,.2);color:#f5c542}
       .btn.tdo{border:1px dashed rgba(79,163,224,.7);background:rgba(79,163,224,.07)}.btn.tdo .tag{background:rgba(79,163,224,.2);color:#4fa3e0}.btn.tdo .cb{border-radius:6px}
       .btn.tdo.arm{border-style:solid;border-color:#4fa3e0;background:rgba(79,163,224,.18)}
@@ -3174,7 +3659,7 @@ class LoxWochenplanerCard extends FpBase {
       .btn.pop .cb{animation:fpcheck .5s cubic-bezier(.3,1.6,.5,1)}.btn.pop .cb::before{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid ${G};animation:fpring .6s ease-out forwards}
       @keyframes fpcheck{0%{transform:scale(.55)}60%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes fpring{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.3);opacity:0}}
       @media (prefers-reduced-motion:reduce){.btn.pop .cb,.btn.pop .cb::before{animation:none}}
-      .due{font-style:normal;font-size:10px;font-weight:600;color:#e0a84f;border:1px solid rgba(224,168,79,.5);border-radius:8px;padding:1px 6px;margin-left:6px;white-space:nowrap;display:inline-block}
+      .due{color:#e0a84f;border:1px solid rgba(224,168,79,.6);line-height:15px;border-radius:8px;padding:1px 6px;margin-left:6px;white-space:nowrap;display:inline-block}
       .due.last{color:var(--fp-on-accent,#1e1e1e);background:#e0a84f;border-color:#e0a84f}.btn.done .due{opacity:.5}
       .pl.op{color:#c39a4a}.pl.op::before{display:none}
       .pev.mid .ev{font-size:11px;padding:3px 5px 3px 6px;white-space:normal;line-height:1.3}.pev.mid .et{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--fp-text,#ddd)}
@@ -3187,7 +3672,7 @@ class LoxWochenplanerCard extends FpBase {
       .c.p .big{font-size:14px}.c.p .big small{font-size:10px}.c.p .bar{margin:5px 0 4px}
       .fc{font-size:11px;color:var(--fp-text3,#8a8a8a);white-space:nowrap}.fc b{font-size:18px;font-weight:300;color:var(--fp-text,#ddd);margin-right:4px}
       .opn{font-size:11px;color:#c39a4a;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .prog{font-size:11px;color:var(--fp-text3,#8a8a8a);margin-bottom:4px;display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.8px}.gr{color:${G};font-weight:600}
+      .prog{font-size:12px;font-weight:600;color:#a3a3a3;margin-bottom:4px;display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.8px}.gr{color:${G};font-weight:600}
       .free{display:flex;align-items:center;gap:8px;color:var(--fp-text3,#8a8a8a);font-size:14px;padding:6px 2px}.free ha-icon{color:${G}}
       .vc{display:flex;align-items:center;justify-content:center;gap:6px;height:100%;min-height:40px;color:#4fa3e0;font-size:13px;font-weight:600;background:rgba(79,163,224,.08);border-radius:8px}.vc ha-icon{--mdc-icon-size:20px}
       .big{font-size:18px;font-weight:300;line-height:1.1}.big small{font-size:13px;color:var(--fp-text3,#8a8a8a)}
@@ -3207,19 +3692,30 @@ class LoxWochenplanerCard extends FpBase {
       .lab.th .flg{position:absolute;top:-1px;right:24px;width:42px;padding:7px 0 15px;background:var(--rc);color:var(--fp-on-accent,#141414);font-size:13px;font-weight:800;text-align:center;letter-spacing:.2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);z-index:2}
       .lab.th .nm{padding-right:50px}.lab.th .lv2:empty{display:none}
       .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .lab.th .nm{padding-right:0}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
-      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:10px;color:var(--fp-text3,#7a7a7a);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
+      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:600;color:#a3a3a3;text-transform:uppercase;letter-spacing:.9px;margin:4px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
       .bg.one{grid-template-columns:1fr}
-      .age{display:block;font-size:10px;color:var(--fp-text3,#8a8a8a);font-weight:400;margin-top:2px}
+
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
-      .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542}
+      .bin{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l r";align-items:center;column-gap:8px}
+      .bl{grid-area:l;display:flex;align-items:center;gap:6px;min-width:0}.br{grid-area:r;display:flex;align-items:center;gap:5px;justify-content:flex-end}
+      .bx{white-space:nowrap;min-width:0}
+      .bin.two{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"t t p" "m s s";row-gap:4px;align-items:start}.bin.two .bl,.bin.two .br{display:contents}
+      .bin.two .bx{grid-area:t;white-space:normal;overflow-wrap:break-word;hyphens:auto}.bin.two .bl > :not(.bx){grid-area:m;justify-self:start}
+      .bin.two .ptr{grid-area:p;justify-self:end}.c .bg:not(.one) .bin.two .tag .tl,.c .spw .bin.two .tag .tl{display:none}.bin.two .br > .tag{grid-area:s;justify-self:end}
+      .btn .tag,.due,.age,.ptr{display:inline-block;margin:0;font-style:normal;font-size:11px;font-weight:700;line-height:17px;padding:0 8px;border-radius:9px;white-space:nowrap;letter-spacing:.2px}
+      .age{color:#aab2bf;border:1px solid #4a505c;line-height:15px;font-weight:600}
+      .ptr{background:rgba(245,197,66,.18);color:#f5c542}.btn.done .ptr,.btn.done .tag,.btn.done .age{opacity:.6}
+      .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542;background:rgba(245,197,66,.18)}
       .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
-      .rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#f5c542;background:#f5c542}
-      .ptp{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:#f5c542;opacity:.85;vertical-align:middle}
+      .rvb.on{background:rgba(245,197,66,.18);border-color:#f5c542}.rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#f5c542;background:#f5c542}
+      .ptp{display:inline-block;margin-left:6px;padding:0 7px;border-radius:9px;background:rgba(245,197,66,.16);color:#f5c542;font-size:11px;font-weight:700;line-height:17px;vertical-align:middle;white-space:nowrap;font-style:normal}.done .ptp{opacity:.6}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),var(--fp-bg2,#232323) 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--fp-bg3,#2b2b2b);font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
-      .vs2{font-size:11px;color:var(--fp-text3,#8a8a8a);margin-top:3px}.c.vc2{display:flex;flex-direction:column;gap:6px}
-      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
+      .vs2{font-size:11px;font-weight:400;color:var(--fp-text3,#8a8a8a)}.rvx{display:inline-block;animation:fprvx 5s ease-out both;background:linear-gradient(100deg,currentColor 40%,#ffe27a 50%,currentColor 60%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}@keyframes fprvx{0%{opacity:0;filter:blur(8px);transform:scale(.5) rotate(-6deg);background-position:100% 0}12%{opacity:1;filter:blur(0);transform:scale(1.15) rotate(2deg)}20%{transform:scale(1) rotate(0)}40%{background-position:0 0}86%{opacity:1;filter:blur(0)}100%{opacity:.25;filter:blur(4px)}}@media (prefers-reduced-motion:reduce){.rvx{animation:none}}.vl1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
       .vcard .vi{font-size:22px;text-align:center}.vcard .vt{min-width:0;font-size:13px;line-height:1.3}
-      .vcard .vbtn,.vcard .who{grid-column:1 / -1}.vbtn{display:flex;gap:8px}.vbtn .take{flex:1;height:40px;animation:fppul 2.4s ease-in-out infinite}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
+      .vcard .vbtn,.vcard .who{grid-column:1 / -1}.vbtn{display:flex;gap:8px}.vbtn .take{flex:1 1 auto;max-width:200px;height:40px;animation:fppul 2.4s ease-in-out infinite}
+      .c.vc2{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;align-content:flex-start;align-items:flex-start}.c.vc2 .vcard{flex:1 1 240px;max-width:340px}
+      .c .bg:not(.one) > .spw{grid-column:span 2}.c .spw .btn .bin{min-width:0;overflow:hidden}.c .spw .rvb{width:36px;min-width:36px;height:auto;padding:0}.c .spw .rvb svg{width:22px;height:16px}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
       .take{border:none;border-radius:10px;padding:8px 12px;background:#f5c542;color:var(--fp-on-accent,#141414);font:inherit;font-size:13px;font-weight:700;cursor:pointer;animation:fpwig 2.4s ease-in-out infinite}
       .who{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.who span{font-size:12px;color:var(--fp-text2,#aaa);margin-right:4px}
       .wp{display:flex;align-items:center;gap:6px;border:1px solid var(--c,#444);background:var(--fp-bg2,#232323);color:inherit;border-radius:18px;padding:2px 10px 2px 2px;font:inherit;font-size:13px;cursor:pointer}.wp.x{padding:4px 10px;border-color:#444;color:var(--fp-text2,#999)}
@@ -3231,7 +3727,7 @@ class LoxWochenplanerCard extends FpBase {
       .lab.bday .ring,.lab.bday .lt{position:relative;z-index:2}
       .tcol.bday{background:linear-gradient(160deg,rgba(255,122,182,.20),rgba(255,216,77,.14),rgba(92,225,230,.14),rgba(176,124,255,.20));background-size:300% 300%;animation:fpbdg 6s ease-in-out infinite}.tcol.bday .lab.th{animation:none;background:transparent}
       @keyframes fpbdg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-      .bdx{position:absolute;left:46px;top:50%;width:0;height:0;z-index:1;pointer-events:none}.tcol .bdx{left:42px;top:44px}
+      .bdx{position:absolute;left:50%;top:50%;width:0;height:0;z-index:1;pointer-events:none}
       .bdx i{position:absolute;left:0;top:0;display:block}
       .bdx .cf{width:6px;height:10px;border-radius:2px;background:var(--c);animation:fpcf 1.6s ease-out infinite}
       @keyframes fpcf{0%{transform:rotate(var(--a)) translateY(0) scale(.4);opacity:1}80%{opacity:1}100%{transform:rotate(var(--a)) translateY(-64px) rotate(240deg) scale(1);opacity:0}}
@@ -3240,8 +3736,8 @@ class LoxWochenplanerCard extends FpBase {
       @keyframes fpbl{0%{transform:translate(0,10px) scale(.3);opacity:0}15%{opacity:1}100%{transform:translate(var(--x),-80px) scale(1);opacity:0}}
       .bdx .bu{width:var(--s);height:var(--s);border-radius:50%;border:1.5px solid rgba(160,220,255,.9);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.8),rgba(160,220,255,.15) 40%,transparent 70%);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);animation:fpbu 3.4s ease-out infinite}
       @keyframes fpbu{0%{transform:translate(0,0) scale(.2);opacity:0}15%{opacity:1}100%{transform:translate(var(--x),-70px) scale(1.2);opacity:0}}
-      .bdx .rd{width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:conic-gradient(#ff5a5a,#ffb23d,#ffe94d,#55d16b,#4aa8ff,#8f6bff,#ff5a5a);-webkit-mask:radial-gradient(circle,transparent 30px,#000 32px,#000 40px,transparent 42px,transparent 50px,#000 52px,#000 58px,transparent 60px);mask:radial-gradient(circle,transparent 30px,#000 32px,#000 40px,transparent 42px,transparent 50px,#000 52px,#000 58px,transparent 60px);animation:fpspin 3s linear infinite;opacity:.85}
-      .bdx .rd.r2{width:160px;height:160px;margin:-80px 0 0 -80px;background:repeating-conic-gradient(rgba(255,255,255,.18) 0 8deg,transparent 8deg 24deg);-webkit-mask:none;mask:none;animation-duration:9s;animation-direction:reverse}
+      .bdx .rd{width:88px;height:88px;margin:-44px 0 0 -44px;border-radius:50%;background:conic-gradient(#ff5a5a,#ffb23d,#ffe94d,#55d16b,#4aa8ff,#8f6bff,#ff5a5a);-webkit-mask:radial-gradient(circle,transparent 33px,#000 34px,#000 38px,transparent 39px,transparent 40px,#000 41px,#000 43px,transparent 44px);mask:radial-gradient(circle,transparent 33px,#000 34px,#000 38px,transparent 39px,transparent 40px,#000 41px,#000 43px,transparent 44px);animation:fpspin 3s linear infinite;opacity:.85}
+      .bdx .rd.r2{width:104px;height:104px;margin:-52px 0 0 -52px;background:repeating-conic-gradient(rgba(255,255,255,.18) 0 8deg,transparent 8deg 24deg);-webkit-mask:none;mask:none;animation-duration:9s;animation-direction:reverse}
       .bdx .st{color:#ffd84d;font-size:14px;font-style:normal;margin:-8px 0 0 -5px;text-shadow:0 0 6px rgba(255,216,77,.8);animation:fpst 2.1s ease-out infinite}
       @keyframes fpst{0%{transform:rotate(var(--a)) translateY(0) scale(.3);opacity:0}20%{opacity:1}100%{transform:rotate(var(--a)) translateY(-70px) scale(1.1);opacity:0}}
       @media (prefers-reduced-motion:reduce){.bdx,.take,.lab.bday{animation:none}.bdx i{animation:none;opacity:0}}
@@ -3261,10 +3757,11 @@ class LoxWochenplanerCard extends FpBase {
           <button class="nb" data-nav="1"><ha-icon icon="mdi:chevron-right"></ha-icon></button>
         </div>
       </div>
-      ${todayGrid || `<div class="grid">${head}${(!cals.length || cals.some((c) => !c.person)) ? termine : ''}${volRow}${rows}${empty}</div>`}
+      ${todayGrid || `<div class="grid">${head}${(!cals.length || cals.some((c) => !c.person)) ? termine : ''}${rows}${volRow}${empty}</div>`}
       ${this._err ? `<div class="err">${esc(this._err)}</div>` : ''}
       ${this._detail ? this._detailHtml(kids, pre, awards, frames) : ''}
     </div>`;
+    this._fit();
   }
 }
 
@@ -4501,6 +4998,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('lead_school', 'num', 'Schulferien zeigen ab', 'Show school holidays from', 'Tage vor dem ersten Ferientag. Ferien werden aus den Kalendern erkannt (Sportferien, Frühlingsferien, Pfingst-, Sommer-, Herbst-, Weihnachtsferien).', 'Days before the first day. Holidays are found in the calendars (winter sports, spring, Whitsun, summer, autumn, Christmas holidays).', { min: 0, max: 30, unit: { de: 'Tage', en: 'days' } }),
       F('christmas_start', 'select', 'Weihnachts-Saison ab', 'Christmas season from', 'Die Adventskerzen zünden sich Sonntag für Sonntag an.', 'The Advent candles light up Sunday by Sunday.',
         { opts: [['advent', { de: '1. Advent', en: '1st Advent' }], ['dec1', { de: '1. Dezember', en: '1 December' }]] }),
+      F('night_mode', 'bool', 'Nachtmodus', 'Night mode', 'Nach Sonnenuntergang (echte Sonne aus Home Assistant) wird der Planer etwas dunkler und die Uhr grösser; im Himmel funkeln Sterne und ab und zu fliegt eine Sternschnuppe.', 'After sunset (the real sun from Home Assistant) the planner gets a little darker and the clock bigger; stars twinkle and now and then a shooting star flies by.'),
+      F('fun_days', 'bool', 'Besondere Tage', 'Special days', 'An besonderen Tagen zeigt der Kopfbereich eine eigene Szene: Dino-Tag (20.2.), 1. April, erster Handy-Anruf (3.4.), Titanic (15.4.), Mondlandung (20.7.), Vulkan (27.8.); Sputnik fliegt nachts vom 4. bis 11. Oktober, die Concorde am 26. November. Feiertage, Bräuche und Geburtstage haben Vorrang. Ein Info-Knopf erklärt den Tag.', 'On special days the header shows its own scene: Dinosaur Day (20 Feb), April Fools\' Day, first mobile call (3 Apr), Titanic (15 Apr), Moon landing (20 Jul), volcano (27 Aug); Sputnik crosses the night sky 4–11 October, Concorde flies on 26 November. Holidays, customs and birthdays come first. An info button explains the day.'),
+      F('uk_days', 'bool', 'British Days', 'British Days', 'Zehnmal im Jahr an einem zufälligen gewöhnlichen Tag: der Buckingham Palace mit der Königsgarde statt unseres Hauses. Nie an Weihnachten, Feiertagen, Ferien oder anderen besonderen Tagen.', 'Ten times a year on a random ordinary day: Buckingham Palace with the King\'s Guard instead of the house. Never at Christmas, on holidays, school holidays or other special days.'),
+      F('uk_for', 'text', 'British Day für', 'British Day for', 'Optional: ein Name. Der Info-Text sagt dann, dass dieser Tag für diese Person ist – als Andenken an die britischen Wurzeln.', 'Optional: a name. The info text then says the day is for this person – a keepsake of the British roots.', { max: 40 }),
+      F('frost_mode', 'bool', 'Frost-Modus', 'Frost mode', 'Bei starker Kälte gefriert die ganze Szene oben: Raureif auf Boden, Haus und Bäumen, gefrorene Pfützen und glitzernde Eiskristalle. Die Temperatur kommt von der gewählten Wetter-Entität.', 'In hard frost the whole scene at the top freezes: hoarfrost on the ground, the house and the trees, frozen puddles and glittering ice crystals. The temperature comes from the selected weather entity.'),
+      F('frost_below', 'num', 'Gefroren ab', 'Frozen from', 'Aussentemperatur, ab der alles gefriert (Standard −1°).', 'Outside temperature from which everything freezes (default −1°).', { min: -25, max: 0, unit: '°' }),
       F('xmas_snow', 'bool', 'An Weihnachten schneit es immer', 'It always snows at Christmas', 'Das echte Wetter bleibt klein oben rechts.', 'The real weather stays small at the top right.'),
       F('wedding', 'date', 'Hochzeitstag', 'Wedding anniversary', 'Mit Jahr zeigt der Planer „14 Jahre verheiratet“.', 'With the year the planner shows "14 years married".'),
       F('couple', 'date', 'Kennenlerntag', 'Couple anniversary', 'Der Tag, an dem ihr ein Paar wurdet.', 'The day you became a couple.'),
@@ -4567,6 +5070,15 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     _errText(e) {
       const code = String((e && (e.code || e.message)) || e).replace(/^invalid_/, '');
       return this.T.errors[code] || (e && e.message) || code;
+    }
+    // pulls all calendars and lists at once (reads only, so no parent PIN)
+    _rfBtn() { const en = this._lang === 'en'; return `<button class="tb${this._rfBusy ? ' busy' : ''}" data-refreshall title="${en ? 'Refresh calendars and lists' : 'Kalender und Listen aktualisieren'}"><ha-icon icon="mdi:refresh"></ha-icon>${en ? 'Refresh' : 'Aktualisieren'}</button>`; }
+    async _refreshAll() {
+      if (this._rfBusy || !this._store) return; this._rfBusy = true; this._render();
+      try { const r = await Promise.race([this._store.ws('family_planer/refresh', {}), new Promise((res) => setTimeout(() => res({ done: true }), 45000))]);
+        this._flash(this._lang === 'en' ? (r && r.done === false ? 'Just refreshed – try again in a moment.' : 'Calendars and lists refreshed.') : (r && r.done === false ? 'Gerade erst aktualisiert – gleich nochmals versuchen.' : 'Kalender und Listen aktualisiert.'));
+      } catch (e) { this._flash(this._errText(e), true); }
+      window.dispatchEvent(new Event('fp-refresh')); this._rfBusy = false; this._render();
     }
     async _call(type, data) {
       try { return await window.FPPIN.call(this._store, type, data, this._ctx()); } catch (e) {
@@ -4636,6 +5148,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); this._avSave(p, window.FPAV.set(this._avCode(p), part, val)); } return; }
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
       if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
+      if (t.closest('[data-refreshall]')) { this._refreshAll(); return; }
       if (t.closest('[data-lock]')) { window.FPPIN.lock(this._store); this._data = null; this._asked = false; this._tab = 'pics'; this._render(); return; }
       const rm = t.closest('[data-rment]');
       if (rm) { const f = this._forms[rm.dataset.tab]; f[rm.dataset.k] = (f[rm.dataset.k] || []).filter((x) => x !== rm.dataset.rment); this._render(); return; }
@@ -4849,7 +5362,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const unit = fd.unit ? `<span class="u">${esc(typeof fd.unit === 'string' ? fd.unit : L(fd.unit, lang))}</span>` : '';
       let ctl = '';
       if (fd.type === 'bool') return `<label class="row b"><span class="lt"><b>${esc(L(fd.label, lang))}</b>${fd.desc[lang] ? `<small>${esc(L(fd.desc, lang))}</small>` : ''}</span><input type="checkbox" class="sw" ${a} ${v ? 'checked' : ''}></label>`;
-      if (fd.type === 'num') ctl = `<span class="nw"><input class="in n" type="number" inputmode="${fd.step && fd.step < 1 ? 'decimal' : 'numeric'}" min="${fd.min}" max="${fd.max}" step="${fd.step || 1}" ${a} value="${esc(v)}">${unit}</span>`;
+      if (fd.type === 'num') ctl = `<span class="nw"><input class="in n" type="number" inputmode="${fd.min < 0 ? 'text' : fd.step && fd.step < 1 ? 'decimal' : 'numeric'}" min="${fd.min}" max="${fd.max}" step="${fd.step || 1}" ${a} value="${esc(v)}">${unit}</span>`;
       else if (fd.type === 'md') ctl = `<input class="in" style="width:170px" type="date" ${a} value="${esc(new Date().getFullYear() + '-' + String(v || '08-01'))}">`;
       else if (fd.type === 'time') ctl = `<input class="in t" type="time" ${a} value="${esc(String(v || '').slice(0, 5))}">`;
       else if (fd.type === 'date') ctl = `<input class="in" style="width:170px" type="date" ${a} value="${esc(/^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : '')}">`;
@@ -4978,7 +5491,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       .card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style>`;
       const msg = this._msg ? `<div class="msg${this._err ? ' e' : ''}">${esc(this._msg)}</div>` : '';
       if (!this._data) {
-        this.shadowRoot.innerHTML = `${style}<div class="card"><div class="top"><h2>${esc(T.title)}</h2><button class="tb pin" data-unlock><ha-icon icon="mdi:shield-key-outline"></ha-icon>${esc(T.parent)}</button></div>
+        this.shadowRoot.innerHTML = `${style}<div class="card"><div class="top"><h2>${esc(T.title)}</h2>${this._rfBtn()}<button class="tb pin" data-unlock><ha-icon icon="mdi:shield-key-outline"></ha-icon>${esc(T.parent)}</button></div>
           ${this._picsView()}${msg}</div>`;
         return;
       }
@@ -5000,7 +5513,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const mods = this._data.general.modules;
       const tabs = ORDER.map((id) => TABS.find((x) => x.id === id)).filter((x) => x && !((x.id === 'lists' && !mods.lists) || (['persons', 'chores', 'vacation', 'points', 'todos', 'announce', 'seasons', 'sonder'].includes(x.id) && !mods.week)));
       this.shadowRoot.innerHTML = `${style}<div class="card">
-        <div class="top"><h2>${esc(T.title)}</h2><button class="tb" data-chpin><ha-icon icon="mdi:form-textbox-password"></ha-icon>${esc(T.pin)}</button><button class="tb" data-lock><ha-icon icon="mdi:lock-outline"></ha-icon>${esc(T.lock)}</button></div>
+        <div class="top"><h2>${esc(T.title)}</h2>${this._rfBtn()}<button class="tb" data-chpin><ha-icon icon="mdi:form-textbox-password"></ha-icon>${esc(T.pin)}</button><button class="tb" data-lock><ha-icon icon="mdi:lock-outline"></ha-icon>${esc(T.lock)}</button></div>
         <div class="tabs">${tabs.map((x) => `<button class="tab${x.id === tab.id ? ' on' : ''}" data-tabsel="${x.id}"><ha-icon icon="${x.icon}"></ha-icon>${esc(L(x.label, lang))}</button>`).join('')}</div>
         ${body}${dlg}${msg}</div>`;
       if (tab.id === 'chores') this._mountPlan();
@@ -5769,18 +6282,18 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
       design: 'Design', refresh: 'Kalender und Listen aktualisieren', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wds: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
-      away: 'Weg – Ämtli pausieren', home: 'Hier – Ämtli laufen weiter', close: 'Schliessen', open: 'offen', all: 'alle', fam: 'Ganze Familie', opt: 'Optional – lange Termine', optHint: 'Keine Ferien-Wörter, aber länger als die eingestellte Stundenzahl. Ohne Entscheid laufen die Ämtli weiter.',
+      lblQ: 'Anzeigen als', lblF: 'Ferien', lblW: 'Abwesend', away: 'Weg – Ämtli pausieren', home: 'Hier – Ämtli laufen weiter', close: 'Schliessen', open: 'offen', all: 'alle', fam: 'Ganze Familie', opt: 'Optional – lange Termine', optHint: 'Keine Ferien-Wörter, aber länger als die eingestellte Stundenzahl. Ohne Entscheid laufen die Ämtli weiter.',
       miss: 'Ansicht „{p}“ fehlt in diesem Dashboard. Ansicht mit diesem Pfad anlegen oder in der Navigationskarte unter paths: anpassen.' },
     en: { wd: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], mon: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       design: 'Design', refresh: 'Refresh calendars and lists', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays in the next two weeks. Who do they apply to, and are you away or here?', vacEmpty: 'No absence in the calendar for the next two weeks.', awWho: 'Who is away?', awNone: 'Nobody is away right now.', awUntil: 'away until {d}', awAt: 'away from {t} today', awTomAt: 'away tomorrow from {t}', awTom: 'away from tomorrow', wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      away: 'Away – pause chores', home: 'Here – chores go on', close: 'Close', open: 'open', all: 'all', fam: 'Whole family', opt: 'Optional – long events', optHint: 'No holiday words, but longer than the set number of hours. Without a decision chores go on.',
+      lblQ: 'Show as', lblF: 'Holiday', lblW: 'Away', away: 'Away – pause chores', home: 'Here – chores go on', close: 'Close', open: 'open', all: 'all', fam: 'Whole family', opt: 'Optional – long events', optHint: 'No holiday words, but longer than the set number of hours. Without a decision chores go on.',
       miss: 'View "{p}" is missing in this dashboard. Add a view with this path or change it under paths: in the navigation card.' } };
   const NAV_POPCSS = `.pop .aw{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;margin:4px 0;border-radius:10px;background:var(--fp-bg2);font-size:13px}.pop .vb button.sel{outline:2px solid var(--fp-accent)}
 
         button{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--fp-line);background:var(--fp-bg3);color:var(--fp-text2);font:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
         button ha-icon{--mdc-icon-size:20px}button.on{border-color:color-mix(in srgb,var(--fp-accent) 60%,transparent);color:var(--fp-accent)}
         .sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
-        .vs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.vs button{height:32px;padding:0 12px;border-radius:16px;font-size:12px}
+        .vs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.vs button{height:32px;padding:0 12px;border-radius:16px;font-size:12px}.vl2{align-items:center}.vl2 .lq{font-size:12px;color:var(--fp-text2);margin-right:2px}
         .oh{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:14px 2px 4px}.oh2{font-size:12px;color:var(--fp-text3);margin:0 2px 8px}
         .pop{width:min(620px,calc(100vw - 16px));box-sizing:border-box;max-height:calc(100vh - 90px);overflow:auto;background:var(--fp-pop,var(--fp-bg1));color:var(--fp-text);font-family:var(--fp-font);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);box-shadow:0 14px 40px rgba(0,0,0,.45);padding:14px;-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none)}
         .ph{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 10px;display:flex;align-items:center;gap:6px}.ph .x{margin-left:auto;height:30px;padding:0 10px}
@@ -5808,13 +6321,17 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           if (b && this._views && !this._views.has(b.dataset.go)) { this._flash(NAV_T[this._lang()].miss.replace('{p}', b.dataset.go)); return; }
           if (b && window.FPX) { window.FPX.fpNavigate(b.dataset.go); return; }
           if (e.target.closest('[data-themes]')) { this._open = this._open === 'theme' ? null : 'theme'; this._render(); return; }
-          if (e.target.closest('[data-refresh]')) { this._refresh(); return; }
+          if (window.FPSEASON && window.FPSEASON.tap && window.FPSEASON.tap(e.target)) return;
+          if (e.target.closest('[data-funinfo]')) { this._open = this._open === 'fun' ? null : 'fun'; this._render(); return; }
           if (e.target.closest('[data-vac]')) { this._open = this._open === 'vac' ? null : 'vac'; this._render(); return; }
           if (e.target.closest('[data-x]')) { this._open = null; this._render(); return; }
           const th = e.target.closest('[data-theme]'); if (th) { this._save({ theme: th.dataset.theme }); return; }
           const sy = e.target.closest('[data-style]'); if (sy) { this._save({ style: sy.dataset.style }); return; }
           const vf = e.target.closest('[data-vfam]'); if (vf) { const c = this._vacChoice(vf.dataset.key); c.family = !c.family; this._render(); return; }
           const vp = e.target.closest('[data-vper]'); if (vp) { const c = this._vacChoice(vp.dataset.key); c.family = false; const i = c.persons.indexOf(vp.dataset.vper); if (i >= 0) c.persons.splice(i, 1); else c.persons.push(vp.dataset.vper); this._render(); return; }
+          const vl = e.target.closest('[data-vlabel]'); if (vl) { const c = this._vacChoice(vl.dataset.key); c.label = vl.dataset.vlabel;
+            const v = (((this._store && this._store.snap) || {}).vacation_review || []).find((x) => x.key === vl.dataset.key);
+            if (v && v.decision === 'away') this._decide(v.key, 'away'); else this._render(); return; }
           const vd = e.target.closest('[data-decide]'); if (vd) this._decide(vd.dataset.key, vd.dataset.decide);
         };
         this.shadowRoot.addEventListener('click', this._onClick);
@@ -5871,6 +6388,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
       const lt = this._light();
       const o = { season: se, wx, hour: n.getHours(), night: lt.night, dusk: lt.dusk, lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow(), top: this._topNow() };
+      const lim = Number.isFinite(Number(cfg.frost_below)) ? Number(cfg.frost_below) : -1;
+      o.frost = cfg.frost_mode !== false && !!wx && typeof wx.temp === 'number' && wx.temp <= lim;
       if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };
       const key = SE.sceneKey(o); return { key, html: key === this._scnKey && this._scnEl ? null : SE.scene(o), wx };
     }
@@ -5884,13 +6403,22 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         this._render();
       } catch (e) { this._views = null; }
     }
-    disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } }
+    disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
+    // night mode: a soft dark veil over the whole dashboard (no layout change, clicks pass through)
+    _night(on) {
+      let v = document.getElementById('fp-night');
+      if (!on) { if (v) v.style.opacity = '0'; return; }
+      if (!v) { v = document.createElement('div'); v.id = 'fp-night'; v.setAttribute('aria-hidden', 'true');
+        v.style.cssText = 'position:fixed;inset:0;pointer-events:none;background:rgba(6,9,28,.30);z-index:2147483000;opacity:0;transition:opacity 3s ease';
+        document.body.appendChild(v); }
+      v.style.opacity = '1';
+    }
     getCardSize() { return 1; }
     // who a holiday applies to, as picked in the popup (default: the persons found in the calendar)
     _vacChoice(key) {
       this._vc = this._vc || {}; if (this._vc[key]) return this._vc[key];
       const v = (((this._store && this._store.snap) || {}).vacation_review || []).find((x) => x.key === key) || {};
-      this._vc[key] = { family: !!v.family, persons: [...((v.chosen && v.chosen.length ? v.chosen : v.persons) || [])] }; return this._vc[key];
+      this._vc[key] = { family: !!v.family, persons: [...((v.chosen && v.chosen.length ? v.chosen : v.persons) || [])], label: v.label || ((v.kind || 'holiday') === 'holiday' ? 'ferien' : 'weg') }; return this._vc[key];
     }
     // popups live in their own layer on top of the page, so cards below (glass style, own stacking) can never cover them
     _popLayer(html, css) {
@@ -5914,17 +6442,9 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       try { await window.FPPIN.call(this._store, 'family_planer/theme/set', data, { lang: this._lang(), host: this }); }
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
-    // header refresh: the server pulls all calendars and lists, the week view reloads its events
-    async _refresh() {
-      if (this._busyR || !this._store) return;
-      this._busyR = true; this._render();
-      try { await Promise.race([this._store.ws('family_planer/refresh', {}), new Promise((res) => setTimeout(res, 45000))]); } catch (e) { /* shown by the status page */ }
-      window.dispatchEvent(new Event('fp-refresh'));
-      setTimeout(() => { this._busyR = false; this._render(); }, 600);
-    }
     async _decide(key, decision) {
       const c = this._vacChoice(key);
-      try { await window.FPPIN.call(this._store, 'family_planer/vacation/decide', { key, decision, family: !!c.family, persons: c.family ? [] : c.persons }, { lang: this._lang(), host: this }); delete this._vc[key]; }
+      try { await window.FPPIN.call(this._store, 'family_planer/vacation/decide', { key, decision, family: !!c.family, persons: c.family ? [] : c.persons, label: c.label }, { lang: this._lang(), host: this }); delete this._vc[key]; }
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
     _clock() {
@@ -5952,11 +6472,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       this._wxNow = sc.wx || null;
       this.shadowRoot.innerHTML = `<style>${window.FPSEASON ? window.FPSEASON.CSS : ''}
         :host{display:block;margin-bottom:8px}
-        .bar::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}.bar{position:relative;display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:center;gap:8px;background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);padding:6px 10px 6px 14px;font-family:var(--fp-font);color:var(--fp-text);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
+        .bar::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}.bar{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);padding:6px 10px 6px 14px;font-family:var(--fp-font);color:var(--fp-text);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
         .t{display:flex;align-items:center;gap:10px;min-width:0}
         .clk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;white-space:nowrap}.dl{display:flex;align-items:center;gap:8px;min-width:0}.clk b{font-size:26px;font-weight:300;font-variant-numeric:tabular-nums;color:var(--fp-accent);line-height:1}
-        .clk .dt{font-size:14px;color:var(--fp-text);overflow:hidden;text-overflow:ellipsis}.ttl{font-size:10px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1.2px;display:block}
-        .mid{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start;margin-left:10px}.mid button span.l{display:none}
+        .clk .dt{font-size:13px;color:var(--fp-text2);color:var(--fp-text);overflow:hidden;text-overflow:ellipsis}.ttl{font-size:10px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1.2px;display:block}
+        .lft{display:flex;flex-direction:column;gap:6px;min-width:0}.mid{display:flex;gap:8px;flex-wrap:nowrap;justify-content:flex-start}.mid button span.l{display:none}
         button{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--fp-line);background:var(--fp-bg3);color:var(--fp-text2);font:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
         .mid button.on{background:var(--fp-grad);border-color:transparent;color:var(--fp-on-accent);font-weight:600}
         button.on{border-color:color-mix(in srgb,var(--fp-accent) 60%,transparent);color:var(--fp-accent)}
@@ -5969,18 +6489,18 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
         button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}button.vac.quiet{color:inherit;border-color:var(--fp-line)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
-        @media (max-width:700px){.clk .dt{display:none}.bar{grid-template-columns:auto 1fr;row-gap:8px}.mid{grid-column:1 / -1;grid-row:2;margin-left:0;justify-content:center;gap:8px}.rt{grid-column:2;grid-row:1}.rt .stk{flex-direction:row}.wxn{padding:0 8px}}
+        @media (max-width:700px){.clk .dt{display:none}.wxn{padding:0 8px}}
         .bar.sc{min-height:96px;padding-top:10px;padding-bottom:10px}.bar.sc > :not(.scn){position:relative;z-index:1}.bar.sc .clk b,.bar.sc .clk span,.bar.sc .ttl{text-shadow:0 1px 3px rgba(0,0,0,.55)}
         .bar.sc .mid button:not(.on),.bar.sc .rt > button,.bar.sc .stk button{background:color-mix(in srgb,var(--fp-bg3) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
         .wxc{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px;min-width:0}.wxc.one{justify-content:center}
         .wxn{display:flex;align-items:center;justify-content:center;gap:6px;height:40px;box-sizing:border-box;padding:0 12px;border-radius:10px;border:1px solid var(--fp-line);background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:13px;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}.wxn b{font-size:15px}.wxn i{font-style:normal;font-size:18px}
         .sug{display:flex;align-items:center;gap:8px;max-width:260px;height:40px;box-sizing:border-box;padding:0 10px 0 6px;border-radius:10px;background:color-mix(in srgb,var(--fp-accent) 22%,var(--fp-bg1));border:1px solid color-mix(in srgb,var(--fp-accent) 50%,transparent);font-size:12px;line-height:1.25;animation:fpsugin .6s ease-out}
         .sug i{font-style:normal;font-size:20px;animation:fpbob 3s ease-in-out infinite}.sug b{display:block;font-size:12px;line-height:1.2}.sug span span{font-size:11px;line-height:1.2}.sug span{color:var(--fp-text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        .tl{display:flex;align-items:center;gap:10px}.slab{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:12px;white-space:nowrap}
+        .tl{display:flex;align-items:baseline;gap:10px;height:40px;align-items:center}.bar.nt .clk b{font-size:34px;transition:font-size 1s}.slab{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:12px;white-space:nowrap}
         @keyframes fpsugin{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
-        @media (max-width:700px){.sug,.wxn span,.slab{display:none}}
-      </style><div class="bar${sc.key ? ' sc' : ''}"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b>${this._seasonLabel(s, lang)}</span><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span></span></span>
-        <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div>
+        button.slab{font:inherit;font-size:12px;cursor:pointer;color:inherit;border:1px solid transparent}.hint.fi{max-width:340px;line-height:1.45}.slab.fun{border-color:var(--fp-acc,#69C350)}.slab.fun ha-icon{--mdc-icon-size:15px;opacity:.8}.slab.fun.on{background:var(--fp-bg3)}@media (max-width:700px){.sug,.wxn span,.slab{display:none}.slab.fun{display:inline-flex}}
+      </style><div class="bar${sc.key ? ' sc' : ''}"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="lft"><span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span>
+        <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
         ${this._right(s, lang, review, pending, btns.includes('einstellungen') ? this._navBtn('einstellungen', lang, cur) : '')}</div>`;
       const bar = this.shadowRoot.querySelector('.bar');
       if (sc.key && bar) {
@@ -5989,6 +6509,9 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         this._scnKey = sc.key;
       } else { this._scnEl = null; this._scnKey = ''; }
       this._popLayer(this._popHtml, NAV_POPCSS);
+      const lt = this._light(); const hr = new Date().getHours();
+      const nt = !!(s && (s.season_cfg || {}).night_mode !== false) && (lt.night != null ? lt.night : (hr >= 20 || hr < 6));
+      this._night(nt); if (bar) bar.classList.toggle('nt', nt);
       // first paint: the header size is known only now -> draw the scene once more with the right top edge
       if (sc.key) { const t = this._topNow(); if (t !== this._usedTop) { this._usedTop = t; window.requestAnimationFrame(() => this._render()); } }
     }
@@ -5999,7 +6522,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     _seasonLabel(s, lang) {
       const se = s && s.season; if (!se || se.enabled === false || !se.label || !window.FPSEASON) return '';
       const ic = (window.FPSEASON.LABEL[se.vis] || [''])[0]; const sub = { advent1: '1. Advent', advent2: '2. Advent', advent3: '3. Advent', advent4: '4. Advent' }[se.sub] || '';
-      return `<span class="slab">${ic} ${escN(sub || (lang === 'en' ? se.label.en : se.label.de))}</span>`;
+      // special days, and customs with an explanation (Mother's / Father's Day …), get a chip with an info button
+      const f = se.fun || (se.info && se.label ? { icon: ic, label: se.label, info: se.info, scene: true } : null); const L = (x) => escN(lang === 'en' ? x.en : x.de);
+      // special days: their own chip with an info button that explains the day
+      const fb = f ? `<button class="slab fun${this._open === 'fun' ? ' on' : ''}" data-funinfo title="${escN(lang === 'en' ? 'What is today?' : 'Was ist heute?')}">${escN(f.icon || '')} ${L(f.label)}<ha-icon icon="mdi:information-outline"></ha-icon></button>` : '';
+      if (f && f.scene) return fb;
+      return `<span class="slab">${ic} ${escN(sub || (lang === 'en' ? se.label.en : se.label.de))}</span>${fb}`;
     }
     _wxCorner(s, lang) {
       const wx = this._wxNow; if (!wx) return '';
@@ -6017,7 +6545,9 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         const ic = b.kind === 'holiday' ? '🌴' : '✈️'; const d = (x) => { const dd = new Date(String(x).slice(0, 10) + 'T12:00'); return `${T.wds[dd.getDay()]} ${dd.getDate()}.${dd.getMonth() + 1}.`; };
         const txt = b.state === 'now' ? T.awUntil.replace('{d}', b.allday ? d(b.until) : `${d(b.until)} ${String(b.until).slice(11, 16)}`) : b.state === 'today' ? T.awAt.replace('{t}', b.at) : (b.at ? T.awTomAt.replace('{t}', b.at) : T.awTom);
         return `<div class="aw"><b>${escN(p.name)}</b><span>${ic} ${escN(txt)}</span></div>`; }).join('');
-      const pop = this._open === 'theme' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:palette-outline"></ha-icon>${T.design}<button class="x" data-x>✕</button></div>
+      const se0 = s.season || {}; const fn = se0.fun || (se0.info && se0.label ? { icon: ((window.FPSEASON && window.FPSEASON.LABEL[se0.vis]) || [''])[0], label: se0.label, info: se0.info } : null);
+      const pop = this._open === 'fun' && fn ? `<div class="pop" role="dialog"><div class="ph">${escN(fn.icon || '')} ${escN(lang === 'en' ? fn.label.en : fn.label.de)}<button class="x" data-x>✕</button></div><div class="hint fi">${escN(lang === 'en' ? fn.info.en : fn.info.de)}</div></div>`
+        : this._open === 'theme' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:palette-outline"></ha-icon>${T.design}<button class="x" data-x>✕</button></div>
           <div class="tg">${Object.keys(THEMES).map((k) => `<button class="${k === cur ? 'on' : ''}" data-theme="${k}">${themeMini(k, sty)}<span class="tn">${k === cur ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${nm(k)}</span></button>`).join('')}</div>
           <div class="ph" style="margin-top:14px"><ha-icon icon="mdi:layers-outline"></ha-icon>${T.style}</div>
           <div class="sg">${STYLES.map((k) => `<button class="${k === sty ? 'on' : ''}" data-style="${k}">${themeMini(cur, k)}<span class="tn">${k === sty ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${sn(k)}</span></button>`).join('')}</div></div>`
@@ -6028,11 +6558,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
             return (kind === 'long' ? `<div class="oh">${T.opt}</div><div class="oh2">${T.optHint}</div>` : '') + list.map((v) => { const c = this._vacChoice(v.key);
               return `<div class="vi"><div class="vt">${escN(v.title)}</div><div class="vd">${fmtD(v.days[0])} – ${fmtD(v.days[v.days.length - 1])}</div>
               <div class="vs"><button class="${c.family ? 'on' : ''}" data-vfam data-key="${escN(v.key)}"><ha-icon icon="mdi:account-group"></ha-icon>${T.fam}</button>${(s.persons || []).map((p) => `<button class="${!c.family && c.persons.includes(p.id) ? 'on' : ''}" data-vper="${escN(p.id)}" data-key="${escN(v.key)}">${escN(p.name)}</button>`).join('')}</div>
+              <div class="vs vl2"><span class="lq">${T.lblQ}</span>${[['ferien', '🌴', T.lblF], ['weg', '✈️', T.lblW]].map(([l, ic, t]) => `<button class="${c.label === l ? 'on' : ''}" data-vlabel="${l}" data-key="${escN(v.key)}">${ic} ${t}</button>`).join('')}</div>
               <div class="vb"><button class="away${v.decision === 'away' ? ' sel' : ''}" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
               <button class="home${v.decision === 'home' ? ' sel' : ''}" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`; }).join(''); }).join('')}</div></div>` : '';
       this._popHtml = pop;
-      const rf = `<button class="ic sq rf${this._busyR ? ' spin' : ''}" data-refresh title="${escN(T.refresh)}" aria-label="${escN(T.refresh)}"><ha-icon icon="mdi:refresh"></ha-icon></button>`;
-      return `<span class="rt">${this._wxCorner(s, lang)}<span class="stk">${vac}${rf}</span>${setBtn ? `<span class="stk one">${setBtn}</span>` : ''}
+      return `<span class="rt">${this._wxCorner(s, lang)}<span class="stk">${vac}${setBtn}</span>
         ${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;
     }
   }

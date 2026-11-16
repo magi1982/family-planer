@@ -335,18 +335,18 @@
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
       design: 'Design', refresh: 'Kalender und Listen aktualisieren', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wds: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
-      away: 'Weg – Ämtli pausieren', home: 'Hier – Ämtli laufen weiter', close: 'Schliessen', open: 'offen', all: 'alle', fam: 'Ganze Familie', opt: 'Optional – lange Termine', optHint: 'Keine Ferien-Wörter, aber länger als die eingestellte Stundenzahl. Ohne Entscheid laufen die Ämtli weiter.',
+      lblQ: 'Anzeigen als', lblF: 'Ferien', lblW: 'Abwesend', away: 'Weg – Ämtli pausieren', home: 'Hier – Ämtli laufen weiter', close: 'Schliessen', open: 'offen', all: 'alle', fam: 'Ganze Familie', opt: 'Optional – lange Termine', optHint: 'Keine Ferien-Wörter, aber länger als die eingestellte Stundenzahl. Ohne Entscheid laufen die Ämtli weiter.',
       miss: 'Ansicht „{p}“ fehlt in diesem Dashboard. Ansicht mit diesem Pfad anlegen oder in der Navigationskarte unter paths: anpassen.' },
     en: { wd: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], mon: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
       design: 'Design', refresh: 'Refresh calendars and lists', style: 'Style', err: 'Could not be saved.', vac: 'Check holidays', vacHint: 'Your calendar has holidays in the next two weeks. Who do they apply to, and are you away or here?', vacEmpty: 'No absence in the calendar for the next two weeks.', awWho: 'Who is away?', awNone: 'Nobody is away right now.', awUntil: 'away until {d}', awAt: 'away from {t} today', awTomAt: 'away tomorrow from {t}', awTom: 'away from tomorrow', wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      away: 'Away – pause chores', home: 'Here – chores go on', close: 'Close', open: 'open', all: 'all', fam: 'Whole family', opt: 'Optional – long events', optHint: 'No holiday words, but longer than the set number of hours. Without a decision chores go on.',
+      lblQ: 'Show as', lblF: 'Holiday', lblW: 'Away', away: 'Away – pause chores', home: 'Here – chores go on', close: 'Close', open: 'open', all: 'all', fam: 'Whole family', opt: 'Optional – long events', optHint: 'No holiday words, but longer than the set number of hours. Without a decision chores go on.',
       miss: 'View "{p}" is missing in this dashboard. Add a view with this path or change it under paths: in the navigation card.' } };
   const NAV_POPCSS = `.pop .aw{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;margin:4px 0;border-radius:10px;background:var(--fp-bg2);font-size:13px}.pop .vb button.sel{outline:2px solid var(--fp-accent)}
 
         button{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--fp-line);background:var(--fp-bg3);color:var(--fp-text2);font:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
         button ha-icon{--mdc-icon-size:20px}button.on{border-color:color-mix(in srgb,var(--fp-accent) 60%,transparent);color:var(--fp-accent)}
         .sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
-        .vs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.vs button{height:32px;padding:0 12px;border-radius:16px;font-size:12px}
+        .vs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.vs button{height:32px;padding:0 12px;border-radius:16px;font-size:12px}.vl2{align-items:center}.vl2 .lq{font-size:12px;color:var(--fp-text2);margin-right:2px}
         .oh{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:14px 2px 4px}.oh2{font-size:12px;color:var(--fp-text3);margin:0 2px 8px}
         .pop{width:min(620px,calc(100vw - 16px));box-sizing:border-box;max-height:calc(100vh - 90px);overflow:auto;background:var(--fp-pop,var(--fp-bg1));color:var(--fp-text);font-family:var(--fp-font);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);box-shadow:0 14px 40px rgba(0,0,0,.45);padding:14px;-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none)}
         .ph{font-size:12px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1px;margin:2px 2px 10px;display:flex;align-items:center;gap:6px}.ph .x{margin-left:auto;height:30px;padding:0 10px}
@@ -374,13 +374,17 @@
           if (b && this._views && !this._views.has(b.dataset.go)) { this._flash(NAV_T[this._lang()].miss.replace('{p}', b.dataset.go)); return; }
           if (b && window.FPX) { window.FPX.fpNavigate(b.dataset.go); return; }
           if (e.target.closest('[data-themes]')) { this._open = this._open === 'theme' ? null : 'theme'; this._render(); return; }
-          if (e.target.closest('[data-refresh]')) { this._refresh(); return; }
+          if (window.FPSEASON && window.FPSEASON.tap && window.FPSEASON.tap(e.target)) return;
+          if (e.target.closest('[data-funinfo]')) { this._open = this._open === 'fun' ? null : 'fun'; this._render(); return; }
           if (e.target.closest('[data-vac]')) { this._open = this._open === 'vac' ? null : 'vac'; this._render(); return; }
           if (e.target.closest('[data-x]')) { this._open = null; this._render(); return; }
           const th = e.target.closest('[data-theme]'); if (th) { this._save({ theme: th.dataset.theme }); return; }
           const sy = e.target.closest('[data-style]'); if (sy) { this._save({ style: sy.dataset.style }); return; }
           const vf = e.target.closest('[data-vfam]'); if (vf) { const c = this._vacChoice(vf.dataset.key); c.family = !c.family; this._render(); return; }
           const vp = e.target.closest('[data-vper]'); if (vp) { const c = this._vacChoice(vp.dataset.key); c.family = false; const i = c.persons.indexOf(vp.dataset.vper); if (i >= 0) c.persons.splice(i, 1); else c.persons.push(vp.dataset.vper); this._render(); return; }
+          const vl = e.target.closest('[data-vlabel]'); if (vl) { const c = this._vacChoice(vl.dataset.key); c.label = vl.dataset.vlabel;
+            const v = (((this._store && this._store.snap) || {}).vacation_review || []).find((x) => x.key === vl.dataset.key);
+            if (v && v.decision === 'away') this._decide(v.key, 'away'); else this._render(); return; }
           const vd = e.target.closest('[data-decide]'); if (vd) this._decide(vd.dataset.key, vd.dataset.decide);
         };
         this.shadowRoot.addEventListener('click', this._onClick);
@@ -437,6 +441,8 @@
       const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
       const lt = this._light();
       const o = { season: se, wx, hour: n.getHours(), night: lt.night, dusk: lt.dusk, lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow(), top: this._topNow() };
+      const lim = Number.isFinite(Number(cfg.frost_below)) ? Number(cfg.frost_below) : -1;
+      o.frost = cfg.frost_mode !== false && !!wx && typeof wx.temp === 'number' && wx.temp <= lim;
       if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };
       const key = SE.sceneKey(o); return { key, html: key === this._scnKey && this._scnEl ? null : SE.scene(o), wx };
     }
@@ -450,13 +456,22 @@
         this._render();
       } catch (e) { this._views = null; }
     }
-    disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } }
+    disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
+    // night mode: a soft dark veil over the whole dashboard (no layout change, clicks pass through)
+    _night(on) {
+      let v = document.getElementById('fp-night');
+      if (!on) { if (v) v.style.opacity = '0'; return; }
+      if (!v) { v = document.createElement('div'); v.id = 'fp-night'; v.setAttribute('aria-hidden', 'true');
+        v.style.cssText = 'position:fixed;inset:0;pointer-events:none;background:rgba(6,9,28,.30);z-index:2147483000;opacity:0;transition:opacity 3s ease';
+        document.body.appendChild(v); }
+      v.style.opacity = '1';
+    }
     getCardSize() { return 1; }
     // who a holiday applies to, as picked in the popup (default: the persons found in the calendar)
     _vacChoice(key) {
       this._vc = this._vc || {}; if (this._vc[key]) return this._vc[key];
       const v = (((this._store && this._store.snap) || {}).vacation_review || []).find((x) => x.key === key) || {};
-      this._vc[key] = { family: !!v.family, persons: [...((v.chosen && v.chosen.length ? v.chosen : v.persons) || [])] }; return this._vc[key];
+      this._vc[key] = { family: !!v.family, persons: [...((v.chosen && v.chosen.length ? v.chosen : v.persons) || [])], label: v.label || ((v.kind || 'holiday') === 'holiday' ? 'ferien' : 'weg') }; return this._vc[key];
     }
     // popups live in their own layer on top of the page, so cards below (glass style, own stacking) can never cover them
     _popLayer(html, css) {
@@ -480,17 +495,9 @@
       try { await window.FPPIN.call(this._store, 'family_planer/theme/set', data, { lang: this._lang(), host: this }); }
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
-    // header refresh: the server pulls all calendars and lists, the week view reloads its events
-    async _refresh() {
-      if (this._busyR || !this._store) return;
-      this._busyR = true; this._render();
-      try { await Promise.race([this._store.ws('family_planer/refresh', {}), new Promise((res) => setTimeout(res, 45000))]); } catch (e) { /* shown by the status page */ }
-      window.dispatchEvent(new Event('fp-refresh'));
-      setTimeout(() => { this._busyR = false; this._render(); }, 600);
-    }
     async _decide(key, decision) {
       const c = this._vacChoice(key);
-      try { await window.FPPIN.call(this._store, 'family_planer/vacation/decide', { key, decision, family: !!c.family, persons: c.family ? [] : c.persons }, { lang: this._lang(), host: this }); delete this._vc[key]; }
+      try { await window.FPPIN.call(this._store, 'family_planer/vacation/decide', { key, decision, family: !!c.family, persons: c.family ? [] : c.persons, label: c.label }, { lang: this._lang(), host: this }); delete this._vc[key]; }
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
     _clock() {
@@ -518,11 +525,11 @@
       this._wxNow = sc.wx || null;
       this.shadowRoot.innerHTML = `<style>${window.FPSEASON ? window.FPSEASON.CSS : ''}
         :host{display:block;margin-bottom:8px}
-        .bar::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}.bar{position:relative;display:grid;grid-template-columns:auto auto minmax(0,1fr);align-items:center;gap:8px;background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);padding:6px 10px 6px 14px;font-family:var(--fp-font);color:var(--fp-text);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
+        .bar::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}.bar{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);padding:6px 10px 6px 14px;font-family:var(--fp-font);color:var(--fp-text);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
         .t{display:flex;align-items:center;gap:10px;min-width:0}
         .clk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;white-space:nowrap}.dl{display:flex;align-items:center;gap:8px;min-width:0}.clk b{font-size:26px;font-weight:300;font-variant-numeric:tabular-nums;color:var(--fp-accent);line-height:1}
-        .clk .dt{font-size:14px;color:var(--fp-text);overflow:hidden;text-overflow:ellipsis}.ttl{font-size:10px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1.2px;display:block}
-        .mid{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start;margin-left:10px}.mid button span.l{display:none}
+        .clk .dt{font-size:13px;color:var(--fp-text2);color:var(--fp-text);overflow:hidden;text-overflow:ellipsis}.ttl{font-size:10px;color:var(--fp-text3);text-transform:uppercase;letter-spacing:1.2px;display:block}
+        .lft{display:flex;flex-direction:column;gap:6px;min-width:0}.mid{display:flex;gap:8px;flex-wrap:nowrap;justify-content:flex-start}.mid button span.l{display:none}
         button{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--fp-line);background:var(--fp-bg3);color:var(--fp-text2);font:inherit;font-size:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
         .mid button.on{background:var(--fp-grad);border-color:transparent;color:var(--fp-on-accent);font-weight:600}
         button.on{border-color:color-mix(in srgb,var(--fp-accent) 60%,transparent);color:var(--fp-accent)}
@@ -535,18 +542,18 @@
         button.ic{padding:0 10px 0 8px;gap:8px}.sw{display:flex;gap:3px;align-items:center;padding:4px 5px;border:1px solid;border-radius:7px}.sw i{display:block;width:8px;height:16px;border-radius:3px}
         button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}button.vac.quiet{color:inherit;border-color:var(--fp-line)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
-        @media (max-width:700px){.clk .dt{display:none}.bar{grid-template-columns:auto 1fr;row-gap:8px}.mid{grid-column:1 / -1;grid-row:2;margin-left:0;justify-content:center;gap:8px}.rt{grid-column:2;grid-row:1}.rt .stk{flex-direction:row}.wxn{padding:0 8px}}
+        @media (max-width:700px){.clk .dt{display:none}.wxn{padding:0 8px}}
         .bar.sc{min-height:96px;padding-top:10px;padding-bottom:10px}.bar.sc > :not(.scn){position:relative;z-index:1}.bar.sc .clk b,.bar.sc .clk span,.bar.sc .ttl{text-shadow:0 1px 3px rgba(0,0,0,.55)}
         .bar.sc .mid button:not(.on),.bar.sc .rt > button,.bar.sc .stk button{background:color-mix(in srgb,var(--fp-bg3) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
         .wxc{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px;min-width:0}.wxc.one{justify-content:center}
         .wxn{display:flex;align-items:center;justify-content:center;gap:6px;height:40px;box-sizing:border-box;padding:0 12px;border-radius:10px;border:1px solid var(--fp-line);background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:13px;white-space:nowrap;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}.wxn b{font-size:15px}.wxn i{font-style:normal;font-size:18px}
         .sug{display:flex;align-items:center;gap:8px;max-width:260px;height:40px;box-sizing:border-box;padding:0 10px 0 6px;border-radius:10px;background:color-mix(in srgb,var(--fp-accent) 22%,var(--fp-bg1));border:1px solid color-mix(in srgb,var(--fp-accent) 50%,transparent);font-size:12px;line-height:1.25;animation:fpsugin .6s ease-out}
         .sug i{font-style:normal;font-size:20px;animation:fpbob 3s ease-in-out infinite}.sug b{display:block;font-size:12px;line-height:1.2}.sug span span{font-size:11px;line-height:1.2}.sug span{color:var(--fp-text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        .tl{display:flex;align-items:center;gap:10px}.slab{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:12px;white-space:nowrap}
+        .tl{display:flex;align-items:baseline;gap:10px;height:40px;align-items:center}.bar.nt .clk b{font-size:34px;transition:font-size 1s}.slab{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:12px;white-space:nowrap}
         @keyframes fpsugin{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
-        @media (max-width:700px){.sug,.wxn span,.slab{display:none}}
-      </style><div class="bar${sc.key ? ' sc' : ''}"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b>${this._seasonLabel(s, lang)}</span><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span></span></span>
-        <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div>
+        button.slab{font:inherit;font-size:12px;cursor:pointer;color:inherit;border:1px solid transparent}.hint.fi{max-width:340px;line-height:1.45}.slab.fun{border-color:var(--fp-acc,#69C350)}.slab.fun ha-icon{--mdc-icon-size:15px;opacity:.8}.slab.fun.on{background:var(--fp-bg3)}@media (max-width:700px){.sug,.wxn span,.slab{display:none}.slab.fun{display:inline-flex}}
+      </style><div class="bar${sc.key ? ' sc' : ''}"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="lft"><span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span>
+        <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
         ${this._right(s, lang, review, pending, btns.includes('einstellungen') ? this._navBtn('einstellungen', lang, cur) : '')}</div>`;
       const bar = this.shadowRoot.querySelector('.bar');
       if (sc.key && bar) {
@@ -555,6 +562,9 @@
         this._scnKey = sc.key;
       } else { this._scnEl = null; this._scnKey = ''; }
       this._popLayer(this._popHtml, NAV_POPCSS);
+      const lt = this._light(); const hr = new Date().getHours();
+      const nt = !!(s && (s.season_cfg || {}).night_mode !== false) && (lt.night != null ? lt.night : (hr >= 20 || hr < 6));
+      this._night(nt); if (bar) bar.classList.toggle('nt', nt);
       // first paint: the header size is known only now -> draw the scene once more with the right top edge
       if (sc.key) { const t = this._topNow(); if (t !== this._usedTop) { this._usedTop = t; window.requestAnimationFrame(() => this._render()); } }
     }
@@ -565,7 +575,12 @@
     _seasonLabel(s, lang) {
       const se = s && s.season; if (!se || se.enabled === false || !se.label || !window.FPSEASON) return '';
       const ic = (window.FPSEASON.LABEL[se.vis] || [''])[0]; const sub = { advent1: '1. Advent', advent2: '2. Advent', advent3: '3. Advent', advent4: '4. Advent' }[se.sub] || '';
-      return `<span class="slab">${ic} ${escN(sub || (lang === 'en' ? se.label.en : se.label.de))}</span>`;
+      // special days, and customs with an explanation (Mother's / Father's Day …), get a chip with an info button
+      const f = se.fun || (se.info && se.label ? { icon: ic, label: se.label, info: se.info, scene: true } : null); const L = (x) => escN(lang === 'en' ? x.en : x.de);
+      // special days: their own chip with an info button that explains the day
+      const fb = f ? `<button class="slab fun${this._open === 'fun' ? ' on' : ''}" data-funinfo title="${escN(lang === 'en' ? 'What is today?' : 'Was ist heute?')}">${escN(f.icon || '')} ${L(f.label)}<ha-icon icon="mdi:information-outline"></ha-icon></button>` : '';
+      if (f && f.scene) return fb;
+      return `<span class="slab">${ic} ${escN(sub || (lang === 'en' ? se.label.en : se.label.de))}</span>${fb}`;
     }
     _wxCorner(s, lang) {
       const wx = this._wxNow; if (!wx) return '';
@@ -583,7 +598,9 @@
         const ic = b.kind === 'holiday' ? '🌴' : '✈️'; const d = (x) => { const dd = new Date(String(x).slice(0, 10) + 'T12:00'); return `${T.wds[dd.getDay()]} ${dd.getDate()}.${dd.getMonth() + 1}.`; };
         const txt = b.state === 'now' ? T.awUntil.replace('{d}', b.allday ? d(b.until) : `${d(b.until)} ${String(b.until).slice(11, 16)}`) : b.state === 'today' ? T.awAt.replace('{t}', b.at) : (b.at ? T.awTomAt.replace('{t}', b.at) : T.awTom);
         return `<div class="aw"><b>${escN(p.name)}</b><span>${ic} ${escN(txt)}</span></div>`; }).join('');
-      const pop = this._open === 'theme' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:palette-outline"></ha-icon>${T.design}<button class="x" data-x>✕</button></div>
+      const se0 = s.season || {}; const fn = se0.fun || (se0.info && se0.label ? { icon: ((window.FPSEASON && window.FPSEASON.LABEL[se0.vis]) || [''])[0], label: se0.label, info: se0.info } : null);
+      const pop = this._open === 'fun' && fn ? `<div class="pop" role="dialog"><div class="ph">${escN(fn.icon || '')} ${escN(lang === 'en' ? fn.label.en : fn.label.de)}<button class="x" data-x>✕</button></div><div class="hint fi">${escN(lang === 'en' ? fn.info.en : fn.info.de)}</div></div>`
+        : this._open === 'theme' ? `<div class="pop" role="dialog"><div class="ph"><ha-icon icon="mdi:palette-outline"></ha-icon>${T.design}<button class="x" data-x>✕</button></div>
           <div class="tg">${Object.keys(THEMES).map((k) => `<button class="${k === cur ? 'on' : ''}" data-theme="${k}">${themeMini(k, sty)}<span class="tn">${k === cur ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${nm(k)}</span></button>`).join('')}</div>
           <div class="ph" style="margin-top:14px"><ha-icon icon="mdi:layers-outline"></ha-icon>${T.style}</div>
           <div class="sg">${STYLES.map((k) => `<button class="${k === sty ? 'on' : ''}" data-style="${k}">${themeMini(cur, k)}<span class="tn">${k === sty ? '<ha-icon icon="mdi:check"></ha-icon>' : ''}${sn(k)}</span></button>`).join('')}</div></div>`
@@ -594,11 +611,11 @@
             return (kind === 'long' ? `<div class="oh">${T.opt}</div><div class="oh2">${T.optHint}</div>` : '') + list.map((v) => { const c = this._vacChoice(v.key);
               return `<div class="vi"><div class="vt">${escN(v.title)}</div><div class="vd">${fmtD(v.days[0])} – ${fmtD(v.days[v.days.length - 1])}</div>
               <div class="vs"><button class="${c.family ? 'on' : ''}" data-vfam data-key="${escN(v.key)}"><ha-icon icon="mdi:account-group"></ha-icon>${T.fam}</button>${(s.persons || []).map((p) => `<button class="${!c.family && c.persons.includes(p.id) ? 'on' : ''}" data-vper="${escN(p.id)}" data-key="${escN(v.key)}">${escN(p.name)}</button>`).join('')}</div>
+              <div class="vs vl2"><span class="lq">${T.lblQ}</span>${[['ferien', '🌴', T.lblF], ['weg', '✈️', T.lblW]].map(([l, ic, t]) => `<button class="${c.label === l ? 'on' : ''}" data-vlabel="${l}" data-key="${escN(v.key)}">${ic} ${t}</button>`).join('')}</div>
               <div class="vb"><button class="away${v.decision === 'away' ? ' sel' : ''}" data-decide="away" data-key="${escN(v.key)}"><ha-icon icon="mdi:airplane"></ha-icon>${T.away}</button>
               <button class="home${v.decision === 'home' ? ' sel' : ''}" data-decide="home" data-key="${escN(v.key)}"><ha-icon icon="mdi:home-heart"></ha-icon>${T.home}</button></div></div>`; }).join(''); }).join('')}</div></div>` : '';
       this._popHtml = pop;
-      const rf = `<button class="ic sq rf${this._busyR ? ' spin' : ''}" data-refresh title="${escN(T.refresh)}" aria-label="${escN(T.refresh)}"><ha-icon icon="mdi:refresh"></ha-icon></button>`;
-      return `<span class="rt">${this._wxCorner(s, lang)}<span class="stk">${vac}${rf}</span>${setBtn ? `<span class="stk one">${setBtn}</span>` : ''}
+      return `<span class="rt">${this._wxCorner(s, lang)}<span class="stk">${vac}${setBtn}</span>
         ${this._err ? `<div class="err">${escN(this._err)}</div>` : ''}</span>`;
     }
   }

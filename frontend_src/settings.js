@@ -128,6 +128,12 @@
       F('lead_school', 'num', 'Schulferien zeigen ab', 'Show school holidays from', 'Tage vor dem ersten Ferientag. Ferien werden aus den Kalendern erkannt (Sportferien, Frühlingsferien, Pfingst-, Sommer-, Herbst-, Weihnachtsferien).', 'Days before the first day. Holidays are found in the calendars (winter sports, spring, Whitsun, summer, autumn, Christmas holidays).', { min: 0, max: 30, unit: { de: 'Tage', en: 'days' } }),
       F('christmas_start', 'select', 'Weihnachts-Saison ab', 'Christmas season from', 'Die Adventskerzen zünden sich Sonntag für Sonntag an.', 'The Advent candles light up Sunday by Sunday.',
         { opts: [['advent', { de: '1. Advent', en: '1st Advent' }], ['dec1', { de: '1. Dezember', en: '1 December' }]] }),
+      F('night_mode', 'bool', 'Nachtmodus', 'Night mode', 'Nach Sonnenuntergang (echte Sonne aus Home Assistant) wird der Planer etwas dunkler und die Uhr grösser; im Himmel funkeln Sterne und ab und zu fliegt eine Sternschnuppe.', 'After sunset (the real sun from Home Assistant) the planner gets a little darker and the clock bigger; stars twinkle and now and then a shooting star flies by.'),
+      F('fun_days', 'bool', 'Besondere Tage', 'Special days', 'An besonderen Tagen zeigt der Kopfbereich eine eigene Szene: Dino-Tag (20.2.), 1. April, erster Handy-Anruf (3.4.), Titanic (15.4.), Mondlandung (20.7.), Vulkan (27.8.); Sputnik fliegt nachts vom 4. bis 11. Oktober, die Concorde am 26. November. Feiertage, Bräuche und Geburtstage haben Vorrang. Ein Info-Knopf erklärt den Tag.', 'On special days the header shows its own scene: Dinosaur Day (20 Feb), April Fools\' Day, first mobile call (3 Apr), Titanic (15 Apr), Moon landing (20 Jul), volcano (27 Aug); Sputnik crosses the night sky 4–11 October, Concorde flies on 26 November. Holidays, customs and birthdays come first. An info button explains the day.'),
+      F('uk_days', 'bool', 'British Days', 'British Days', 'Zehnmal im Jahr an einem zufälligen gewöhnlichen Tag: der Buckingham Palace mit der Königsgarde statt unseres Hauses. Nie an Weihnachten, Feiertagen, Ferien oder anderen besonderen Tagen.', 'Ten times a year on a random ordinary day: Buckingham Palace with the King\'s Guard instead of the house. Never at Christmas, on holidays, school holidays or other special days.'),
+      F('uk_for', 'text', 'British Day für', 'British Day for', 'Optional: ein Name. Der Info-Text sagt dann, dass dieser Tag für diese Person ist – als Andenken an die britischen Wurzeln.', 'Optional: a name. The info text then says the day is for this person – a keepsake of the British roots.', { max: 40 }),
+      F('frost_mode', 'bool', 'Frost-Modus', 'Frost mode', 'Bei starker Kälte gefriert die ganze Szene oben: Raureif auf Boden, Haus und Bäumen, gefrorene Pfützen und glitzernde Eiskristalle. Die Temperatur kommt von der gewählten Wetter-Entität.', 'In hard frost the whole scene at the top freezes: hoarfrost on the ground, the house and the trees, frozen puddles and glittering ice crystals. The temperature comes from the selected weather entity.'),
+      F('frost_below', 'num', 'Gefroren ab', 'Frozen from', 'Aussentemperatur, ab der alles gefriert (Standard −1°).', 'Outside temperature from which everything freezes (default −1°).', { min: -25, max: 0, unit: '°' }),
       F('xmas_snow', 'bool', 'An Weihnachten schneit es immer', 'It always snows at Christmas', 'Das echte Wetter bleibt klein oben rechts.', 'The real weather stays small at the top right.'),
       F('wedding', 'date', 'Hochzeitstag', 'Wedding anniversary', 'Mit Jahr zeigt der Planer „14 Jahre verheiratet“.', 'With the year the planner shows "14 years married".'),
       F('couple', 'date', 'Kennenlerntag', 'Couple anniversary', 'Der Tag, an dem ihr ein Paar wurdet.', 'The day you became a couple.'),
@@ -194,6 +200,15 @@
     _errText(e) {
       const code = String((e && (e.code || e.message)) || e).replace(/^invalid_/, '');
       return this.T.errors[code] || (e && e.message) || code;
+    }
+    // pulls all calendars and lists at once (reads only, so no parent PIN)
+    _rfBtn() { const en = this._lang === 'en'; return `<button class="tb${this._rfBusy ? ' busy' : ''}" data-refreshall title="${en ? 'Refresh calendars and lists' : 'Kalender und Listen aktualisieren'}"><ha-icon icon="mdi:refresh"></ha-icon>${en ? 'Refresh' : 'Aktualisieren'}</button>`; }
+    async _refreshAll() {
+      if (this._rfBusy || !this._store) return; this._rfBusy = true; this._render();
+      try { const r = await Promise.race([this._store.ws('family_planer/refresh', {}), new Promise((res) => setTimeout(() => res({ done: true }), 45000))]);
+        this._flash(this._lang === 'en' ? (r && r.done === false ? 'Just refreshed – try again in a moment.' : 'Calendars and lists refreshed.') : (r && r.done === false ? 'Gerade erst aktualisiert – gleich nochmals versuchen.' : 'Kalender und Listen aktualisiert.'));
+      } catch (e) { this._flash(this._errText(e), true); }
+      window.dispatchEvent(new Event('fp-refresh')); this._rfBusy = false; this._render();
     }
     async _call(type, data) {
       try { return await window.FPPIN.call(this._store, type, data, this._ctx()); } catch (e) {
@@ -263,6 +278,7 @@
       const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); this._avSave(p, window.FPAV.set(this._avCode(p), part, val)); } return; }
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
       if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
+      if (t.closest('[data-refreshall]')) { this._refreshAll(); return; }
       if (t.closest('[data-lock]')) { window.FPPIN.lock(this._store); this._data = null; this._asked = false; this._tab = 'pics'; this._render(); return; }
       const rm = t.closest('[data-rment]');
       if (rm) { const f = this._forms[rm.dataset.tab]; f[rm.dataset.k] = (f[rm.dataset.k] || []).filter((x) => x !== rm.dataset.rment); this._render(); return; }
@@ -476,7 +492,7 @@
       const unit = fd.unit ? `<span class="u">${esc(typeof fd.unit === 'string' ? fd.unit : L(fd.unit, lang))}</span>` : '';
       let ctl = '';
       if (fd.type === 'bool') return `<label class="row b"><span class="lt"><b>${esc(L(fd.label, lang))}</b>${fd.desc[lang] ? `<small>${esc(L(fd.desc, lang))}</small>` : ''}</span><input type="checkbox" class="sw" ${a} ${v ? 'checked' : ''}></label>`;
-      if (fd.type === 'num') ctl = `<span class="nw"><input class="in n" type="number" inputmode="${fd.step && fd.step < 1 ? 'decimal' : 'numeric'}" min="${fd.min}" max="${fd.max}" step="${fd.step || 1}" ${a} value="${esc(v)}">${unit}</span>`;
+      if (fd.type === 'num') ctl = `<span class="nw"><input class="in n" type="number" inputmode="${fd.min < 0 ? 'text' : fd.step && fd.step < 1 ? 'decimal' : 'numeric'}" min="${fd.min}" max="${fd.max}" step="${fd.step || 1}" ${a} value="${esc(v)}">${unit}</span>`;
       else if (fd.type === 'md') ctl = `<input class="in" style="width:170px" type="date" ${a} value="${esc(new Date().getFullYear() + '-' + String(v || '08-01'))}">`;
       else if (fd.type === 'time') ctl = `<input class="in t" type="time" ${a} value="${esc(String(v || '').slice(0, 5))}">`;
       else if (fd.type === 'date') ctl = `<input class="in" style="width:170px" type="date" ${a} value="${esc(/^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : '')}">`;
@@ -605,7 +621,7 @@
       </style>`;
       const msg = this._msg ? `<div class="msg${this._err ? ' e' : ''}">${esc(this._msg)}</div>` : '';
       if (!this._data) {
-        this.shadowRoot.innerHTML = `${style}<div class="card"><div class="top"><h2>${esc(T.title)}</h2><button class="tb pin" data-unlock><ha-icon icon="mdi:shield-key-outline"></ha-icon>${esc(T.parent)}</button></div>
+        this.shadowRoot.innerHTML = `${style}<div class="card"><div class="top"><h2>${esc(T.title)}</h2>${this._rfBtn()}<button class="tb pin" data-unlock><ha-icon icon="mdi:shield-key-outline"></ha-icon>${esc(T.parent)}</button></div>
           ${this._picsView()}${msg}</div>`;
         return;
       }
@@ -627,7 +643,7 @@
       const mods = this._data.general.modules;
       const tabs = ORDER.map((id) => TABS.find((x) => x.id === id)).filter((x) => x && !((x.id === 'lists' && !mods.lists) || (['persons', 'chores', 'vacation', 'points', 'todos', 'announce', 'seasons', 'sonder'].includes(x.id) && !mods.week)));
       this.shadowRoot.innerHTML = `${style}<div class="card">
-        <div class="top"><h2>${esc(T.title)}</h2><button class="tb" data-chpin><ha-icon icon="mdi:form-textbox-password"></ha-icon>${esc(T.pin)}</button><button class="tb" data-lock><ha-icon icon="mdi:lock-outline"></ha-icon>${esc(T.lock)}</button></div>
+        <div class="top"><h2>${esc(T.title)}</h2>${this._rfBtn()}<button class="tb" data-chpin><ha-icon icon="mdi:form-textbox-password"></ha-icon>${esc(T.pin)}</button><button class="tb" data-lock><ha-icon icon="mdi:lock-outline"></ha-icon>${esc(T.lock)}</button></div>
         <div class="tabs">${tabs.map((x) => `<button class="tab${x.id === tab.id ? ' on' : ''}" data-tabsel="${x.id}"><ha-icon icon="${x.icon}"></ha-icon>${esc(L(x.label, lang))}</button>`).join('')}</div>
         ${body}${dlg}${msg}</div>`;
       if (tab.id === 'chores') this._mountPlan();

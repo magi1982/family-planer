@@ -35,11 +35,11 @@ const durTxt = (ms, short) => { const m = Math.max(0, Math.round(ms / 60000)); c
 const SOON_T = ['in {n} Min', 'in {n} Std'];
 const FPL = 'de';
 const TX = {
-  de: { today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
+  de: { fer: 'Ferien', awy: 'Nicht da', today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
     secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Heute nichts',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
-  en: { today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
+  en: { fer: 'Holiday', awy: 'Away', today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
     secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', spcH: 'Special chores', open: '{n} open', rel: 'Reliability', cancel: 'Cancel', none: 'Nothing today',
     school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
@@ -275,7 +275,7 @@ const REVEAL_EYE = '<svg viewBox="0 0 34 24" width="32" height="23" aria-hidden=
 class FpBase extends HTMLElement {
   setConfig(config) {
     this._cfg = this._normalize(config || {});
-    if (!this.shadowRoot) { this.attachShadow({ mode: 'open' }); this._bind(); }
+    if (!this.shadowRoot) { this.attachShadow({ mode: 'open' }); this._bind(); if (!this.lang) this.lang = FPL; }
     this._teardown();
     this._data = {};
     this._render(true);
@@ -290,6 +290,7 @@ class FpBase extends HTMLElement {
   _teardown() {
     (this._unsubs || []).forEach((p) => p.then((u) => u && u()).catch(() => {}));
     if (this._onFpRefresh) { window.removeEventListener('fp-refresh', this._onFpRefresh); this._onFpRefresh = null; }
+    if (this._onFitResize) { window.removeEventListener('resize', this._onFitResize); this._onFitResize = null; }
     this._unsubs = null;
     if (this._timer) { clearInterval(this._timer); this._timer = null; }
   }
@@ -297,6 +298,7 @@ class FpBase extends HTMLElement {
     if (!this._hass || !this._cfg || !this.isConnected || this._unsubs) return;
     // header refresh button: pull the calendars again and reload the events
     this._onFpRefresh = () => { if (this._syncCal) this._syncCal(); }; window.addEventListener('fp-refresh', this._onFpRefresh);
+    this._onFitResize = () => { clearTimeout(this._fitT); this._fitT = setTimeout(() => { if (this._fit) this._fit(); }, 150); }; window.addEventListener('resize', this._onFitResize);
     this._unsubs = this._lists().map(([key, ent]) => this._hass.connection.subscribeMessage(
       (m) => { this._data[key] = m.items || []; this._render(); },
       { type: 'todo/item/subscribe', entity_id: ent }
@@ -448,28 +450,48 @@ class LoxWochenplanerCard extends FpBase {
     return true;
   }
   _sonderTitle(it) {
-    return !it.secret || this._reveal === it.id ? esc(it.title) : TX.secret;
+    return !it.secret ? esc(it.title) : this._reveal === it.id ? `<span class="rvx">${esc(it.title)}</span>` : TX.secret;
   }
   // points a chore / to-do is worth (from the snapshot); 0 = show nothing
   _pts(kind, id) { const s = (this.fpStore && this.fpStore.snap) || {}; const n = Math.round(Number((s[kind] || {})[id]) || 0); return n > 0 ? n : 0; }
-  _ptTag(kind, id) { const n = this._pts(kind, id); return n ? ` · +${n}` : ''; }
-  _ptPill(kind, id) { const n = this._pts(kind, id); return n ? `<small class="ptp">+${n}</small>` : ''; }
+  // every task button is built the same: title, then small rounded info chips, points right-aligned
+  // every task button is built the same: left title + time info (seit / heute fällig / bis Mo), right source + points.
+  // Fits on one line → one line; otherwise left: title over time, right: points over source (see _fit()).
+  _bi(title, time, src, pts) {
+    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${time || ''}</span><span class="br">${src || ''}${pts > 0 ? `<b class="ptr">+${pts}</b>` : ''}</span></span>`;
+  }
+  _fit() {
+    const root = this.shadowRoot; if (!root) return;
+    root.querySelectorAll('.bin').forEach((b) => { b.classList.remove('two'); const l = b.firstElementChild; const r = b.lastElementChild;
+      if (l.scrollWidth + r.scrollWidth + 8 > b.clientWidth) b.classList.add('two'); });
+  }
+  _listName(t) {
+    const ent = String(t.src || '').split('|')[0]; const st = ent && this._hass && this._hass.states[ent];
+    return st ? ((st.attributes || {}).friendly_name || ent) : '';
+  }
   // separate, calm button on the right – far from the tick, so revealing never ticks the job off
   _revealBtn(it, hot) {
-    return it.secret && this._reveal !== it.id ? `<button class="rvb${hot ? ' y' : ''}" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
+    // the eye stays while the job is shown: a second tap hides it again (never ticks it off)
+    return it.secret ? `<button class="rvb${hot ? ' y' : ''}${this._reveal === it.id ? ' on' : ''}" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
   }
   _sonderBtns(snap, pid, tStr) {
     const pts = snap.sonder_points || {};
     return (snap.sonder || []).filter((it) => it.pid === pid && (it.done ? (it.done_at || '').slice(0, 10) === tStr : this._sonderVisible(it, tStr)))
-      .map((it) => { const b = `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span><span class="bt"><em class="tag">${esc(it.icon)} ${TX.spc}${pts[it.id] ? ` · +${pts[it.id]}` : ''}</em>${this._sonderTitle(it)}</span></button>`;
+      .map((it) => { const b = `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span>${this._bi(this._sonderTitle(it), '', `<em class="tag">${esc(it.icon)}<span class="tl"> ${TX.spc}</span></em>`, Number(pts[it.id]) || 0)}</button>`;
         const r = it.done ? '' : this._revealBtn(it); return r ? `<div class="spw">${b}${r}</div>` : b; }).join('');
+  }
+  // an absent day: "Holiday" only for real holidays (or when chosen in the check), otherwise "Away"
+  _awayLook(snap, name, ds) {
+    const p = ((snap && snap.persons) || []).find((x) => x.name === name);
+    const kind = p ? (((snap.away_kind || {})[p.id]) || {})[ds] : null;
+    return kind === 'holiday' ? { icon: 'mdi:palm-tree', text: TX.fer } : { icon: 'mdi:airplane', text: TX.awy };
   }
   _volCards(snap, tStr, persons) {
     const pts = snap.sonder_points || {};
     const open = (snap.sonder || []).filter((it) => it.pid == null && !it.done && this._sonderVisible(it, tStr));
     return open.map((it) => {
       const who = this._claim === it.id ? `<div class="who"><span>${TX.who}</span>${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="wp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 26)}<b>${esc(p.name)}</b></button>`).join('')}<button class="wp x" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${pts[it.id] ? '+' + TX.pts.replace('{n}', pts[it.id]) : ''}${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span><div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
+      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -548,7 +570,8 @@ class LoxWochenplanerCard extends FpBase {
     const vw = e.target.closest('[data-view]');
     if (vw) { this._view = vw.dataset.view; this._dayOff = 0; this._week = 0; this._go(0); return; }
     const tm = e.target.closest('[data-tdmore]'); if (tm) { this._tdMore = this._tdMore === tm.dataset.tdmore ? null : tm.dataset.tdmore; this._render(); return; }
-    const rv = e.target.closest('[data-reveal]'); if (rv) { this._reveal = rv.dataset.reveal; clearTimeout(this._rvT); this._rvT = setTimeout(() => { this._reveal = null; this._render(); }, 5000); this._render(); return; }
+    const rv = e.target.closest('[data-reveal]'); if (rv && this._reveal === rv.dataset.reveal) { this._reveal = null; clearTimeout(this._rvT); this._render(); return; }
+    if (rv) { this._reveal = rv.dataset.reveal; try { const b = rv.getBoundingClientRect(); if (window.FPCONFETTI && window.FPCONFETTI.burst) window.FPCONFETTI.burst(b.left + b.width / 2, b.top + b.height / 2, 'silver', '#F5C542', 0.45); } catch (err) { /* no effect */ } clearTimeout(this._rvT); this._rvT = setTimeout(() => { this._reveal = null; this._render(); }, 5000); this._render(); return; }
     const cl = e.target.closest('[data-claim]'); if (cl) { this._claim = this._claim === cl.dataset.claim ? null : cl.dataset.claim; this._render(); return; }
     const cp = e.target.closest('[data-claimp]');
     if (cp && this.fpStore) { const [iid, pid] = cp.dataset.claimp.split('|'); this._claim = null; this.fpStore.ws('family_planer/sonder/claim', { inst_id: iid, person_id: pid }).catch(() => this._render()); return; }
@@ -681,7 +704,7 @@ class LoxWochenplanerCard extends FpBase {
       const tds = this._tdMore === k.name ? tdAll : [...tdOpen.slice(0, maxTd), ...tdAll.filter((t) => t.done)];
       const tdRest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
       const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
-      const tdBtns = tds.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}${ageOf(t)}</span></button>`).join('')
+      const tdBtns = tds.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span>${this._bi(esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title), ageOf(t), `<em class="tag">${t.src && this._listName(t) ? `📋<span class="tl"> ${esc(this._listName(t))}</span>` : '☑<span class="tl"> To-do</span>'}</em>`, this._pts('todo_points', t.id))}</button>`).join('')
         + (tdRest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', tdRest)}</button>` : this._tdMore === k.name && tdOpen.length > maxTd ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.less}</button>` : '')
         + (showTodos ? this._sonderBtns(snapX, pidOf[k.name], tStr) : '');
       const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
@@ -690,8 +713,8 @@ class LoxWochenplanerCard extends FpBase {
       const lv = level(st.pct); const C = 2 * Math.PI * 24;
       const AVS = phone ? 56 : 72;
       const seX = snapX.season || {}; const isBday = (seX.birthdays || []).includes(pidOf[k.name]);
-      const label = `<div class="lab${isBday ? ' bday' : ''}" data-person="${esc(k.name)}" style="box-shadow:inset 3px 0 0 ${k.farbe}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:${AVS}px;height:${AVS}px"><span class="ava">${avatarHtml(k, AVS)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
+      const label = `<div class="lab${isBday ? ' bday' : ''}" data-person="${esc(k.name)}" style="box-shadow:inset 3px 0 0 ${k.farbe}">
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:${AVS}px;height:${AVS}px"><span class="ava">${avatarHtml(k, AVS)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}${aw.some((a) => a.id === 'crown') ? '<span class="crown"><ha-icon icon="mdi:crown"></ha-icon></span>' : ''}</div>
           <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2"><span class="rib2" style="--rc:${lv.c}">${st.pct}%</span>${aw.slice(0, phone ? 3 : 6).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}${aw.length > (phone ? 3 : 6) ? `<span class="mdm">+${aw.length - (phone ? 3 : 6)}</span>` : ''}</div>
           </div>
           </div>`;
@@ -714,7 +737,8 @@ class LoxWochenplanerCard extends FpBase {
       const cells = days.map((d) => injectEv(d, ((d) => {
         const ds = ymd(d);
         if (((this._cfg.abwesend || {})[k.name] || []).includes(ds) && !(ds === tStr && mine.length)) {
-          return `<div class="c ${ds < tStr ? 'p' : ds === tStr ? 't' : 'f'} vac${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}"><div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon>${T[ds] === 's' ? '' : '<span>Ferien</span>'}</div></div>`;
+          const aw = this._awayLook(snapX, k.name, ds);
+          return `<div class="c ${ds < tStr ? 'p' : ds === tStr ? 't' : 'f'} vac${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}"><div class="vc"><ha-icon icon="${aw.icon}"></ha-icon>${T[ds] === 's' ? '' : `<span>${aw.text}</span>`}</div></div>`;
         }
         if (ds === tStr && ds !== focus) {
           return mine.length ? `<div class="c t" data-focus="${ds}"><div class="fc"><b>${tDone}/${mine.length}</b></div><div class="bar"><i style="width:${Math.round((tDone / mine.length) * 100)}%;background:${G}"></i></div>${tdOpen.length ? `<div class="tdn2">☑ ${tdOpen.length}</div>` : ''}</div>` : `<div class="c t" data-focus="${ds}">${tdOpen.length ? `<div class="tdn2">☑ ${tdOpen.length}</div>` : ''}</div>`;
@@ -724,7 +748,7 @@ class LoxWochenplanerCard extends FpBase {
           if (!mine.length) return `<div class="c t"><div class="bg">${tdBtns}</div></div>`;
           const all = tDone === mine.length;
           return `<div class="c t"><div class="prog"><span>${tDone} von ${mine.length} erledigt</span>${all ? '<span class="gr">Super!</span>' : ''}</div><div class="bg">` +
-            mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Spezial${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + tdBtns + `</div></div>`;
+            mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Spezial</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + tdBtns + `</div></div>`;
         }
         if (ds < tStr) {
           const s = h[ds] && h[ds].s[k.name];
@@ -755,7 +779,7 @@ class LoxWochenplanerCard extends FpBase {
     // volunteer tile: only while a special chore is waiting for the fastest child
     const kidsP = kids.map((k) => ({ ...k, id: pidOf[k.name] }));
     const volHtml = this._volCards(snapX, tStr, kidsP);
-    const volRow = !volHtml || !days.some((d) => ymd(d) === tStr) || ['termine', 'schule'].includes(modeX) ? '' : `<div class="lab vol"><div class="ring vr" style="width:${phone ? 56 : 72}px;height:${phone ? 56 : 72}px"><span>🙋</span></div><div class="lt"><div class="nm">${TX.vol}</div><div class="vs2">${TX.volSub}</div></div></div>`
+    const volRow = !volHtml || !days.some((d) => ymd(d) === tStr) || ['termine', 'schule'].includes(modeX) ? '' : `<div class="lab vol"><div class="ring vr" style="width:${phone ? 56 : 72}px;height:${phone ? 56 : 72}px"><span>🙋</span></div><div class="lt"><div class="nm vl1">${TX.vol} <span class="vs2">${TX.volSub}</span></div></div></div>`
       + days.map((d) => (ymd(d) === tStr ? `<div class="c t vc2">${volHtml}</div>` : `<div class="c f${T[ymd(d)] === 's' ? ' sm' : ''}"></div>`)).join('');
     const viewNow = this._view || (snapX.settings || {}).default_view || 'today';
     let todayGrid = '';
@@ -777,7 +801,7 @@ class LoxWochenplanerCard extends FpBase {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
             if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
-            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span><span class="bt">${specIds.has(i.m.c) ? `<em class="tag">⭐ Spezial${this._ptTag('item_points', i.uid)}</em>` : ''}${esc(i.summary)}${specIds.has(i.m.c) ? '' : this._ptPill('item_points', i.uid)}${dueTag(i.m, tStr)}</span></button>`).join('') + '</div>' : '';
+            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Spezial</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : '';
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
@@ -788,20 +812,21 @@ class LoxWochenplanerCard extends FpBase {
           const list = this._tdMore === k.name ? tdAll : [...tdOpen.slice(0, maxTd), ...tdAll.filter((t) => t.done)];
           const rest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
           const ageOf = (t) => { if ((snapX.todo_settings || {}).show_age === false || t.done || !t.created) return ''; const n = Math.round((today - startOfDay(new Date(t.created))) / 86400000); return n >= 1 ? `<small class="age">${TX.since.replace('{n}', n)}</small>` : ''; };
-          tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span><span class="bt"><em class="tag">☑ To-do${this._ptTag('todo_points', t.id)}</em>${esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title)}${ageOf(t)}</span></button>`).join('')
+          tdh = list.map((t) => `<button class="btn tdo${t.done ? ' done' : ''}${this._tdArm === t.id ? ' arm' : ''}" data-todoid="${esc(t.id)}"><span class="cb"></span>${this._bi(esc(this._tdArm === t.id ? 'Nochmals tippen zum Erledigen' : t.title), ageOf(t), `<em class="tag">${t.src && this._listName(t) ? `📋<span class="tl"> ${esc(this._listName(t))}</span>` : '☑<span class="tl"> To-do</span>'}</em>`, this._pts('todo_points', t.id))}</button>`).join('')
             + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '');
           if (tdh) tdh = `<div class="bg one">${tdh}</div>`;
           if (tdOpen.length) tdInfo = TX.open.replace('{n}', tdOpen.length);
           sph = this._sonderBtns(snapX, pid, tStr); if (sph) sph = `<div class="bg one">${sph}</div>`;
         }
-        const body = away ? `<div class="vc"><ha-icon icon="mdi:palm-tree"></ha-icon><span>Ferien</span></div>`
+        const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
+        const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || `<div class="none">${TX.none}</div>`;
-        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pid]) || 0) : ''}
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
+        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
           <span class="flg" style="--rc:${lv.c}" title="${TX.rel}">${st.pct}%</span><div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
-      if (volHtml && isT && !['termine', 'schule'].includes(modeX)) cols.push(`<div class="tcol volc"><div class="lab th vol"><div class="ring vr" style="width:64px;height:64px"><span>🙋</span></div><div class="lt"><div class="nm">${TX.vol}</div><div class="vs2">${TX.volSub}</div></div></div><div class="tbody">${volHtml}</div></div>`);
+      if (volHtml && isT && !['termine', 'schule'].includes(modeX)) cols.push(`<div class="tcol volc"><div class="lab th vol"><div class="ring vr" style="width:64px;height:64px"><span>🙋</span></div><div class="lt"><div class="nm vl1">${TX.vol} <span class="vs2">${TX.volSub}</span></div></div></div><div class="tbody">${volHtml}</div></div>`);
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(${cols.length},minmax(0,1fr))`}">${cols.join('')}</div>`;
     }
 
@@ -813,7 +838,8 @@ class LoxWochenplanerCard extends FpBase {
       .date{font-size:24px;font-weight:300}.date b{font-weight:600}
       .sub{font-size:12px;color:#7a7a7a;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:2px}
       .nav{margin-left:auto;display:flex;align-items:center;gap:8px}.tdg{display:flex;gap:6px}
-      .top{flex-wrap:nowrap}.card.phone .top{flex-wrap:wrap}
+      .top{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}.top::-webkit-scrollbar{display:none}
+      .top > *{flex:none}.seg button{white-space:nowrap}.card.phone .top{gap:8px}.card.phone .seg button{padding:0 10px}
       .nb{background:#262626;border:1px solid #333;color:#ddd;border-radius:10px;height:42px;min-width:42px;padding:0 14px;display:flex;align-items:center;justify-content:center;cursor:pointer;font:inherit;font-size:14px;-webkit-tap-highlight-color:transparent}
       .nb ha-icon{--mdc-icon-size:22px}.nb.td{gap:6px}.tdn{background:${G};color:#141414;border-radius:10px;padding:0 7px;font-size:12px;line-height:20px}.nb.g{color:${G};border-color:rgba(105,195,80,.5)}
       .wk{font-size:12px;color:#8a8a8a;padding:0 8px;text-align:center;min-width:150px}.wk b{display:block;color:#ececec;font-size:15px;font-weight:600}
@@ -824,7 +850,7 @@ class LoxWochenplanerCard extends FpBase {
       .corner{font-size:10px;color:#555;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:6px;padding:0 4px 6px}
       .corner .leg{background:none;padding:0;margin:0;gap:4px 10px}.corner .lgi{font-size:12px}
       .pev.mid .src{display:none}
-      .hd{padding:4px 10px 6px;font-size:11px;color:#8a8a8a;text-transform:uppercase;letter-spacing:1px}
+      .hd{padding:4px 10px 6px;font-size:12px;font-weight:600;color:#a3a3a3;text-transform:uppercase;letter-spacing:1px}
       .hd{cursor:pointer;border-radius:8px;-webkit-tap-highlight-color:transparent}.hd.fx{background:#262626}
       .hd b{display:block;font-size:18px;color:#e5e5e5;font-weight:300;letter-spacing:0;text-transform:none;margin-top:2px}
       .hd.t,.hd.t b{color:${G}}.hd.t b{font-weight:500}
@@ -842,7 +868,7 @@ class LoxWochenplanerCard extends FpBase {
       .src{display:inline-block;font-size:9px;font-weight:700;color:#141414;border-radius:6px;padding:0 5px;margin-right:5px;line-height:15px;vertical-align:1px;white-space:nowrap}
       .leg{display:flex;align-items:center;gap:12px;margin-left:auto;background:#232323;border-radius:10px;padding:8px 14px;flex-wrap:wrap}
       .leg + .nav{margin-left:0}
-      .lgt{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px}
+      .lgt{font-size:11px;color:#8f8f8f;text-transform:uppercase;letter-spacing:1px}
       .tnav{display:flex;gap:6px;margin-left:auto}.tnav + .seg{margin-left:0}
       .seg{display:flex;background:#232323;border-radius:10px;padding:3px;gap:2px;margin-left:auto}.seg + .leg{margin-left:0}
       .seg button{background:transparent;border:none;color:#999;font:inherit;font-size:13px;padding:0 13px;height:36px;border-radius:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}.seg button.on{background:#3a3a3a;color:#fff;font-weight:600}
@@ -885,8 +911,8 @@ class LoxWochenplanerCard extends FpBase {
       .btn.done{background:rgba(105,195,80,.12);border-color:rgba(105,195,80,.45)}
       .btn.done .cb{background:${G};border-color:${G}}
       .btn.done .cb::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #1e1e1e;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
-      .btn.done .bt{color:#a7dc93}
-      .btn .tag{display:inline-block;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:7px;margin-right:6px;vertical-align:1px}
+      .btn.done .bx{color:#a7dc93}
+      .btn .tag{display:inline-block;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.3px;padding:1px 6px;border-radius:7px;margin-right:6px;vertical-align:1px}
       .btn.spc{border-color:rgba(245,197,66,.65);background:rgba(245,197,66,.08)}.btn.spc .tag{background:rgba(245,197,66,.2);color:#F5C542}
       .btn.tdo{border:1px dashed rgba(79,163,224,.7);background:rgba(79,163,224,.07)}.btn.tdo .tag{background:rgba(79,163,224,.2);color:#4FA3E0}.btn.tdo .cb{border-radius:6px}
       .btn.tdo.arm{border-style:solid;border-color:#4FA3E0;background:rgba(79,163,224,.18)}
@@ -894,7 +920,7 @@ class LoxWochenplanerCard extends FpBase {
       .btn.pop .cb{animation:fpcheck .5s cubic-bezier(.3,1.6,.5,1)}.btn.pop .cb::before{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid ${G};animation:fpring .6s ease-out forwards}
       @keyframes fpcheck{0%{transform:scale(.55)}60%{transform:scale(1.25)}100%{transform:scale(1)}}@keyframes fpring{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.3);opacity:0}}
       @media (prefers-reduced-motion:reduce){.btn.pop .cb,.btn.pop .cb::before{animation:none}}
-      .due{font-style:normal;font-size:10px;font-weight:600;color:#E0A84F;border:1px solid rgba(224,168,79,.5);border-radius:8px;padding:1px 6px;margin-left:6px;white-space:nowrap;display:inline-block}
+      .due{color:#E0A84F;border:1px solid rgba(224,168,79,.6);line-height:15px;border-radius:8px;padding:1px 6px;margin-left:6px;white-space:nowrap;display:inline-block}
       .due.last{color:#1e1e1e;background:#E0A84F;border-color:#E0A84F}.btn.done .due{opacity:.5}
       .pl.op{color:#c39a4a}.pl.op::before{display:none}
       .pev.mid .ev{font-size:11px;padding:3px 5px 3px 6px;white-space:normal;line-height:1.3}.pev.mid .et{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd}
@@ -907,7 +933,7 @@ class LoxWochenplanerCard extends FpBase {
       .c.p .big{font-size:14px}.c.p .big small{font-size:10px}.c.p .bar{margin:5px 0 4px}
       .fc{font-size:11px;color:#8a8a8a;white-space:nowrap}.fc b{font-size:18px;font-weight:300;color:#ddd;margin-right:4px}
       .opn{font-size:11px;color:#c39a4a;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .prog{font-size:11px;color:#8a8a8a;margin-bottom:4px;display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.8px}.gr{color:${G};font-weight:600}
+      .prog{font-size:12px;font-weight:600;color:#a3a3a3;margin-bottom:4px;display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.8px}.gr{color:${G};font-weight:600}
       .free{display:flex;align-items:center;gap:8px;color:#8a8a8a;font-size:14px;padding:6px 2px}.free ha-icon{color:${G}}
       .vc{display:flex;align-items:center;justify-content:center;gap:6px;height:100%;min-height:40px;color:#4FA3E0;font-size:13px;font-weight:600;background:rgba(79,163,224,.08);border-radius:8px}.vc ha-icon{--mdc-icon-size:20px}
       .big{font-size:18px;font-weight:300;line-height:1.1}.big small{font-size:13px;color:#8a8a8a}
@@ -927,19 +953,30 @@ class LoxWochenplanerCard extends FpBase {
       .lab.th .flg{position:absolute;top:-1px;right:24px;width:42px;padding:7px 0 15px;background:var(--rc);color:#141414;font-size:13px;font-weight:800;text-align:center;letter-spacing:.2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);z-index:2}
       .lab.th .nm{padding-right:50px}.lab.th .lv2:empty{display:none}
       .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .lab.th .nm{padding-right:0}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
-      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:10px;color:#7a7a7a;text-transform:uppercase;letter-spacing:1px;margin:2px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
+      .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:600;color:#a3a3a3;text-transform:uppercase;letter-spacing:.9px;margin:4px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
       .bg.one{grid-template-columns:1fr}
-      .age{display:block;font-size:10px;color:#8a8a8a;font-weight:400;margin-top:2px}
+
       .tdmore{background:none;border:1px dashed #3a3a3a;color:#999;border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
-      .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#F5C542}
+      .bin{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l r";align-items:center;column-gap:8px}
+      .bl{grid-area:l;display:flex;align-items:center;gap:6px;min-width:0}.br{grid-area:r;display:flex;align-items:center;gap:5px;justify-content:flex-end}
+      .bx{white-space:nowrap;min-width:0}
+      .bin.two{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"t t p" "m s s";row-gap:4px;align-items:start}.bin.two .bl,.bin.two .br{display:contents}
+      .bin.two .bx{grid-area:t;white-space:normal;overflow-wrap:break-word;hyphens:auto}.bin.two .bl > :not(.bx){grid-area:m;justify-self:start}
+      .bin.two .ptr{grid-area:p;justify-self:end}.c .bg:not(.one) .bin.two .tag .tl,.c .spw .bin.two .tag .tl{display:none}.bin.two .br > .tag{grid-area:s;justify-self:end}
+      .btn .tag,.due,.age,.ptr{display:inline-block;margin:0;font-style:normal;font-size:11px;font-weight:700;line-height:17px;padding:0 8px;border-radius:9px;white-space:nowrap;letter-spacing:.2px}
+      .age{color:#aab2bf;border:1px solid #4a505c;line-height:15px;font-weight:600}
+      .ptr{background:rgba(245,197,66,.18);color:#F5C542}.btn.done .ptr,.btn.done .tag,.btn.done .age{opacity:.6}
+      .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#F5C542;background:rgba(245,197,66,.18)}
       .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
-      .rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#F5C542;background:#F5C542}
-      .ptp{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:#F5C542;opacity:.85;vertical-align:middle}
+      .rvb.on{background:rgba(245,197,66,.18);border-color:#F5C542}.rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#F5C542;background:#F5C542}
+      .ptp{display:inline-block;margin-left:6px;padding:0 7px;border-radius:9px;background:rgba(245,197,66,.16);color:#F5C542;font-size:11px;font-weight:700;line-height:17px;vertical-align:middle;white-space:nowrap;font-style:normal}.done .ptp{opacity:.6}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),#232323 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:#2b2b2b;font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
-      .vs2{font-size:11px;color:#8a8a8a;margin-top:3px}.c.vc2{display:flex;flex-direction:column;gap:6px}
-      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:#2b2b2b;border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
+      .vs2{font-size:11px;font-weight:400;color:#8a8a8a}.rvx{display:inline-block;animation:fprvx 5s ease-out both;background:linear-gradient(100deg,currentColor 40%,#FFE27A 50%,currentColor 60%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}@keyframes fprvx{0%{opacity:0;filter:blur(8px);transform:scale(.5) rotate(-6deg);background-position:100% 0}12%{opacity:1;filter:blur(0);transform:scale(1.15) rotate(2deg)}20%{transform:scale(1) rotate(0)}40%{background-position:0 0}86%{opacity:1;filter:blur(0)}100%{opacity:.25;filter:blur(4px)}}@media (prefers-reduced-motion:reduce){.rvx{animation:none}}.vl1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:#2b2b2b;border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
       .vcard .vi{font-size:22px;text-align:center}.vcard .vt{min-width:0;font-size:13px;line-height:1.3}
-      .vcard .vbtn,.vcard .who{grid-column:1 / -1}.vbtn{display:flex;gap:8px}.vbtn .take{flex:1;height:40px;animation:fppul 2.4s ease-in-out infinite}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#F5C542;font-size:11px;margin-top:2px}
+      .vcard .vbtn,.vcard .who{grid-column:1 / -1}.vbtn{display:flex;gap:8px}.vbtn .take{flex:1 1 auto;max-width:200px;height:40px;animation:fppul 2.4s ease-in-out infinite}
+      .c.vc2{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;align-content:flex-start;align-items:flex-start}.c.vc2 .vcard{flex:1 1 240px;max-width:340px}
+      .c .bg:not(.one) > .spw{grid-column:span 2}.c .spw .btn .bin{min-width:0;overflow:hidden}.c .spw .rvb{width:36px;min-width:36px;height:auto;padding:0}.c .spw .rvb svg{width:22px;height:16px}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#F5C542;font-size:11px;margin-top:2px}
       .take{border:none;border-radius:10px;padding:8px 12px;background:#F5C542;color:#141414;font:inherit;font-size:13px;font-weight:700;cursor:pointer;animation:fpwig 2.4s ease-in-out infinite}
       .who{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.who span{font-size:12px;color:#aaa;margin-right:4px}
       .wp{display:flex;align-items:center;gap:6px;border:1px solid var(--c,#444);background:#232323;color:inherit;border-radius:18px;padding:2px 10px 2px 2px;font:inherit;font-size:13px;cursor:pointer}.wp.x{padding:4px 10px;border-color:#444;color:#999}
@@ -951,7 +988,7 @@ class LoxWochenplanerCard extends FpBase {
       .lab.bday .ring,.lab.bday .lt{position:relative;z-index:2}
       .tcol.bday{background:linear-gradient(160deg,rgba(255,122,182,.20),rgba(255,216,77,.14),rgba(92,225,230,.14),rgba(176,124,255,.20));background-size:300% 300%;animation:fpbdg 6s ease-in-out infinite}.tcol.bday .lab.th{animation:none;background:transparent}
       @keyframes fpbdg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-      .bdx{position:absolute;left:46px;top:50%;width:0;height:0;z-index:1;pointer-events:none}.tcol .bdx{left:42px;top:44px}
+      .bdx{position:absolute;left:50%;top:50%;width:0;height:0;z-index:1;pointer-events:none}
       .bdx i{position:absolute;left:0;top:0;display:block}
       .bdx .cf{width:6px;height:10px;border-radius:2px;background:var(--c);animation:fpcf 1.6s ease-out infinite}
       @keyframes fpcf{0%{transform:rotate(var(--a)) translateY(0) scale(.4);opacity:1}80%{opacity:1}100%{transform:rotate(var(--a)) translateY(-64px) rotate(240deg) scale(1);opacity:0}}
@@ -960,8 +997,8 @@ class LoxWochenplanerCard extends FpBase {
       @keyframes fpbl{0%{transform:translate(0,10px) scale(.3);opacity:0}15%{opacity:1}100%{transform:translate(var(--x),-80px) scale(1);opacity:0}}
       .bdx .bu{width:var(--s);height:var(--s);border-radius:50%;border:1.5px solid rgba(160,220,255,.9);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.8),rgba(160,220,255,.15) 40%,transparent 70%);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);animation:fpbu 3.4s ease-out infinite}
       @keyframes fpbu{0%{transform:translate(0,0) scale(.2);opacity:0}15%{opacity:1}100%{transform:translate(var(--x),-70px) scale(1.2);opacity:0}}
-      .bdx .rd{width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:conic-gradient(#FF5A5A,#FFB23D,#FFE94D,#55D16B,#4AA8FF,#8F6BFF,#FF5A5A);-webkit-mask:radial-gradient(circle,transparent 30px,#000 32px,#000 40px,transparent 42px,transparent 50px,#000 52px,#000 58px,transparent 60px);mask:radial-gradient(circle,transparent 30px,#000 32px,#000 40px,transparent 42px,transparent 50px,#000 52px,#000 58px,transparent 60px);animation:fpspin 3s linear infinite;opacity:.85}
-      .bdx .rd.r2{width:160px;height:160px;margin:-80px 0 0 -80px;background:repeating-conic-gradient(rgba(255,255,255,.18) 0 8deg,transparent 8deg 24deg);-webkit-mask:none;mask:none;animation-duration:9s;animation-direction:reverse}
+      .bdx .rd{width:88px;height:88px;margin:-44px 0 0 -44px;border-radius:50%;background:conic-gradient(#FF5A5A,#FFB23D,#FFE94D,#55D16B,#4AA8FF,#8F6BFF,#FF5A5A);-webkit-mask:radial-gradient(circle,transparent 33px,#000 34px,#000 38px,transparent 39px,transparent 40px,#000 41px,#000 43px,transparent 44px);mask:radial-gradient(circle,transparent 33px,#000 34px,#000 38px,transparent 39px,transparent 40px,#000 41px,#000 43px,transparent 44px);animation:fpspin 3s linear infinite;opacity:.85}
+      .bdx .rd.r2{width:104px;height:104px;margin:-52px 0 0 -52px;background:repeating-conic-gradient(rgba(255,255,255,.18) 0 8deg,transparent 8deg 24deg);-webkit-mask:none;mask:none;animation-duration:9s;animation-direction:reverse}
       .bdx .st{color:#FFD84D;font-size:14px;font-style:normal;margin:-8px 0 0 -5px;text-shadow:0 0 6px rgba(255,216,77,.8);animation:fpst 2.1s ease-out infinite}
       @keyframes fpst{0%{transform:rotate(var(--a)) translateY(0) scale(.3);opacity:0}20%{opacity:1}100%{transform:rotate(var(--a)) translateY(-70px) scale(1.1);opacity:0}}
       @media (prefers-reduced-motion:reduce){.bdx,.take,.lab.bday{animation:none}.bdx i{animation:none;opacity:0}}
@@ -981,10 +1018,11 @@ class LoxWochenplanerCard extends FpBase {
           <button class="nb" data-nav="1"><ha-icon icon="mdi:chevron-right"></ha-icon></button>
         </div>
       </div>
-      ${todayGrid || `<div class="grid">${head}${(!cals.length || cals.some((c) => !c.person)) ? termine : ''}${volRow}${rows}${empty}</div>`}
+      ${todayGrid || `<div class="grid">${head}${(!cals.length || cals.some((c) => !c.person)) ? termine : ''}${rows}${volRow}${empty}</div>`}
       ${this._err ? `<div class="err">${esc(this._err)}</div>` : ''}
       ${this._detail ? this._detailHtml(kids, pre, awards, frames) : ''}
     </div>`;
+    this._fit();
   }
 }
 

@@ -125,3 +125,75 @@ def test_away_badge_with_times():
     assert V.absence_spans({"m": [ev]}, P, V.DEFAULT_WORDS, "owner", 20) == {}  # long event: only once confirmed
     key = V.found({"m": [ev]}, P, V.DEFAULT_WORDS, "owner", 20, long_events=True)[0]["key"]
     assert V.absence_spans({"m": [ev]}, P, V.DEFAULT_WORDS, "owner", 20, {key: "away"})["m"][0]["kind"] == "trip"
+
+
+def test_night_mode_setting():
+    assert S.clean_settings({})["night_mode"] is True
+    assert S.clean_settings({"night_mode": False})["night_mode"] is False
+    assert S.clean_settings({"night_mode": "x"})["night_mode"] is True
+
+
+def test_frost_settings():
+    c = S.clean_settings({})
+    assert c["frost_mode"] is True and c["frost_below"] == -1
+    assert S.clean_settings({"frost_below": "-12"})["frost_below"] == -12
+    assert S.clean_settings({"frost_below": -99})["frost_below"] == -25
+    assert S.clean_settings({"frost_below": 5})["frost_below"] == 0
+    assert S.clean_settings({"frost_below": "x"})["frost_below"] == -1
+    assert S.clean_settings({"frost_mode": False})["frost_mode"] is False
+
+
+def test_fun_days_fixed_and_priority():
+    assert S.resolve({}, date(2027, 2, 20))["fun"]["key"] == "dino"
+    assert (S.resolve({}, date(2027, 1, 13))["fun"] or {}).get("key") != "duck"
+    assert S.resolve({}, date(2027, 7, 20))["fun"]["key"] == "moon"
+    sp = S.resolve({}, date(2027, 10, 9))["fun"]
+    assert sp["key"] == "sputnik" and sp["scene"] is False
+    assert S.resolve({}, date(2027, 10, 12))["fun"] is None or S.resolve({}, date(2027, 10, 12))["fun"]["key"] == "uk"
+    # Swiss National Day keeps its own scene
+    assert S.resolve({}, date(2027, 8, 1))["fun"] is None or S.resolve({}, date(2027, 8, 1))["fun"]["key"] != "uk"
+    assert S.resolve({"fun_days": False}, date(2027, 2, 20))["fun"] is None or S.resolve({"fun_days": False}, date(2027, 2, 20))["fun"]["key"] == "uk"
+
+
+def test_fun_day_does_not_replace_easter():
+    # Easter 2027 is on 28 March -> 15 April is an everyday spring day and shows the Titanic
+    assert S.resolve({}, date(2027, 4, 15))["fun"]["key"] == "titanic"
+    # 1 April 2029 is Easter Sunday -> Easter stays
+    assert S.resolve({}, date(2029, 4, 1))["fun"] is None
+
+
+def test_uk_days_ten_plain_days():
+    F = importlib.import_module("fpkg.funday")
+    days = [d for d in (date(2027, 1, 1) + __import__("datetime").timedelta(days=i) for i in range(365)) if (S.resolve({}, d)["fun"] or {}).get("key") == "uk"]
+    assert len(days) == 10
+    assert all(d.month != 12 and not (d.month == 1 and d.day <= 6) for d in days)
+    assert all(S.resolve({}, d)["key"] in (None, "winter", "fruehling", "sommer", "herbst") for d in days)
+    assert all(F.fixed_on(d) is None for d in days)
+    assert S.resolve({"uk_days": False}, days[0])["fun"] is None
+
+
+def test_absence_label_choice():
+    V = importlib.import_module("fpkg.vacation")
+    ev = {"summary": "Sam Paris", "start": "2026-11-15T15:00:00+01:00", "end": "2026-11-17T23:30:00+01:00"}
+    P = {"m": {"name": "Sam"}}
+    key = V.found({"m": [ev]}, P, V.DEFAULT_WORDS, "owner", 20, long_events=True)[0]["key"]
+    as_holiday = {key: {"d": "away", "label": "ferien"}}
+    assert V.absence_spans({"m": [ev]}, P, V.DEFAULT_WORDS, "owner", 20, as_holiday)["m"][0]["kind"] == "holiday"
+    assert set(V.absence_kinds({"m": [ev]}, P, V.DEFAULT_WORDS, "owner", 20, as_holiday)["m"].values()) == {"holiday"}
+    assert V.decision({"d": "away", "label": "evil"})["label"] == ""
+    ferien = {"summary": "Sommerferien", "start": "2026-07-04", "end": "2026-07-12"}
+    fk = V.found({"m": [ferien]}, P, V.DEFAULT_WORDS, "family", 20, long_events=True)[0]["key"]
+    assert set(V.absence_kinds({"m": [ferien]}, P, V.DEFAULT_WORDS, "family", 20, {})["m"].values()) == {"holiday"}
+    assert set(V.absence_kinds({"m": [ferien]}, P, V.DEFAULT_WORDS, "family", 20, {fk: {"d": "away", "label": "weg"}})["m"].values()) == {"trip"}
+
+
+def test_event_info_and_british_dedication():
+    F = importlib.import_module("fpkg.funday")
+    assert "Papa" in S.resolve({}, date(2027, 6, 6))["info"]["de"]          # Father's Day 2027
+    assert "Mama" in S.resolve({}, date(2027, 5, 9))["info"]["de"]          # Mother's Day 2027
+    assert S.resolve({}, date(2027, 3, 3))["info"] is None
+    assert S.clean_settings({"uk_for": "<b>Sam</b>"})["uk_for"] == "bSam/b"
+    assert S.clean_settings({"uk_for": "x" * 80})["uk_for"] == "x" * 40
+    f = F.dedicate(F.info("uk"), "Sam")
+    assert f["info"]["de"].startswith("Dieser Tag ist für Sam") and f["info"]["en"].startswith("This day is for Sam")
+    assert F.dedicate(F.info("moon"), "Sam")["info"]["de"].startswith("Am 20. Juli")

@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 import re
 
-from . import validate
+from . import funday, validate
 
 # ---------------------------------------------------------------------------------------------- date helpers
 
@@ -218,10 +218,26 @@ def _on_year(mo: int, d: int, year: int) -> date:
 DEFAULTS = {
     "enabled": True, "lead_day": 3, "lead_school": 3, "christmas_start": "advent", "xmas_snow": True,
     "weather": None, "storm_kmh": 50, "intensity": "normal", "priority": list(PRIORITY),
-    "events": {}, "wedding": "", "couple": "", "anim_bday": True, "house": "standard",
+    "events": {}, "wedding": "", "couple": "", "anim_bday": True, "house": "standard", "night_mode": True, "fun_days": True, "uk_days": True, "uk_for": "", "frost_mode": True, "frost_below": -1,
 }
 INTENSITY = ("calm", "normal", "lots")
 HOUSES = ("standard", "pool")
+
+
+def _short(val) -> str:
+    """A short name for the British Day dedication: plain text, no markup, at most 40 characters."""
+    if not isinstance(val, str):
+        return ""
+    return "".join(c for c in val if c.isprintable() and c not in "<>&\"'`{}")[:40].strip()
+
+
+def _frost(val) -> int:
+    """Frost threshold in degrees, -25 … 0, default -1."""
+    try:
+        num = int(float(val))
+    except (TypeError, ValueError):
+        return -1
+    return max(-25, min(0, num))
 
 
 def clean_settings(raw) -> dict:
@@ -250,6 +266,12 @@ def clean_settings(raw) -> dict:
         "wedding": clean_date(raw.get("wedding")),
         "couple": clean_date(raw.get("couple")),
         "anim_bday": bool(raw.get("anim_bday", True)),
+        "night_mode": bool(raw.get("night_mode", True)),
+        "frost_mode": bool(raw.get("frost_mode", True)),
+        "fun_days": bool(raw.get("fun_days", True)),
+        "uk_days": bool(raw.get("uk_days", True)),
+        "uk_for": _short(raw.get("uk_for")),
+        "frost_below": _frost(raw.get("frost_below")),
         "house": raw.get("house") if raw.get("house") in HOUSES else "standard",
     }
 
@@ -375,6 +397,17 @@ def resolve(cfg: dict, today: date, ferien: list[dict] | None = None, persons: d
         base["sub"] = "august"
     if base["vis"] == "silvester":
         base["sub"] = base["key"]
+    top_kind = cands[0]["kind"] if cands else None
+    if top_kind == "season" and base["vis"] == "weihnachten":
+        top_kind = "custom"   # Christmas time is never replaced
+
+    def plain(d: date) -> bool:
+        occ_d = [o for o in occurrences(cfg, d, ferien, persons) if o["start"] <= d <= o["end"]]
+        return all(o["kind"] == "season" and o["key"] not in xmas_days for o in occ_d)
+    sig = repr((sorted(cfg.items(), key=str), ferien, sorted((persons or {}).keys())))
+    base["fun"] = funday.dedicate(funday.pick(today, top_kind, cfg["fun_days"], cfg["uk_days"], plain, sig), cfg["uk_for"])
+    ev_info = funday.EVENT_INFO.get(base["key"] or "")
+    base["info"] = {"de": ev_info[0], "en": ev_info[1]} if ev_info else None
     return base
 
 

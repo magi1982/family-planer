@@ -552,3 +552,36 @@ Die Prozentzahl (heute grünes Bändeli unter dem Namen) auf die gleiche Höhe w
 2. **Grosse Zahl** – „82 %“ gross in der Stufenfarbe, darunter „zuverlässig“ und ein dünner Balken.
 3. **Fähnchen** – hängendes Fähnchen oben rechts an der Karte mit der Zahl (braucht am wenigsten Platz, Name und Abzeichen bleiben einzeilig).
 **Status:** ✅ Fähnchen umgesetzt (etwas weiter links, lokal)
+
+### 49. Design-Durchsicht (Vorschläge vom 15.11.)
+Aus einer Durchsicht aller Ansichten auf iPad und Handy. Jeder Punkt einzeln wählbar.
+1. **Handy-Personenkarten kompakter:** Avatar links, Name/Abzeichen rechts daneben (heute untereinander) – spart pro Person ca. 60 px.
+2. **Handy-Werkzeugleiste einzeilig:** Heute/Woche, Filter und To-do-Knöpfe in eine waagrecht wischbare Zeile; „To-dos & Spezial“ bricht heute auf 3 Zeilen um.
+3. **Handy-Kopfszene:** Haus etwas links der Mitte, damit es nicht hinter den Navigationsknöpfen verschwindet; Wetter nur als Symbol + Temperatur.
+4. **Wochenansicht – Sonderämtli kompakt:** in schmalen Zellen Etikett und Augen-Knopf als kleine Symbole in einer Zeile (heute zerquetscht).
+5. **Wochenansicht – Freiwillig-Zeile:** Knöpfe nicht über die ganze Breite (max. ca. 260 px), Karten nebeneinander statt untereinander.
+6. **Einheitliche Punkte-Plaketten:** gleiche Form und Farbe für Ämtli, To-dos und Sonderämtli (heute gelb +10 / blaues Etikett / gelbes Etikett).
+7. **Lesbarkeit:** kleine graue Grossbuchstaben-Überschriften (TERMINE, ÄMTLI …) etwas heller und grösser (Kontrast nach WCAG AA).
+8. **„Heute nichts“ freundlicher:** kleines Symbol und nächster Termin bzw. „morgen: …“.
+9. **Leere Listen-Seite:** Symbol, kurzer Text und Knopf „Liste einrichten“ direkt in die Einstellungen statt Pfad-Text.
+10. **Belohnungen:** Fortschrittsbalken bis zur nächsten Belohnung pro Person, Belohnungen als Kärtchen mit Symbol.
+11. **Nachtmodus fürs Tablet:** nach Sonnenuntergang alles etwas dunkler und ruhiger, Uhr grösser; Gartenlichter passen dazu.
+12. **Weiche Übergänge:** Abhaken mit kurzem Häkchen-Animationseffekt auch in der Wochenansicht, Ansichtswechsel mit sanftem Einblenden.
+**Status:** 🟡 umgesetzt: 2, 4, 5, 6, 7, 11 (lokal). Offen: 1, 3, 8, 9, 10, 12
+
+### 50. Einheitlicher Aufbau der Ämtli- und To-do-Knöpfe
+Regel: Passt alles auf eine Zeile → links Text, daneben Zeit-Info (seit x Tagen, heute fällig, bis Mo); rechts Punkte, links davon die Herkunft (To-do, Liste, Kalender von …, Sonder). Passt es nicht → links oben Text, links unten Zeit-Info, rechts oben Punkte, rechts unten Herkunft. Nur zwei Schriftgrössen (Titel und klein).
+Drei Stil-Vorschläge (Bild buttons.png): **A** ruhig – nur Punkte als Plakette, Infos als farbiger Text; **B** gemischt – Zeit-Info als Text, Herkunft als weiche Plakette; **C** alles Plaketten – Zeit-Info umrandet, Herkunft gefüllt, „heute fällig“ kräftig.
+**Status:** ✅ Stil C (alles Plaketten) umgesetzt, lokal
+
+### 51. Frost-Modus: alles gefriert bei starker Kälte
+Wenn die Aussentemperatur unter einen einstellbaren Wert fällt (Standard −1 °C), wird die ganze Szene eingefroren: Boden mit Raureif (weiss-bläulich, auch ohne Schnee), Bäume und Büsche bereift, Eiszapfen am Dach, Pool zugefroren mit Eisfläche, Fenster mit Eisblumen am Rand, dazu feine glitzernde Eiskristalle in der Luft.
+Temperaturquelle: das Attribut `temperature` der eingestellten Wetter-Entität (keine eigene Sensor-Entität). Optional: eine eigene Temperatur-Entität (z. B. Aussenfühler) in den Einstellungen wählbar, die Vorrang hat.
+Einstellungen: „Frost-Modus“ ein/aus und „Gefroren ab“ (−25 … 0 °C, Standard −1 °C), jeweils mit Beschreibung DE/EN.
+**Status:** ✅ umgesetzt (Quelle: Wetter-Entität), lokal; eigener Aussenfühler als Option noch offen
+
+### 52. Info-Texte auch für Bräuche und Feiertage
+Der Info-Knopf (ⓘ) neben dem Datum gibt es heute nur an den besonderen Tagen. Vorschlag: auch Schweizer Bräuche und Feiertage bekommen einen kurzen, kindgerechten Text (DE/EN), der erklärt, was gefeiert wird.
+Kandidaten: Samichlaus, Heiligabend/Weihnachten, Silvester, Neujahr/Berchtoldstag, Dreikönigstag, Fasnacht, Valentinstag, Karfreitag/Ostern, Tag der Arbeit, Auffahrt, Pfingsten, Muttertag, Vatertag, 1. August, Bettag, Erntedank, Frühlings-/Sommer-/Herbst-/Winteranfang.
+Nicht nötig: Wetter, Jahreszeiten, Ferien, Geburtstag, Hochzeitstag (selbsterklärend).
+**Status:** Idee

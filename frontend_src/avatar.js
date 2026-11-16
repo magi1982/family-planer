@@ -298,8 +298,9 @@
     if (o.face !== '0') s += faceArt[o.face](h1);
     if (costume) s += costume[1]();
     if (o.head !== '0') s += headArt[o.head]();
-    if (o.pet !== '0') s += petArt[o.pet]();
-    if (o.fx !== '0') s += fxArt[o.fx]();
+    // companions and small effects sit a bit inside, so nothing is cut off by the round picture
+    if (o.pet !== '0') s += `<g transform="translate(32 34) scale(.84) translate(-32 -34)">${petArt[o.pet]()}</g>`;
+    if (o.fx !== '0') s += ['leuchtaugen', 'goldglanz', 'rubinglanz'].includes(o.fx) ? fxArt[o.fx]() : `<g transform="translate(32 33) scale(.8) translate(-32 -33)">${fxArt[o.fx]()}</g>`;
     return `<svg viewBox="${view || '0 0 64 64'}" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
   };
   // the big-effect layer around a picture: put it inside a position:relative box of the picture's size

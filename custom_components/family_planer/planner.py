@@ -543,7 +543,7 @@ class FamilyPlanner:
             self._changed(save=False)
 
     async def async_vacation_decide(self, key: str, decision: str | None, family: bool = False,
-                                    persons: list[str] | None = None) -> None:
+                                    persons: list[str] | None = None, label: str | None = None) -> None:
         """Holiday found in a calendar: "away" pauses chores, "home" keeps them going, None = ask again.
 
         family / persons: for whom it applies (default: the persons found in the calendar).
@@ -552,7 +552,7 @@ class FamilyPlanner:
         if decision in ("away", "home"):
             dec[key] = {"d": decision, "family": bool(family),
                         "persons": [p for p in (persons or []) if p in self.data["persons"]][:30],
-                        "at": self.today().isoformat()}
+                        "at": self.today().isoformat(), "label": label if label in vacation.LABELS else ""}
         else:
             dec.pop(key, None)
         known = getattr(self, "_vac_keys", set()) | {e["key"] for e in self.vacation_review}
@@ -1513,8 +1513,10 @@ class FamilyPlanner:
             "season": self.season(),
             "season_cfg": {k: v for k, v in self.season_settings().items()
                            if k in ("weather", "storm_kmh", "intensity", "sug_enabled", "sug_from", "pool", "pool_min",
-                                    "jacuzzi", "jacuzzi_min", "xmas_snow", "anim_bday", "house")},
+                                    "jacuzzi", "jacuzzi_min", "xmas_snow", "anim_bday", "house", "night_mode",
+                                    "frost_mode", "frost_below")},
             "busy": self.busy,
+            "away_kind": self.away_kind,
             "away_badge": {pid: b for pid, spans in self.away_spans.items() if (b := vacation.badge_at(spans, dt_util.now()))},
             "sonder": sonder.view(self.data["sonder_inst"], self.data["sonder"], self.lang),
             "sonder_points": {iid: self.sonder_points(i) for iid, i in self.data["sonder_inst"].items()},

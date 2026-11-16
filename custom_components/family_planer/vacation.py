@@ -134,14 +134,26 @@ def found(events_by_owner: dict[str | None, list[dict]], persons: dict, words: l
     return sorted(out.values(), key=lambda e: e["days"][0])
 
 
+LABELS = ("ferien", "weg")
+
+
 def decision(raw) -> dict:
     """Stored decision -> {"d": "away" | "home", "family": bool, "persons": [ids], "at": iso date}."""
     if isinstance(raw, str):
-        return {"d": raw, "family": False, "persons": [], "at": ""}
+        return {"d": raw, "family": False, "persons": [], "at": "", "label": ""}
     if not isinstance(raw, dict) or raw.get("d") not in ("away", "home"):
         return {}
     return {"d": raw["d"], "family": bool(raw.get("family")), "persons": [p for p in raw.get("persons") or [] if isinstance(p, str)][:30],
-            "at": str(raw.get("at") or "")[:10]}
+            "at": str(raw.get("at") or "")[:10], "label": raw.get("label") if raw.get("label") in LABELS else ""}
+
+
+def kind_of(ev: dict, dec: dict) -> str:
+    """What the absence is shown as: the choice in the check ("ferien" / "weg"), else holidays from the calendar."""
+    if dec.get("label") == "ferien":
+        return "holiday"
+    if dec.get("label") == "weg":
+        return "trip"
+    return "holiday" if ev["kind"] == "holiday" else "trip"
 
 
 def absence_spans(events_by_owner: dict[str | None, list[dict]], persons: dict, words: list[str], scope: str,
@@ -155,8 +167,7 @@ def absence_spans(events_by_owner: dict[str | None, list[dict]], persons: dict, 
             continue
         who_ = list(persons) if dec.get("family") else [p for p in dec.get("persons", []) if p in persons] or ev["persons"]
         for pid in who_:
-            out.setdefault(pid, []).append({"start": ev["start"], "end": ev["end"],
-                                            "kind": "holiday" if ev["kind"] == "holiday" else "trip"})
+            out.setdefault(pid, []).append({"start": ev["start"], "end": ev["end"], "kind": kind_of(ev, dec)})
     return out
 
 
@@ -227,7 +238,7 @@ def absence_kinds(events_by_owner: dict[str | None, list[dict]], persons: dict, 
         if dec.get("d") == "home" or (ev["kind"] == "long" and dec.get("d") != "away"):
             continue
         who_ = list(persons) if dec.get("family") else [p for p in dec.get("persons", []) if p in persons] or ev["persons"]
-        kind = "holiday" if ev["kind"] == "holiday" else "trip"
+        kind = kind_of(ev, dec)
         for pid in who_:
             days = out.setdefault(pid, {})
             for d in ev["days"]:
@@ -273,7 +284,7 @@ def review(entries: list[dict], decisions: dict, today: date, ahead_days: int = 
         if dec and dec["at"] and dec["at"] < old:
             continue
         out.append({**e, "decision": dec.get("d"), "family": dec.get("family", False), "chosen": dec.get("persons", []),
-                    "decided_at": dec.get("at", "")})
+                    "decided_at": dec.get("at", ""), "label": dec.get("label", "")})
     return out[:30]
 
 

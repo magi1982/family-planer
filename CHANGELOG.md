@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.13.3 – 2026-11-16
+
+### Added
+- **Titanic to tap:** tapping the ship on 15 April tells the story: night falls, the full moon rises, an iceberg drifts in, the ship breaks in two and sinks, lifeboats with lanterns row away – then it is day again. Big ice floes drift by. Now and then a bouncing golden arrow with "Tap!" and sparkles shows the kids where to tap (also on the lunar module).
+- **Lunar module to tap:** on 20 July it lifts off into space and lands again in a cloud of moon dust; a small Swiss flag is planted next to it.
+- **Info texts for Mother's Day and Father's Day** – the info chip next to the date now also works for customs (more can follow).
+- **British Day for …** (setting): an optional name; the info text then says the day is for this person as a keepsake of the British roots.
+- **Special days** (setting, on by default): their own header scene on Dinosaur Day (20 Feb), April Fools' Day (spaghetti harvest), the first mobile phone call (3 Apr), Titanic (15 Apr), the Moon landing (20 Jul) and a volcano day (27 Aug); Sputnik crosses the night sky 4–11 October and Concorde flies by on 26 November. Holidays, customs, birthdays and anniversaries keep their own scene. A chip with an info button explains the day.
+- **British Days** (setting, on by default): ten random ordinary days a year show Buckingham Palace with the King's Guard instead of the house – never at Christmas, on holidays, school holidays or other special days.
+- **Hot days:** above 30 °C a pool party with floats and a lawn sprinkler; on warm days a little lizard scurries across the ground.
+- **Secret chores:** revealing one plays a small sparkle animation; tapping the eye again hides it (it is never ticked off by accident).
+- **Frost mode** (setting with threshold, default −1 °C): in hard frost the header scene freezes – hoarfrost on everything, frozen puddles, glittering ice crystals. Uses the temperature of the selected weather entity.
+- **Night mode** (setting under *Seasons & weather*, on by default): after the real sunset (`sun.sun`) a soft dark veil lies over the dashboard and the clock gets bigger; animations keep running. On a clear night single stars flare up now and then and a shooting star crosses the sky every so often.
+- **Diagnostics** now include the holiday / trip detection and the special-chore counts – anonymised (persons as P1, P2 …, no titles or names) – so problems with *away* can be checked from the diagnostics download.
+
+### Changed
+- **Scenes:** on hot days the ball flies in an arc from child to child; the lunar module looks like the original Apollo LM; after 23:00 only a dark blue light flickers upstairs now and then. Rubber Duck Day was removed.
+- **Absences:** a day off shows *Away* ✈️ unless it really is a holiday (*Holiday* 🌴 for school holidays and holiday words). In the holiday check (top right) every entry can be set to *Holiday* or *Away*.
+- **Scenes:** five sprinklers and a ball thrown between the swimmers on hot days, a slower lizard away from the pool, a slow moon jump with dust, ice floes around the Titanic, New York 1973 for the first mobile call (skyline, radio mast, the caller, a yellow cab), red-white-blue bunting and flowers on British Days (no bus), Sputnik with its four antennas trailing, a more realistic Concorde.
+- **Scenes, round 4:** at night the house is darker and now and then a light goes on upstairs (the ground floor is either fully lit or dark); no snowball kids at night; New Year's Day with a chimney sweep on the roof, a lucky pig, clover and a toadstool instead of emojis; slimmer three kings; cable car with valley station, mast and top station behind the trees, ski runs only on its mountain, a summit cross; Christmas Eve glitter in bright patches and the Christ child stays out longer; baby's breath on the meadow and no parasol on the wedding anniversary; carnival streamers hang from the top and sway, no emojis; chocolate bunnies stay behind the bushes; doves fly out of the picture in all directions; Father's Day with a man cave, a caveman dad and a smoking campfire; summer with one shark fin and crabs that come out of a sand hole and dig in again.
+- **Volunteer column:** title and *First come, first served* in one line.
+- **Header:** left the time with weekday and date next to it, the three buttons below – symmetric to the right side. The *Refresh* button moved into *Settings* (top bar) and reloads all calendars and lists from there.
+- **Scenes, round 3:** darker ground at night; New Year's Eve with silver and gold glitter fireworks showing the coming year (night only), New Year's Day by day with lucky charms; three kings for Epiphany; winter sports with ski runs and the cable car on the mountain next to the house; on snowy winter days a snowman and children throwing snowballs; Easter bunnies only peek out with their heads, chocolate bunnies hide behind bushes, tilted eggs; stronger glitter on Christmas Eve; a bridal couple on the wedding anniversary; shark fins that rise and sink at the horizon and crabs on the beach; carnival now with your own house, confetti on the ground and confetti explosions; new doves that start on the ground and fly up flapping; Father's Day with dad on a ride-on mower, a drone and the grill.
+- **Week view:** the volunteer row is at the bottom; its cards sit side by side with normal-sized buttons. A special chore in a narrow cell spans two cells, so title and eye fit.
+- **Toolbar in one line** on every screen (swipe sideways on the phone if it does not fit).
+- **Every task button is built the same:** left the title and the time chip (*for 2 d*, *due today*, *until Mon*), right the source chip (*To-do*, the name of the to-do list, *Special*, *Extra*) and the points – all as rounded chips in one size. If it does not fit on one line: title and time on the left, points and source on the right, one above the other. In narrow week cells the source shows its symbol only.
+- **Better readability:** section headers (*Events*, *Chores*, *To-dos* …) and progress lines are larger and brighter.
+- **More customs and fixes in the scene:** Samichlaus with his donkey and a cheerful Schmutzli; Christmas Eve with glitter on the ground, presents everywhere and the Christkind peeking out from behind the tree; the cable car climbs the mountain and a skier carves down the slope in the winter sports holidays; an empty cross on Ascension Day and Whitsun, white doves at Whitsun; funny floating things instead of hearts on Father's Day; a plane flies by now and then and a shark fin surfaces at the beach; fireworks keep away from the house; late at night (from 23:00) stars show even through clouds. No banners in the scene any more.
+- **Avatars:** birthday animations are centred on the avatar (also in the week view), the rainbow rings are smaller; companions and small effects sit a little further inside the round picture so nothing is cut off.
+- **Season scenes reworked:** a whole sky of rockets and crackling fireworks on New Year's Eve, crowns beside the house on Epiphany, a very colourful Fasnacht with lanterns, balloons and a marching Guggenmusik, rabbit holes with little white bunnies peeking out at Easter, many animated hearts on Mother's Day (no banner), a grill with smoke and a football on Father's Day, doves and a picnic at Pentecost, a beach bungalow with palms in the summer holidays, children with school bags walking to school, and a much livelier birthday with rising balloons and party poppers. The 1 August flag stands beside the house.
+- **Pool covered at night** (22:00–8:00), pool suggestions only until 21:00.
+
 ## 0.13.2 – 2026-11-15
 
 ### Added
@@ -23,6 +55,7 @@
 
 
 ### Fixed
+- Chimney and fire smoke now rises from the chimney instead of drifting across the sky; clear nights no longer show clouds.
 - **Date in the header** shows the weekday in full again (a second, short weekday list overwrote it).
 - **Lists no longer jump while you work:** switching a special chore on or assigning a day to a chore keeps the row where it is (the order is fixed while the page is open); saving no longer blanks the list and throws you back to the top.
 - **Shopping list *Optimise* no longer hangs:** reading the list is limited to 15 s and the AI to 30 s (at most 60 items per request); if it takes longer, the planner sorts by keywords only and the button shows *taking too long* after 60 s at the latest.

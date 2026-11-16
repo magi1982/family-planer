@@ -742,6 +742,7 @@ async def ws_todo_delete(hass: HomeAssistant, connection: websocket_api.ActiveCo
                                   vol.Required("decision"): vol.Any("away", "home", None),
                                   vol.Optional("family", default=False): bool,
                                   vol.Optional("persons", default=list): vol.All([ID], vol.Length(max=30)),
+                                  vol.Optional("label"): vol.Any("ferien", "weg", None),
                                   vol.Optional("token"): TOKEN})
 @websocket_api.async_response
 async def ws_vacation_decide(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
@@ -752,7 +753,7 @@ async def ws_vacation_decide(hass: HomeAssistant, connection: websocket_api.Acti
         return
     if not _change(connection, msg, planner):
         return
-    await planner.async_vacation_decide(msg["key"], msg["decision"], msg["family"], msg["persons"])
+    await planner.async_vacation_decide(msg["key"], msg["decision"], msg["family"], msg["persons"], msg.get("label"))
     connection.send_result(msg["id"])
 
 

@@ -6,7 +6,7 @@ Every phrase must occur in the source (build.py checks this), so the list stays 
 WEEK = [
     ("const FPL = 'de';", "const FPL = 'en';"),
     ("'Nochmals tippen zum Erledigen'", "'Tap again to finish'"),
-    ('<em class="tag">⭐ Spezial${', '<em class="tag">⭐ Special${'),
+    ('<em class="tag">⭐<span class="tl"> Spezial</span></em>', '<em class="tag">⭐<span class="tl"> Special</span></em>'),
     ("const SOON_T = ['in {n} Min', 'in {n} Std'];", "const SOON_T = ['in {n} min', 'in {n} h'];"),
     ("trophy: ['Pokal des Monats', 'Beste Quote im letzten Monat.'],",
      "trophy: ['Trophy of the month', 'Best rate last month.'],"),
@@ -105,7 +105,6 @@ WEEK = [
     ("const schoolC = { farbe: k.farbe, name: 'Schule', schule: true };", "const schoolC = { farbe: k.farbe, name: 'School', schule: true };"),
     ("lessons = spans.map((z) => ({ title: 'Schule', s:", "lessons = spans.map((z) => ({ title: 'School', s:"),
     ("`🎒 los ${hm(new Date(bk.s - wg * 60000))} · zuhause ${hm(new Date(+bk.e + wg * 60000))}` : '🎒 Schule'", "`🎒 leave ${hm(new Date(bk.s - wg * 60000))} · home ${hm(new Date(+bk.e + wg * 60000))}` : '🎒 School'"),
-    ("'<span>Ferien</span>'", "'<span>Holiday</span>'"),
     ("data-nav=\"0\">Heute</button>", "data-nav=\"0\">Today</button>"),
     ("title=\"Kalender synchronisieren\"", "title=\"Sync calendars\""),
 ]
