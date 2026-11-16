@@ -628,4 +628,4 @@ Wie Titanic und Mondfähre: in jeder Szene etwas, das beim Antippen eine kleine 
 38. **Alphorn** (die Schweizerfahne): Ein Alphornbläser erscheint und bläst, Noten schweben übers Bild, das Höhenfeuer lodert auf.
 39. **Kerzen auspusten** (den Geburtstagskuchen): Die Kerzen werden ausgepustet (kleine Rauchfahnen), dann gehen sie mit Konfetti wieder an.
 40. **Ring ring!** (das Ur-Handy): Das Handy klingelt und vibriert, dann verwandelt es sich kurz in ein modernes Smartphone und zurück.
-**Status:** Idee
+**Status:** Prototyp im Artefakt „Family Planer – 40 Tipp-Animationen“ (alle 40 antippbar, 11 davon grosse Geschichten: 4, 8, 12, 19, 22, 25, 27, 33, 37, 38, 40). Noch nicht im Planer eingebaut.
