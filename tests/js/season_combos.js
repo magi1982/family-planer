@@ -33,5 +33,7 @@ const snap = { lang: 'de', season: { vis: 'alltag' }, season_cfg: { sug_from: '1
 if (S.suggest(snap, { states: {} }, { kind: 'sunny', temp: 28 }, [], new Date('2026-07-04T10:00:00')) !== null) errors.push('suggestion before noon');
 const sg = S.suggest(snap, { states: {} }, { kind: 'rainy', temp: 12 }, [], new Date('2026-07-04T15:00:00'));
 if (!sg || !sg.title || bad(JSON.stringify(sg))) errors.push('no suggestion on a rainy afternoon');
+// the New Year's Eve fireworks always show the coming year
+if (S.nextYear(new Date('2026-11-16T12:00:00')) !== 2027 || S.nextYear(new Date('2026-12-31T23:00:00')) !== 2027 || S.nextYear(new Date('2027-01-01T00:30:00')) !== 2027) errors.push('next year');
 if (errors.length) { console.error(errors.slice(0, 30).join('\n')); process.exit(1); }
 console.log(`ok ${n}`);

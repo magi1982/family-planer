@@ -2,9 +2,11 @@
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
-// window.FPSEASON = { setSnap, cur, scene, sceneKey, weather, suggest, burst, page, band, LABEL }
+// window.FPSEASON = { nextYear, setSnap, cur, scene, sceneKey, weather, suggest, burst, page, band, LABEL }
 // ---------------------------------------------------------------------------------------------------------
 (() => {
+  // New Year's Eve always shows the coming year; only in January (just after midnight) is the new year already the current one
+  const nextYear = (d) => (d.getMonth() === 0 ? d.getFullYear() : d.getFullYear() + 1);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const rng = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
   const W = 1200; const H = 120; const CX = 640; // CX: where the main motif sits (a bit right of the middle, the navigation is on the left)
@@ -70,7 +72,7 @@
   };
 
   // ------------------------------------------------------------------------------ snapshot hook
-  const api = { cur: null };
+  const api = { nextYear, cur: null };
   api.setSnap = (s) => { api.cur = s && s.season && s.season.enabled !== false && s.season.vis ? s.season : null; };
   api.page = () => (api.cur && PAGE[api.cur.vis]) || '';
   api.band = () => (api.cur && BAND[api.cur.vis]) || '';
@@ -441,7 +443,7 @@
         if (silv) for (let k = 0; k < 7; k++) svg += `<circle class="tw" cx="${(x + (r() - 0.5) * 44).toFixed(0)}" cy="${(y + (r() - 0.3) * 36).toFixed(0)}" r="${(0.8 + r() * 0.8).toFixed(1)}" fill="${k % 2 ? '#fff' : '#FFD24A'}" style="animation-delay:-${(r() * 1.8).toFixed(2)}s;animation-duration:.7s"/>`;
       }
       if (silv) {
-        const now = new Date(); const yr = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
+        const yr = nextYear(new Date());
         [[CX - 300, TOP + 30, 0], [CX + 300, TOP + 26, 3.5]].forEach(([x, y, dl]) => {
           svg += burstRays(x, y - 4, '#FFD24A', String(dl)) + `<g class="yr" style="transform-origin:${x}px ${y}px;animation-delay:-${dl}s"><text x="${x}" y="${y + 6}" text-anchor="middle" font-size="19" font-weight="800" font-family="system-ui,sans-serif" fill="#FFE27A" stroke="#b8860b" stroke-width=".6" letter-spacing="1">${yr}</text></g>`; });
       }
