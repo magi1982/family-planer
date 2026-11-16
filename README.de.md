@@ -11,8 +11,9 @@
 
 Der Familienplaner fürs Wandtablet: **Ämtli** mit Punkten und echten Belohnungen, **Termine und Stundenplan**
 jeder Person auf einen Blick, **Ferien**, die Ämtli automatisch pausieren, **Ansagen** über Alexa sobald jemand
-heimkommt – und **Einkaufs- und To-do-Listen, die sich selbst sortieren**. Alles wird in der Oberfläche
-eingerichtet, **kein YAML**.
+heimkommt – und **Einkaufs- und To-do-Listen, die sich selbst sortieren**. Oben zeigt ein **lebendiger Kopfbereich**
+euer Haus im echten Wetter und zur echten Tageszeit, durch die Jahreszeiten, Schweizer Bräuche und besondere Tage.
+Alles wird in der Oberfläche eingerichtet, **kein YAML**.
 
 🇬🇧 [English](README.md) · 🇩🇪 **Deutsch**
 
@@ -149,7 +150,12 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 - **Zuverlässigkeit** in Prozent (30 Tage), farbiges Band pro Person.
 - **Faire Punkte** (Standard): Wer **alle** Ämtli des Tages erledigt, bekommt gleich viele Punkte (Standard 30) – egal ob 2 oder 6 Ämtli. Jedes erledigte Ämtli bringt sofort seinen Anteil; 3 von 6 erledigt = 50 % = 15 Punkte. Die Punkte im Ämtliplan wirken als Gewicht (ein schweres Ämtli mit 20 zählt doppelt so viel wie eines mit 10). Alternativ Modus *Pro Ämtli*: mehr Ämtli, mehr Punkte.
 - **Punkte**: zusätzlich **Tagesbonus** für einen ganz erledigten Tag, **Serienbonus** für jede 7-Tage-Serie. Wird ein Ämtli wieder geöffnet, werden die Punkte zurückgebucht.
-- **10 Level** von *Starter* über *Profi* und *Held* bis *Grossmeister* – mit Fortschrittsbalken. Eingelöste Punkte senken das Level nie.
+- **Level pro Schuljahr** (Saison, beginnt am 1. August – einstellbar): von *Starter* über *Held* und *Legende* bis zu herrlich verrückten Namen ab Level 21. Die Level sind in **Stufen – Bronze (1–5), Silber (6–10), Gold (11–15), Diamant (16–20) und Rubin (ab 21)**; das Level-Abzeichen am Bild zeigt die Stufenfarbe. Eingelöste Punkte senken das Level nie.
+- **Level-Aufstieg wird gefeiert**: Banner mit dem neuen Level-Namen, Konfetti in der Stufenfarbe, auf Wunsch **Bonuspunkte** (ein voller Tag pro Level, drei Tage bei einer neuen Stufe) – und jedes Level **schaltet Avatar-Extras frei** (Mütze, Goldbrille, Hamster, Babydrache, Phönix, Kronen, Flügel, Galaxie …), die nur diese Person tragen kann. Sie bleiben auch nach dem Saisonwechsel.
+- **Easter Egg:** Tipp auf das Level-Abzeichen am Bild – jede Stufe hat ihren eigenen Effekt (Funken, Goldregen, Sternexplosion mit Blitz, Rubin-Ausbruch, bei dem der Bildschirm wackelt). Direkt nach einem Aufstieg leuchtet das Abzeichen für ein paar Tipper.
+
+![Level-Aufstieg](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/levels.png)
+
 - **Auszeichnungen und Pokale** – jede hat einen Zeitraum, damit niemand drei Pokale am Tag sammelt:
 
   | Auszeichnung | Gewonnen | Rahmen / Punkte (Standard) |

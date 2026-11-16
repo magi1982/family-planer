@@ -11,7 +11,8 @@
 
 The family planner for your wall tablet: **chores** with points and real rewards, everyone's **events and school
 timetable** at a glance, **holidays** that pause chores automatically, **spoken reminders** as soon as someone comes
-home – and **shopping and to-do lists that sort themselves**. Everything is set up in the UI, **no YAML**.
+home – and **shopping and to-do lists that sort themselves**. On top, a **living header** shows your house in the real
+weather and time of day, through the seasons, Swiss customs and special days. Everything is set up in the UI, **no YAML**.
 
 🇬🇧 **English** · 🇩🇪 [Deutsch](README.de.md)
 
@@ -150,7 +151,12 @@ Per child (or person, e.g. university/work):
 - **Reliability** in percent (30 days), coloured band per person.
 - **Fair points** (default): whoever finishes **all** of their chores of the day gets the same number of points (default 30) – whether they have 2 or 6 chores. Every finished chore immediately earns its share; 3 of 6 done = 50 % = 15 points. The points in the chore plan act as weights (a heavy chore with 20 counts twice as much as one with 10). Alternatively *per chore* mode: more chores, more points.
 - **Bonuses**: additionally a **day bonus** for a fully completed day and a **streak bonus** for every 7-day streak. If a chore is reopened, its points are booked back.
-- **10 levels** from *Starter* via *Pro* and *Hero* to *Grandmaster* – with progress bar. Redeemed points never lower the level.
+- **Levels per school year** (season, starts on 1 August – adjustable): from *Starter* via *Hero* and *Legend* up to wonderfully silly names beyond level 21. The levels come in **tiers – bronze (1–5), silver (6–10), gold (11–15), diamond (16–20) and ruby (21+)**; the level badge on the picture shows the tier colour. Redeemed points never lower the level.
+- **Level-up celebration**: a banner with the new level name, confetti in the tier colour, optional **bonus points** (one full day per level, three days at a new tier) – and every level **unlocks avatar extras** (cap, golden glasses, hamster, baby dragon, phoenix, crowns, wings, galaxy …) that only this person can wear. They stay after the season reset.
+- **Easter egg:** tap the level badge on the picture – every tier has its own effect (sparks, golden rain, star explosion with flash, ruby eruption that shakes the screen). Right after a level-up the badge glows for a few taps.
+
+![Level-up](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/levels.png)
+
 - **Awards and trophies** – each one has a period, so nobody collects three trophies a day:
 
   | Award | Won | Frame / points (default) |
