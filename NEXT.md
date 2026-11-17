@@ -669,5 +669,5 @@ Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 - Mondlandungs-Tag hat kein Haus → 44 (Haus wird Startrampe) passt dort nicht → Sputnik-Woche. 76 (Teleskop) nicht am Mondlandungs-Tag.
 - Themen-Tage ohne Haus (Handy, Vulkan, Mond, Titanic, Dino, British Day): nur ihre eigene Animation.
 - 50 und 106 brauchen die volle Sonne (nicht Abendsonne, nicht bewölkt).
-- Antippen der ganzen Szene kollidiert mit Doppeltippen = Vollbild und mit den Tipp-Objekten Titanic/Mondfähre → kurz warten, ob ein zweiter Tipp kommt; Objekte haben Vorrang.
-- Einstellungen: „Tipp-Animationen“ an/aus, „Überraschungen“ (aus / selten ≈ 1 Tag pro Woche / oft ≈ 3 Tage pro Woche).
+- Entscheid Doppeltippen: Das Szenenbild zählt nicht mehr als „freie Stelle“ fürs Vollbild-Doppeltippen. Ein Tipp aufs Bild startet sofort die Animation (keine Wartezeit), Vollbild an/aus geht weiter über die übrigen freien Stellen. Titanic/Mondfähre haben Vorrang.
+- Einstellungen: „Tipp-Animationen“ an/aus, „Überraschungen“ (aus / selten ≈ 1 Tag pro Woche / oft ≈ 3 Tage pro Woche), Standard: selten (entschieden).
