@@ -647,3 +647,27 @@ Einstellungen (mit Beschreibung DE/EN): „Buchstabe auf dem Coin“ (1 Zeichen,
 Datenschutz: kein Familienname im Code oder in Beispielen – der Buchstabe kommt nur aus der Einstellung.
 Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 **Status:** Idee (Design gewählt)
+
+## 55 · Welche Tipp-Animation wann läuft (Vorschlag, noch nicht gebaut)
+
+**Zeitfenster:** Tag (06–17 Uhr), Abend (17–20 Uhr), Nacht (20–06 Uhr, wie die Szene). Pro Zeitfenster und Tag wird **eine** Animation fest ausgewählt (vom Datum abgeleitet, nicht dieselbe wie in den letzten Tagen) → 2–3 verschiedene pro Tag; nochmal tippen spielt dieselbe nochmal.
+
+**Reihenfolge beim Auswählen (die erste passende Stufe gewinnt):**
+1. Themen-Tag mit eigener Szene: Dino-Tag 103 · Handy-Tag 40 · Vulkan-Tag 42 · Mondlandung (bestehende Mondfähre) · Titanic (bestehendes Schiff) · British Day (keine).
+2. Anlass: Geburtstag 39 (Tag+Abend) · Valentin/Hochzeits-/Kennenlerntag 67 (Abend/Nacht) · Fasnacht 27 · Ostern 29 · Schulanfang 101 · 1. August 38 (Abend/Nacht) · Samichlaus 19 (Tag) · Advent–26.12. 65 (Abend/Nacht) · Silvester 93 (Tag/Abend), 22 (Nacht) · Sputnik-Woche 4.–11.10. 44 (Abend).
+3. Wetter (nur Tag): Regen 68 · Sonne nach Regen 71 · teils bewölkt 49 · Wind 7 (Herbst) / 51 (sonst, Sturm) · Schnee 72/55 · Frost 79 · ab 30 °C 59 · ab 20 °C 16 · volle Sonne 50/106.
+4. Jahreszeit:
+   - Frühling: Tag 58, 62, 109, 56 · Nacht 76, 63
+   - Sommer: Tag 75, 78, 83, 77, 98, 99, 92 · Strand 35, 52 · Abend 73, 80, 57 · Nacht 48 (nur August), 41, 74
+   - Herbst: Tag 54, 77, 105 · Abend 87, 57 · Nacht 60, 66, 76
+   - Winter: Tag 72, 55, 89, 79 · Nacht 45, 66
+5. Überraschung (ca. 1 Tag pro Woche statt Stufe 4): Tag 61, 70, 86, 88, 94, 97, 98, 99, 106, 107 · Nacht 63, 74, 110, 41
+
+**Gefundene Konflikte:**
+- Sommer zeigt standardmässig den ganzen Sommer den Strand (kein Haus) → Pool-/Haus-Animationen würden im Sommer nie laufen. Vorschlag: Strand nur in den Sommerferien, sonst Haus mit Pool.
+- Animationen sind auf das Pool-Haus abgestimmt; mit dem Standard-Haus passen Dach/Pool/Kamin nicht → nur mit Pool-Haus oder anpassen.
+- Mondlandungs-Tag hat kein Haus → 44 (Haus wird Startrampe) passt dort nicht → Sputnik-Woche. 76 (Teleskop) nicht am Mondlandungs-Tag.
+- Themen-Tage ohne Haus (Handy, Vulkan, Mond, Titanic, Dino, British Day): nur ihre eigene Animation.
+- 50 und 106 brauchen die volle Sonne (nicht Abendsonne, nicht bewölkt).
+- Antippen der ganzen Szene kollidiert mit Doppeltippen = Vollbild und mit den Tipp-Objekten Titanic/Mondfähre → kurz warten, ob ein zweiter Tipp kommt; Objekte haben Vorrang.
+- Einstellungen: „Tipp-Animationen“ an/aus, „Überraschungen“ (aus / selten / oft).
