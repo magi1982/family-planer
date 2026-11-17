@@ -720,7 +720,7 @@ Status: ✅ umgesetzt in 0.15.0 (inkl. Pokale & Auszeichnungen pro Person und Fa
 - Einstellungen: Statistik-Knopf ein/aus · „Wer hat was gemacht“ für Kinder sichtbar · „Da üben wir noch“ ein/aus · Standard-Zeitraum.
 
 ### 58. Schönerer „Tipp!“-Hinweis am Haus
-Status: Idee – 5 Vorschläge im Design-Artefakt „Family Planer – Tipp-Hinweis am Haus (5 Vorschläge)“, wartet auf Auswahl.
+Status: Aussehen gewählt (17.11.): **Neon-Schild hängt vom Himmel**, weiter oben (Schild bei y ≈ 3–24 der Szene, kurze Drähte vom oberen Rand), Neonfarbe je Saison. Vorschau: Artefakt „Family Planer – Neon-Tipp-Schild (Ansicht)“. Offen: Takt und Umsetzung in der App.
 - Heute: gelbe Pille „Tipp!“ im Himmel zwischen Baum und Haus, alle 7 s für ca. 1,8 s (8–9× pro Minute, gut 500× pro Stunde).
 - Vorschläge (alle mit Blase am Haus): 1 Comic-Sprechblase zum Dach · 2 Gedankenblase aus dem Kamin · 3 Fahne auf dem Dach · 4 Fenster leuchtet und ruft · 5 Neon-Schild auf dem First.
 - Takt separat wählbar: heute (alle 7 s) · Ruhig (alle 20 s) · Am Anfang mehr (1. Minute alle 7 s, dann alle 45 s) · Nur wenn Ruhe ist (nach 2 min ohne Tipp, dann alle 30 s).
