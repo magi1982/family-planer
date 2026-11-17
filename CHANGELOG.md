@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.14.0 – 2026-11-17
 
 ### Added
 - **Volunteer champion** (weekly award): whoever took on and did the most volunteer chores of the week.
