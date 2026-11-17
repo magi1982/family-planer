@@ -677,7 +677,7 @@ Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 ## 56 · Fairere Auszeichnungen (Ideen, noch nicht gebaut)
 
 **Problem Meilensteine (100 / 500 / 1000 Ämtli):** Wer mehr Ämtli im Plan hat, erreicht sie schneller.
-- A) **Alles-erledigt-Tage:** Meilenstein zählt Tage, an denen *alle eigenen* Ämtli erledigt waren (z. B. 25 / 100 / 250 Tage) – unabhängig davon, wie viele Ämtli ein Kind hat.
+- **Entscheid: A.** A) **Alles-erledigt-Tage:** Meilenstein zählt Tage, an denen *alle eigenen* Ämtli erledigt waren (z. B. 25 / 100 / 250 Tage) – unabhängig davon, wie viele Ämtli ein Kind hat.
 - B) **Quote statt Anzahl:** Meilenstein für die Erledigungsquote über 30 Tage (z. B. 80 % / 90 % / 100 %).
 - C) **Persönliches Ziel:** Ziel pro Kind = eigene Ämtli pro Woche × Wochen (z. B. „10 Wochen Plan geschafft“).
 
@@ -687,3 +687,10 @@ Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 3. **Kein Aufschieben:** Die ganze Woche kein Ämtli überfällig in den nächsten Tag gerutscht.
 4. **Helferherz:** Ein Ämtli eines anderen übernommen oder ein Zusatz-/Sonder-Ämtli freiwillig gemacht.
 5. **Aufholjagd:** Die eigene Quote gegenüber der Vorwoche am stärksten verbessert (fair für alle Stufen).
+
+**Weitere Vorschläge aus vorhandenen Daten (Ersatz Frühaufsteher, Wahl offen):**
+6. **Freiwilligen-Champion:** am meisten freiwillige Sonder-Ämtli der Woche übernommen und erledigt (Sonder-Ämtli: wer übernommen, wann erledigt).
+7. **Pünktlich-Profi:** höchster Anteil Ämtli, die vor ihrer Fälligkeit erledigt wurden (Ämtli: Start, Fälligkeit, erledigt um) – Abend-Ämtli zählen bis zum Abend.
+8. **Sofort-Macher:** höchster Anteil Ämtli, die innerhalb von 30 Minuten nach ihrem Start erledigt wurden – fair, weil jedes Ämtli ab seiner eigenen Startzeit zählt.
+9. **To-do-Held:** am meisten eigene To-dos der Woche abgehakt (To-dos: erledigt um).
+10. **Sparfuchs:** am meisten Punkte der Woche gesammelt und behalten statt eingelöst (Punktebuch).
