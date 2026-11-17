@@ -800,3 +800,8 @@ Status: Frage beantwortet, Idee wartet auf Entscheid.
 - To-do-Chip zeigt eine E-Mail-Adresse und überlappt den Text: statt Adresse den Namen zeigen, Chip in eigene Zeile, sauber abschneiden.
 - Rote Fehlerbox „Ansicht ‚statistik‘ fehlt in diesem Dashboard“ mitten im Kopf: für Kinder nicht sichtbar machen (nur im Bearbeiten-Modus bzw. als kleiner Hinweis), Knopf ohne Ziel ausblenden.
 - Test: Layout-Test in schmalen Spalten (3–5 Personen, lange Wörter, viele Sonderämtli) mit Screenshots, bevor ausgeliefert wird.
+
+## 63 · Grundsatz: läuft ohne Handarbeit (18.11.)
+- Wer den Planer über HACS installiert, muss nichts von Hand anlegen – keine Dashboard-Ansichten, keine Helfer, keine Automationen, kein Claude/MCP.
+- Jede Seite (Statistik, Belohnungen, Listen, Tierchen …) muss auch ohne eigene Dashboard-Ansicht erreichbar sein: fehlt die Ansicht, öffnet der Navigationsknopf die Seite als Fenster über dem Planer (wie die To-dos).
+- Prüfen: frische Installation mit Beispieldaten → alle Knöpfe funktionieren, keine Fehlermeldung, keine leeren Seiten.
