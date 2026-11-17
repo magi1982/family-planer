@@ -86,3 +86,16 @@ def test_english_names():
     L.optimize(lst, ["milk", "gift"], "en", TODAY)
     names = [c["name"] for c in lst["categories"]]
     assert "Dairy & eggs" in names and names[-1] == "Other"
+
+
+def test_keyword_pass_then_background_ai_pass():
+    # optimise button: keywords answer at once, the AI only gets the leftovers afterwards
+    lst = L.new_list("Einkaufen", "todo.x", 10)
+    items = ["Milch", "Brot", "Geschenk für Oma", "Wunderkerze Typ Q"]
+    L.optimize(lst, items, "de", TODAY)
+    left = L.leftovers(lst, items)
+    assert left == ["Geschenk für Oma", "Wunderkerze Typ Q"]
+    L.optimize(lst, items, "de", TODAY, {"Geschenk für Oma": "Geschenke", "Wunderkerze Typ Q": "Party"})
+    assert L.leftovers(lst, items) == []
+    m = L.item_map(lst, items)
+    assert m["Milch"] == "dairy" and m["Brot"] != L.OTHER

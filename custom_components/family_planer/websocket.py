@@ -299,7 +299,7 @@ async def ws_list_refresh(hass: HomeAssistant, connection: websocket_api.ActiveC
     if not _change(connection, msg, planner):
         return
     try:
-        result = await planner.async_refresh_list(msg["list_id"], use_ai=msg["ai"])
+        result = await planner.async_refresh_list(msg["list_id"], use_ai=msg["ai"], ai_background=True)
     except KeyError:
         connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Unknown list")
         return

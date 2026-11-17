@@ -204,6 +204,11 @@ def _match_existing(lst: dict, label: str) -> str | None:
     return None
 
 
+def leftovers(lst: dict, items: list[str]) -> list[str]:
+    """Open items the keywords and learned assignments could not place (only these go to the AI)."""
+    return [n for n in items if categorize(lst, n) in (None, OTHER)]
+
+
 @dataclass
 class OptimizeResult:
     created: list[str] = field(default_factory=list)

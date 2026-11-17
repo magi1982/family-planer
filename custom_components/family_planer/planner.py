@@ -109,6 +109,7 @@ LIST_READ_TIMEOUT = 15
 AI_TIMEOUT = 30
 AI_MAX_ITEMS = 60
 REFRESH_MIN_GAP = 20
+LIST_CACHE_SECONDS = 45   # a list read this recently (state change, daily run) is reused by the optimise button
 AWAY_RETRY_AFTER_START = (60, 180, 600)  # seconds after the start: read the calendars again
 
 
@@ -135,6 +136,8 @@ class FamilyPlanner:
         self._away_known = False
         self._pin_fail: list[datetime] = []
         self._ai_last: dict[str, datetime] = {}
+        self._items_cache: dict[str, tuple[datetime, list[dict]]] = {}
+        self._ai_running: set[str] = set()
         self._refresh_last: datetime | None = None
         self.closing = False
         self.busy: dict[str, list[list]] = {}  # today's timed events per person (suggestions)
@@ -939,9 +942,12 @@ class FamilyPlanner:
 
             self._list_timers[lid] = async_call_later(self.hass, 2, run)
 
-    async def _list_items(self, entity: str) -> list[dict]:
+    async def _list_items(self, entity: str, fresh_ok: bool = False) -> list[dict]:
         if self.hass.states.get(entity) is None:
             return []
+        cached = self._items_cache.get(entity)
+        if fresh_ok and cached and (dt_util.now() - cached[0]).total_seconds() < LIST_CACHE_SECONDS:
+            return cached[1]
         try:
             async with asyncio.timeout(LIST_READ_TIMEOUT):
                 res = await self.hass.services.async_call(
@@ -950,7 +956,9 @@ class FamilyPlanner:
         except Exception as err:  # includes TimeoutError: a slow cloud list must never block the planner
             _LOGGER.debug("Cannot read %s: %s", entity, err)
             return []
-        return (res or {}).get(entity, {}).get("items", [])
+        items = (res or {}).get(entity, {}).get("items", [])
+        self._items_cache[entity] = (dt_util.now(), items)
+        return items
 
     async def _ai_suggestions(self, lst: dict, names: list[str]) -> dict[str, str]:
         ai_entity = self.settings.get(CONF_AI_TASK)
@@ -971,12 +979,16 @@ class FamilyPlanner:
             return {}
         return lists.parse_ai((res or {}).get("data"))
 
-    async def async_refresh_list(self, list_id: str, use_ai: bool = False) -> dict[str, Any]:
-        """Categorise the open items of a list; with use_ai also ask the AI about the leftovers."""
+    async def async_refresh_list(self, list_id: str, use_ai: bool = False, ai_background: bool = False) -> dict[str, Any]:
+        """Categorise the open items of a list; with use_ai also ask the AI about the leftovers.
+
+        ai_background (optimise button): the keyword pass answers at once, the slow AI pass runs afterwards and
+        updates the list live when it is done.
+        """
         lst = self.data["lists"].get(list_id)
         if lst is None:
             raise KeyError(list_id)
-        items = await self._list_items(lst["entity"])
+        items = await self._list_items(lst["entity"], fresh_ok=ai_background)
         ent = self.hass.states.get(lst["entity"])
         if ent is None or ent.state in ("unavailable", "unknown"):
             self.set_status(f"list:{list_id}", False, f"{lst['entity']} unavailable")
@@ -988,13 +1000,19 @@ class FamilyPlanner:
         open_names = [it["summary"] for it in items if it.get("summary") and it.get("status") == "needs_action"]
         before = json.dumps([lst["categories"], lst["assignments"]], sort_keys=True)
         result = None
+        ai_pending = False
         if lst.get("auto", True):
             ai = {}
-            if use_ai and (self._ai_last.get(list_id) is None
-                           or dt_util.now() - self._ai_last[list_id] > timedelta(seconds=60)):
+            leftovers = lists.leftovers(lst, open_names)
+            if use_ai and leftovers and list_id not in self._ai_running and (
+                    self._ai_last.get(list_id) is None or dt_util.now() - self._ai_last[list_id] > timedelta(seconds=60)):
                 self._ai_last[list_id] = dt_util.now()
-                leftovers = [n for n in open_names if lists.categorize(lst, n) in (None, lists.OTHER)]
-                ai = await self._ai_suggestions(lst, leftovers)
+                if ai_background and self.settings.get(CONF_AI_TASK):
+                    ai_pending = True
+                    self._ai_running.add(list_id)
+                    self.hass.async_create_task(self._async_ai_pass(list_id, open_names, names))
+                else:
+                    ai = await self._ai_suggestions(lst, leftovers)
             result = lists.optimize(lst, open_names, self.lang, dt_util.now().date().isoformat(), ai,
                                     validate.integer(self.settings.get("prune_days"), 7, 365, lists.PRUNE_AFTER_DAYS))
         else:
@@ -1005,7 +1023,26 @@ class FamilyPlanner:
             self.list_maps[list_id] = new_map
             self._changed(save=changed)
         return {"created": result.created if result else [], "removed": result.removed if result else [],
-                "assigned": result.assigned if result else 0}
+                "assigned": result.assigned if result else 0, "ai_pending": ai_pending}
+
+    async def _async_ai_pass(self, list_id: str, open_names: list[str], names: list[str]) -> None:
+        """Second, slow step of the optimise button: ask the AI about what the keywords could not place."""
+        try:
+            lst = self.data["lists"].get(list_id)
+            if lst is None:
+                return
+            ai = await self._ai_suggestions(lst, lists.leftovers(lst, open_names))
+            lst = self.data["lists"].get(list_id)  # the list may have been removed meanwhile
+            if not ai or lst is None:
+                return
+            before = json.dumps([lst["categories"], lst["assignments"]], sort_keys=True)
+            lists.optimize(lst, open_names, self.lang, dt_util.now().date().isoformat(), ai,
+                           validate.integer(self.settings.get("prune_days"), 7, 365, lists.PRUNE_AFTER_DAYS))
+            if json.dumps([lst["categories"], lst["assignments"]], sort_keys=True) != before:
+                self.list_maps[list_id] = lists.item_map(lst, names)
+                self._changed(save=True)
+        finally:
+            self._ai_running.discard(list_id)
 
     async def async_sync_name_list(self, entity: str) -> None:
         """A to-do list chosen under To-dos: items with a name or nickname become that person's to-dos."""

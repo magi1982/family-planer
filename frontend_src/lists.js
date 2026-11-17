@@ -8,12 +8,12 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const TXT = {
     de: { add: 'Was fehlt?', addb: 'Hinzufügen', sorting: 'Wird einsortiert …', done: 'Erledigt', clear: 'Erledigte löschen',
-      cats: 'Kategorien', optimize: 'Optimieren', optimizing: 'Optimiere …', slow: 'dauert zu lange – später nochmals versuchen', move: 'Kategorie wählen', learned: 'Gemerkt: „{i}“ → {c}',
+      cats: 'Kategorien', optimize: 'Optimieren', optimizing: 'Optimiere …', slow: 'dauert zu lange – später nochmals versuchen', aibg: 'Die KI sortiert den Rest im Hintergrund – die Liste aktualisiert sich gleich.', move: 'Kategorie wählen', learned: 'Gemerkt: „{i}“ → {c}',
       empty: 'Die Liste ist leer – oben etwas hinzufügen.', nolists: 'Noch keine Liste eingerichtet. Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren → Smarte Listen.',
       unavailable: 'Liste nicht erreichbar', edit: 'Kategorien bearbeiten', limit: '{n} von max. {m}', newcat: '+ Kategorie', save: 'Speichern', cancel: 'Abbrechen',
       other: 'bleibt immer zuletzt', created: 'Neu: {x}', removed: 'Zusammengefasst: {x}', nothing: 'Alles ist schon gut sortiert.', err: 'Fehler: ', del: 'Löschen' },
     en: { add: 'What do you need?', addb: 'Add', sorting: 'Sorting …', done: 'Done', clear: 'Clear done',
-      cats: 'Categories', optimize: 'Optimise', optimizing: 'Optimising …', slow: 'taking too long – try again later', move: 'Choose category', learned: 'Remembered: "{i}" → {c}',
+      cats: 'Categories', optimize: 'Optimise', optimizing: 'Optimising …', slow: 'taking too long – try again later', aibg: 'The AI sorts the rest in the background – the list updates in a moment.', move: 'Choose category', learned: 'Remembered: "{i}" → {c}',
       empty: 'The list is empty – add something above.', nolists: 'No list set up yet. Settings → Devices & services → Family Planer → Configure → Smart lists.',
       unavailable: 'List not available', edit: 'Edit categories', limit: '{n} of max. {m}', newcat: '+ Category', save: 'Save', cancel: 'Cancel',
       other: 'always stays last', created: 'New: {x}', removed: 'Merged: {x}', nothing: 'Everything is sorted well already.', err: 'Error: ', del: 'Delete' },
@@ -79,10 +79,11 @@
         if (this._busy) return; this._busy = true; this._render();
         try {
           const r = await Promise.race([this._store.pws('family_planer/list/refresh', { list_id: l.id, ai: true }),
-            new Promise((_res, rej) => setTimeout(() => rej(new Error(this.T.slow)), 60000))]);
+            new Promise((_res, rej) => setTimeout(() => rej(new Error(this.T.slow)), 25000))]);
           const parts = [];
           if (r && r.created && r.created.length) parts.push(fmt(this.T.created, { x: r.created.join(', ') }));
           if (r && r.removed && r.removed.length) parts.push(fmt(this.T.removed, { x: r.removed.join(', ') }));
+          if (r && r.ai_pending) parts.push(this.T.aibg);
           this._flash(parts.join(' · ') || this.T.nothing);
         } catch (er) { this._flash(this.T.err + (er.message || er), true); }
         this._busy = false; this._render(); return;
