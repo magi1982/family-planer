@@ -567,7 +567,7 @@ Aus einer Durchsicht aller Ansichten auf iPad und Handy. Jeder Punkt einzeln wä
 10. **Belohnungen:** Fortschrittsbalken bis zur nächsten Belohnung pro Person, Belohnungen als Kärtchen mit Symbol.
 11. **Nachtmodus fürs Tablet:** nach Sonnenuntergang alles etwas dunkler und ruhiger, Uhr grösser; Gartenlichter passen dazu.
 12. **Weiche Übergänge:** Abhaken mit kurzem Häkchen-Animationseffekt auch in der Wochenansicht, Ansichtswechsel mit sanftem Einblenden.
-**Status:** 🟡 umgesetzt: 2, 4, 5, 6, 7, 11 (lokal). Offen: 1, 3, 8, 9, 10, 12
+**Status:** 🟡 umgesetzt: 2, 4, 5, 6, 7, 10 (Balken pro Belohnung mit Prognose gibt es schon), 11. Offen: 1, 3, 8, 9, 12
 
 ### 50. Einheitlicher Aufbau der Ämtli- und To-do-Knöpfe
 Regel: Passt alles auf eine Zeile → links Text, daneben Zeit-Info (seit x Tagen, heute fällig, bis Mo); rechts Punkte, links davon die Herkunft (To-do, Liste, Kalender von …, Sonder). Passt es nicht → links oben Text, links unten Zeit-Info, rechts oben Punkte, rechts unten Herkunft. Nur zwei Schriftgrössen (Titel und klein).
