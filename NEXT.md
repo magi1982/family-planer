@@ -720,7 +720,7 @@ Status: ✅ umgesetzt in 0.15.0 (inkl. Pokale & Auszeichnungen pro Person und Fa
 - Einstellungen: Statistik-Knopf ein/aus · „Wer hat was gemacht“ für Kinder sichtbar · „Da üben wir noch“ ein/aus · Standard-Zeitraum.
 
 ### 58. Schönerer „Tipp!“-Hinweis am Haus
-Status: Aussehen gewählt (17.11.): **Neon-Schild hängt vom Himmel**, weiter oben (Schild bei y ≈ 3–24 der Szene, kurze Drähte vom oberen Rand), Neonfarbe je Saison. Vorschau: Artefakt „Family Planer – Neon-Tipp-Schild (Ansicht)“. Takt (Wunsch 17.11.): nach Aktivität alle 10 s.
+Status: **umgesetzt in 0.16.0** (Neon-Schild hängt vom Himmel, Saisonfarbe, Einstellungen „Tipp-Schild“ und „Nach Aktivität so lange zeigen“). Frühere Notizen: Aussehen gewählt (17.11.): **Neon-Schild hängt vom Himmel**, weiter oben (Schild bei y ≈ 3–24 der Szene, kurze Drähte vom oberen Rand), Neonfarbe je Saison. Vorschau: Artefakt „Family Planer – Neon-Tipp-Schild (Ansicht)“. Takt (Wunsch 17.11.): nach Aktivität alle 10 s.
 - Vorschlag Umsetzung: Aktivität = jeder Tipp auf dem Planer (Knopf, Abhaken, Wischen, Ansicht wechseln) oder der Bewegungsmelder aus den Ansagen meldet Bewegung. Danach 2 Minuten lang alle 10 s, dann Ruhe (kein Blinken in einen leeren Raum). Läuft gerade eine Animation: Pause.
 - Einstellung „Tipp-Schild“ (Saisons & Wetter, mit Beschreibung DE/EN): Aus · Nach Aktivität (Standard) · Immer (alle 30 s); dazu „Nach Aktivität so lange zeigen“ (1–10 min, Standard 2).
 - Heute: gelbe Pille „Tipp!“ im Himmel zwischen Baum und Haus, alle 7 s für ca. 1,8 s (8–9× pro Minute, gut 500× pro Stunde).
@@ -748,7 +748,7 @@ Status: Ideensammlung – wartet auf Auswahl. Grundregel für alle Spiele: freig
 12. Glücksrad am Sonntag für eine perfekte Woche (kleiner Bonus oder Avatar-Extra).
 
 ### 60. Ämtli-Haustier und Glücksrad am Sonntag (aus #59, Punkte 1 und 12)
-Status: Runde 2 im Artefakt „Family Planer – Ämtli-Haustier & Glücksrad (Entwürfe)“ (Ja / Nein / Verbessern pro Karte), wartet auf Bewertung. Runde 1 bleibt als round1.html.
+Status: **Runde 3** im Artefakt (17.11.), wartet auf Bewertung (Runde „pet3“). Vorher: Runde 2 im Artefakt „Family Planer – Ämtli-Haustier & Glücksrad (Entwürfe)“ (Ja / Nein / Verbessern pro Karte), wartet auf Bewertung. Runde 1 bleibt als round1.html.
 - Runde 1 Feedback: „neben dem Bild“ und „Haustier-Haus“ raus, mehr und bessere Tiere, Kopfbild und Eltern-Überraschung raus, Avatar-Effekt häufiger.
 - Ort: das aktuelle Tier lebt winzig im Garten der Kopfszene (Animal-Crossing-Stil, je nach Lebensraum: Boden, Klettern/Nest, Graben/Loch, Wasser/Pool, Luft/Dach und Nest, Insekten/Blumen, Sonne/Stein; Saisons: Winter-Eis, Strand, Herbst-Laubhaufen). 5. Knopf „Tierchen“ links mit eigener Seite (Garten mit allen Tieren, Pflege nur beim aktuellen, Sammlung, Tierbuch x/26) – wie Pokémon Go.
 - 26 Tiere (Fuchs, Katze, Hund, Hase, Igel, Waschbär, Panda, Lama, Erdmännchen, Eichhörnchen, Hamster, Maus, Einhorn, Otter, Frosch, Axolotl, Eidechse, Chamäleon mit Farbwechsel, Drache, Eule, Pinguin, Ente, Papagei, Biene, Marienkäfer, Schmetterling): Ei → Baby (3 ganze Tage) → Jung (15) → Gross (40), deutlichere Unterschiede pro Stufe.
@@ -757,3 +757,13 @@ Status: Runde 2 im Artefakt „Family Planer – Ämtli-Haustier & Glücksrad (E
 - Glücksrad: Knopf oben rechts immer sichtbar (grau mit Wochenring, Sonntag leuchtend, „gedreht“ mit Häkchen). 24 gleich grosse Felder: Avatar-Effekt 7 · +25 Taler 5 · Haustier-Extra 3 · Jubel-Effekt 3 · Nochmals 2 · Ämtli-Joker 2 · Doppelte Punkte 1 · Goldfeld 1 (Zusatz-Dreh: 3/4 +50 Taler, 1/4 Jackpot +100). Stile bunt / Neon / Holz.
 - 24 neue Avatar-Effekte (1 Woche): Regenbogen-Ring, Flammen-Rahmen, Polarlicht, Galaxie-Wirbel, Blitz-Ring, Pixel-Glitch, Musiknoten, Lava-Ring, Edelstein-Kranz, Planeten, Regenwolke, Fischschwarm, Disco-Laser, Tornado, Komet, Geister, Runen, Wurfsterne, Rakete, Plasma, Strudel, Diamant-Regen, Mondphasen, Puls-Wellen.
 - Einstellungen später prüfen: Haustier an/aus, Glücksrad an/aus, Regel „gute Woche“ (Tage), Effekte im Rad.
+- Runde 2 Feedback: Tiere zu dick und teils nicht erkennbar (Eidechse, Chamäleon, Drache, Erdmännchen, Eule, Pinguin, Ente, Marienkäfer), Lama raus; Igel, Frosch, Schmetterling ok; Garten-Animationen zu einfach; Glücksrad-Knopf bei jeder Person; Rad bunt mit Blinken; mehr Haustier-Extras; Tierwechsel als Gewinn (~10 %); junges Tier wechseln nur mit Tierwechsel; 9 Effekte gewählt, Rakete in Flugrichtung.
+- Runde 3: 35 Tiere neu (schlank, Seitenansicht mit Gelenken; neu: Reh, Pony, Koala, Faultier, Robbe, Biber, Flamingo, Fledermaus, Kolibri, Tiger), Verhaltens-„Gehirn“ (laufen, schnuppern, klettern, graben, schwimmen, fliegen, sonnen, Apfel holen), Grössen S/M/L in der Kopfszene, 6 Vorschläge „Tier bei der Person“ (A–F, inkl. Level-Platz), Fundsachen beim Abhaken + Tamagotchi-Pflege (Hunger, Spass, Sauberkeit, Energie), Lieblingsfutter pro Tier, Garten im Animal-Crossing-Stil mit Zuhause pro Lebensraum und Tag/Nacht, runder Rad-Knopf pro Person, Rad mit Lauflichtern, Tierwechsel 2 Felder (8,3 %), 10 Haustier-Extras, 12 neue Avatar-Effekte.
+- Wunsch 17.11.: **Info-Knopf mit Entwicklungsbaum** pro Tier und **wählbare Merkmale** (Masche, Glöckchen, Halstuch, Frisürchen, Stern, Sommersprossen, weisse Schwanzspitze, weisse Söckchen, Fellfarbe hell/dunkel) – Baby keine, Jung 1, Gross 2 + Farbe, jederzeit änderbar, auch in der Sammlung. In Runde 3 als Entwurf drin.
+- Einstellungen später prüfen: Fundsachen an/aus, Glitzer-Funken an/aus, Werte sinken (aus/langsam/normal), Tier in der Kopfszene, Platz bei der Person.
+
+### 61. Freiwillige Ämtli: wie viele darf ein Kind nehmen? (17.11.)
+Status: Frage beantwortet, Idee wartet auf Entscheid.
+- Heute: kein Limit – ein Kind kann jedes offene freiwillige Ämtli nehmen (nur „max. offene Ämtli“ begrenzt, wie viele gleichzeitig angeboten werden).
+- Idee: Einstellung „Freiwillige Ämtli pro Person und Tag“ (unbegrenzt / 1 / 2 / 3), damit auch die anderen eine Chance haben; zusätzlich evtl. „erst wieder nehmen, wenn das genommene erledigt ist“.
+
