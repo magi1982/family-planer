@@ -131,9 +131,14 @@ def rollover(data: dict, today: date, away: dict | None = None) -> bool:
         rec["total"] += 1
         if it.get("done"):
             rec["done"] += 1
-            at = str(it.get("done_at") or "")[11:16]  # local HH:MM, for the early-bird award
+            at = str(it.get("done_at") or "")[11:16]  # local HH:MM
             if at and at > rec.get("last", ""):
                 rec["last"] = at
+            # for the on-time award: done before the last day, or the time it was done on the last day
+            if it.get("done_at") and str(it["done_at"])[:10] < day:
+                rec["before"] = rec.get("before", 0) + 1
+            elif at:
+                rec.setdefault("due_times", []).append(at)
         else:
             rec["missed"].append(it.get("title", ""))
         changed = True

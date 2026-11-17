@@ -166,9 +166,11 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
   | 🐝 Fleissbiene | am meisten erledigt in einer Woche | **Bronze**-Rahmen · klein |
   | 🛡️ Wochenend-Held | Samstag und Sonntag alles erledigt | klein |
   | 📈 Aufsteiger | mindestens 15 Punkte besser als in der Vorwoche | mittel |
-  | 🌅 Frühaufsteher | an 4 Tagen der Woche alles vor 12 Uhr erledigt (einstellbar) | klein |
+  | ⏰ Pünktlich-Profi | mindestens 80 % der Ämtli der Woche rechtzeitig erledigt – vor dem letzten Tag oder an diesem bis 20 Uhr (einstellbar), Abend-Ämtli zählen also auch | klein |
+  | 🙋 Freiwilligen-Champion | am meisten freiwillige Ämtli der Woche übernommen und erledigt | mittel |
+  | 🛟 Retter in der Not | das freiwillige Ämtli übernommen, das am längsten (mind. einen Tag) offen war | klein |
   | 💎 Diamant-Serie | 30 Tage am Stück alles erledigt | riesig |
-  | 🏅 Meilensteine | 100, 500 und 1000 Ämtli insgesamt | mittel |
+  | 🏅 Meilensteine | 25, 100 und 250 Tage mit allen eigenen Ämtli erledigt – fair, egal wie viele Ämtli jemand hat | mittel |
   | 👪 Familien-Teamwork | die ganze Familie hat an einem Tag alles erledigt | klein |
   | 🔥 Serie | Tage am Stück (wechselt täglich, keine Punkte) | – |
 

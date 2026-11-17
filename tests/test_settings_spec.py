@@ -112,11 +112,11 @@ def test_theme_style_migration_and_nav():
 def test_award_settings_in_points_section():
     game = {"default_points": 10, "day_points": 30, "day_bonus": 5, "streak_bonus": 20}
     patch, _ = S.points({"awards": {"items": {"crown": {"on": False, "size": "xl"}, "bee": {"size": "huge"}},
-                                    "early_time": "25:00", "confetti": False}}, game, "fair", [])
+                                    "ontime_time": "25:00", "confetti": False}}, game, "fair", [])
     aw = patch["awards"]
     assert aw["items"]["crown"] == {"on": False, "size": "xl"}
     assert aw["items"]["bee"]["size"] == "s" and aw["items"]["bee"]["on"] is True  # invalid size -> default
-    assert aw["early_time"] == "12:00" and aw["confetti"] is False
+    assert aw["ontime_time"] == "20:00" and aw["confetti"] is False
 
 
 def test_announce_fixed_times_without_motion():

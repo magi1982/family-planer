@@ -49,8 +49,8 @@
   const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
   const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
   const RSIZES = ['s', 'm', 'l', 'xl', 'xxl'];
-  const UNIT = { crown: 'pct', climber: 'pct', perfect: 'pct', weekend: 'pct', trophy: 'pct', bee: 'days', early: 'days', diamond: 'days', milestone: 'chores' };
-  const MILES = [100, 500, 1000];
+  const UNIT = { crown: 'pct', climber: 'pct', perfect: 'pct', weekend: 'pct', trophy: 'pct', bee: 'days', ontime: 'pct', volunteer: 'chores', rescue: 'days', diamond: 'days', milestone: 'days' };
+  const MILES = [25, 100, 250];
   // days until a person can afford `cost` at their current pace (null = no pace yet)
   const daysTo = (s, pid, cost) => { const pace = s.pace || {}; const have = ((s.points || {})[pid] || {}).available || 0; if (have >= cost) return 0;
     const v = (pace.persons || {})[pid] || pace.family || 0; return v > 0 ? Math.ceil((cost - have) / v) : null; };
@@ -141,7 +141,7 @@
       const persons = s.persons; const sel = persons.find((p) => p.id === this._sel) || null;  // nobody selected = everything
       const pts = s.points || {};
       const FX = (this._cfg.lang === 'en' ? window.FPX_EN : window.FPX) || window.FPX || {}; const AWT = FX.AWT || {}; const AWR = FX.AWR || [];
-      const et = (s.settings || {}).early_time || '12:00'; const apts = s.award_points || {};
+      const et = (s.settings || {}).ontime_time || '20:00'; const apts = s.award_points || {};
       const awName = (id, v) => String((AWT[id] || [id])[0]).replace(/\{n\}/g, v == null ? '' : v);
       const medal = (a, big) => `<span class="md${big ? ' big' : ''}" style="--mc:${COLOR(a.color)}" title="${esc(awName(a.id, a.value))}"><ha-icon icon="${esc(a.icon)}"></ha-icon></span>`;
       const ring = (p, size) => { const r = (s.awards || {})[p.id] || {}; const fr = ['platinum', 'gold', 'silver', 'bronze'].includes(r.frame) ? r.frame : '';
@@ -171,7 +171,7 @@
       const oa = (s.open_awards || []).filter((a) => AWR.some((r) => r[0] === a.id));
       const openAw = oa.length ? `<div class="sec">${esc(T.open)}</div><div class="oas">${oa.map((a) => { const rule = (AWR.find((r) => r[0] === a.id) || [])[4] || '';
           const lp = persons.find((p) => p.id === a.leader); const u = T.units[UNIT[a.id]] || '{n}';
-          const nm = a.id === 'milestone' ? awName('milestone', MILES.find((m) => m > (a.value || 0)) || 1000) : awName(a.id, a.id === 'diamond' ? 30 : '');
+          const nm = a.id === 'milestone' ? awName('milestone', MILES.find((m) => m > (a.value || 0)) || 250) : awName(a.id, a.id === 'diamond' ? 30 : '');
           return `<div class="oa" style="--mc:${COLOR(a.color)}">${medal(a, true)}<div class="ot"><b>${esc(nm)}</b><span>${esc(rule.replace('{t}', et))}</span>
             <span class="om"><em>${esc(T.per[a.period] || '')}</em>${apts[a.id] ? `<em class="pp">${esc(fmt(T.worth, { n: apts[a.id] }))}</em>` : ''}
             ${lp && a.value ? `<em class="ld">${av(lp, 18)}${esc(fmt(T.lead, { n: lp.name }))} · ${esc(fmt(u, { n: a.value }))}</em>` : `<em>${esc(T.noLead)}</em>`}</span></div></div>`; }).join('')}</div>` : '';

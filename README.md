@@ -167,9 +167,11 @@ Per child (or person, e.g. university/work):
   | 🐝 Busy bee | most done in a week | **bronze** frame · small |
   | 🛡️ Weekend hero | Saturday and Sunday everything done | small |
   | 📈 Climber | at least 15 points better than the week before | medium |
-  | 🌅 Early bird | on 4 days of the week everything done before 12:00 (adjustable) | small |
+  | ⏰ On-time pro | at least 80 % of the week's chores done in time – before their last day or on it by 20:00 (adjustable), so evening chores count too | small |
+  | 🙋 Volunteer champion | took on and did the most volunteer chores of the week | medium |
+  | 🛟 Rescuer | took on the volunteer chore that had been waiting longest (at least a day) | small |
   | 💎 Diamond streak | 30 days in a row everything done | giant |
-  | 🏅 Milestones | 100, 500 and 1000 chores in total | medium |
+  | 🏅 Milestones | 25, 100 and 250 days with every own chore done – fair however many chores somebody has | medium |
   | 👪 Family teamwork | the whole family finished everything on one day | small |
   | 🔥 Streak | days in a row (changes daily, no points) | – |
 

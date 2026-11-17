@@ -86,9 +86,11 @@ const AWT = {
   bee: ['Fleissbiene', 'Am meisten erledigt in der letzten Woche.'],
   weekend: ['Wochenend-Held', 'Am Wochenende alles erledigt.'],
   climber: ['Aufsteiger', 'Am meisten verbessert gegenüber der Vorwoche.'],
-  early: ['Frühaufsteher', 'An mindestens 4 Tagen alles vor {t} Uhr erledigt.'],
+  ontime: ['Pünktlich-Profi', 'Den grössten Teil der Ämtli rechtzeitig erledigt (bis {t} Uhr am letzten Tag).'],
+  volunteer: ['Freiwilligen-Champion', 'Am meisten freiwillige Ämtli übernommen und erledigt.'],
+  rescue: ['Retter in der Not', 'Ein freiwilliges Ämtli übernommen, das am längsten offen war.'],
   diamond: ['Diamant-Serie', '{n} Tage am Stück alles erledigt.'],
-  milestone: ['Meilenstein {n}', '{n} Ämtli insgesamt erledigt.'],
+  milestone: ['Meilenstein {n}', '{n} Tage mit allen eigenen Ämtli erledigt.'],
   team: ['Familien-Teamwork', 'Gestern hat die ganze Familie alles erledigt.'],
   streak: ['{n}-Tage-Serie', '{n} Tage am Stück alles erledigt.'],
 };
@@ -100,9 +102,11 @@ const AWR = [
   ['bee', 'mdi:bee', '#CD8A4E', 'Fleissbiene', 'Am meisten erledigt in einer Woche (im Modus Fair: die meisten ganzen Tage).'],
   ['weekend', 'mdi:shield-star', '#E06B6B', 'Wochenend-Held', 'Samstag und Sonntag alles erledigt.'],
   ['climber', 'mdi:trending-up', '#4FD1C5', 'Aufsteiger', 'Mindestens 15 Prozentpunkte besser als in der Vorwoche.'],
-  ['early', 'mdi:weather-sunset-up', '#FFB74D', 'Frühaufsteher', 'An mindestens 4 Tagen der Woche alles vor {t} Uhr erledigt.'],
+  ['ontime', 'mdi:clock-check-outline', '#FFB74D', 'Pünktlich-Profi', 'Mindestens 80 % der Ämtli einer Woche rechtzeitig erledigt – vor dem letzten Tag oder an diesem bis {t} Uhr. Abend-Ämtli zählen also auch.'],
+  ['volunteer', 'mdi:hand-heart', '#8BC34A', 'Freiwilligen-Champion', 'Am meisten freiwillige Ämtli einer Woche übernommen und erledigt.'],
+  ['rescue', 'mdi:lifebuoy', '#FF7043', 'Retter in der Not', 'Ein freiwilliges Ämtli übernommen, das am längsten (mind. einen Tag) offen war.'],
   ['diamond', 'mdi:diamond-stone', '#7FDBFF', 'Diamant-Serie', '30 Tage am Stück alles erledigt.'],
-  ['milestone', 'mdi:medal', '#E0A84F', 'Meilenstein', '100, 500 und 1000 Ämtli insgesamt erledigt.'],
+  ['milestone', 'mdi:medal', '#E0A84F', 'Meilenstein', '25, 100 und 250 Tage mit allen eigenen Ämtli erledigt – fair, egal wie viele Ämtli jemand hat.'],
   ['team', 'mdi:account-group', '#C771D6', 'Familien-Teamwork', 'An einem Tag erledigt die ganze Familie alles.'],
 ];
 // Rahmen, Krone und Medaillen – auch von der Belohnungs-Ansicht genutzt
@@ -524,7 +528,7 @@ class LoxWochenplanerCard extends FpBase {
     const s = this.fpStore && this.fpStore.snap; const A = {}; const F = {}; kids.forEach((k) => { A[k.name] = []; });
     if (!s) return { A, F };
     const byName = Object.fromEntries((s.persons || []).map((p) => [p.name, p.id]));
-    const et = (s.settings || {}).early_time || '12:00';
+    const et = (s.settings || {}).ontime_time || '20:00';
     kids.forEach((k) => {
       const r = (s.awards || {})[byName[k.name]] || { list: [] }; F[k.name] = r.frame || '';
       A[k.name] = (r.list || []).map((a) => { const tx = AWT[a.id] || [a.id, '']; const f = (x) => x.replace(/\{n\}/g, a.value == null ? '' : a.value).replace('{t}', et);
@@ -535,7 +539,7 @@ class LoxWochenplanerCard extends FpBase {
   _detailHtml(kids, pre, awards, frames) {
     const k = kids.find((x) => x.name === this._detail); if (!k) return '';
     const s = pre[k.name]; const lv = level(s.pct); const aw = awards[k.name] || [];
-    const snap = (this.fpStore && this.fpStore.snap) || {}; const pts = snap.award_points || {}; const et = (snap.settings || {}).early_time || '12:00';
+    const snap = (this.fpStore && this.fpStore.snap) || {}; const pts = snap.award_points || {}; const et = (snap.settings || {}).ontime_time || '20:00';
     const on = ((snap.award_settings || {}).items) || {};
     const q = (x) => (x[1] ? `${x[0]} / ${x[1]} <small>(${Math.round((x[0] / x[1]) * 100)} %)</small>` : '<small>noch keine</small>');
     const holders = (id) => kids.filter((x) => (awards[x.name] || []).some((a) => a.id === id)).map((x) => x.name).join(', ') || 'noch niemand';

@@ -41,14 +41,14 @@ CFG = A.clean_settings(None)
 
 def test_weekly_awards_once_per_week_with_points_and_confetti():
     hist = _week({
-        "lea": [(2, 2, "08:30")] * 7,                       # perfect, early, weekend, crown (fair)
+        "lea": [(2, 2, "08:30")] * 7,                       # perfect, weekend, crown (fair)
         "mia": [(6, 6, "18:00")] * 5 + [(3, 6, None)] * 2,  # many chores, weak weekend
         "tom": [(1, 2, None)] * 7,
     })
     data = _data(hist)
     A.evaluate(data, TODAY, {"lea": 7}, CFG, True, 30, TS, _add)
     h = data["awards"]["holders"]
-    assert h["crown"] == ["lea"] and h["perfect"] == ["lea"] and h["weekend"] == ["lea"] and h["early"] == ["lea"]
+    assert h["crown"] == ["lea"] and h["perfect"] == ["lea"] and h["weekend"] == ["lea"]
     assert h["bee"] == ["lea"]  # fair: 7 complete days beat 6 days
     refs = {e["ref"] for e in data["ledger"]}
     assert f"award:crown:{MON.isoformat()}:lea" in refs
@@ -97,8 +97,9 @@ def test_monthly_trophy_and_diamond_and_milestones():
     A.evaluate(data, date(2026, 11, 2), {"lea": 31, "mia": 0}, CFG, True, 30, TS, _add)
     h = data["awards"]["holders"]
     assert h["trophy"] == ["lea"] and h["diamond"] == ["lea"]
-    assert data["counters"]["lea"]["done"] == 124 and h["milestone"] == ["lea"]
-    assert data["awards"]["milestone"]["lea"] == 100
+    # milestones count days with every own chore done: 31 days -> 25-day milestone; mia never finished a day
+    assert data["counters"]["lea"]["full_days"] == 31 and h["milestone"] == ["lea"]
+    assert data["awards"]["milestone"]["lea"] == 25
     pts = {e["ref"].split(":")[1]: e["pts"] for e in data["ledger"] if e["pid"] == "lea"}
     assert pts["trophy"] == 30 and pts["diamond"] == 60 and pts["milestone"] == 20
     # streak breaks -> diamond goes away; reaching 30 again later wins it again
@@ -135,3 +136,51 @@ def test_person_awards_frame_and_open_awards():
 def test_points_sizes():
     assert [A.points_for(s, 30) for s in A.SIZES] == [0, 10, 20, 30, 60]
     assert A.points_for("s", 31) == 11
+
+
+def test_milestones_are_fair_whatever_the_number_of_chores():
+    hist = {}
+    for i in range(25):
+        hist[(date(2026, 10, 1) + timedelta(days=i)).isoformat()] = {
+            "lea": {"done": 1, "total": 1, "missed": []},        # one chore a day
+            "mia": {"done": 6, "total": 6, "missed": []},        # six chores a day
+            "tom": {"done": 5, "total": 6, "missed": ["x"]}}     # many done, never all
+    data = _data(hist)
+    A.evaluate(data, date(2026, 10, 26), {}, CFG, True, 30, TS, _add)
+    assert sorted(data["awards"]["holders"]["milestone"]) == ["lea", "mia"]
+    assert data["awards"]["full_level"] == {"lea": 25, "mia": 25, "tom": 0}
+
+
+def test_on_time_counts_evening_chores_until_the_cutoff():
+    hist = {}
+    for i in range(7):
+        d = (MON + timedelta(days=i)).isoformat()
+        hist[d] = {"lea": {"done": 2, "total": 2, "missed": [], "due_times": ["07:10", "19:30"]},   # evening chore in time
+                   "mia": {"done": 2, "total": 2, "missed": [], "due_times": ["21:15"], "before": 1},  # one late each day
+                   "tom": {"done": 1, "total": 1, "missed": []}}                                     # no times known
+    data = _data(hist)
+    A.evaluate(data, TODAY, {}, CFG, True, 30, TS, _add)
+    assert data["awards"]["holders"]["ontime"] == ["lea"]
+    cfg = A.clean_settings({"ontime_time": "22:00"})
+    data = _data(hist)
+    A.evaluate(data, TODAY, {}, cfg, True, 30, TS, _add)
+    assert sorted(data["awards"]["holders"]["ontime"]) == ["lea", "mia"]
+
+
+def test_volunteer_champion_and_rescuer():
+    data = _data({})
+    def done(iid, pid, start, claimed, day):
+        A.log_volunteer(data, iid, {"pid": pid, "mode": "free", "start": start, "claimed_at": claimed + "T10:00"}, True, day)
+    done("a", "lea", "2026-11-02", "2026-11-02", MON)
+    done("b", "lea", "2026-11-03", "2026-11-03", MON + timedelta(days=1))
+    done("c", "mia", "2026-11-01", "2026-11-04", MON + timedelta(days=2))   # waited three days for somebody
+    done("d", "tom", "2026-11-04", "2026-11-04", MON + timedelta(days=2))
+    done("e", "tom", "2026-11-05", "2026-11-05", MON + timedelta(days=3))
+    A.log_volunteer(data, "e", {"pid": "tom", "mode": "free"}, False, MON + timedelta(days=3))  # undone again
+    A.evaluate(data, TODAY, {}, CFG, True, 30, TS, _add)
+    h = data["awards"]["holders"]
+    assert h["volunteer"] == ["lea"] and h["rescue"] == ["mia"]
+    assert any(e["ref"] == f"award:volunteer:{MON.isoformat()}:lea" for e in data["ledger"])
+    # handed-out chores are no volunteering
+    A.log_volunteer(data, "f", {"pid": "mia", "mode": "each", "start": "2026-11-10"}, True, TODAY)
+    assert "f" not in data["awards"]["vol"]

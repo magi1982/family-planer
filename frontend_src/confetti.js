@@ -10,10 +10,10 @@
   const TXT = {
     de: { lvl: '{n} ist jetzt Level {v} – {t}! ⬆️', lvlB: ' +{b} Punkte', unl: ' · Neu: {u}', day: 'Super, {n}! Alle Ämtli erledigt 🎉', team: 'Familien-Teamwork! Alle haben alles erledigt 🤝', won: '{n}: {a}!',
       a: { trophy: 'Pokal des Monats 🏆', crown: 'Krone der Woche 👑', perfect: 'Perfekte Woche ⭐', bee: 'Fleissbiene 🐝', weekend: 'Wochenend-Held 🦸',
-        climber: 'Aufsteiger 📈', early: 'Frühaufsteher 🌅', diamond: 'Diamant-Serie 💎', milestone: 'Meilenstein {v} 🏅', team: 'Familien-Teamwork 🤝' } },
+        climber: 'Aufsteiger 📈', ontime: 'Pünktlich-Profi ⏰', volunteer: 'Freiwilligen-Champion 🙋', rescue: 'Retter in der Not 🛟', diamond: 'Diamant-Serie 💎', milestone: 'Meilenstein {v} 🏅', team: 'Familien-Teamwork 🤝' } },
     en: { lvl: '{n} is now level {v} – {t}! ⬆️', lvlB: ' +{b} points', unl: ' · New: {u}', day: 'Well done, {n}! Every chore done 🎉', team: 'Family teamwork! Everybody did everything 🤝', won: '{n}: {a}!',
       a: { trophy: 'Trophy of the month 🏆', crown: 'Crown of the week 👑', perfect: 'Perfect week ⭐', bee: 'Busy bee 🐝', weekend: 'Weekend hero 🦸',
-        climber: 'Climber 📈', early: 'Early bird 🌅', diamond: 'Diamond streak 💎', milestone: 'Milestone {v} 🏅', team: 'Family teamwork 🤝' } },
+        climber: 'Climber 📈', ontime: 'On-time pro ⏰', volunteer: 'Volunteer champion 🙋', rescue: 'Rescuer 🛟', diamond: 'Diamond streak 💎', milestone: 'Milestone {v} 🏅', team: 'Family teamwork 🤝' } },
   };
   const COUNT = { s: 90, m: 190, l: 340 };
   const MAX_AGE_MIN = 20; // older celebrations (e.g. the tablet was asleep for hours) are not replayed

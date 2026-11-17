@@ -2,9 +2,11 @@
 
 Awards are handed out on a schedule so children do not get several new trophies every day:
 
-* weekly (Monday, for the past Monday–Sunday): crown, busy bee, perfect week, weekend hero, climber, early bird
+* weekly (Monday, for the past Monday–Sunday): crown, busy bee, perfect week, weekend hero, climber, on time,
+  volunteer champion, rescuer
 * monthly (on the 1st, for the past month): trophy of the month
-* when reached: diamond streak (30 days in a row), milestones (100 / 500 / 1000 chores), family teamwork (one day)
+* when reached: diamond streak (30 days in a row), milestones (25 / 100 / 250 days with every own chore done –
+  fair however many chores somebody has), family teamwork (one day)
 
 Every win books points once (ledger ref ``award:<id>:<period>:<person>``) and creates a celebration
 (confetti on the dashboards). A person gets at most one big celebration per day; further wins that day are
@@ -14,7 +16,8 @@ State in ``data["awards"]``::
 
     {"week": "2026-11-02", "month": "2026-10", "holders": {award_id: [pid, ...]},
      "since": {award_id: iso_date}, "diamond": {pid: bool}, "milestone": {pid: level},
-     "team": {"day": iso, "pids": [...]}, "day_done": {pid: iso}, "celebrations": [...]}
+     "team": {"day": iso, "pids": [...]}, "day_done": {pid: iso}, "celebrations": [...],
+     "vol": {inst_id: {"pid", "day", "wait"}}}   # volunteer chores done (for the weekly volunteer awards)
 """
 from __future__ import annotations
 
@@ -29,7 +32,9 @@ META: dict[str, dict] = {
     "bee": {"icon": "mdi:bee", "color": "#CD8A4E", "metal": "bronze", "fx": "banner", "size": "s", "period": "week"},
     "weekend": {"icon": "mdi:shield-star", "color": "#E06B6B", "metal": None, "fx": "m", "size": "s", "period": "week"},
     "climber": {"icon": "mdi:trending-up", "color": "#4FD1C5", "metal": None, "fx": "m", "size": "m", "period": "week"},
-    "early": {"icon": "mdi:weather-sunset-up", "color": "#FFB74D", "metal": None, "fx": "banner", "size": "s", "period": "week"},
+    "ontime": {"icon": "mdi:clock-check-outline", "color": "#FFB74D", "metal": None, "fx": "banner", "size": "s", "period": "week"},
+    "volunteer": {"icon": "mdi:hand-heart", "color": "#8BC34A", "metal": None, "fx": "m", "size": "m", "period": "week"},
+    "rescue": {"icon": "mdi:lifebuoy", "color": "#FF7043", "metal": None, "fx": "m", "size": "s", "period": "week"},
     "diamond": {"icon": "mdi:diamond-stone", "color": "#7FDBFF", "metal": None, "fx": "l", "size": "xl", "period": "reach"},
     "milestone": {"icon": "mdi:medal", "color": "#E0A84F", "metal": None, "fx": "m", "size": "m", "period": "reach"},
     "team": {"icon": "mdi:account-group", "color": "#C771D6", "metal": None, "fx": "l", "size": "s", "period": "day"},
@@ -37,8 +42,11 @@ META: dict[str, dict] = {
 IDS = tuple(META)
 METAL_RANK = {"platinum": 4, "gold": 3, "silver": 2, "bronze": 1}
 SIZES = ("none", "s", "m", "l", "xl")
-MILESTONES = (100, 500, 1000)
-MILESTONE_COLOR = {100: "#CD8A4E", 500: "#C9D1D9", 1000: "#F5C542"}
+MILESTONES = (25, 100, 250)          # days with every own chore done
+MILESTONE_COLOR = {25: "#CD8A4E", 100: "#C9D1D9", 250: "#F5C542"}
+ONTIME_SHARE = 0.8                    # on time: at least 80 % of the week's chores done in time
+ONTIME_MIN = 5
+VOL_KEEP_DAYS = 60
 DIAMOND_DAYS = 30
 CLIMB_MIN = 0.15
 MAX_CELEBRATIONS = 40
@@ -50,17 +58,17 @@ def new_id() -> str:
 
 # ------------------------------------------------------------------ settings
 def clean_settings(raw: dict | None) -> dict:
-    """{"items": {id: {"on": bool, "size": size}}, "early_time": "HH:MM", "confetti": bool}"""
+    """{"items": {id: {"on": bool, "size": size}}, "ontime_time": "HH:MM", "confetti": bool}"""
     raw = raw or {}
     items = raw.get("items") or {}
     out = {}
     for aid, meta in META.items():
         cur = items.get(aid) or {}
         out[aid] = {"on": bool(cur.get("on", True)), "size": cur.get("size") if cur.get("size") in SIZES else meta["size"]}
-    t = str(raw.get("early_time") or "12:00")
+    t = str(raw.get("ontime_time") or "20:00")
     if len(t) != 5 or t[2] != ":" or not (t[:2].isdigit() and t[3:].isdigit()) or int(t[:2]) > 23 or int(t[3:]) > 59:
-        t = "12:00"
-    return {"items": out, "early_time": t, "confetti": bool(raw.get("confetti", True))}
+        t = "20:00"
+    return {"items": out, "ontime_time": t, "confetti": bool(raw.get("confetti", True))}
 
 
 def points_for(size: str, day_points: int) -> int:
@@ -83,9 +91,14 @@ def _range(start: date, end: date):
         d += timedelta(days=1)
 
 
-def period_stats(history: dict, pid: str, start: date, end: date) -> dict:
-    """done/total chores, fair day sum, days with chores, complete days and early days in [start, end]."""
-    done = total = days = complete = 0
+def ontime_count(rec: dict, cutoff: str) -> int:
+    """Chores of a day record done in time: before their last day, or on it by the cutoff time (default 20:00)."""
+    return int(rec.get("before", 0)) + sum(1 for t in rec.get("due_times", []) if t and t <= cutoff)
+
+
+def period_stats(history: dict, pid: str, start: date, end: date, cutoff: str = "20:00") -> dict:
+    """done/total chores, fair day sum, days with chores, complete days and chores done in time in [start, end]."""
+    done = total = days = complete = ontime = 0
     frac = 0.0
     lasts = []
     for d in _range(start, end):
@@ -94,12 +107,49 @@ def period_stats(history: dict, pid: str, start: date, end: date) -> dict:
             continue
         done += rec.get("done", 0)
         total += rec["total"]
+        ontime += ontime_count(rec, cutoff)
         days += 1
         frac += rec.get("done", 0) / rec["total"]
         if rec.get("done") == rec["total"]:
             complete += 1
             lasts.append(rec.get("last") or "")
-    return {"done": done, "total": total, "days": days, "frac": round(frac, 3), "complete": complete, "lasts": lasts}
+    return {"done": done, "total": total, "days": days, "frac": round(frac, 3), "complete": complete, "lasts": lasts,
+            "ontime": ontime}
+
+
+def _ontime_rate(s: dict) -> float:
+    return s["ontime"] / s["total"] if s["total"] >= ONTIME_MIN else -1
+
+
+def vol_week(st: dict, persons: list[str], monday: date) -> dict[str, list[str]]:
+    """Volunteer champion (most volunteer chores done) and rescuer (took the one open longest, at least a day)."""
+    sunday = (monday + timedelta(days=6)).isoformat()
+    week = [v for v in (st.get("vol") or {}).values() if monday.isoformat() <= v.get("day", "") <= sunday
+            and v.get("pid") in persons]
+    count: dict[str, int] = {}
+    for v in week:
+        count[v["pid"]] = count.get(v["pid"], 0) + 1
+    most = max(count.values(), default=0)
+    longest = max((v.get("wait", 0) for v in week), default=0)
+    return {"volunteer": sorted(p for p, n in count.items() if most >= 1 and n == most),
+            "rescue": sorted({v["pid"] for v in week if longest >= 1 and v.get("wait", 0) == longest})}
+
+
+def log_volunteer(data: dict, inst_id: str, inst: dict, done: bool, today: date) -> None:
+    """A volunteer chore was ticked off (or undone): remember who did it and how long it waited to be taken."""
+    st = _state(data)
+    if not done or inst.get("mode") not in ("free", None) or not inst.get("pid"):
+        st["vol"].pop(inst_id, None)
+        return
+    try:
+        wait = max(0, (date.fromisoformat(str(inst.get("claimed_at") or today.isoformat())[:10])
+                       - date.fromisoformat(str(inst.get("start") or today.isoformat())[:10])).days)
+    except ValueError:
+        wait = 0
+    st["vol"][inst_id] = {"pid": inst["pid"], "day": today.isoformat(), "wait": wait}
+    horizon = (today - timedelta(days=VOL_KEEP_DAYS)).isoformat()
+    for k in [k for k, v in st["vol"].items() if v.get("day", "") < horizon]:
+        st["vol"].pop(k, None)
 
 
 def _rate(s: dict, fair: bool) -> float:
@@ -125,10 +175,11 @@ def _best(stats: dict[str, dict], fair: bool, minimum: int) -> list[str]:
     return [p for p in cand if amount(p) == most]
 
 
-def week_winners(history: dict, persons: list[str], monday: date, fair: bool, early_time: str) -> dict[str, list[str]]:
+def week_winners(history: dict, persons: list[str], monday: date, fair: bool, cutoff: str = "20:00",
+                 st: dict | None = None) -> dict[str, list[str]]:
     """Weekly awards for the week starting on `monday` (Mon–Sun)."""
     sunday = monday + timedelta(days=6)
-    stats = {p: period_stats(history, p, monday, sunday) for p in persons}
+    stats = {p: period_stats(history, p, monday, sunday, cutoff) for p in persons}
     prev = {p: period_stats(history, p, monday - timedelta(days=7), monday - timedelta(days=1)) for p in persons}
     won: dict[str, list[str]] = {}
     won["crown"] = _best(stats, fair, 3)
@@ -147,7 +198,10 @@ def week_winners(history: dict, persons: list[str], monday: date, fair: bool, ea
              if _enough(stats[p], fair, 3) and _enough(prev[p], fair, 3)}
     top = max(gains.values(), default=0)
     won["climber"] = [p for p, g in gains.items() if top >= CLIMB_MIN and g == top]
-    won["early"] = [p for p, s in stats.items() if sum(1 for t in s["lasts"] if t and t < early_time) >= 4]
+    # on time: the best share of chores done in time (evening chores count until the cutoff, not just mornings)
+    best = max((_ontime_rate(s) for s in stats.values()), default=-1)
+    won["ontime"] = [p for p, s in stats.items() if best >= ONTIME_SHARE and _ontime_rate(s) == best]
+    won.update(vol_week(st or {}, persons, monday))
     return won
 
 
@@ -161,7 +215,7 @@ def month_winners(history: dict, persons: list[str], first: date, fair: bool) ->
 def _state(data: dict) -> dict:
     st = data.setdefault("awards", {})
     for key, default in (("holders", {}), ("since", {}), ("diamond", {}), ("milestone", {}), ("day_done", {}),
-                         ("celebrations", []), ("counted", {})):
+                         ("celebrations", []), ("counted", {}), ("vol", {}), ("full_counted", {}), ("full_level", {})):
         st.setdefault(key, default)
     st.setdefault("week", None)
     st.setdefault("month", None)
@@ -204,24 +258,32 @@ def evaluate(data: dict, today: date, streaks: dict[str, int], cfg: dict, fair: 
     persons = [p for p in data.get("persons", {})]
     on = {aid: cfg["items"][aid]["on"] for aid in IDS}
 
-    # milestones count every finished chore; history is trimmed after 120 days, so count each day once
+    # counters: every finished chore and every day with all own chores done (milestones); history is trimmed
+    # after 120 days, so each day is counted once
     counters = data.setdefault("counters", {})
-    counted = st["counted"]
+    counted, full_counted = st["counted"], st["full_counted"]
     for day, per in history.items():
         for pid, rec in per.items():
             key = f"{day}|{pid}"
-            if key in counted or pid not in data.get("persons", {}):
+            if pid not in data.get("persons", {}):
                 continue
-            counted[key] = True
-            counters.setdefault(pid, {"done": 0})["done"] += int(rec.get("done", 0))
+            c = counters.setdefault(pid, {"done": 0})
+            if key not in counted:
+                counted[key] = True
+                c["done"] += int(rec.get("done", 0))
+            if key not in full_counted:
+                full_counted[key] = True
+                if rec.get("total") and rec.get("done") == rec["total"]:
+                    c["full_days"] = c.get("full_days", 0) + 1
     horizon = (today - timedelta(days=150)).isoformat()
-    for key in [k for k in counted if k[:10] < horizon]:
-        counted.pop(key, None)
+    for m in (counted, full_counted):
+        for key in [k for k in m if k[:10] < horizon]:
+            m.pop(key, None)
 
     # weekly awards for the last complete week
     monday = today - timedelta(days=today.weekday()) - timedelta(days=7)
     if st["week"] != monday.isoformat():
-        won = week_winners(history, persons, monday, fair, cfg["early_time"])
+        won = week_winners(history, persons, monday, fair, cfg["ontime_time"], st)
         for aid, pids in won.items():
             pids = pids if on[aid] else []
             st["holders"][aid] = pids
@@ -252,19 +314,20 @@ def evaluate(data: dict, today: date, streaks: dict[str, int], cfg: dict, fair: 
         st["diamond"][pid] = reached
     st["holders"]["diamond"] = holders
 
-    # milestones 100 / 500 / 1000 chores
+    # milestones: 25 / 100 / 250 days with every own chore done (fair for few and many chores alike)
     holders = []
     for pid in persons:
-        total = counters.get(pid, {}).get("done", 0)
+        total = counters.get(pid, {}).get("full_days", 0)
         level = max([m for m in MILESTONES if total >= m] or [0])
         if level and on["milestone"]:
             holders.append(pid)
-            if level > st["milestone"].get(pid, 0):
+            if level > st["full_level"].get(pid, 0):
                 step = MILESTONES.index(level)
-                _win(data, st, "milestone", pid, str(level), cfg, day_points, ts, today, ledger_add, value=level,
+                _win(data, st, "milestone", pid, f"days{level}", cfg, day_points, ts, today, ledger_add, value=level,
                      color=MILESTONE_COLOR[level], size=_step(cfg["items"]["milestone"]["size"], step),
-                     fx="l" if level >= 500 else "m")
-        st["milestone"][pid] = max(level, st["milestone"].get(pid, 0))
+                     fx="l" if level >= 100 else "m")
+        st["full_level"][pid] = max(level, st["full_level"].get(pid, 0))
+        st["milestone"][pid] = st["full_level"][pid]
     st["holders"]["milestone"] = holders
 
     # family teamwork: yesterday everybody with chores finished all of them (at least two persons)
@@ -329,7 +392,7 @@ def open_awards(data: dict, today: date, streaks: dict[str, int], fair: bool, cf
     history = data.get("history", {})
     persons = list(data.get("persons", {}))
     monday = today - timedelta(days=today.weekday())
-    week = {p: period_stats(history, p, monday, today - timedelta(days=1)) for p in persons}
+    week = {p: period_stats(history, p, monday, today - timedelta(days=1), cfg["ontime_time"]) for p in persons}
     month = {p: period_stats(history, p, today.replace(day=1), today - timedelta(days=1)) for p in persons}
     counters = data.get("counters", {})
     out = []
@@ -345,9 +408,18 @@ def open_awards(data: dict, today: date, streaks: dict[str, int], fair: bool, cf
             amount = (lambda p: week[p]["frac"]) if fair else (lambda p: week[p]["done"])
             leader = max(persons, key=amount, default=None)
             value = amount(leader) if leader else None
-        elif aid == "early":
-            leader = max(persons, key=lambda p: sum(1 for t in week[p]["lasts"] if t and t < cfg["early_time"]), default=None)
-            value = sum(1 for t in week[leader]["lasts"] if t and t < cfg["early_time"]) if leader else None
+        elif aid == "ontime":
+            rate = {p: (week[p]["ontime"] / week[p]["total"]) if week[p]["total"] else -1 for p in persons}
+            leader = max(persons, key=lambda p: rate[p], default=None)
+            value = round(rate[leader] * 100) if leader and rate[leader] >= 0 else None
+        elif aid in ("volunteer", "rescue"):
+            w = [v for v in st["vol"].values() if v.get("day", "") >= monday.isoformat() and v.get("pid") in persons]
+            key = (lambda v: 1) if aid == "volunteer" else (lambda v: v.get("wait", 0))
+            score: dict[str, int] = {}
+            for v in w:
+                score[v["pid"]] = score.get(v["pid"], 0) + key(v) if aid == "volunteer" else max(score.get(v["pid"], 0), key(v))
+            leader = max(score, key=score.get, default=None)
+            value = score.get(leader) if leader else None
         elif aid == "trophy":
             best = _best(month, fair, 1)
             leader = best[0] if best else None
@@ -356,8 +428,8 @@ def open_awards(data: dict, today: date, streaks: dict[str, int], fair: bool, cf
             leader = max(persons, key=lambda p: streaks.get(p, 0), default=None)
             value = streaks.get(leader, 0) if leader else None
         elif aid == "milestone":
-            leader = max(persons, key=lambda p: counters.get(p, {}).get("done", 0), default=None)
-            value = counters.get(leader, {}).get("done", 0) if leader else None
+            leader = max(persons, key=lambda p: counters.get(p, {}).get("full_days", 0), default=None)
+            value = counters.get(leader, {}).get("full_days", 0) if leader else None
         out.append({"id": aid, "icon": META[aid]["icon"], "color": META[aid]["color"], "period": META[aid]["period"],
                     "leader": leader, "value": value})
     return out

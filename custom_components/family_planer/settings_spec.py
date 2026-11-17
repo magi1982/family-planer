@@ -127,7 +127,7 @@ def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list,
     cur_aw = cur_awards or clean_settings(None)
     raw = data.get("awards") if isinstance(data.get("awards"), dict) else {}
     aw = clean_settings({"items": {**cur_aw["items"], **(raw.get("items") or {})},
-                         "early_time": raw.get("early_time", cur_aw["early_time"]),
+                         "ontime_time": raw.get("ontime_time", cur_aw.get("ontime_time", "20:00")),
                          "confetti": raw.get("confetti", cur_aw["confetti"])})
     cur_lv = clean_levels(cur_levels)
     raw_lv = data.get("levels") if isinstance(data.get("levels"), dict) else {}

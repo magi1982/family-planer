@@ -82,6 +82,20 @@ def test_done_items_counted_as_done():
     assert d["history"]["2026-11-04"]["p1"] == {"done": 1, "total": 1, "missed": []}
 
 
+def test_history_remembers_when_chores_were_done():
+    # for the on-time award: done before the last day, or the time of day on the last day
+    d = base()
+    d["chores"]["c1"] = {"title": "A", "assign": {"p1": {"3": {"window": 2}}}}
+    d["chores"]["c2"] = {"title": "B", "assign": {"p1": {"4": {}}}}
+    engine.rollover(d, WED)
+    next(iter(d["items"].values())).update(done=True, done_at="2026-11-04T18:00:00+01:00")
+    engine.rollover(d, WED + timedelta(days=1))
+    it = next(i for i in d["items"].values() if i["chore_id"] == "c2")
+    it.update(done=True, done_at="2026-11-05T19:45:00+01:00")
+    engine.rollover(d, WED + timedelta(days=2))
+    assert d["history"]["2026-11-05"]["p1"]["before"] == 1 and d["history"]["2026-11-05"]["p1"]["due_times"] == ["19:45"]
+
+
 def test_plan_change_removes_open_and_keeps_done():
     d = base()
     d["chores"]["c1"] = {"title": "A", "assign": {"p1": {"3": {}}}}

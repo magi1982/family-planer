@@ -406,6 +406,7 @@ class FamilyPlanner:
             raise ValueError("not_claimed")
         inst["done"] = bool(done)
         inst["done_at"] = dt_util.now().isoformat() if done else None
+        awards.log_volunteer(self.data, iid, inst, bool(done), dt_util.now().date())
         ref = f"sonder:{iid}"
         self.data["ledger"][:] = [e for e in self.data["ledger"] if e.get("ref") != ref]
         pts = self.sonder_points(inst)
@@ -1554,7 +1555,7 @@ class FamilyPlanner:
                          "fullscreen_dblclick": bool(st.get("fullscreen_dblclick", True)),
                          "fullscreen_auto": bool(st.get("fullscreen_auto", False)),
                          "nav": self.nav(), "nav_title": bool(st.get("nav_title", False)),
-                         "early_time": self.award_settings()["early_time"],
+                         "ontime_time": self.award_settings()["ontime_time"],
                          "confetti": self.award_settings()["confetti"],
                          "default_view": st.get("default_view") if st.get("default_view") in settings_spec.VIEWS else "today"},
             "season": self.season(),

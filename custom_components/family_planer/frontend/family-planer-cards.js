@@ -2839,9 +2839,11 @@ const AWT = {
   bee: ['Fleissbiene', 'Am meisten erledigt in der letzten Woche.'],
   weekend: ['Wochenend-Held', 'Am Wochenende alles erledigt.'],
   climber: ['Aufsteiger', 'Am meisten verbessert gegenüber der Vorwoche.'],
-  early: ['Frühaufsteher', 'An mindestens 4 Tagen alles vor {t} Uhr erledigt.'],
+  ontime: ['Pünktlich-Profi', 'Den grössten Teil der Ämtli rechtzeitig erledigt (bis {t} Uhr am letzten Tag).'],
+  volunteer: ['Freiwilligen-Champion', 'Am meisten freiwillige Ämtli übernommen und erledigt.'],
+  rescue: ['Retter in der Not', 'Ein freiwilliges Ämtli übernommen, das am längsten offen war.'],
   diamond: ['Diamant-Serie', '{n} Tage am Stück alles erledigt.'],
-  milestone: ['Meilenstein {n}', '{n} Ämtli insgesamt erledigt.'],
+  milestone: ['Meilenstein {n}', '{n} Tage mit allen eigenen Ämtli erledigt.'],
   team: ['Familien-Teamwork', 'Gestern hat die ganze Familie alles erledigt.'],
   streak: ['{n}-Tage-Serie', '{n} Tage am Stück alles erledigt.'],
 };
@@ -2853,9 +2855,11 @@ const AWR = [
   ['bee', 'mdi:bee', '#CD8A4E', 'Fleissbiene', 'Am meisten erledigt in einer Woche (im Modus Fair: die meisten ganzen Tage).'],
   ['weekend', 'mdi:shield-star', '#E06B6B', 'Wochenend-Held', 'Samstag und Sonntag alles erledigt.'],
   ['climber', 'mdi:trending-up', '#4FD1C5', 'Aufsteiger', 'Mindestens 15 Prozentpunkte besser als in der Vorwoche.'],
-  ['early', 'mdi:weather-sunset-up', '#FFB74D', 'Frühaufsteher', 'An mindestens 4 Tagen der Woche alles vor {t} Uhr erledigt.'],
+  ['ontime', 'mdi:clock-check-outline', '#FFB74D', 'Pünktlich-Profi', 'Mindestens 80 % der Ämtli einer Woche rechtzeitig erledigt – vor dem letzten Tag oder an diesem bis {t} Uhr. Abend-Ämtli zählen also auch.'],
+  ['volunteer', 'mdi:hand-heart', '#8BC34A', 'Freiwilligen-Champion', 'Am meisten freiwillige Ämtli einer Woche übernommen und erledigt.'],
+  ['rescue', 'mdi:lifebuoy', '#FF7043', 'Retter in der Not', 'Ein freiwilliges Ämtli übernommen, das am längsten (mind. einen Tag) offen war.'],
   ['diamond', 'mdi:diamond-stone', '#7FDBFF', 'Diamant-Serie', '30 Tage am Stück alles erledigt.'],
-  ['milestone', 'mdi:medal', '#E0A84F', 'Meilenstein', '100, 500 und 1000 Ämtli insgesamt erledigt.'],
+  ['milestone', 'mdi:medal', '#E0A84F', 'Meilenstein', '25, 100 und 250 Tage mit allen eigenen Ämtli erledigt – fair, egal wie viele Ämtli jemand hat.'],
   ['team', 'mdi:account-group', '#C771D6', 'Familien-Teamwork', 'An einem Tag erledigt die ganze Familie alles.'],
 ];
 // Rahmen, Krone und Medaillen – auch von der Belohnungs-Ansicht genutzt
@@ -3277,7 +3281,7 @@ class LoxWochenplanerCard extends FpBase {
     const s = this.fpStore && this.fpStore.snap; const A = {}; const F = {}; kids.forEach((k) => { A[k.name] = []; });
     if (!s) return { A, F };
     const byName = Object.fromEntries((s.persons || []).map((p) => [p.name, p.id]));
-    const et = (s.settings || {}).early_time || '12:00';
+    const et = (s.settings || {}).ontime_time || '20:00';
     kids.forEach((k) => {
       const r = (s.awards || {})[byName[k.name]] || { list: [] }; F[k.name] = r.frame || '';
       A[k.name] = (r.list || []).map((a) => { const tx = AWT[a.id] || [a.id, '']; const f = (x) => x.replace(/\{n\}/g, a.value == null ? '' : a.value).replace('{t}', et);
@@ -3288,7 +3292,7 @@ class LoxWochenplanerCard extends FpBase {
   _detailHtml(kids, pre, awards, frames) {
     const k = kids.find((x) => x.name === this._detail); if (!k) return '';
     const s = pre[k.name]; const lv = level(s.pct); const aw = awards[k.name] || [];
-    const snap = (this.fpStore && this.fpStore.snap) || {}; const pts = snap.award_points || {}; const et = (snap.settings || {}).early_time || '12:00';
+    const snap = (this.fpStore && this.fpStore.snap) || {}; const pts = snap.award_points || {}; const et = (snap.settings || {}).ontime_time || '20:00';
     const on = ((snap.award_settings || {}).items) || {};
     const q = (x) => (x[1] ? `${x[0]} / ${x[1]} <small>(${Math.round((x[0] / x[1]) * 100)} %)</small>` : '<small>noch keine</small>');
     const holders = (id) => kids.filter((x) => (awards[x.name] || []).some((a) => a.id === id)).map((x) => x.name).join(', ') || 'noch niemand';
@@ -4179,9 +4183,11 @@ const AWT = {
   bee: ['Busy bee', 'Most done last week.'],
   weekend: ['Weekend hero', 'Everything done at the weekend.'],
   climber: ['Climber', 'Improved the most compared with the week before.'],
-  early: ['Early bird', 'Everything done before {t} on at least 4 days.'],
+  ontime: ['On-time pro', 'Most chores done in time (by {t} on their last day).'],
+  volunteer: ['Volunteer champion', 'Took on and did the most volunteer chores.'],
+  rescue: ['Rescuer', 'Took on the volunteer chore that had been waiting longest.'],
   diamond: ['Diamond streak', 'Everything done {n} days in a row.'],
-  milestone: ['Milestone {n}', '{n} chores done in total.'],
+  milestone: ['Milestone {n}', '{n} days with every own chore done.'],
   team: ['Family teamwork', 'Yesterday the whole family did everything.'],
   streak: ['{n}-day streak', 'Everything done {n} days in a row.'],
 };
@@ -4193,9 +4199,11 @@ const AWR = [
   ['bee', 'mdi:bee', '#CD8A4E', 'Busy bee', 'Most done in a week (in fair mode: the most complete days).'],
   ['weekend', 'mdi:shield-star', '#E06B6B', 'Weekend hero', 'Everything done on Saturday and Sunday.'],
   ['climber', 'mdi:trending-up', '#4FD1C5', 'Climber', 'At least 15 percentage points better than the week before.'],
-  ['early', 'mdi:weather-sunset-up', '#FFB74D', 'Early bird', 'Everything done before {t} on at least 4 days of the week.'],
+  ['ontime', 'mdi:clock-check-outline', '#FFB74D', 'On-time pro', 'At least 80 % of the chores of a week done in time – before their last day or on it by {t}. Evening chores count too.'],
+  ['volunteer', 'mdi:hand-heart', '#8BC34A', 'Volunteer champion', 'Took on and did the most volunteer chores of a week.'],
+  ['rescue', 'mdi:lifebuoy', '#FF7043', 'Rescuer', 'Took on the volunteer chore that had been waiting longest (at least a day).'],
   ['diamond', 'mdi:diamond-stone', '#7FDBFF', 'Diamond streak', 'Everything done 30 days in a row.'],
-  ['milestone', 'mdi:medal', '#E0A84F', 'Milestone', '100, 500 and 1000 chores done in total.'],
+  ['milestone', 'mdi:medal', '#E0A84F', 'Milestone', '25, 100 and 250 days with every own chore done – fair however many chores somebody has.'],
   ['team', 'mdi:account-group', '#C771D6', 'Family teamwork', 'On one day the whole family does everything.'],
 ];
 // Rahmen, Krone und Medaillen – auch von der Belohnungs-Ansicht genutzt
@@ -4617,7 +4625,7 @@ class LoxWochenplanerCard extends FpBase {
     const s = this.fpStore && this.fpStore.snap; const A = {}; const F = {}; kids.forEach((k) => { A[k.name] = []; });
     if (!s) return { A, F };
     const byName = Object.fromEntries((s.persons || []).map((p) => [p.name, p.id]));
-    const et = (s.settings || {}).early_time || '12:00';
+    const et = (s.settings || {}).ontime_time || '20:00';
     kids.forEach((k) => {
       const r = (s.awards || {})[byName[k.name]] || { list: [] }; F[k.name] = r.frame || '';
       A[k.name] = (r.list || []).map((a) => { const tx = AWT[a.id] || [a.id, '']; const f = (x) => x.replace(/\{n\}/g, a.value == null ? '' : a.value).replace('{t}', et);
@@ -4628,7 +4636,7 @@ class LoxWochenplanerCard extends FpBase {
   _detailHtml(kids, pre, awards, frames) {
     const k = kids.find((x) => x.name === this._detail); if (!k) return '';
     const s = pre[k.name]; const lv = level(s.pct); const aw = awards[k.name] || [];
-    const snap = (this.fpStore && this.fpStore.snap) || {}; const pts = snap.award_points || {}; const et = (snap.settings || {}).early_time || '12:00';
+    const snap = (this.fpStore && this.fpStore.snap) || {}; const pts = snap.award_points || {}; const et = (snap.settings || {}).ontime_time || '20:00';
     const on = ((snap.award_settings || {}).items) || {};
     const q = (x) => (x[1] ? `${x[0]} / ${x[1]} <small>(${Math.round((x[0] / x[1]) * 100)} %)</small>` : '<small>none yet</small>');
     const holders = (id) => kids.filter((x) => (awards[x.name] || []).some((a) => a.id === id)).map((x) => x.name).join(', ') || 'nobody yet';
@@ -5679,8 +5687,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
   const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
   const RSIZES = ['s', 'm', 'l', 'xl', 'xxl'];
-  const UNIT = { crown: 'pct', climber: 'pct', perfect: 'pct', weekend: 'pct', trophy: 'pct', bee: 'days', early: 'days', diamond: 'days', milestone: 'chores' };
-  const MILES = [100, 500, 1000];
+  const UNIT = { crown: 'pct', climber: 'pct', perfect: 'pct', weekend: 'pct', trophy: 'pct', bee: 'days', ontime: 'pct', volunteer: 'chores', rescue: 'days', diamond: 'days', milestone: 'days' };
+  const MILES = [25, 100, 250];
   // days until a person can afford `cost` at their current pace (null = no pace yet)
   const daysTo = (s, pid, cost) => { const pace = s.pace || {}; const have = ((s.points || {})[pid] || {}).available || 0; if (have >= cost) return 0;
     const v = (pace.persons || {})[pid] || pace.family || 0; return v > 0 ? Math.ceil((cost - have) / v) : null; };
@@ -5771,7 +5779,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const persons = s.persons; const sel = persons.find((p) => p.id === this._sel) || null;  // nobody selected = everything
       const pts = s.points || {};
       const FX = (this._cfg.lang === 'en' ? window.FPX_EN : window.FPX) || window.FPX || {}; const AWT = FX.AWT || {}; const AWR = FX.AWR || [];
-      const et = (s.settings || {}).early_time || '12:00'; const apts = s.award_points || {};
+      const et = (s.settings || {}).ontime_time || '20:00'; const apts = s.award_points || {};
       const awName = (id, v) => String((AWT[id] || [id])[0]).replace(/\{n\}/g, v == null ? '' : v);
       const medal = (a, big) => `<span class="md${big ? ' big' : ''}" style="--mc:${COLOR(a.color)}" title="${esc(awName(a.id, a.value))}"><ha-icon icon="${esc(a.icon)}"></ha-icon></span>`;
       const ring = (p, size) => { const r = (s.awards || {})[p.id] || {}; const fr = ['platinum', 'gold', 'silver', 'bronze'].includes(r.frame) ? r.frame : '';
@@ -5801,7 +5809,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const oa = (s.open_awards || []).filter((a) => AWR.some((r) => r[0] === a.id));
       const openAw = oa.length ? `<div class="sec">${esc(T.open)}</div><div class="oas">${oa.map((a) => { const rule = (AWR.find((r) => r[0] === a.id) || [])[4] || '';
           const lp = persons.find((p) => p.id === a.leader); const u = T.units[UNIT[a.id]] || '{n}';
-          const nm = a.id === 'milestone' ? awName('milestone', MILES.find((m) => m > (a.value || 0)) || 1000) : awName(a.id, a.id === 'diamond' ? 30 : '');
+          const nm = a.id === 'milestone' ? awName('milestone', MILES.find((m) => m > (a.value || 0)) || 250) : awName(a.id, a.id === 'diamond' ? 30 : '');
           return `<div class="oa" style="--mc:${COLOR(a.color)}">${medal(a, true)}<div class="ot"><b>${esc(nm)}</b><span>${esc(rule.replace('{t}', et))}</span>
             <span class="om"><em>${esc(T.per[a.period] || '')}</em>${apts[a.id] ? `<em class="pp">${esc(fmt(T.worth, { n: apts[a.id] }))}</em>` : ''}
             ${lp && a.value ? `<em class="ld">${av(lp, 18)}${esc(fmt(T.lead, { n: lp.name }))} · ${esc(fmt(u, { n: a.value }))}</em>` : `<em>${esc(T.noLead)}</em>`}</span></div></div>`; }).join('')}</div>` : '';
@@ -6309,7 +6317,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('awards', 'awards', 'Pokale & Auszeichnungen', 'Trophies & awards', 'Pro Auszeichnung ein/aus und wie viele Punkte sie bringt (beim Gewinnen, und wieder, wenn man sie neu gewinnt). Klein = ⅓, Mittel = ⅔, Gross = 1×, Riesig = 2× der Punkte für einen ganzen Tag.', 'Per award on/off and how many points it gives (when won, and again when won anew). Small = ⅓, medium = ⅔, large = 1×, giant = 2× the points for a full day.'),
       F('season_start', 'md', 'Neue Level-Saison ab', 'New level season from', 'Jedes Schuljahr starten alle wieder bei Level 1. Freigeschaltete Extras und Punkte zum Einlösen bleiben, der Bestwert wird als Abzeichen gespeichert.', 'Every school year everybody starts again at level 1. Unlocked extras and points to redeem stay; the best level is kept as a badge.'),
       F('level_bonus', 'bool', 'Bonuspunkte beim Level-Aufstieg', 'Bonus points on level up', 'Ein voller Tag Punkte pro Level, drei bei einer neuen Stufe (Silber, Gold, Diamant, Rubin).', 'One full day of points per level, three for a new tier (silver, gold, diamond, ruby).'),
-      F('early_time', 'time', 'Frühaufsteher: alles erledigt vor', 'Early bird: everything done before', 'Zeit für die Auszeichnung „Frühaufsteher“.', 'Time for the "Early bird" award.'),
+      F('ontime_time', 'time', 'Pünktlich-Profi: rechtzeitig bis', 'On-time pro: in time until', 'Ein Ämtli zählt als rechtzeitig, wenn es vor seinem letzten Tag oder an diesem bis zu dieser Zeit erledigt ist (Standard 20:00, so zählen auch Abend-Ämtli).', 'A chore counts as in time when it is done before its last day or on it by this time (default 20:00, so evening chores count too).'),
       F('confetti', 'bool', 'Konfetti', 'Confetti', 'Kleines Konfetti mit Namen, wenn jemand alle Ämtli des Tages erledigt hat; grösseres in der Pokalfarbe bei Pokalen. Höchstens ein grosses pro Person und Tag.', 'Small confetti with the name when someone has done all chores of the day; bigger ones in the trophy colour for trophies. At most one big one per person and day.'),
       F('reward_notify', 'entities', 'Anfragen zusätzlich melden an', 'Also send requests to', 'z. B. die Handy-App – zusätzlich zur Mitteilung in Home Assistant.', 'e.g. the mobile app – in addition to the Home Assistant notification.', { domain: 'notify' }),
     ] },
@@ -6394,8 +6402,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   // tab order on the page
   const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'status'];
   const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', einstellungen: 'Settings' } };
-  const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', early: 'Frühaufsteher', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
-    en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', early: 'Early bird', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
+  const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', ontime: 'Pünktlich-Profi', volunteer: 'Freiwilligen-Champion', rescue: 'Retter in der Not', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
+    en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', ontime: 'On-time pro', volunteer: 'Volunteer champion', rescue: 'Rescuer', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
   const AWS = { de: { none: 'Ohne Punkte', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
   const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder' };
   // season events in the settings (keys from the server's catalogue)
@@ -6463,7 +6471,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (id === 'seasons') { const f = clone(d.seasons); f.priority = f.priority || Object.keys(PRIO); f.events = f.events || {}; return f; }
       if (id === 'general') { const g = clone(d.general); g.mod_week = g.modules.week; g.mod_lists = g.modules.lists; return g; }
       if (id === 'lists') return clone(d.lists_settings);
-      if (id === 'points') { const f = clone(d.points); f.early_time = (f.awards || {}).early_time || '12:00'; f.confetti = (f.awards || {}).confetti !== false;
+      if (id === 'points') { const f = clone(d.points); f.ontime_time = (f.awards || {}).ontime_time || '20:00'; f.confetti = (f.awards || {}).confetti !== false;
         f.season_start = (f.levels || {}).season_start || '08-01'; f.level_bonus = (f.levels || {}).bonus !== false; return f; }
       return clone(d[id]);
     }
@@ -6543,7 +6551,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     async _saveTab() {
       const id = this._tab; const f = { ...this._forms[id] };
       if (id === 'general') { f.modules = { week: !!f.mod_week, lists: !!f.mod_lists }; delete f.mod_week; delete f.mod_lists; }
-      if (id === 'points') { f.awards = { items: (f.awards || {}).items || {}, early_time: f.early_time, confetti: !!f.confetti }; delete f.early_time; delete f.confetti;
+      if (id === 'points') { f.awards = { items: (f.awards || {}).items || {}, ontime_time: f.ontime_time, confetti: !!f.confetti }; delete f.ontime_time; delete f.confetti;
         f.levels = { season_start: f.season_start, bonus: !!f.level_bonus }; delete f.season_start; delete f.level_bonus; }
       if (id === 'vacation' && typeof f.words === 'string') f.words = f.words.split(',').map((x) => x.trim()).filter(Boolean);
       if (id === 'announce' && typeof f.times === 'string') f.times = f.times.split(',').map((x) => x.trim()).filter(Boolean);
@@ -7169,10 +7177,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const TXT = {
     de: { lvl: '{n} ist jetzt Level {v} – {t}! ⬆️', lvlB: ' +{b} Punkte', unl: ' · Neu: {u}', day: 'Super, {n}! Alle Ämtli erledigt 🎉', team: 'Familien-Teamwork! Alle haben alles erledigt 🤝', won: '{n}: {a}!',
       a: { trophy: 'Pokal des Monats 🏆', crown: 'Krone der Woche 👑', perfect: 'Perfekte Woche ⭐', bee: 'Fleissbiene 🐝', weekend: 'Wochenend-Held 🦸',
-        climber: 'Aufsteiger 📈', early: 'Frühaufsteher 🌅', diamond: 'Diamant-Serie 💎', milestone: 'Meilenstein {v} 🏅', team: 'Familien-Teamwork 🤝' } },
+        climber: 'Aufsteiger 📈', ontime: 'Pünktlich-Profi ⏰', volunteer: 'Freiwilligen-Champion 🙋', rescue: 'Retter in der Not 🛟', diamond: 'Diamant-Serie 💎', milestone: 'Meilenstein {v} 🏅', team: 'Familien-Teamwork 🤝' } },
     en: { lvl: '{n} is now level {v} – {t}! ⬆️', lvlB: ' +{b} points', unl: ' · New: {u}', day: 'Well done, {n}! Every chore done 🎉', team: 'Family teamwork! Everybody did everything 🤝', won: '{n}: {a}!',
       a: { trophy: 'Trophy of the month 🏆', crown: 'Crown of the week 👑', perfect: 'Perfect week ⭐', bee: 'Busy bee 🐝', weekend: 'Weekend hero 🦸',
-        climber: 'Climber 📈', early: 'Early bird 🌅', diamond: 'Diamond streak 💎', milestone: 'Milestone {v} 🏅', team: 'Family teamwork 🤝' } },
+        climber: 'Climber 📈', ontime: 'On-time pro ⏰', volunteer: 'Volunteer champion 🙋', rescue: 'Rescuer 🛟', diamond: 'Diamond streak 💎', milestone: 'Milestone {v} 🏅', team: 'Family teamwork 🤝' } },
   };
   const COUNT = { s: 90, m: 190, l: 340 };
   const MAX_AGE_MIN = 20; // older celebrations (e.g. the tablet was asleep for hours) are not replayed

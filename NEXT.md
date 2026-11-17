@@ -688,7 +688,7 @@ Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 4. **Helferherz:** Ein Ämtli eines anderen übernommen oder ein Zusatz-/Sonder-Ämtli freiwillig gemacht.
 5. **Aufholjagd:** Die eigene Quote gegenüber der Vorwoche am stärksten verbessert (fair für alle Stufen).
 
-**Weitere Vorschläge aus vorhandenen Daten (Entscheid: 6 Freiwilligen-Champion und 7 Pünktlich-Profi kommen; Pünktlich-Profi ersetzt den Frühaufsteher):**
+**Weitere Vorschläge aus vorhandenen Daten (umgesetzt: A Meilensteine nach Tagen, 6 Freiwilligen-Champion, 7 Pünktlich-Profi statt Frühaufsteher, 11 Retter in der Not; 12 Allrounder verworfen):**
 6. **Freiwilligen-Champion:** am meisten freiwillige Sonder-Ämtli der Woche übernommen und erledigt (Sonder-Ämtli: wer übernommen, wann erledigt).
 7. **Pünktlich-Profi:** höchster Anteil Ämtli, die vor ihrer Fälligkeit erledigt wurden (Ämtli: Start, Fälligkeit, erledigt um) – Abend-Ämtli zählen bis zum Abend.
 8. **Sofort-Macher:** höchster Anteil Ämtli, die innerhalb von 30 Minuten nach ihrem Start erledigt wurden – fair, weil jedes Ämtli ab seiner eigenen Startzeit zählt.
