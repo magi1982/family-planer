@@ -762,6 +762,8 @@ Status: **Runde 3** im Artefakt (17.11.), wartet auf Bewertung (Runde „pet3“
 - Wunsch 17.11.: **Info-Knopf mit Entwicklungsbaum** pro Tier und **wählbare Merkmale** (Masche, Glöckchen, Halstuch, Frisürchen, Stern, Sommersprossen, weisse Schwanzspitze, weisse Söckchen, Fellfarbe hell/dunkel) – Baby keine, Jung 1, Gross 2 + Farbe, jederzeit änderbar, auch in der Sammlung. In Runde 3 als Entwurf drin.
 - Einstellungen später prüfen: Fundsachen an/aus, Glitzer-Funken an/aus, Werte sinken (aus/langsam/normal), Tier in der Kopfszene, Platz bei der Person.
 
+- Runde 4 (Wunsch 17.11., im selben Artefakt, Abschnitte 8–12): **Sammelkarten** pro Tier (3 Stile: Holo, Sticker, Spiel-Karte; Seltenheit gewöhnlich/selten/episch/legendär) mit **Spezialfähigkeit** (eigene Animation pro Tier, z. B. Mäuselsprung, Feuerpuster, Bauchrutscher), **echter Grösse und echtem Gewicht** je Stufe; **Belohnung beim Abhaken** ohne Extra-Tipp: 2–4 Symbole steigen über dem Ämtli auf (immer Taler, immer etwas fürs Tier, selten Pillen/Energie-Drink/Glitzer-Funke; 3 Varianten Fächer/Liste/Plopp); **Icons** für Futter, Trinken, Pillen (Happy, Wachs, Glitzer, Schlaf-Tropfen, Vitamin, Trost-Pflaster) und Lustiges in Stil A/B; **Energie und Durst**, Happy-Pille gegen sauer, **Entwickeln-Knopf** (grau → gelb wie „Ich nehm’s!“, Kind löst die Entwicklung selbst aus); 3 Ideen: **Ausflüge**, **Tricks lernen**, **Gemüsebeet** + weitere (Freundschaften, Tierparty, Tierarzt-Spiel, Fotoalbum, Saison-Kostüme, Tier-Quiz).
+
 ### 61. Freiwillige Ämtli: wie viele darf ein Kind nehmen? (17.11.)
 Status: Frage beantwortet, Idee wartet auf Entscheid.
 - Heute: kein Limit – ein Kind kann jedes offene freiwillige Ämtli nehmen (nur „max. offene Ämtli“ begrenzt, wie viele gleichzeitig angeboten werden).
