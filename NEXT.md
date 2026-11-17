@@ -703,13 +703,13 @@ Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 
 ### 57. Statistik-Seite (4. Knopf in der Navigation)
 Status: Idee – Entwurf im Design-Artefakt „Family Planer – Statistik-Seite (Vorschlag)“, wartet auf „mach es“.
-- Neuer Knopf „Statistik“ (mdi:chart-bar) nach Belohnungen.
-- Start: ganze Familie – eine grosse Karte pro Person (feste Reihenfolge, keine Rangliste) mit 10 Punkten, 7-Tage-Sternen, Ämtli/freiwillig/Serie; darunter „Zusammen als Familie“. Karte antippen → Detailseite der Person, „‹ Familie“ führt zurück.
-- Zeitraum: Woche / Monat / 3 Monate (History reicht 120 Tage).
-- Zuverlässigkeit als 10 Punkte („Lea schafft 9 von 10 Ämtli“) + Lob-Satz + Trend.
-- Kacheln: Ämtli erledigt, freiwillig geholfen, To-dos abgehakt, rechtzeitig fertig, Tage am Stück (+ Rekord), Punkte.
-- 7 Tage als Bauklötze (1 Klotz = 1 Ämtli, Stern bei „alles geschafft“), 12-Wochen-Punktekalender.
-- „Das mache ich am meisten“, „Da üben wir noch“ (statt „verpasst“), „Wann ich helfe“ (Morgen/Nachmittag/Abend).
-- Zusammen als Familie: Summe Ämtli/To-dos, Familien-Serie (+ Rekord), Retter-Einsätze, freiwillig, Familien-Mauer. Kein Familien-Ziel.
-- Daten: history, done_at, awards.vol (auf 120 Tage verlängern), Punkte-Verlauf; neu: To-do-Zähler pro Person.
-- Einstellungen: Statistik-Knopf ein/aus · Familien-Mauer bunt pro Kind (Standard aus) · „Da üben wir noch“ ein/aus · Standard-Zeitraum.
+- Neuer Knopf „Statistik“ (mdi:chart-bar) nach Belohnungen; Zeitraum Woche / Monat / 3 Monate.
+- Oben Familie + je ein Knopf pro Person (→ eigene Statistik).
+- Familie: Ämtli geschafft, freiwillige Ämtli, To-dos, Tage „alle alles geschafft“ (+ Rekord).
+- „Wer hat was gemacht?“: Balken pro Person nach Art (Ämtli / freiwillig / To-dos).
+- „Welche Ämtli – wer wie oft?“: Tabelle Ämtli × Person mit Anzahl (auch freiwillige Ämtli und To-dos).
+- Unten Personenkarten (feste Reihenfolge): 10 Punkte Zuverlässigkeit, 7-Tage-Sterne, Serie → antippen = Detailseite.
+- Detailseite: Kacheln, 7 Tage als Bauklötze, 12-Wochen-Kalender, „Das mache ich am meisten“, „Da üben wir noch“, „Wann ich helfe“; Knopf „‹ Familie“.
+- Kein Familien-Ziel, keine Retter-Statistik.
+- Daten: history (120 Tage), done_at; neu nötig: Zähler pro Ämtli + Person (history kennt heute nur verpasste Titel), Titel bei freiwilligen Ämtli merken, awards.vol 60 → 120 Tage, To-do-Zähler pro Person.
+- Einstellungen: Statistik-Knopf ein/aus · „Wer hat was gemacht“ für Kinder sichtbar · „Da üben wir noch“ ein/aus · Standard-Zeitraum.
