@@ -728,3 +728,21 @@ Status: Aussehen gewählt (17.11.): **Neon-Schild hängt vom Himmel**, weiter ob
 - Takt separat wählbar: heute (alle 7 s) · Ruhig (alle 20 s) · Am Anfang mehr (1. Minute alle 7 s, dann alle 45 s) · Nur wenn Ruhe ist (nach 2 min ohne Tipp, dann alle 30 s).
 - Evtl. Einstellung „Tipp-Hinweis: Takt“ mit Beschreibung.
 - 17.11.: Neon-Schild gefällt – 4 weitere Neon-Vorschläge für alle Saisons (gleicher Ort oben über der Bildmitte, auch ohne Haus; Farbe je Saison: Winter eisblau, Sommer pink, Herbst bernstein, Frühling/Spezialtage grün): A hängt vom Himmel · B Blase mit Pfeil nach unten · C Leuchtschild mit Glühbirnen (immer warmgelb) · D Schreibschrift zeichnet sich.
+
+### 59. Ideen: Lernen, Pflichtbewusstsein, Minigames (17.11.)
+Status: Ideensammlung – wartet auf Auswahl. Grundregel für alle Spiele: freigeschaltet erst, wenn die Ämtli des Tages erledigt sind; max. Spielzeit pro Tag als Einstellung; alles lokal, keine Werbung, keine Daten nach aussen.
+**Pflichtbewusst werden**
+1. Ämtli-Haustier: jedes Kind hat ein kleines Tier (Drache, Hamster, Fuchs …), das wächst und Tricks lernt, wenn Ämtli erledigt werden; bei vergessenen Ämtli wird es müde – stirbt nie, erholt sich sofort.
+2. Persönliche Wochen-Mission: jedes Kind bekommt eine kleine Mission („3× Tisch decken ohne Erinnerung“, „jeden Tag vor 18 Uhr fertig“) mit Abzeichen.
+3. Bildkarten-Routinen: Morgen- und Abendroutine als Bildkarten (Zähne, Kleider, Schulthek) – auch für Kinder, die noch nicht lesen.
+4. Ämtli-Tauschbörse: Kinder tauschen Ämtli untereinander, Eltern bestätigen mit einem Tipp.
+**Lernen**
+5. Frage des Tages: eine kindgerechte Frage (Natur, Schweiz, Rechnen, Englisch) im Kopfbild, Schwierigkeit pro Person; richtig = kleiner Bonus.
+6. Uhr lesen lernen: analoge Uhr im Planer, „Wie spät ist es?“ mit Tippen.
+7. Englisch-Wort des Tages mit Bild.
+**Minigames**
+8. Suchbild in der Kopfszene: 5 versteckte Dinge in der aktuellen Saison-Szene finden.
+9. Fang-Spiel im Kopfbild: 20 s lang Schneeflocken / Blätter / Sternschnuppen fangen, passend zur Saison.
+10. Kopfrechnen-Blitz: 60 s Rechnen passend zum Alter, eigener Rekord statt Rangliste.
+11. Memory mit Avataren und Saison-Bildern.
+12. Glücksrad am Sonntag für eine perfekte Woche (kleiner Bonus oder Avatar-Extra).
