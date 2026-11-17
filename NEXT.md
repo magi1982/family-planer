@@ -709,7 +709,8 @@ Status: Idee – Entwurf im Design-Artefakt „Family Planer – Statistik-Seite
 - „Wer hat was gemacht?“: Balken pro Person nach Art (Ämtli / freiwillig / To-dos).
 - „Welche Ämtli – wer wie oft?“: Tabelle Ämtli × Person mit Anzahl (auch freiwillige Ämtli und To-dos).
 - Unten Personenkarten (feste Reihenfolge): 10 Punkte Zuverlässigkeit, 7-Tage-Sterne, Serie → antippen = Detailseite.
-- Detailseite: Kacheln, 7 Tage als Bauklötze, 12-Wochen-Kalender, „Das mache ich am meisten“, „Da üben wir noch“, „Wann ich helfe“; Knopf „‹ Familie“.
+- Detailseite: Kacheln, 7 Tage als Bauklötze, 12-Wochen-Kalender, „Was ich gemacht habe“ (Balken nach Art + Liste pro Art: Ämtli, freiwillige Ämtli, To-dos pro Liste), „Da üben wir noch“, „Wann ich helfe“; Knopf „‹ Familie“.
+- Tages-Punkte (Kalender, 7-Tage-Reihe): grün = alles, gelbgrün = 1 vergessen, orange = 2, rot = 3+, grau = frei.
 - Kein Familien-Ziel, keine Retter-Statistik.
 - Daten: history (120 Tage), done_at; neu nötig: Zähler pro Ämtli + Person (history kennt heute nur verpasste Titel), Titel bei freiwilligen Ämtli merken, awards.vol 60 → 120 Tage, To-do-Zähler pro Person.
 - Einstellungen: Statistik-Knopf ein/aus · „Wer hat was gemacht“ für Kinder sichtbar · „Da üben wir noch“ ein/aus · Standard-Zeitraum.
