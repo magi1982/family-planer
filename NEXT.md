@@ -792,3 +792,11 @@ Status: Frage beantwortet, Idee wartet auf Entscheid.
 - Dev startet mit eigener Einrichtung und Testfamilie (Beispieldaten); standardmässig **stumm**: keine Ansagen über Alexa, keine Benachrichtigungen, keine echten To-do-Listen – damit Tests die Familie nicht stören.
 - Ablauf: Änderungen → Push nach Dev → am PC testen → „prod“ → derselbe Stand ins jetzige Repo + Release.
 - Tests: Skript-Test, dass in der Dev-Variante kein `family_planer/` oder `family-planer-card` mehr vorkommt.
+
+## 62 · Grafische Fehler auf dem Tablet (Version 0.16.0, gemeldet 17.11.)
+- Namen auf Personenkarten mit „…“ abgeschnitten (schmale Spalten): Name darf umbrechen bzw. kleiner werden; Prozent-Band nicht über den Namen legen.
+- Ämtli-, To-do- und Sonderämtli-Texte brechen Wort für Wort und mit Silbentrennung um („Pflan-zen zu-sam-men“): Inhalt braucht die volle Breite; Punkte-Chip und Abzeichen in eine eigene Zeile statt daneben.
+- Sonderämtli überlappen: Emoji, „Sonder“-Abzeichen und „+10“ liegen über dem Titel, Text läuft aus der Karte und über die Überschrift „SONDERÄMTLI“: keine festen Höhen, kein absolutes Positionieren, Raster [Haken | Text | Punkte] mit min-width:0.
+- To-do-Chip zeigt eine E-Mail-Adresse und überlappt den Text: statt Adresse den Namen zeigen, Chip in eigene Zeile, sauber abschneiden.
+- Rote Fehlerbox „Ansicht ‚statistik‘ fehlt in diesem Dashboard“ mitten im Kopf: für Kinder nicht sichtbar machen (nur im Bearbeiten-Modus bzw. als kleiner Hinweis), Knopf ohne Ziel ausblenden.
+- Test: Layout-Test in schmalen Spalten (3–5 Personen, lange Wörter, viele Sonderämtli) mit Screenshots, bevor ausgeliefert wird.
