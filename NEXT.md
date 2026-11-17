@@ -748,8 +748,12 @@ Status: Ideensammlung – wartet auf Auswahl. Grundregel für alle Spiele: freig
 12. Glücksrad am Sonntag für eine perfekte Woche (kleiner Bonus oder Avatar-Extra).
 
 ### 60. Ämtli-Haustier und Glücksrad am Sonntag (aus #59, Punkte 1 und 12)
-Status: Entwürfe zum Durchschauen im Artefakt „Family Planer – Ämtli-Haustier & Glücksrad (Entwürfe)“ (Ja / Nein / Verbessern pro Karte), wartet auf Auswahl.
-- Wo im Planer: A klein neben dem Bild · B im Garten der Kopfszene · C eigene Zeile „Haustiere“ · D Haustier-Haus auf der Belohnungen-Seite.
-- 10 Tiere (Drache, Hamster, Fuchs, Pinguin, Katze, Hase, Eule, Schildkröte, Axolotl, Igel): Ei → Baby (3 ganze Tage) → Jung (15) → Gross (40); froh, müde (gestern etwas vergessen, erstes Ämtli weckt es), schläft (nachts). Stirbt nie.
-- Glücksrad: 3 Stile (bunt, Neon, Jahrmarkt-Holz), drehen nach guter Woche (Vorschlag: an 6 von 7 Tagen alles), 1× pro Sonntag.
-- Preise (Chance): +25 Taler 22 % · Avatar-Effekt 1 Woche 18 % · +50 Taler 12 % · doppelte Punkte 1 Tag 10 % · Haustier-Extra 10 % · Jubel-Effekt 1 Woche 9 % · nochmals drehen 8 % · Kopfbild wählen 1 Tag 5 % · Ämtli-Joker 3 % · Jackpot +100 Taler 2 % · Überraschung von den Eltern 1 %.
+Status: Runde 2 im Artefakt „Family Planer – Ämtli-Haustier & Glücksrad (Entwürfe)“ (Ja / Nein / Verbessern pro Karte), wartet auf Bewertung. Runde 1 bleibt als round1.html.
+- Runde 1 Feedback: „neben dem Bild“ und „Haustier-Haus“ raus, mehr und bessere Tiere, Kopfbild und Eltern-Überraschung raus, Avatar-Effekt häufiger.
+- Ort: das aktuelle Tier lebt winzig im Garten der Kopfszene (Animal-Crossing-Stil, je nach Lebensraum: Boden, Klettern/Nest, Graben/Loch, Wasser/Pool, Luft/Dach und Nest, Insekten/Blumen, Sonne/Stein; Saisons: Winter-Eis, Strand, Herbst-Laubhaufen). 5. Knopf „Tierchen“ links mit eigener Seite (Garten mit allen Tieren, Pflege nur beim aktuellen, Sammlung, Tierbuch x/26) – wie Pokémon Go.
+- 26 Tiere (Fuchs, Katze, Hund, Hase, Igel, Waschbär, Panda, Lama, Erdmännchen, Eichhörnchen, Hamster, Maus, Einhorn, Otter, Frosch, Axolotl, Eidechse, Chamäleon mit Farbwechsel, Drache, Eule, Pinguin, Ente, Papagei, Biene, Marienkäfer, Schmetterling): Ei → Baby (3 ganze Tage) → Jung (15) → Gross (40), deutlichere Unterschiede pro Stufe.
+- 7 Stimmungen: froh, freut sich, hungrig (ab 15 Uhr noch nichts), müde (gestern vergessen), sauer (nur automatisch: <50 % in 7 Tagen oder 3 Tage in Folge vergessen), stolz, schläft. Glitzer-Variante 1 von 20. Stirbt nie.
+- Sammlung unbegrenzt; im Garten der Kopfszene nur das aktuelle Tier. Zurücksetzen durch das Kind selbst mit zweimal Nachfragen.
+- Glücksrad: Knopf oben rechts immer sichtbar (grau mit Wochenring, Sonntag leuchtend, „gedreht“ mit Häkchen). 24 gleich grosse Felder: Avatar-Effekt 7 · +25 Taler 5 · Haustier-Extra 3 · Jubel-Effekt 3 · Nochmals 2 · Ämtli-Joker 2 · Doppelte Punkte 1 · Goldfeld 1 (Zusatz-Dreh: 3/4 +50 Taler, 1/4 Jackpot +100). Stile bunt / Neon / Holz.
+- 24 neue Avatar-Effekte (1 Woche): Regenbogen-Ring, Flammen-Rahmen, Polarlicht, Galaxie-Wirbel, Blitz-Ring, Pixel-Glitch, Musiknoten, Lava-Ring, Edelstein-Kranz, Planeten, Regenwolke, Fischschwarm, Disco-Laser, Tornado, Komet, Geister, Runen, Wurfsterne, Rakete, Plasma, Strudel, Diamant-Regen, Mondphasen, Puls-Wellen.
+- Einstellungen später prüfen: Haustier an/aus, Glücksrad an/aus, Regel „gute Woche“ (Tage), Effekte im Rad.
