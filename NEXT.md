@@ -725,3 +725,4 @@ Status: Idee – 5 Vorschläge im Design-Artefakt „Family Planer – Tipp-Hinw
 - Vorschläge (alle mit Blase am Haus): 1 Comic-Sprechblase zum Dach · 2 Gedankenblase aus dem Kamin · 3 Fahne auf dem Dach · 4 Fenster leuchtet und ruft · 5 Neon-Schild auf dem First.
 - Takt separat wählbar: heute (alle 7 s) · Ruhig (alle 20 s) · Am Anfang mehr (1. Minute alle 7 s, dann alle 45 s) · Nur wenn Ruhe ist (nach 2 min ohne Tipp, dann alle 30 s).
 - Evtl. Einstellung „Tipp-Hinweis: Takt“ mit Beschreibung.
+- 17.11.: Neon-Schild gefällt – 4 weitere Neon-Vorschläge für alle Saisons (gleicher Ort oben über der Bildmitte, auch ohne Haus; Farbe je Saison: Winter eisblau, Sommer pink, Herbst bernstein, Frühling/Spezialtage grün): A hängt vom Himmel · B Blase mit Pfeil nach unten · C Leuchtschild mit Glühbirnen (immer warmgelb) · D Schreibschrift zeichnet sich.
