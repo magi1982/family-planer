@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Added
+- **Tap animations** (setting, on by default): a tap on the free picture in the header plays one of more than 60 animations that fits the day – special days, occasions (birthday, carnival, Easter, first day of school, Swiss National Day, St. Nicholas, Advent, New Year's Eve, Sputnik week), strong weather (checked at every tap), season and time of day (a different one by day, in the evening and at night). A yellow "Tap!" hint always sits at the same spot in the sky between the tree and the house.
+- **Surprises** (setting: off, rare – default, about one day a week – or often): on surprise days something crazy plays instead of the season animation (black hole, Matrix mode, pixel explosion, synthwave 1986 …).
+- **Summer at home:** from the first day of the summer holidays beach and house with pool take turns day by day; outside the holidays summer is shown at home, so the pool animations play too.
+
+### Changed
+- **Titanic and lunar module** now start like every other animation: a tap anywhere on the free picture; their own arrow hints are gone.
+- **Double tap:** the header picture never toggles fullscreen any more (a tap there plays an animation); buttons in the header always keep their own function.
+- **Lists – Optimise** answers at once: a list read in the last 45 s is reused, the keywords sort right away and the AI sorts the rest in the background (the list updates live when it is done).
+
+### Removed
+- **Standard house:** the header always shows the house with pool & pergola (the setting *House in the scene* is gone; a saved "standard" becomes the pool house).
+
 ### Fixed
 - The New Year's Eve fireworks in the header now always show the coming year (before, they showed the current year until December).
 - **Absences after a restart or update:** cloud calendars often deliver their events only a little after Home Assistant has started, so absences and the holiday check could stay empty until the next regular refresh. The planner now reads the calendars again 1, 3 and 10 minutes after the start.

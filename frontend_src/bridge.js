@@ -374,7 +374,7 @@
           if (b && this._views && !this._views.has(b.dataset.go)) { this._flash(NAV_T[this._lang()].miss.replace('{p}', b.dataset.go)); return; }
           if (b && window.FPX) { window.FPX.fpNavigate(b.dataset.go); return; }
           if (e.target.closest('[data-themes]')) { this._open = this._open === 'theme' ? null : 'theme'; this._render(); return; }
-          if (window.FPSEASON && window.FPSEASON.tap && window.FPSEASON.tap(e.target)) return;
+          if (this._sceneTap(e)) return;
           if (e.target.closest('[data-funinfo]')) { this._open = this._open === 'fun' ? null : 'fun'; this._render(); return; }
           if (e.target.closest('[data-vac]')) { this._open = this._open === 'vac' ? null : 'vac'; this._render(); return; }
           if (e.target.closest('[data-x]')) { this._open = null; this._render(); return; }
@@ -388,23 +388,26 @@
           const vd = e.target.closest('[data-decide]'); if (vd) this._decide(vd.dataset.key, vd.dataset.decide);
         };
         this.shadowRoot.addEventListener('click', this._onClick);
+        if (window.FPTAPS) {
+          try { if (!window.__fpTapSheet) { window.__fpTapSheet = new window.CSSStyleSheet(); window.__fpTapSheet.replaceSync(window.FPTAPS.css()); } this.shadowRoot.adoptedStyleSheets = [window.__fpTapSheet]; } catch (er) { this._tapCss = true; }
+        }
         // a tap outside a popup closes it
         this._outside = (e) => { const path = e.composedPath(); if (this.isConnected && this._open && !path.includes(this) && !path.includes(this._layer)) { this._open = null; this._render(); } };
         window.addEventListener('pointerdown', this._outside, true);
         window.addEventListener('location-changed', () => this._render());
         this._tick = setInterval(() => this._clock(), 15000);
-        window.addEventListener('resize', () => { if (this._narrowNow() !== this._wasNarrow || this._topNow() !== this._wasTop) { this._wasNarrow = this._narrowNow(); this._wasTop = this._topNow(); this._render(); } });
+        window.addEventListener('resize', () => { this._placeHint(); if (this._narrowNow() !== this._wasNarrow || this._topNow() !== this._wasTop) { this._wasNarrow = this._narrowNow(); this._wasTop = this._topNow(); this._render(); } });
       }
       this._render();
     }
     set hass(h) {
       const first = !this._hass; this._hass = h;
-      if (first) { this._store = Store.get(h.connection, this._cfg.entry_id); this._off = this._store.listen(() => this._render()); this._loadViews(); }
+      if (first) { this._store = Store.get(h.connection, this._cfg.entry_id); this._off = this._store.listen(() => this._soft()); this._loadViews(); }
       // weather entity changed -> only the scene and the little weather corner are updated
       const ent = this._wxEnt(); const st = ent && h.states[ent];
       const lt = this._light();
       const sig = (st ? `${st.state}|${(st.attributes || {}).temperature}|${(st.attributes || {}).wind_speed}` : '') + `|${lt.night}|${lt.dusk}`;
-      if (sig !== this._wxSig) { this._wxSig = sig; if (!first) this._render(); }
+      if (sig !== this._wxSig) { this._wxSig = sig; if (!first) this._soft(); }
       if (ent !== this._fcEnt) this._subForecast(ent);
     }
     // how much of the scene's top is cut off at this header size (garlands hang from the visible edge)
@@ -440,7 +443,7 @@
       const cfg = s.season_cfg || {}; const n = new Date(); const wx = SE.weather(this._hass, cfg.weather, lang);
       const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
       const lt = this._light();
-      const o = { season: se, wx, hour: n.getHours(), night: lt.night, dusk: lt.dusk, lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), house: cfg.house || 'standard', narrow: this._narrowNow(), top: this._topNow() };
+      const o = { season: se, wx, hour: n.getHours(), night: lt.night, dusk: lt.dusk, lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), narrow: this._narrowNow(), top: this._topNow() };
       const lim = Number.isFinite(Number(cfg.frost_below)) ? Number(cfg.frost_below) : -1;
       o.frost = cfg.frost_mode !== false && !!wx && typeof wx.temp === 'number' && wx.temp <= lim;
       if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };
@@ -501,11 +504,52 @@
       catch (e) { if (e !== window.FPPIN.CANCEL) this._flash(NAV_T[this._lang()].err); }
     }
     _clock() {
-      const hr = new Date().getHours(); if (hr !== this._hr) { this._hr = hr; this._render(); }
+      const hr = new Date().getHours(); if (hr !== this._hr) { this._hr = hr; this._soft(); }
       const el = this.shadowRoot && this.shadowRoot.querySelector('.clk'); if (!el) return;
       const T = NAV_T[this._lang()]; const n = new Date(); const p2 = (x) => String(x).padStart(2, '0');
       el.querySelector('b').textContent = `${p2(n.getHours())}:${p2(n.getMinutes())}`;
       el.querySelector('.dt').textContent = `${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}`;
+    }
+    // a render caused by data, weather or the clock waits until a playing tap story is over (taps render at once)
+    _soft() {
+      const left = (this._playUntil || 0) - Date.now();
+      if (left <= 0) { this._render(); return; }
+      clearTimeout(this._softT); this._softT = setTimeout(() => this._render(), left + 50);
+    }
+    // what the tap stories need to choose (the same values the scene was drawn with)
+    _tapCtx() {
+      const s = this._store && this._store.snap; if (!s || !s.season) return null;
+      const cfg = s.season_cfg || {}; if (cfg.tap_anims === false) return null;
+      const se = s.season.enabled === false ? { ...s.season, vis: 'alltag', fun: null } : s.season;
+      const wx = this._wxNow || {}; const lt = this._light(); const n = new Date();
+      const lim = Number.isFinite(Number(cfg.frost_below)) ? Number(cfg.frost_below) : -1;
+      return { season: se, wx: { kind: wx.kind, temp: wx.temp }, hour: n.getHours(), night: lt.night, date: n, lang: this._lang(),
+        frost: cfg.frost_mode !== false && typeof wx.temp === 'number' && wx.temp <= lim,
+        surprises: cfg.surprises || 'rare', rained: !!this._rainAt && Date.now() - this._rainAt < 3 * 3600e3 };
+    }
+    // a tap on the free scene (never on a button or anything else that reacts) plays the story that fits now
+    _sceneTap(e) {
+      if (!this._scnEl || !window.FPSEASON || !window.FPSEASON.play) return false;
+      const bar = this.shadowRoot.querySelector('.bar'); const path = e.composedPath();
+      if (!bar || !path.includes(bar)) return false;
+      for (const n of path) {
+        if (n === bar) break;
+        if (n.nodeType === 1 && (/^(BUTTON|A|INPUT|SELECT|TEXTAREA|LABEL|HA-ICON-BUTTON)$/.test(n.tagName) || n.getAttribute('role') === 'button'
+          || Object.keys(n.dataset || {}).some((k) => k !== 'tap'))) return false;
+      }
+      const ctx = this._tapCtx(); if (!ctx) return false;
+      const ms = window.FPSEASON.play(this._scnEl.querySelector('svg'), ctx); if (!ms) return false;
+      this._playUntil = Date.now() + ms; this._scnEl.classList.add('playing');
+      clearTimeout(this._playT); this._playT = setTimeout(() => { if (this._scnEl) this._scnEl.classList.remove('playing'); }, ms);
+      return true;
+    }
+    // the "Tap!" hint: always at the same spot in the sky between the tree and the house, kept inside the header
+    _placeHint() {
+      const scn = this._scnEl; const h = scn && scn.querySelector('.fphint'); const svg = scn && scn.querySelector('svg');
+      if (!h || !svg || !svg.getScreenCTM) return;
+      const m = svg.getScreenCTM(); if (!m) return; const pt = svg.createSVGPoint(); pt.x = 528; pt.y = 30; const p = pt.matrixTransform(m);
+      const r = scn.getBoundingClientRect(); if (!r.width) return;
+      h.style.left = `${Math.max(36, Math.min(r.width - 36, p.x - r.left))}px`; h.style.top = `${Math.max(34, Math.min(r.height - 6, p.y - r.top))}px`;
     }
     _render() {
       if (!this.shadowRoot || !this._cfg) return;
@@ -522,8 +566,8 @@
       const review = ((s && s.vacation_review) || []).filter((v) => !v.decision); const pending = review.length;
       const sc = this._sceneHtml(s, lang); const keepScn = sc.key && sc.html === null ? this._scnEl : null;
       if (keepScn) keepScn.remove();
-      this._wxNow = sc.wx || null;
-      this.shadowRoot.innerHTML = `<style>${window.FPSEASON ? window.FPSEASON.CSS : ''}
+      this._wxNow = sc.wx || null; if (sc.wx && ['rainy', 'pouring', 'lightning'].includes(sc.wx.kind)) this._rainAt = Date.now();
+      this.shadowRoot.innerHTML = `<style>${window.FPSEASON ? window.FPSEASON.CSS : ''}${this._tapCss && window.FPTAPS ? window.FPTAPS.css() : ''}
         :host{display:block;margin-bottom:8px}
         .bar::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}.bar{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;background:var(--fp-bg1);border:1px solid var(--fp-line);border-radius:var(--fp-radius,14px);padding:6px 10px 6px 14px;font-family:var(--fp-font);color:var(--fp-text);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
         .t{display:flex;align-items:center;gap:10px;min-width:0}
@@ -543,6 +587,13 @@
         button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}button.vac.quiet{color:inherit;border-color:var(--fp-line)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
         @media (max-width:700px){.clk .dt{display:none}.wxn{padding:0 8px}}
+        .fphint{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px;animation:fphn 7s ease-in-out infinite;opacity:0;z-index:2}
+        .fphint b{font:900 13px/1 system-ui,sans-serif;color:#141414;background:#FFE27A;border-radius:12px;padding:5px 11px;box-shadow:0 2px 8px rgba(0,0,0,.4),0 0 0 3px rgba(255,226,122,.35)}
+        .fphint i{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #FFE27A;animation:fphb .7s ease-in-out infinite;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+        .fphint u{position:absolute;top:100%;width:40px;height:14px;margin-top:2px;border:2px solid #FFE27A;border-radius:50%;animation:fphr 1.4s ease-out infinite}
+        @keyframes fphn{0%,62%,100%{opacity:0}68%,94%{opacity:1}}@keyframes fphb{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}@keyframes fphr{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.8);opacity:0}}
+        .scn.playing .fphint,.fphint[hidden]{display:none}.bar.sc{cursor:pointer}.bar.sc button{cursor:pointer}
+        @media (prefers-reduced-motion:reduce){.fphint{animation:none;opacity:1}.fphint i,.fphint u{animation:none}}
         .bar.sc{min-height:96px;padding-top:10px;padding-bottom:10px}.bar.sc > :not(.scn){position:relative;z-index:1}.bar.sc .clk b,.bar.sc .clk span,.bar.sc .ttl{text-shadow:0 1px 3px rgba(0,0,0,.55)}
         .bar.sc .mid button:not(.on),.bar.sc .rt > button,.bar.sc .stk button{background:color-mix(in srgb,var(--fp-bg3) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
         .wxc{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px;min-width:0}.wxc.one{justify-content:center}
@@ -552,7 +603,7 @@
         .tl{display:flex;align-items:baseline;gap:10px;height:40px;align-items:center}.bar.nt .clk b{font-size:34px;transition:font-size 1s}.slab{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:12px;white-space:nowrap}
         @keyframes fpsugin{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
         button.slab{font:inherit;font-size:12px;cursor:pointer;color:inherit;border:1px solid transparent}.hint.fi{max-width:340px;line-height:1.45}.slab.fun{border-color:var(--fp-acc,#69C350)}.slab.fun ha-icon{--mdc-icon-size:15px;opacity:.8}.slab.fun.on{background:var(--fp-bg3)}@media (max-width:700px){.sug,.wxn span,.slab{display:none}.slab.fun{display:inline-flex}}
-      </style><div class="bar${sc.key ? ' sc' : ''}"><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="lft"><span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span>
+      </style><div class="bar${sc.key ? ' sc' : ''}" data-fp-head><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="lft"><span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span>
         <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
         ${this._right(s, lang, review, pending, btns.includes('einstellungen') ? this._navBtn('einstellungen', lang, cur) : '')}</div>`;
       const bar = this.shadowRoot.querySelector('.bar');
@@ -560,6 +611,14 @@
         if (keepScn) bar.prepend(keepScn);
         else { const tmp = document.createElement('div'); tmp.innerHTML = sc.html; this._scnEl = tmp.firstElementChild; bar.prepend(this._scnEl); }
         this._scnKey = sc.key;
+        let hint = this._scnEl.querySelector('.fphint');
+        if (!hint) {
+          hint = document.createElement('div'); hint.className = 'fphint'; hint.setAttribute('aria-hidden', 'true');
+          const b = document.createElement('b'); b.textContent = lang === 'en' ? 'Tap!' : 'Tipp!';
+          hint.append(b, document.createElement('i'), document.createElement('u')); this._scnEl.appendChild(hint);
+        }
+        const ctx = this._tapCtx(); hint.hidden = !ctx || !window.FPSEASON.canPlay(ctx);
+        window.requestAnimationFrame(() => this._placeHint());
       } else { this._scnEl = null; this._scnKey = ''; }
       this._popLayer(this._popHtml, NAV_POPCSS);
       const lt = this._light(); const hr = new Date().getHours();

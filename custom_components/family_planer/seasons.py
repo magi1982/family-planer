@@ -218,10 +218,11 @@ def _on_year(mo: int, d: int, year: int) -> date:
 DEFAULTS = {
     "enabled": True, "lead_day": 3, "lead_school": 3, "christmas_start": "advent", "xmas_snow": True,
     "weather": None, "storm_kmh": 50, "intensity": "normal", "priority": list(PRIORITY),
-    "events": {}, "wedding": "", "couple": "", "anim_bday": True, "house": "standard", "night_mode": True, "fun_days": True, "uk_days": True, "uk_for": "", "frost_mode": True, "frost_below": -1,
+    "events": {}, "wedding": "", "couple": "", "anim_bday": True, "night_mode": True, "fun_days": True, "uk_days": True, "uk_for": "", "frost_mode": True, "frost_below": -1,
+    "tap_anims": True, "surprises": "rare",
 }
 INTENSITY = ("calm", "normal", "lots")
-HOUSES = ("standard", "pool")
+SURPRISES = ("off", "rare", "often")
 
 
 def _short(val) -> str:
@@ -272,7 +273,8 @@ def clean_settings(raw) -> dict:
         "uk_days": bool(raw.get("uk_days", True)),
         "uk_for": _short(raw.get("uk_for")),
         "frost_below": _frost(raw.get("frost_below")),
-        "house": raw.get("house") if raw.get("house") in HOUSES else "standard",
+        "tap_anims": bool(raw.get("tap_anims", True)),
+        "surprises": raw.get("surprises") if raw.get("surprises") in SURPRISES else "rare",
     }
 
 
@@ -344,7 +346,7 @@ def resolve(cfg: dict, today: date, ferien: list[dict] | None = None, persons: d
     cfg = clean_settings(cfg)
     jz = jahreszeit(today)
     base = {"enabled": cfg["enabled"], "key": None, "vis": "alltag", "kind": None, "jz": jz, "sub": None, "advent": 0,
-            "wild": 1, "snow": False, "birthdays": [], "ages": {}, "anniversary": None, "label": None,
+            "wild": 1, "snow": False, "beach": False, "birthdays": [], "ages": {}, "anniversary": None, "label": None,
             "intensity": cfg["intensity"], "weather": cfg["weather"], "storm_kmh": cfg["storm_kmh"],
             "anim_bday": cfg["anim_bday"]}
     if not cfg["enabled"]:
@@ -387,6 +389,14 @@ def resolve(cfg: dict, today: date, ferien: list[dict] | None = None, persons: d
         if base["key"] in (None, "winter", "herbst"):
             base.update(key="weihnachten", kind="season", wild=EVENTS["weihnachten"][4],
                         label={"de": EVENTS["weihnachten"][2], "en": EVENTS["weihnachten"][3]})
+    if base["vis"] == "sommer":
+        hol = next((o for o in occ if o["key"] == "ferien_sommer" and o["start"] <= today <= o["end"]), None)
+        # beach and house with pool take turns day by day from the first day of the summer holidays (beach first);
+        # outside the summer holidays summer is at home, the first day of summer itself stays a beach day
+        if hol is not None:
+            base["beach"] = (today - hol["start"]).days % 2 == 0
+        else:
+            base["beach"] = base["key"] == "sommeranfang"
     if base["vis"] == "dreikoenig":
         base["sub"] = "dreikoenig"
     if base["vis"] == "ostern":

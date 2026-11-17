@@ -1560,8 +1560,8 @@ class FamilyPlanner:
             "season": self.season(),
             "season_cfg": {k: v for k, v in self.season_settings().items()
                            if k in ("weather", "storm_kmh", "intensity", "sug_enabled", "sug_from", "pool", "pool_min",
-                                    "jacuzzi", "jacuzzi_min", "xmas_snow", "anim_bday", "house", "night_mode",
-                                    "frost_mode", "frost_below")},
+                                    "jacuzzi", "jacuzzi_min", "xmas_snow", "anim_bday", "night_mode",
+                                    "frost_mode", "frost_below", "tap_anims", "surprises")},
             "busy": self.busy,
             "away_kind": self.away_kind,
             "away_badge": {pid: b for pid, spans in self.away_spans.items() if (b := vacation.badge_at(spans, dt_util.now()))},

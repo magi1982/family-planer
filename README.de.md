@@ -304,6 +304,21 @@ Jedes Design gibt es in drei **Stilen**: *Standard*, *Transparent* und *Glas* (M
 
 **Besondere Tage.** An manchen Tagen bekommt der Kopfbereich eine eigene Szene: Dino-Tag (20.2.), 1. April, erster Handy-Anruf (3.4.), Titanic (15.4.), Mondlandung (20.7.) und ein Vulkan (27.8.); Sputnik fliegt vom 4. bis 11. Oktober nachts über den Himmel, die Concorde am 26. November. Feiertage, Bräuche und Geburtstage haben immer Vorrang. Ein Chip neben dem Datum mit ⓘ erklärt den Tag. **British Days**: an zehn zufälligen gewöhnlichen Tagen im Jahr steht der Buckingham Palace mit der Königsgarde da; mit *British Day für* lassen sie sich jemandem widmen. Am 15. April kann man die Titanic antippen – sie sinkt und taucht wieder auf. Beides lässt sich unter *Einstellungen → Saisons & Wetter* ausschalten. Über 30 °C gibt es eine Poolparty und der Rasensprenger läuft.
 
+
+**Tipp-Animationen** (Einstellung, standardmässig an). Ein Tipp auf das freie Bild oben spielt eine Animation, die zum Tag passt – es gibt über 60. Ein gelber Hinweis *Tipp!* im Himmel zwischen Baum und Haus zeigt, wann eine bereitsteht. Welche läuft, wird in dieser Reihenfolge gewählt:
+
+| Stufe | Wann | Beispiele |
+|---|---|---|
+| 1 | Besonderer Tag mit eigener Szene | Dino-Tag: Flugsaurier und Raptor · erster Handy-Anruf · Vulkan · Mondlandung: die Mondfähre hebt ab · Titanic |
+| 2 | Anlass | Geburtstagstorte · Valentins-/Hochzeitstag · Fasnacht · Ostern · Schulanfang · 1. August · Samichlaus · Adventslichter · Silvester-Feuerwerk · Sputnik-Woche |
+| 3 | Starkes Wetter (bei jedem Tipp neu geprüft) | Regen · Regenbogen nach Regen · Wind · Schnee · Frost · über 30 °C |
+| 4 | Jahreszeit und Tageszeit | tagsüber, abends und nachts je eine andere, z. B. Schmetterlinge im Frühling, Pool-Spass im Sommer, ein Drache im Herbst, Polarlicht im Winter |
+| 5 | Überraschungstag | schwarzes Loch, Matrix-Modus, Pixel-Explosion, Synthwave 1986 … |
+
+Innerhalb eines Tages läuft zur gleichen Tageszeit wieder dieselbe Animation, am nächsten Tag kommt eine andere. *Überraschungen* (Einstellung): aus, selten (etwa 1 Tag pro Woche, Standard) oder oft (etwa 3 Tage pro Woche); Anlässe und Wetter haben immer Vorrang. Die Knöpfe oben funktionieren wie gewohnt, und Doppeltippen im Kopfbereich schaltet das Vollbild nie um.
+
+**Sommer.** Ab dem ersten Tag der Sommerferien (aus den Kalendern erkannt) wechseln sich Strand und Haus mit Pool Tag für Tag ab; ausserhalb der Ferien ist der Sommer zu Hause.
+
 **Saisons als Design-Ebene.** Über jedes Design und jeden Stil legt der Planer die aktuelle Saison: eigenes Kopfbild, Seitenhintergrund, Farbband, ein kleiner Effekt beim Abhaken und die Avatar-Extras.
 
 | Art | Ereignisse | Sichtbar ab |
@@ -356,7 +371,7 @@ Alles, was die Home-Assistant-Dialoge bieten, auf einer übersichtlichen Seite �
 
 ## Vollbild per Doppeltippen
 
-- **Doppeltippen auf eine freie Stelle** des Planers (Titelleiste, Ränder, Zwischenräume) → Kopfzeile und Seitenleiste von Home Assistant verschwinden, und der Browser schaltet – wo erlaubt – in echtes Vollbild. Nochmals doppeltippen beendet es.
+- **Doppeltippen auf eine freie Stelle** des Planers (Ränder, Zwischenräume; nicht das Bild oben – ein Tipp dort spielt eine Animation) → Kopfzeile und Seitenleiste von Home Assistant verschwinden, und der Browser schaltet – wo erlaubt – in echtes Vollbild. Nochmals doppeltippen beendet es.
 - Tippen auf Ämtli, Knöpfe und Eingabefelder löst es nie aus – so wird nichts aus Versehen abgehakt.
 - Optional: **beim Öffnen automatisch Vollbild** – ideal fürs Wandtablet. Beides unter *Einstellungen → Allgemein*.
 

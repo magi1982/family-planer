@@ -92,9 +92,23 @@ def test_upcoming_lists_events():
     assert "advent" in keys and "silvester" in keys
 
 
-def test_house_setting():
-    assert S.clean_settings({"house": "pool"})["house"] == "pool"
-    assert S.clean_settings({"house": "<x>"})["house"] == "standard"
+def test_tap_animation_settings():
+    # the standard house is gone (there is only the pool house); tap stories and surprises are settings
+    c = S.clean_settings({"house": "standard"})
+    assert "house" not in c and c["tap_anims"] is True and c["surprises"] == "rare"
+    assert S.clean_settings({"surprises": "often", "tap_anims": False})["surprises"] == "often"
+    assert S.clean_settings({"surprises": "<x>"})["surprises"] == "rare"
+
+
+def test_summer_beach_and_house_take_turns():
+    fer = [{"key": "ferien_sommer", "start": "2026-07-04", "end": "2026-08-09"}]
+    days = [S.resolve({}, date(2026, 7, d), fer) for d in (4, 5, 6, 7)]
+    assert [x["vis"] for x in days] == ["sommer"] * 4
+    assert [x["beach"] for x in days] == [True, False, True, False]   # beach first, then day by day
+    out = S.resolve({}, date(2026, 8, 20), fer)                        # summer, holidays over: at home
+    assert out["vis"] == "sommer" and out["beach"] is False
+    assert S.resolve({}, date(2026, 6, 21))["beach"] is True           # first day of summer: beach
+    assert S.resolve({}, date(2026, 3, 1))["beach"] is False
 
 
 def test_away_badge():

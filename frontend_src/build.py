@@ -91,6 +91,7 @@ if missing:
 body = "\n".join([
     "// Family Planer cards – built by frontend_src/build.py, do not edit",
     (src / "season.js").read_text(),
+    (src / "taps.js").read_text(),
     (src / "avatar.js").read_text(),
     (src / "avseason.js").read_text(),
     variant(week, plan, "", "FPX"),

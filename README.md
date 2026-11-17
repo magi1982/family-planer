@@ -305,6 +305,20 @@ Each design comes in three **styles**: *Standard*, *Transparent* and *Glass* (fr
 
 **Special days.** On some days the header gets its own scene: Dinosaur Day (20 Feb), April Fools' Day, the first mobile phone call (3 Apr), Titanic (15 Apr), Moon landing (20 Jul) and a volcano (27 Aug); Sputnik crosses the night sky from 4 to 11 October and Concorde flies by on 26 November. Holidays, customs and birthdays always come first. A chip next to the date with an ⓘ explains the day. **British Days**: ten random ordinary days a year show Buckingham Palace with the King's Guard; with *British Day for* you can dedicate them to someone. On 15 April you can tap the Titanic – it sinks and comes back. Both can be switched off under *Settings → Seasons & weather*. Above 30 °C there is a pool party and the sprinkler runs.
 
+**Tap animations** (setting, on by default). A tap on the free picture at the top plays an animation that fits the day – there are more than 60. A yellow *Tap!* hint in the sky between the tree and the house shows when one is ready. Which one plays is chosen in this order:
+
+| Step | When | Examples |
+|---|---|---|
+| 1 | Special day with its own scene | Dinosaur Day: pterosaurs and a raptor · first mobile call · volcano · Moon landing: the lunar module lifts off · Titanic |
+| 2 | Occasion | birthday cake · Valentine's / anniversaries · carnival · Easter · first day of school · Swiss National Day · St. Nicholas · Advent lights · New Year's Eve fireworks · Sputnik week |
+| 3 | Strong weather (checked at every tap) | rain · rainbow after rain · wind · snow · frost · above 30 °C |
+| 4 | Season and time of day | a different one by day, in the evening and at night, e.g. butterflies in spring, pool fun in summer, a dragon in autumn, northern lights in winter |
+| 5 | Surprise day | black hole, Matrix mode, pixel explosion, synthwave 1986 … |
+
+Within a day the same animation plays again for the same time of day; the next day brings another one. *Surprises* (setting): off, rare (about one day a week, default) or often (about three days a week); occasions and weather always come first. Buttons in the header keep working as usual, and a double tap on the header never toggles fullscreen.
+
+**Summer.** From the first day of the summer holidays (found in the calendars) beach and house with pool take turns day by day; outside the holidays summer is spent at home.
+
 **Seasons as a design layer.** Over every design and style the planner lays the current season: own header scene, page background, colour band, a little burst when ticking off and the avatar extras.
 
 | Kind | Events | Shown from |
@@ -357,7 +371,7 @@ Everything that the Home Assistant dialogs offer, in one clear page – also on 
 
 ## Fullscreen on double tap
 
-- **Double-tap an empty spot** of the planner (title bar, margins, gaps) → Home Assistant's header and sidebar disappear, and the browser switches to real fullscreen where allowed. Double-tap again to leave.
+- **Double-tap an empty spot** of the planner (margins, gaps; not the picture in the header – a tap there plays an animation) → Home Assistant's header and sidebar disappear, and the browser switches to real fullscreen where allowed. Double-tap again to leave.
 - Taps on chores, buttons and input fields never trigger it, so nothing is ticked off by accident.
 - Optional: **fullscreen automatically when opened** – ideal for a wall tablet. Both under *Settings → General*.
 
