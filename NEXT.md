@@ -785,3 +785,10 @@ Status: Frage beantwortet, Idee wartet auf Entscheid.
 - Heute: kein Limit – ein Kind kann jedes offene freiwillige Ämtli nehmen (nur „max. offene Ämtli“ begrenzt, wie viele gleichzeitig angeboten werden).
 - Idee: Einstellung „Freiwillige Ämtli pro Person und Tag“ (unbegrenzt / 1 / 2 / 3), damit auch die anderen eine Chance haben; zusätzlich evtl. „erst wieder nehmen, wenn das genommene erledigt ist“.
 
+
+## 61 · Dev- und Prod-Version parallel in Home Assistant (Idee, 17.11.)
+- Zweites öffentliches Repo `magi1982/family-planer-dev`; HACS installiert beide nebeneinander.
+- Ein Skript (`tools/make_dev.py`) erzeugt die Dev-Variante automatisch aus demselben Code: Domain `family_planer_dev`, Name „Family Planer DEV“, Karten `family-planer-dev-card` usw., innere Elemente `fpd-…`, WebSocket-Befehle `family_planer_dev/…`, eigene Datei-URLs und eigener Speicher. So kollidiert nichts.
+- Dev startet mit eigener Einrichtung und Testfamilie (Beispieldaten); standardmässig **stumm**: keine Ansagen über Alexa, keine Benachrichtigungen, keine echten To-do-Listen – damit Tests die Familie nicht stören.
+- Ablauf: Änderungen → Push nach Dev → am PC testen → „prod“ → derselbe Stand ins jetzige Repo + Release.
+- Tests: Skript-Test, dass in der Dev-Variante kein `family_planer/` oder `family-planer-card` mehr vorkommt.
