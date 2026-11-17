@@ -145,3 +145,57 @@ def test_needs_a_grown_up_and_away_child_gets_nothing():
     assert SO.desired({"x": df}, persons, today, ctx(today, away={"c", "d"})) == {}
     w = SO.desired({"x": df}, persons, today, ctx(today, away={"d", "a"}))
     assert [x["pid"] for x in w.values()] == ["b"]
+
+
+# ------------------------------------------------------------------ 0.15.0: order of the volunteer tile
+def _tpl_like(i, span=7):
+    return {**SO.clean_def({"title": f"T{i}", "anchor": {"t": "daily"}, "span": span}, PERSONS), "tpl": "laub"}
+
+
+def test_volunteer_order_rare_then_own_then_templates():
+    persons = {**PERSONS, "d": {"name": "Tom", "role": "adult"}}
+    today = date(2026, 10, 5)
+    defs = {f"t{i}": {**SO.clean_def({"title": f"T{i}", "anchor": {"t": "daily"}, "span": 1}, persons), "tpl": "laub"} for i in range(4)}
+    defs["own"] = SO.clean_def({"title": "Own", "anchor": {"t": "daily"}, "span": 1}, persons)
+    defs["away"] = SO.clean_def({"title": "Away", "anchor": {"t": "daily"}, "span": 1, "away": ["d"]}, persons)
+    insts = {}
+    SO.refresh(insts, defs, persons, today, ctx(today, away={"d"}), {"max_open": 2})
+    assert sorted(x["sid"] for x in insts.values()) == ["away", "own"]
+
+
+def test_more_important_one_pushes_out_an_open_template():
+    today = date(2026, 10, 5)
+    defs = {f"t{i}": _tpl_like(i) for i in range(3)}
+    insts = {}
+    SO.refresh(insts, defs, PERSONS, today, ctx(today), {"max_open": 3})
+    assert len(insts) == 3
+    defs["own"] = SO.clean_def({"title": "Own", "anchor": {"t": "daily"}, "span": 1}, PERSONS)
+    SO.refresh(insts, defs, PERSONS, today, ctx(today), {"max_open": 3})
+    assert len(insts) == 3 and "own" in {x["sid"] for x in insts.values()}
+    # a claimed template is never pushed out
+    defs2 = {f"t{i}": _tpl_like(i) for i in range(2)}
+    i2 = {}
+    SO.refresh(i2, defs2, PERSONS, today, ctx(today), {"max_open": 2})
+    for iid in list(i2):
+        SO.claim(i2, defs2, PERSONS, iid, "a", "2026-10-05T10:00")
+    defs2["own"] = SO.clean_def({"title": "Own", "anchor": {"t": "daily"}, "span": 1}, PERSONS)
+    SO.refresh(i2, defs2, PERSONS, today, ctx(today), {"max_open": 2})
+    assert sum(1 for x in i2.values() if x.get("pid") == "a") == 2
+
+
+def test_templates_rotate_daily():
+    # multi-day templates: what was shown yesterday makes room for those still waiting
+    defs = {f"t{i}": {**SO.clean_def({"title": f"T{i}", "anchor": {"t": "once", "d": "2026-10-01"}, "span": 14}, PERSONS), "tpl": "laub"}
+            for i in range(6)}
+    seen = set()
+    insts = {}
+    for d in range(5, 9):
+        today = date(2026, 10, d)
+        SO.refresh(insts, defs, PERSONS, today, ctx(today), {"max_open": 2})
+        assert len(insts) == 2
+        seen |= {x["sid"] for x in insts.values()}
+    assert len(seen) >= 5  # not always the same two
+    # idempotent within the same day
+    before = dict(insts)
+    assert not SO.refresh(insts, defs, PERSONS, date(2026, 10, 8), ctx(date(2026, 10, 8)), {"max_open": 2})
+    assert insts.keys() == before.keys()

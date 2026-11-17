@@ -84,7 +84,7 @@ def lifetime(ledger: list[dict], pid: str) -> int:
 
 
 PACE_DAYS = 30
-EARN_KINDS = ("chore", "fair", "bonus", "streak", "todo", "award", "adjust")
+EARN_KINDS = ("chore", "fair", "bonus", "streak", "todo", "sonder", "award", "adjust")
 
 
 def pace(ledger: list[dict], persons: list[str], today, days: int = PACE_DAYS) -> dict:

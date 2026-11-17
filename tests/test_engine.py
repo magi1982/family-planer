@@ -79,7 +79,7 @@ def test_done_items_counted_as_done():
     engine.rollover(d, WED)
     next(iter(d["items"].values()))["done"] = True
     engine.rollover(d, WED + timedelta(days=1))
-    assert d["history"]["2026-11-04"]["p1"] == {"done": 1, "total": 1, "missed": []}
+    assert d["history"]["2026-11-04"]["p1"] == {"done": 1, "total": 1, "missed": [], "titles": ["A"]}  # titles for the statistics
 
 
 def test_history_remembers_when_chores_were_done():

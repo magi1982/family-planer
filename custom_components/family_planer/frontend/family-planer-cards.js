@@ -2283,6 +2283,65 @@
   window.FPTAPS = { list: T, css: () => css, pick, play, EN, SEASON, SURPRISE };
 })();
 
+// Points as a coin ("Kerben-Taler"): flat silver disc, gold core, a stamped letter (or a small star) and one notch
+// per family member in the silver ring. No constant shine: every 5–9 s a small star flashes at one spot,
+// each coin in its own rhythm. Pure SVG with SMIL animation (works in every shadow root without extra CSS);
+// with "reduce motion" the flash is left out.
+(() => {
+  if (window.FPCOIN) return;
+  const cfg = { show: true, letter: '', notches: 5 };
+  let uid = 0;
+  const LETTER = /^[A-Za-z0-9ÄÖÜ]$/;
+  const still = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+  // settings come with every snapshot: { settings: { coin: { show, letter } }, persons: [...] }
+  const config = (snap) => {
+    const c = ((snap || {}).settings || {}).coin || {};
+    cfg.show = c.show !== false;
+    const l = String(c.letter || '').slice(0, 1).toUpperCase(); cfg.letter = LETTER.test(l) ? l : '';
+    const n = ((snap || {}).persons || []).length; cfg.notches = n >= 1 && n <= 12 ? n : 5;
+  };
+  const star = (cx, cy, R, fill) => `<path d="M${Array.from({ length: 10 }, (_, i) => { const r = i % 2 ? R * 0.4 : R; const t = (i * 36 - 90) * Math.PI / 180; return `${(cx + Math.cos(t) * r).toFixed(1)} ${(cy + Math.sin(t) * r).toFixed(1)}`; }).join(' L')}Z" fill="${fill}"/>`;
+  const notches = (n) => Array.from({ length: n }, (_, i) => {
+    const a = (i * 360) / n - 90; const t = a * Math.PI / 180; const x = 50 + Math.cos(t) * 36; const y = 50 + Math.sin(t) * 36;
+    return `<rect x="${(x - 1.2).toFixed(1)}" y="${(y - 4.4).toFixed(1)}" width="2.4" height="8.8" fill="#8f99a6" transform="rotate(${(a + 90).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
+  }).join('');
+  const flash = (k) => {
+    if (still()) return '';
+    const dur = (5 + ((k * 1.7) % 4)).toFixed(1); const del = (-((k * 2.3) % 5)).toFixed(1);
+    const s = 9; const d = `M0 ${-s} Q${s * 0.12} ${-s * 0.12} ${s} 0 Q${s * 0.12} ${s * 0.12} 0 ${s} Q${-s * 0.12} ${s * 0.12} ${-s} 0 Q${-s * 0.12} ${-s * 0.12} 0 ${-s}Z`;
+    return `<g transform="translate(74 70)"><path d="${d}" fill="#fff" opacity="0"><animate attributeName="opacity" values="0;0;1;0" keyTimes="0;.92;.95;1" dur="${dur}s" begin="${del}s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="scale" values=".1;.1;1;.1" keyTimes="0;.92;.95;1" dur="${dur}s" begin="${del}s" repeatCount="indefinite"/></path></g>`;
+  };
+  // svg(px): inline coin, '' when the coin is switched off
+  const svg = (px, cls) => {
+    if (!cfg.show) return '';
+    const id = `fpc${++uid}`; const k = uid; const sz = Number(px) || 16;
+    const mark = cfg.letter
+      ? `<text x="50" y="62" text-anchor="middle" font-size="34" font-weight="700" font-family="Georgia,'Times New Roman',serif" fill="#9a6f0a">${cfg.letter}</text>`
+      : star(50, 52, 15, '#9a6f0a');
+    return `<svg class="fpcoin${cls ? ' ' + cls : ''}" viewBox="${sz <= 24 ? '3 3 94 94' : '0 0 100 100'}" width="${sz}" height="${sz}" aria-hidden="true" focusable="false" style="flex:none;vertical-align:-.18em;overflow:visible">`
+      + `<defs><clipPath id="${id}"><path d="M0 0 H100 L0 100Z"/></clipPath></defs>`
+      + `<circle cx="50" cy="50" r="44" fill="#C3CBD4"/><circle cx="50" cy="50" r="44" fill="#E6EBF0" clip-path="url(#${id})"/>`
+      + `<circle cx="50" cy="50" r="28" fill="#E8B020"/><circle cx="50" cy="50" r="28" fill="#FFD84A" clip-path="url(#${id})"/>`
+      + `${mark}${notches(cfg.notches)}${flash(k)}</svg>`;
+  };
+  // fly(from, to): a coin flies from one element to another (both measured now), the target hops a little
+  const fly = (from, to, onEnd) => {
+    try {
+      if (!cfg.show || !from || !to || still() || !document.body.animate) return;
+      const a = from.getBoundingClientRect(); const b = to.getBoundingClientRect(); if (!a.width || !b.width) return;
+      const el = document.createElement('div');
+      el.style.cssText = `position:fixed;left:${a.left}px;top:${a.top + a.height / 2 - 11}px;width:22px;height:22px;pointer-events:none;z-index:9999`;
+      el.innerHTML = svg(22); document.body.appendChild(el);
+      const dx = b.left + b.width / 2 - a.left - 11; const dy = b.top + b.height / 2 - (a.top + a.height / 2);
+      const an = el.animate([{ transform: 'translate(0,0) scale(1)' }, { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 40}px) scale(1.5)`, offset: 0.5 }, { transform: `translate(${dx}px,${dy}px) scale(.6)`, opacity: 0.9 }],
+        { duration: 750, easing: 'cubic-bezier(.4,0,.6,1)' });
+      an.onfinish = () => { el.remove(); if (onEnd) onEnd(); };
+    } catch (e) { /* no animation */ }
+  };
+  const hop = (el) => { try { if (el && el.animate && !still()) el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.18)' }, { transform: 'scale(1)' }], { duration: 350, easing: 'ease-out' }); } catch (e) { /* ignore */ } };
+  window.FPCOIN = { config, svg, fly, hop, cfg };
+})();
+
 // ---------------------------------------------------------------------------
 // Avatar builder v2: layered SVG avatars, code 'av2:' + 12 dot-separated parts (all ids from fixed lists)
 //   fig.hair.hc.sk.head.face.neck.shirt.motif.pet.bg.cost.fx.fxb   ('0' = none; fx / fxb = small / big effects from levels)
@@ -2789,12 +2848,12 @@ const SOON_T = ['in {n} Min', 'in {n} Std'];
 const FPL = 'de';
 const TX = {
   de: { fer: 'Ferien', awy: 'Nicht da', today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Heute nichts',
-    school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
+    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Nichts geplant – frei!',
+    school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant', tomS: 'Morgen', nextS: 'Als Nächstes',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { fer: 'Holiday', awy: 'Away', today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
-    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', spcH: 'Special chores', open: '{n} open', rel: 'Reliability', cancel: 'Cancel', none: 'Nothing today',
-    school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
+    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', spcH: 'Special chores', open: '{n} open', rel: 'Reliability', cancel: 'Cancel', none: 'Nothing planned – free!',
+    school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned', tomS: 'Tomorrow', nextS: 'Next up',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
 // birthday animations behind the birthday child (one per day, chosen by the server)
@@ -3004,6 +3063,8 @@ const avatarGen = (code, bg) => {
   return `<svg viewBox="0 0 40 40" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
 };
 // Termin-Zeit kurz: "14:30–15:20" bzw. schmal "14:30–15"
+// points coin (coin.js); '' when switched off
+const fpCoin = (px) => (window.FPCOIN ? window.FPCOIN.svg(px) : '');
 const evRange = (e, short) => {
   if (e.allDay) return short ? 'ganzt.' : 'ganztägig';
   const t = (x) => (short && !x.getMinutes() ? String(x.getHours()) : pad(x.getHours()) + ':' + pad(x.getMinutes()));
@@ -3215,7 +3276,7 @@ class LoxWochenplanerCard extends FpBase {
   // every task button is built the same: left title + time info (seit / heute fällig / bis Mo), right source + points.
   // Fits on one line → one line; otherwise left: title over time, right: points over source (see _fit()).
   _bi(title, time, src, pts) {
-    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${time || ''}</span><span class="br">${src || ''}${pts > 0 ? `<b class="ptr">+${pts}</b>` : ''}</span></span>`;
+    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${time || ''}</span><span class="br">${src || ''}${pts > 0 ? `<b class="ptr">${fpCoin(13)}+${pts}</b>` : ''}</span></span>`;
   }
   _fit() {
     const root = this.shadowRoot; if (!root) return;
@@ -3243,13 +3304,38 @@ class LoxWochenplanerCard extends FpBase {
     const kind = p ? (((snap.away_kind || {})[p.id]) || {})[ds] : null;
     return kind === 'holiday' ? { icon: 'mdi:palm-tree', text: TX.fer } : { icon: 'mdi:airplane', text: TX.awy };
   }
+  // empty day: friendly box with the next event of this person (tomorrow / weekday)
+  _noneBox(k, dSel, evWho) {
+    const from = addDays(startOfDay(dSel), 1); const until = addDays(from, 7);
+    const nx = (this._events || []).filter((e) => (evWho.get(e) || []).includes(k.name) && e.s >= from && e.s < until && !(e.c && e.c.schule))
+      .sort((a, b) => a.s - b.s)[0];
+    let sub = '';
+    if (nx) {
+      const dd = Math.round((startOfDay(nx.s) - startOfDay(dSel)) / 86400000);
+      sub = `<small>${esc(dd === 1 ? TX.tomS : TX.wd[nx.s.getDay()])}: ${esc(nx.title)}${nx.allDay ? '' : ` · ${pad(nx.s.getHours())}:${pad(nx.s.getMinutes())}`}</small>`;
+    }
+    return `<div class="none2"><ha-icon icon="mdi:balloon"></ha-icon><div><b>${esc(TX.none)}</b>${sub}</div></div>`;
+  }
+  // coin flies from the points plaque to the person's picture (today view), the picture hops
+  _coinFly(btn) {
+    try {
+      if (!window.FPCOIN || !btn) return;
+      const ptr = btn.querySelector('.ptr'); const col = btn.closest('.tcol'); const lab = col && col.querySelector('.lab.th');
+      if (!ptr || !lab) return;
+      const who = lab.dataset.person;
+      window.FPCOIN.fly(ptr.querySelector('svg') || ptr, lab.querySelector('.ring') || lab, () => {
+        const l2 = [...this.shadowRoot.querySelectorAll('.lab.th')].find((x) => x.dataset.person === who);
+        window.FPCOIN.hop(l2 && (l2.querySelector('.ring') || l2));
+      });
+    } catch (e) { /* no animation */ }
+  }
   _volCards(snap, tStr, persons) {
     const pts = snap.sonder_points || {};
     const open = (snap.sonder || []).filter((it) => it.pid == null && !it.done && this._sonderVisible(it, tStr));
     return open.map((it) => {
       // who takes it: big avatar tiles for the whole family (easy to hit on the tablet), cancel as a small link
       const who = this._claim === it.id ? `<div class="vpick"><span class="vq">${TX.who}</span><div class="vps">${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="vp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 46)}<b>${esc(p.name)}</b></button>`).join('')}</div><button class="vx" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
+      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">${fpCoin(13)}+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -3322,11 +3408,11 @@ class LoxWochenplanerCard extends FpBase {
       const s = this.fpStore.snap || {}; const t = (s.todos || []).find((x) => x.id === tdb.dataset.todoid); if (!t) return;
       const confirm = !s.todo_settings || s.todo_settings.confirm !== false;
       if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
-      this._tdArm = null; if (!t.done) this._pop = { uid: t.id, t: Date.now() };
+      this._tdArm = null; if (!t.done) { this._coinFly(tdb); this._pop = { uid: t.id, t: Date.now() }; }
       this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).catch(() => this._render()); return;
     }
     const vw = e.target.closest('[data-view]');
-    if (vw) { this._view = vw.dataset.view; this._dayOff = 0; this._week = 0; this._go(0); return; }
+    if (vw) { const chg = this._view !== vw.dataset.view; this._view = vw.dataset.view; this._dayOff = 0; this._week = 0; this._go(0); if (chg) fadeIn(this.shadowRoot && this.shadowRoot.querySelector('.grid, .tgrid') || this); return; }
     const tm = e.target.closest('[data-tdmore]'); if (tm) { this._tdMore = this._tdMore === tm.dataset.tdmore ? null : tm.dataset.tdmore; this._render(); return; }
     const rv = e.target.closest('[data-reveal]'); if (rv && this._reveal === rv.dataset.reveal) { this._reveal = null; clearTimeout(this._rvT); this._render(); return; }
     if (rv) { this._reveal = rv.dataset.reveal; try { const b = rv.getBoundingClientRect(); if (window.FPCONFETTI && window.FPCONFETTI.burst) window.FPCONFETTI.burst(b.left + b.width / 2, b.top + b.height / 2, 'silver', '#F5C542', 0.45); } catch (err) { /* no effect */ } clearTimeout(this._rvT); this._rvT = setTimeout(() => { this._reveal = null; this._render(); }, 5000); this._render(); return; }
@@ -3336,7 +3422,7 @@ class LoxWochenplanerCard extends FpBase {
     const sb = e.target.closest('[data-sonder]');
     if (sb && this.fpStore) {
       const it = ((this.fpStore.snap || {}).sonder || []).find((x) => x.id === sb.dataset.sonder); if (!it) return;
-      if (!it.done) { this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!it.done) { this._coinFly(sb); this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this.fpStore.ws('family_planer/sonder/set', { inst_id: it.id, done: !it.done }).catch(() => this._render()); return;
     }
     const lt = e.target.closest('[data-lvtap]'); if (lt) { this._lvTap(lt.dataset.lvtap, lt); return; }
@@ -3347,7 +3433,7 @@ class LoxWochenplanerCard extends FpBase {
       const done = b.classList.contains('done');
       b.classList.toggle('done');
       // little check animation only for the chore that was just ticked off
-      if (!done) { this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!done) { this._coinFly(b); this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this._call('todo', 'update_item', { item: b.dataset.uid, status: done ? 'needs_action' : 'completed' }, this._cfg.heute).catch(() => this._render());
       return;
     }
@@ -3424,7 +3510,7 @@ class LoxWochenplanerCard extends FpBase {
     // timetable view: only persons with a timetable
     const rowKids = (this._mode || 'alle') === 'schule' ? kids.filter((x) => (this._cfg.schule || {})[x.name]) : kids;
     // to-dos and special chores (date-based plan) in the planner, clearly marked; own view "To-dos & special"
-    const snapX = (this.fpStore && this.fpStore.snap) || {}; const modeX = this._mode || 'alle';
+    const snapX = (this.fpStore && this.fpStore.snap) || {}; const modeX = this._mode || 'alle'; if (window.FPCOIN) window.FPCOIN.config(snapX);
     const specIds = new Set((snapX.chores || []).filter((c) => c.schedule).map((c) => c.id));
     const pidOf = Object.fromEntries((snapX.persons || []).map((p) => [p.name, p.id]));
     const showTodos = modeX === 'alle' || modeX === 'extra';
@@ -3578,7 +3664,7 @@ class LoxWochenplanerCard extends FpBase {
         }
         const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
         const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
-          : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || `<div class="none">${TX.none}</div>`;
+          : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || this._noneBox(k, dSel, evWho);
         return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
           <span class="flg" style="--rc:${lv.c}" title="${TX.rel}">${st.pct}%</span><div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
@@ -3700,7 +3786,7 @@ class LoxWochenplanerCard extends FpBase {
       .ok{font-size:11px;color:${G};display:flex;align-items:center;gap:4px}.ok ha-icon{--mdc-icon-size:14px}
       .pl{font-size:12px;color:var(--fp-text3,#7a7a7a);line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .pl::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--fp-bg4,#555);margin-right:6px;vertical-align:middle}
-      .none{font-size:13px;color:var(--fp-text3,#555)}
+      .none{font-size:13px;color:var(--fp-text3,#555)}.none2{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--pc,var(--fp-accent)) 10%,transparent);color:var(--fp-text2,var(--fp-text2,#aaa))}.none2 ha-icon{--mdc-icon-size:26px;color:var(--pc,var(--fp-accent));flex:none;animation:fpnb 3s ease-in-out infinite}@keyframes fpnb{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}.none2 b{display:block;font-size:14px;color:var(--fp-text,var(--fp-text,#eee))}.none2 small{display:block;font-size:12px;margin-top:2px}@media (prefers-reduced-motion:reduce){.none2 ha-icon{animation:none}}
       .ev{font-size:12px;line-height:1.3;padding:4px 6px 4px 7px;border-left:3px solid;background:var(--fp-bg4,#303030);border-radius:0 6px 6px 0;margin-top:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
       .ev:first-child{margin-top:0}.ev b{font-weight:600;color:var(--fp-text2,#aaa);margin-right:5px}
       .more{font-size:11px;color:var(--fp-text3,#777);margin-top:4px}
@@ -3710,7 +3796,7 @@ class LoxWochenplanerCard extends FpBase {
       .tcol .lab.th{background:transparent;padding:12px 10px 8px;position:relative;overflow:visible}
       .lab.th .flg{position:absolute;top:-1px;right:24px;width:42px;padding:7px 0 15px;background:var(--rc);color:var(--fp-on-accent,#141414);font-size:13px;font-weight:800;text-align:center;letter-spacing:.2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);z-index:2}
       .lab.th .nm{padding-right:50px}.lab.th .lv2:empty{display:none}
-      .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .lab.th .nm{padding-right:0}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
+      .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .tcol .lab.th{flex-direction:row;align-items:center;gap:12px;padding:10px 12px 8px}.card.phone .tcol .lab.th .lt{flex:1;min-width:0}.card.phone .lab.th .nm{padding-right:46px}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
       .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:600;color:#a3a3a3;text-transform:uppercase;letter-spacing:.9px;margin:4px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
       .bg.one{grid-template-columns:1fr}
 
@@ -3723,7 +3809,7 @@ class LoxWochenplanerCard extends FpBase {
       .bin.two .ptr{grid-area:p;justify-self:end}.c .bg:not(.one) .bin.two .tag .tl,.c .spw .bin.two .tag .tl{display:none}.bin.two .br > .tag{grid-area:s;justify-self:end}
       .btn .tag,.due,.age,.ptr{display:inline-block;margin:0;font-style:normal;font-size:11px;font-weight:700;line-height:17px;padding:0 8px;border-radius:9px;white-space:nowrap;letter-spacing:.2px}
       .age{color:#aab2bf;border:1px solid #4a505c;line-height:15px;font-weight:600}
-      .ptr{background:rgba(245,197,66,.18);color:#f5c542}.btn.done .ptr,.btn.done .tag,.btn.done .age{opacity:.6}
+      .ptr{background:rgba(245,197,66,.18);color:#f5c542}.ptr .fpcoin{margin:0 3px 0 -5px}.btn.done .ptr,.btn.done .tag,.btn.done .age{opacity:.6}
       .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542;background:rgba(245,197,66,.18)}
       .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
       .rvb.on{background:rgba(245,197,66,.18);border-color:#f5c542}.rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#f5c542;background:#f5c542}
@@ -3790,12 +3876,19 @@ class LoxWochenplanerCard extends FpBase {
 }
 
 // Navigation zwischen den Familienplaner-Seiten (funktioniert auch im Kiosk-Modus ohne HA-Kopfzeile)
+// soft fade-in when a page or view appears (skipped with "reduce motion")
+const fadeIn = (el) => {
+  try {
+    if (!el || !el.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    el.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' });
+  } catch (e) { /* ignore */ }
+};
 const fpNavigate = (p) => {
   const parts = location.pathname.split('/').filter(Boolean);
   history.pushState(null, '', `/${parts[0] || 'family-planer'}/${p}${location.search}`);
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
-window.FPX = { AWT, AWR, AWCSS, avatarGen, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
+window.FPX = { AWT, AWR, AWCSS, avatarGen, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, fadeIn, startOfDay, ymd };
 if (!customElements.get('fp-week-inner')) customElements.define('fp-week-inner', LoxWochenplanerCard);
 
 })();
@@ -4133,12 +4226,12 @@ const SOON_T = ['in {n} min', 'in {n} h'];
 const FPL = 'en';
 const TX = {
   de: { fer: 'Ferien', awy: 'Nicht da', today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Heute nichts',
-    school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant',
+    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Nichts geplant – frei!',
+    school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant', tomS: 'Morgen', nextS: 'Als Nächstes',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { fer: 'Holiday', awy: 'Away', today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
-    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', spcH: 'Special chores', open: '{n} open', rel: 'Reliability', cancel: 'Cancel', none: 'Nothing today',
-    school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned',
+    secret: '🤫 Secret job', reveal: 'Show', pts: '{n} pts', x2: 'Points x2', bday: 'Birthday', spc: 'Extra', spcH: 'Special chores', open: '{n} open', rel: 'Reliability', cancel: 'Cancel', none: 'Nothing planned – free!',
+    school: 'School', events: 'Events', chores: 'Chores', todos: 'To-dos', allDone: 'All done!', of: '{a} of {b}', plan: 'Planned', tomS: 'Tomorrow', nextS: 'Next up',
     awNow: 'away until {d}', awToday: 'away today', awTom: 'away from tomorrow', awTomAt: 'away tomorrow from {t}', awAt: 'away from {t}', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
 }[FPL];
 // birthday animations behind the birthday child (one per day, chosen by the server)
@@ -4348,6 +4441,8 @@ const avatarGen = (code, bg) => {
   return `<svg viewBox="0 0 40 40" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
 };
 // Termin-Zeit kurz: "14:30–15:20" bzw. schmal "14:30–15"
+// points coin (coin.js); '' when switched off
+const fpCoin = (px) => (window.FPCOIN ? window.FPCOIN.svg(px) : '');
 const evRange = (e, short) => {
   if (e.allDay) return short ? 'all day' : 'all day';
   const t = (x) => (short && !x.getMinutes() ? String(x.getHours()) : pad(x.getHours()) + ':' + pad(x.getMinutes()));
@@ -4559,7 +4654,7 @@ class LoxWochenplanerCard extends FpBase {
   // every task button is built the same: left title + time info (seit / heute fällig / bis Mo), right source + points.
   // Fits on one line → one line; otherwise left: title over time, right: points over source (see _fit()).
   _bi(title, time, src, pts) {
-    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${time || ''}</span><span class="br">${src || ''}${pts > 0 ? `<b class="ptr">+${pts}</b>` : ''}</span></span>`;
+    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${time || ''}</span><span class="br">${src || ''}${pts > 0 ? `<b class="ptr">${fpCoin(13)}+${pts}</b>` : ''}</span></span>`;
   }
   _fit() {
     const root = this.shadowRoot; if (!root) return;
@@ -4587,13 +4682,38 @@ class LoxWochenplanerCard extends FpBase {
     const kind = p ? (((snap.away_kind || {})[p.id]) || {})[ds] : null;
     return kind === 'holiday' ? { icon: 'mdi:palm-tree', text: TX.fer } : { icon: 'mdi:airplane', text: TX.awy };
   }
+  // empty day: friendly box with the next event of this person (tomorrow / weekday)
+  _noneBox(k, dSel, evWho) {
+    const from = addDays(startOfDay(dSel), 1); const until = addDays(from, 7);
+    const nx = (this._events || []).filter((e) => (evWho.get(e) || []).includes(k.name) && e.s >= from && e.s < until && !(e.c && e.c.schule))
+      .sort((a, b) => a.s - b.s)[0];
+    let sub = '';
+    if (nx) {
+      const dd = Math.round((startOfDay(nx.s) - startOfDay(dSel)) / 86400000);
+      sub = `<small>${esc(dd === 1 ? TX.tomS : TX.wd[nx.s.getDay()])}: ${esc(nx.title)}${nx.allDay ? '' : ` · ${pad(nx.s.getHours())}:${pad(nx.s.getMinutes())}`}</small>`;
+    }
+    return `<div class="none2"><ha-icon icon="mdi:balloon"></ha-icon><div><b>${esc(TX.none)}</b>${sub}</div></div>`;
+  }
+  // coin flies from the points plaque to the person's picture (today view), the picture hops
+  _coinFly(btn) {
+    try {
+      if (!window.FPCOIN || !btn) return;
+      const ptr = btn.querySelector('.ptr'); const col = btn.closest('.tcol'); const lab = col && col.querySelector('.lab.th');
+      if (!ptr || !lab) return;
+      const who = lab.dataset.person;
+      window.FPCOIN.fly(ptr.querySelector('svg') || ptr, lab.querySelector('.ring') || lab, () => {
+        const l2 = [...this.shadowRoot.querySelectorAll('.lab.th')].find((x) => x.dataset.person === who);
+        window.FPCOIN.hop(l2 && (l2.querySelector('.ring') || l2));
+      });
+    } catch (e) { /* no animation */ }
+  }
   _volCards(snap, tStr, persons) {
     const pts = snap.sonder_points || {};
     const open = (snap.sonder || []).filter((it) => it.pid == null && !it.done && this._sonderVisible(it, tStr));
     return open.map((it) => {
       // who takes it: big avatar tiles for the whole family (easy to hit on the tablet), cancel as a small link
       const who = this._claim === it.id ? `<div class="vpick"><span class="vq">${TX.who}</span><div class="vps">${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="vp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 46)}<b>${esc(p.name)}</b></button>`).join('')}</div><button class="vx" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
+      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">${fpCoin(13)}+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -4666,11 +4786,11 @@ class LoxWochenplanerCard extends FpBase {
       const s = this.fpStore.snap || {}; const t = (s.todos || []).find((x) => x.id === tdb.dataset.todoid); if (!t) return;
       const confirm = !s.todo_settings || s.todo_settings.confirm !== false;
       if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
-      this._tdArm = null; if (!t.done) this._pop = { uid: t.id, t: Date.now() };
+      this._tdArm = null; if (!t.done) { this._coinFly(tdb); this._pop = { uid: t.id, t: Date.now() }; }
       this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).catch(() => this._render()); return;
     }
     const vw = e.target.closest('[data-view]');
-    if (vw) { this._view = vw.dataset.view; this._dayOff = 0; this._week = 0; this._go(0); return; }
+    if (vw) { const chg = this._view !== vw.dataset.view; this._view = vw.dataset.view; this._dayOff = 0; this._week = 0; this._go(0); if (chg) fadeIn(this.shadowRoot && this.shadowRoot.querySelector('.grid, .tgrid') || this); return; }
     const tm = e.target.closest('[data-tdmore]'); if (tm) { this._tdMore = this._tdMore === tm.dataset.tdmore ? null : tm.dataset.tdmore; this._render(); return; }
     const rv = e.target.closest('[data-reveal]'); if (rv && this._reveal === rv.dataset.reveal) { this._reveal = null; clearTimeout(this._rvT); this._render(); return; }
     if (rv) { this._reveal = rv.dataset.reveal; try { const b = rv.getBoundingClientRect(); if (window.FPCONFETTI && window.FPCONFETTI.burst) window.FPCONFETTI.burst(b.left + b.width / 2, b.top + b.height / 2, 'silver', '#F5C542', 0.45); } catch (err) { /* no effect */ } clearTimeout(this._rvT); this._rvT = setTimeout(() => { this._reveal = null; this._render(); }, 5000); this._render(); return; }
@@ -4680,7 +4800,7 @@ class LoxWochenplanerCard extends FpBase {
     const sb = e.target.closest('[data-sonder]');
     if (sb && this.fpStore) {
       const it = ((this.fpStore.snap || {}).sonder || []).find((x) => x.id === sb.dataset.sonder); if (!it) return;
-      if (!it.done) { this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!it.done) { this._coinFly(sb); this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this.fpStore.ws('family_planer/sonder/set', { inst_id: it.id, done: !it.done }).catch(() => this._render()); return;
     }
     const lt = e.target.closest('[data-lvtap]'); if (lt) { this._lvTap(lt.dataset.lvtap, lt); return; }
@@ -4691,7 +4811,7 @@ class LoxWochenplanerCard extends FpBase {
       const done = b.classList.contains('done');
       b.classList.toggle('done');
       // little check animation only for the chore that was just ticked off
-      if (!done) { this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!done) { this._coinFly(b); this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this._call('todo', 'update_item', { item: b.dataset.uid, status: done ? 'needs_action' : 'completed' }, this._cfg.heute).catch(() => this._render());
       return;
     }
@@ -4768,7 +4888,7 @@ class LoxWochenplanerCard extends FpBase {
     // timetable view: only persons with a timetable
     const rowKids = (this._mode || 'alle') === 'schule' ? kids.filter((x) => (this._cfg.schule || {})[x.name]) : kids;
     // to-dos and special chores (date-based plan) in the planner, clearly marked; own view "To-dos & special"
-    const snapX = (this.fpStore && this.fpStore.snap) || {}; const modeX = this._mode || 'alle';
+    const snapX = (this.fpStore && this.fpStore.snap) || {}; const modeX = this._mode || 'alle'; if (window.FPCOIN) window.FPCOIN.config(snapX);
     const specIds = new Set((snapX.chores || []).filter((c) => c.schedule).map((c) => c.id));
     const pidOf = Object.fromEntries((snapX.persons || []).map((p) => [p.name, p.id]));
     const showTodos = modeX === 'alle' || modeX === 'extra';
@@ -4922,7 +5042,7 @@ class LoxWochenplanerCard extends FpBase {
         }
         const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
         const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
-          : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || `<div class="none">${TX.none}</div>`;
+          : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || this._noneBox(k, dSel, evWho);
         return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
           <span class="flg" style="--rc:${lv.c}" title="${TX.rel}">${st.pct}%</span><div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
@@ -5044,7 +5164,7 @@ class LoxWochenplanerCard extends FpBase {
       .ok{font-size:11px;color:${G};display:flex;align-items:center;gap:4px}.ok ha-icon{--mdc-icon-size:14px}
       .pl{font-size:12px;color:var(--fp-text3,#7a7a7a);line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .pl::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--fp-bg4,#555);margin-right:6px;vertical-align:middle}
-      .none{font-size:13px;color:var(--fp-text3,#555)}
+      .none{font-size:13px;color:var(--fp-text3,#555)}.none2{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--pc,var(--fp-accent)) 10%,transparent);color:var(--fp-text2,var(--fp-text2,#aaa))}.none2 ha-icon{--mdc-icon-size:26px;color:var(--pc,var(--fp-accent));flex:none;animation:fpnb 3s ease-in-out infinite}@keyframes fpnb{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}.none2 b{display:block;font-size:14px;color:var(--fp-text,var(--fp-text,#eee))}.none2 small{display:block;font-size:12px;margin-top:2px}@media (prefers-reduced-motion:reduce){.none2 ha-icon{animation:none}}
       .ev{font-size:12px;line-height:1.3;padding:4px 6px 4px 7px;border-left:3px solid;background:var(--fp-bg4,#303030);border-radius:0 6px 6px 0;margin-top:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
       .ev:first-child{margin-top:0}.ev b{font-weight:600;color:var(--fp-text2,#aaa);margin-right:5px}
       .more{font-size:11px;color:var(--fp-text3,#777);margin-top:4px}
@@ -5054,7 +5174,7 @@ class LoxWochenplanerCard extends FpBase {
       .tcol .lab.th{background:transparent;padding:12px 10px 8px;position:relative;overflow:visible}
       .lab.th .flg{position:absolute;top:-1px;right:24px;width:42px;padding:7px 0 15px;background:var(--rc);color:var(--fp-on-accent,#141414);font-size:13px;font-weight:800;text-align:center;letter-spacing:.2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);z-index:2}
       .lab.th .nm{padding-right:50px}.lab.th .lv2:empty{display:none}
-      .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .lab.th .nm{padding-right:0}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
+      .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .tcol .lab.th{flex-direction:row;align-items:center;gap:12px;padding:10px 12px 8px}.card.phone .tcol .lab.th .lt{flex:1;min-width:0}.card.phone .lab.th .nm{padding-right:46px}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
       .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:600;color:#a3a3a3;text-transform:uppercase;letter-spacing:.9px;margin:4px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
       .bg.one{grid-template-columns:1fr}
 
@@ -5067,7 +5187,7 @@ class LoxWochenplanerCard extends FpBase {
       .bin.two .ptr{grid-area:p;justify-self:end}.c .bg:not(.one) .bin.two .tag .tl,.c .spw .bin.two .tag .tl{display:none}.bin.two .br > .tag{grid-area:s;justify-self:end}
       .btn .tag,.due,.age,.ptr{display:inline-block;margin:0;font-style:normal;font-size:11px;font-weight:700;line-height:17px;padding:0 8px;border-radius:9px;white-space:nowrap;letter-spacing:.2px}
       .age{color:#aab2bf;border:1px solid #4a505c;line-height:15px;font-weight:600}
-      .ptr{background:rgba(245,197,66,.18);color:#f5c542}.btn.done .ptr,.btn.done .tag,.btn.done .age{opacity:.6}
+      .ptr{background:rgba(245,197,66,.18);color:#f5c542}.ptr .fpcoin{margin:0 3px 0 -5px}.btn.done .ptr,.btn.done .tag,.btn.done .age{opacity:.6}
       .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542;background:rgba(245,197,66,.18)}
       .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
       .rvb.on{background:rgba(245,197,66,.18);border-color:#f5c542}.rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#f5c542;background:#f5c542}
@@ -5134,12 +5254,19 @@ class LoxWochenplanerCard extends FpBase {
 }
 
 // Navigation zwischen den Familienplaner-Seiten (funktioniert auch im Kiosk-Modus ohne HA-Kopfzeile)
+// soft fade-in when a page or view appears (skipped with "reduce motion")
+const fadeIn = (el) => {
+  try {
+    if (!el || !el.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    el.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' });
+  } catch (e) { /* ignore */ }
+};
 const fpNavigate = (p) => {
   const parts = location.pathname.split('/').filter(Boolean);
   history.pushState(null, '', `/${parts[0] || 'family-planer'}/${p}${location.search}`);
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
-window.FPX_EN = { AWT, AWR, AWCSS, avatarGen, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, startOfDay, ymd };
+window.FPX_EN = { AWT, AWR, AWCSS, avatarGen, FpBase, avatarHtml, parseDesc, planZ, esc, WD, G, FONT, isoWeek, weekIdx, planActive, AV_TYPES, PALETTE, fpNavigate, fadeIn, startOfDay, ymd };
 if (!customElements.get('fp-week-inner-en')) customElements.define('fp-week-inner-en', LoxWochenplanerCard);
 
 })();
@@ -5449,12 +5576,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const TXT = {
     de: { add: 'Was fehlt?', addb: 'Hinzufügen', sorting: 'Wird einsortiert …', done: 'Erledigt', clear: 'Erledigte löschen',
       cats: 'Kategorien', optimize: 'Optimieren', optimizing: 'Optimiere …', slow: 'dauert zu lange – später nochmals versuchen', aibg: 'Die KI sortiert den Rest im Hintergrund – die Liste aktualisiert sich gleich.', move: 'Kategorie wählen', learned: 'Gemerkt: „{i}“ → {c}',
-      empty: 'Die Liste ist leer – oben etwas hinzufügen.', nolists: 'Noch keine Liste eingerichtet. Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren → Smarte Listen.',
+      empty: 'Die Liste ist leer – oben etwas hinzufügen.', nolists: 'Noch keine Liste eingerichtet', nolistsSub: 'Einkaufsliste, Bastelliste oder Ferien-Packliste – eine Liste ist schnell angelegt.', setup: 'Liste einrichten',
       unavailable: 'Liste nicht erreichbar', edit: 'Kategorien bearbeiten', limit: '{n} von max. {m}', newcat: '+ Kategorie', save: 'Speichern', cancel: 'Abbrechen',
       other: 'bleibt immer zuletzt', created: 'Neu: {x}', removed: 'Zusammengefasst: {x}', nothing: 'Alles ist schon gut sortiert.', err: 'Fehler: ', del: 'Löschen' },
     en: { add: 'What do you need?', addb: 'Add', sorting: 'Sorting …', done: 'Done', clear: 'Clear done',
       cats: 'Categories', optimize: 'Optimise', optimizing: 'Optimising …', slow: 'taking too long – try again later', aibg: 'The AI sorts the rest in the background – the list updates in a moment.', move: 'Choose category', learned: 'Remembered: "{i}" → {c}',
-      empty: 'The list is empty – add something above.', nolists: 'No list set up yet. Settings → Devices & services → Family Planer → Configure → Smart lists.',
+      empty: 'The list is empty – add something above.', nolists: 'No list set up yet', nolistsSub: 'Shopping, craft supplies or a holiday packing list – a list is set up in no time.', setup: 'Set up a list',
       unavailable: 'List not available', edit: 'Edit categories', limit: '{n} of max. {m}', newcat: '+ Category', save: 'Save', cancel: 'Cancel',
       other: 'always stays last', created: 'New: {x}', removed: 'Merged: {x}', nothing: 'Everything is sorted well already.', err: 'Error: ', del: 'Delete' },
   };
@@ -5499,6 +5626,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const t = e.target; const l = this._cur();
       const tab = t.closest('[data-tab]');
       if (tab) { this._sel = tab.dataset.tab; try { localStorage.setItem('fp_list', this._sel); } catch (er) { /* ignore */ } this._move = null; this._resub(); this._render(); return; }
+      if (t.closest('[data-setup]')) { window.__fpSetTab = 'lists'; (window.FPX || window.FPX_EN).fpNavigate((window.__fpPaths || {}).einstellungen || 'einstellungen'); return; }
       if (!l) return;
       if (t.closest('[data-addb]')) { this._add(); return; }
       const mv = t.closest('[data-mv]');
@@ -5547,7 +5675,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const T = this.T; const ls = this._lists(); const l = this._cur();
       const active = this.shadowRoot.activeElement; const keepFocus = active && active.dataset && active.dataset.addin !== undefined;
       let body = '';
-      if (!l) body = `<div class="empty">${esc(T.nolists)}</div>`;
+      if (!l) body = `<div class="empty nol"><ha-icon icon="mdi:format-list-checks"></ha-icon><b>${esc(T.nolists)}</b><span>${esc(T.nolistsSub)}</span><button class="setup" data-setup><ha-icon icon="mdi:plus"></ha-icon>${esc(T.setup)}</button></div>`;
       else if (this._err) body = `<div class="empty">${esc(T.unavailable)}: ${esc(this._err)}</div>`;
       else if (this._items) {
         const open = this._items.filter((i) => i.status === 'needs_action');
@@ -5602,7 +5730,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .dn{display:flex;gap:10px;margin-top:4px}
         .lnk{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--fp-text3,#888);font:inherit;font-size:13px;cursor:pointer;padding:6px 4px}
         .donel{columns:3 250px;column-gap:12px;margin-top:6px}
-        .empty{color:var(--fp-text3,#888);padding:30px 10px;text-align:center;font-size:14px}
+        .empty{color:var(--fp-text3,#888);padding:30px 10px;text-align:center;font-size:14px}.nol{display:flex;flex-direction:column;align-items:center;gap:8px;padding:40px 16px}.nol>ha-icon{--mdc-icon-size:48px;color:${G};opacity:.8}.nol b{font-size:17px;color:#e6e6e6}.nol span{max-width:340px;line-height:1.45}.nol .setup{display:flex;align-items:center;gap:6px;margin-top:8px;height:44px;padding:0 18px;border-radius:12px;border:0;background:${G};color:var(--fp-on-accent,#111);font:inherit;font-size:15px;font-weight:600;cursor:pointer}
         .msg{position:absolute;left:50%;transform:translateX(-50%);top:12px;background:#2e3a2a;border:1px solid ${G};color:var(--fp-text,#dfe);padding:8px 16px;border-radius:10px;font-size:13px;z-index:5}
         .msg.e{background:#3a2626;border-color:#e06b6b}
         .ov{position:absolute;inset:0;background:rgba(10,10,10,.72);border-radius:var(--fp-radius,16px);display:flex;align-items:flex-start;justify-content:center;padding-top:60px;z-index:4}
@@ -5777,7 +5905,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const T = this.T; const s = this._snap();
       if (!s) { this.shadowRoot.innerHTML = ''; return; }
       const persons = s.persons; const sel = persons.find((p) => p.id === this._sel) || null;  // nobody selected = everything
-      const pts = s.points || {};
+      const pts = s.points || {}; if (window.FPCOIN) window.FPCOIN.config(s); const coin = (px) => (window.FPCOIN ? window.FPCOIN.svg(px) : '');
       const FX = (this._cfg.lang === 'en' ? window.FPX_EN : window.FPX) || window.FPX || {}; const AWT = FX.AWT || {}; const AWR = FX.AWR || [];
       const et = (s.settings || {}).ontime_time || '20:00'; const apts = s.award_points || {};
       const awName = (id, v) => String((AWT[id] || [id])[0]).replace(/\{n\}/g, v == null ? '' : v);
@@ -5802,7 +5930,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           <div class="pi"><b>${esc(p.name)}</b><span class="lv"><i class="tierdot" style="background:${COLOR(x.tier_color)}"></i>${esc(T.lvl)} ${x.level} · ${esc(x.name)}</span>
           <span class="bar"><i style="width:${Math.max(3, x.progress)}%"></i></span>
           <span class="nx">${x.next == null ? esc(T.max) : esc(fmt(T.next, { n: x.next - (x.xp != null ? x.xp : x.lifetime), l: x.level + 1 }))}</span></div>
-          <div class="pt"><strong>${x.balance}</strong><span>${esc(T.pts)}</span>${x.balance !== x.available ? `<em>${esc(fmt(T.reserved, { n: x.balance - x.available }))}</em>` : ''}</div></div>
+          <div class="pt"><strong>${coin(24)}${x.balance}</strong><span>${esc(T.pts)}</span>${x.balance !== x.available ? `<em>${esc(fmt(T.reserved, { n: x.balance - x.available }))}</em>` : ''}</div></div>
           ${aw.length ? `<div class="mds">${aw.slice(0, 6).map((a) => medal(a)).join('')}${aw.length > 6 ? `<span class="mdm">+${aw.length - 6}</span>` : ''}</div>` : ''}
           <div class="runs">${running(p)}</div>
           <button class="add1" data-radd="${esc(p.id)}"><ha-icon icon="mdi:plus"></ha-icon>${esc(T.addFor)}</button></div>`; }).join('');
@@ -5822,11 +5950,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const pen = (r) => `<button class="pen" data-redit="${esc(r.id)}" title="${esc(T.edit)}" aria-label="${esc(T.edit)}"><ha-icon icon="mdi:pencil-outline"></ha-icon></button>`;
       const shop = !s.rewards.length ? `<div class="empty">${esc(T.none)}</div>` : !sel ? `<div class="hint2">${esc(T.pickHint)}</div><div class="shop">${rw.map((r) => { const who = (r.persons && r.persons.length ? persons.filter((p) => r.persons.includes(p.id)) : []);
           return `<div class="rw"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
-          <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}</span>
+          <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${coin(13)}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}</span>
           <span class="who">${who.length ? who.map((p) => `<button class="wp" data-p="${esc(p.id)}" style="--c:${COLOR(p.color)}">${av(p, 20)}${esc(p.name)}</button>`).join('') : `<em class="wa">${esc(T.forAll)}</em>`}</span></div>${pen(r)}</div>`; }).join('')}</div>`
         : `<div class="shop">${rw.map((r) => { const ok = avail >= r.cost;
         return `<div class="rw${ok ? '' : ' lock'}"><div class="ri"><ha-icon icon="${esc(r.icon)}"></ha-icon></div><div class="rt"><b>${esc(r.title)}</b>
-          <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}</span>
+          <span>${r.size && T.sizes[r.size] ? esc(T.sizes[r.size]) + ' · ' : ''}${coin(13)}${r.cost} ${esc(T.pts)} · ${esc(r.approval ? T.approval : T.noapproval)}${r.per_week ? ' · ' + esc(fmt(T.week, { n: r.per_week })) : ''}</span>
           ${ok ? '' : `<span class="ms"><span class="bar"><i style="width:${Math.round((avail / r.cost) * 100)}%"></i></span>${esc(fmt(T.missing, { n: r.cost - avail }))}</span>`}</div>
           ${pen(r)}<button class="rb" data-redeem="${esc(r.id)}" ${ok ? '' : 'disabled'}>${esc(T.redeem)}</button></div>`; }).join('')}</div>`;
       const name = (pid) => (persons.find((p) => p.id === pid) || {}).name || '?';
@@ -5884,7 +6012,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .pi{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.pi b{font-size:16px}
         .lv{font-size:12px;color:var(--fp-text2,#aaa);display:flex;align-items:center;gap:5px}.tierdot{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 4px rgba(255,255,255,.3)}.nx{font-size:11px;color:var(--fp-text3,#777)}
         .bar{display:block;height:6px;border-radius:3px;background:var(--fp-bg4,#333);overflow:hidden}.bar i{display:block;height:100%;background:${G};border-radius:3px}
-        .pt{display:flex;flex-direction:column;align-items:flex-end}.pt strong{font-size:28px;line-height:1;color:${G}}.pt span{font-size:11px;color:var(--fp-text3,#888)}.pt em{font-style:normal;font-size:10px;color:#e0a84f}
+        .pt{display:flex;flex-direction:column;align-items:flex-end}.pt strong{display:flex;align-items:center;gap:6px;font-size:28px;line-height:1;color:${G}}.fpcoin{margin-right:3px}.pt span{font-size:11px;color:var(--fp-text3,#888)}.pt em{font-style:normal;font-size:10px;color:#e0a84f}
         .sec{font-size:12px;color:${G};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin:18px 0 8px}
         .shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
         .rw{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--fp-bg3,#262626);border:1px solid var(--fp-line,#2a2a2a)}
@@ -5940,6 +6068,274 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
   }
   if (!customElements.get('fp-rewards-inner')) customElements.define('fp-rewards-inner', FpRewardsInner);
+})();
+
+// ---------------------------------------------------------------------------
+// Statistics page: the family first (who did what, awards), then one page per person (reliability as 10 dots,
+// 7 days as blocks, 12 weeks as coloured dots, what I did, where my points come from, my awards)
+// rendered inside custom:family-planer-card (view: stats); data from the websocket command family_planer/stats
+// ---------------------------------------------------------------------------
+(() => {
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const COLOR = (c) => (/^#[0-9a-f]{6}$/i.test(c || '') ? c : '#69C350');
+  const fmt = (s, o) => String(s).replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
+  const MC = ['#69C350', '#C6D94B', '#F2A541', '#E0584F'];  // day dots: all done, 1, 2, 3+ forgotten
+  const TYPE_C = { chore: '#69C350', sonder: '#F2A541', todo: '#A88BFA' };
+  const SRC_C = { chore: '#69C350', sonder: '#F2A541', todo: '#A88BFA', bonus: '#F5C542', streak: '#FF8A5B', award: '#4FA3E0', level: '#3FBF9B', adjust: '#E88BC4', reward: '#F08A80' };
+  const TXT = {
+    de: { title: 'Statistik', fam: 'Familie', back: 'Familie', per: { w: 'Woche', m: 'Monat', q: '3 Monate' },
+      choresDone: 'Ämtli geschafft', ofTen: '{n} von 10 erledigt', vol: 'Freiwillige Ämtli', volSub: 'ohne Auftrag erledigt', todos: 'To-dos abgehakt', todosSub: 'aus Listen und Aufgaben',
+      allDone: 'Alle alles geschafft', allDoneN: '{n} Tage', record: 'Rekord: {n} Tage', who: 'Wer hat was gemacht?', total: '{n} total',
+      types: { chore: 'Ämtli', sonder: 'Freiwillige Ämtli', todo: 'To-dos' }, matrix: 'Welche Ämtli – wer wie oft?', matrixSub: 'je grösser der Kreis, desto öfter', sum: 'Total',
+      awards: 'Pokale & Auszeichnungen', awPeriod: 'in diesem Zeitraum', awAll: 'insgesamt', noAw: 'Noch keine – weiter so!',
+      you: 'Und jetzt du!', youSub: 'Tipp auf deine Karte für deine ganze Statistik', rel: 'Zuverlässigkeit', tenOf: '{n} von 10', streakTxt: '{n} Tage am Stück alles geschafft',
+      leg: ['alles', '1 vergessen', '2', '3+', 'frei'], legLong: ['alles geschafft', '1 vergessen', '2 vergessen', '3 oder mehr', 'frei'],
+      heroT: '{name} schafft {n} von 10 Ämtli', heroNone: 'Noch keine Ämtli in diesem Zeitraum', detail: 'Von {t} Ämtli hast du {d} erledigt.',
+      praise: ['Jeder Tag ist eine neue Chance.', 'Gut gemacht – da geht noch was!', 'Super zuverlässig!', 'Perfekt! Wirklich alles geschafft.'],
+      trend: { 1: 'Besser als im Zeitraum davor', 0: 'Gleich gut wie im Zeitraum davor', '-1': 'Etwas weniger als im Zeitraum davor' },
+      tDone: 'Ämtli erledigt', tDoneSub: 'von {n} Ämtli', tVol: 'Freiwillig geholfen', tVolSub: 'Ämtli ohne Auftrag', tTodo: 'To-dos abgehakt', tTodoSub: 'aus Listen und Aufgaben',
+      tOn: 'Rechtzeitig fertig', tOnSub: 'bis {t} Uhr erledigt', tStreak: 'Tage am Stück', tBest: 'Rekord: {n} Tage', tPts: 'Punkte gesammelt', tPtsSub: 'für Belohnungen',
+      week7: 'Meine letzten 7 Tage', block: '1 Klotz = 1 Ämtli', done: 'erledigt', open: 'offen / nicht geschafft', star: 'alles geschafft',
+      weeks12: 'Meine letzten 12 Wochen', dot: 'Jeder Punkt ist ein Tag', fullDays: 'An {n} Tagen hast du alles geschafft!',
+      did: 'Was ich gemacht habe', things: '{n} Sachen erledigt', nothing: 'Noch nichts',
+      pts: 'Woher meine Punkte kommen', ptsHead: '{e} verdient · {s} eingelöst', earned: 'Punkte verdient', spent: 'Für Belohnungen eingelöst', saving: 'noch nichts eingelöst – du sparst!',
+      src: { chore: ['Ämtli', 'deine normalen Ämtli'], sonder: ['Freiwillige Ämtli', 'Sonderämtli, die du gemacht hast'], todo: ['To-dos', 'abgehakte Aufgaben'], bonus: ['Tagesbonus', 'an Tagen mit allem geschafft'],
+        streak: ['Serien-Bonus', 'für viele Tage am Stück'], award: ['Auszeichnungen', 'Pokale und Auszeichnungen'], level: ['Level-Bonus', 'für ein neues Level'], adjust: ['Extra von Mama/Papa', 'Bonus von den Eltern'] },
+      last: 'Letzte Punkte', today: 'heute', yday: 'gestern', myAw: 'Meine Auszeichnungen', practice: 'Da üben wir noch', missed: '{n}× vergessen', tip: 'Tipp: Erinnerung im Planer einschalten',
+      when: 'Wann ich helfe', tod: ['Morgen', 'Nachmittag', 'Abend'], todTxt: ['Du bist ein Morgen-Mensch!', 'Du hilfst am liebsten nach der Schule!', 'Du bist ein Abend-Helfer!'],
+      load: 'Statistik wird geladen …', err: 'Statistik konnte nicht geladen werden.', planner: 'Planer', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
+    en: { title: 'Statistics', fam: 'Family', back: 'Family', per: { w: 'Week', m: 'Month', q: '3 months' },
+      choresDone: 'Chores done', ofTen: '{n} of 10 done', vol: 'Volunteer chores', volSub: 'done without being asked', todos: 'To-dos ticked off', todosSub: 'from lists and tasks',
+      allDone: 'Everyone did everything', allDoneN: '{n} days', record: 'Record: {n} days', who: 'Who did what?', total: '{n} total',
+      types: { chore: 'Chores', sonder: 'Volunteer chores', todo: 'To-dos' }, matrix: 'Which chores – who how often?', matrixSub: 'the bigger the circle, the more often', sum: 'Total',
+      awards: 'Trophies & awards', awPeriod: 'in this period', awAll: 'all time', noAw: 'None yet – keep going!',
+      you: 'And now you!', youSub: 'Tap your card for your full statistics', rel: 'Reliability', tenOf: '{n} of 10', streakTxt: '{n} days in a row all done',
+      leg: ['all', '1 forgotten', '2', '3+', 'free'], legLong: ['all done', '1 forgotten', '2 forgotten', '3 or more', 'free'],
+      heroT: '{name} does {n} of 10 chores', heroNone: 'No chores in this period yet', detail: 'You did {d} of {t} chores.',
+      praise: ['Every day is a new chance.', 'Well done – there is more in you!', 'Super reliable!', 'Perfect! Really everything done.'],
+      trend: { 1: 'Better than the period before', 0: 'As good as the period before', '-1': 'A little less than the period before' },
+      tDone: 'Chores done', tDoneSub: 'of {n} chores', tVol: 'Volunteered', tVolSub: 'chores without being asked', tTodo: 'To-dos ticked off', tTodoSub: 'from lists and tasks',
+      tOn: 'Done in time', tOnSub: 'done by {t}', tStreak: 'Days in a row', tBest: 'Record: {n} days', tPts: 'Points collected', tPtsSub: 'for rewards',
+      week7: 'My last 7 days', block: '1 block = 1 chore', done: 'done', open: 'open / not done', star: 'all done',
+      weeks12: 'My last 12 weeks', dot: 'Every dot is a day', fullDays: 'You did everything on {n} days!',
+      did: 'What I did', things: '{n} things done', nothing: 'Nothing yet',
+      pts: 'Where my points come from', ptsHead: '{e} earned · {s} redeemed', earned: 'points earned', spent: 'Redeemed for rewards', saving: 'nothing redeemed yet – you are saving!',
+      src: { chore: ['Chores', 'your normal chores'], sonder: ['Volunteer chores', 'special chores you did'], todo: ['To-dos', 'ticked-off tasks'], bonus: ['Day bonus', 'on days with everything done'],
+        streak: ['Streak bonus', 'for many days in a row'], award: ['Awards', 'trophies and awards'], level: ['Level bonus', 'for a new level'], adjust: ['Extra from Mum/Dad', 'bonus from the parents'] },
+      last: 'Latest points', today: 'today', yday: 'yesterday', myAw: 'My awards', practice: 'Still practising', missed: '{n}× forgotten', tip: 'Tip: switch on a reminder in the planner',
+      when: 'When I help', tod: ['Morning', 'Afternoon', 'Evening'], todTxt: ['You are a morning person!', 'You like to help after school!', 'You are an evening helper!'],
+      load: 'Loading statistics …', err: 'Statistics could not be loaded.', planner: 'Planner', wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] },
+  };
+  const IMG = /^(av:[a-z0-9.+]+|av2:[a-z0-9.]+|svg:[a-z-]+|img:\/family_planer_files\/avatars\/[a-z0-9_]+\.(jpg|png|webp))$/;
+  const av = (p, size) => (window.FPX && window.FPX.avatarHtml
+    ? window.FPX.avatarHtml({ name: p.name, farbe: COLOR(p.color), bild: IMG.test(p.image || '') ? p.image : '' }, size)
+    : `<span style="width:${size}px;height:${size}px;border-radius:50%;background:${COLOR(p.color)};display:inline-block"></span>`);
+  const coin = (px) => (window.FPCOIN ? window.FPCOIN.svg(px) : '');
+  const STAR = '<svg viewBox="0 0 24 24" width="{s}" height="{s}" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="{c}"/></svg>';
+  const star = (s, c) => STAR.replace(/\{s\}/g, s).replace('{c}', c);
+
+  class FpStatsInner extends HTMLElement {
+    setConfig(cfg) {
+      this._cfg = cfg; this._lang = cfg.lang === 'en' ? 'en' : 'de'; this.T = TXT[this._lang];
+      if (!this.shadowRoot) { this.attachShadow({ mode: 'open' }); this.shadowRoot.addEventListener('click', (e) => this._click(e)); }
+      this._render();
+    }
+    set store(s) { this._store = s; }
+    set hass(h) { this._hass = h; }
+    connectedCallback() { this._load(); }
+    disconnectedCallback() { clearTimeout(this._t); }
+    // new data arrives often (every tick-off): reload the statistics at most every 15 s
+    update() { const now = Date.now(); if (!this._data || now - (this._at || 0) > 15000) this._load(); else { clearTimeout(this._t); this._t = setTimeout(() => this._load(), 15000); } }
+    async _load() {
+      if (!this._store || this._busy) return;
+      this._busy = true; this._at = Date.now();
+      try { this._data = await this._store.ws('family_planer/stats', this._per ? { period: this._per } : {}); this._err = null; if (!this._per) this._per = this._data.period; } catch (e) { this._err = e; }
+      this._busy = false; this._render();
+    }
+    _click(e) {
+      const t = e.target;
+      const pr = t.closest('[data-per]'); if (pr) { if (this._per !== pr.dataset.per) { this._per = pr.dataset.per; this._data = null; this._render(); this._load(); } return; }
+      const who = t.closest('[data-who]');
+      if (who) { this._who = who.dataset.who || null; this._render(); const fx = window.FPX || window.FPX_EN; if (fx && fx.fadeIn) fx.fadeIn(this.shadowRoot.querySelector('.page')); try { this.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (er) { /* ignore */ } }
+    }
+    _snap() { return (this._store && this._store.snap) || {}; }
+    _awMeta() {
+      const fx = (this._lang === 'en' ? window.FPX_EN : window.FPX) || window.FPX || {}; const m = {};
+      (fx.AWR || []).forEach(([id, icon, color, title]) => { m[id] = { icon, color, title }; }); return m;
+    }
+    _render() {
+      if (!this.shadowRoot) return;
+      const T = this.T; const s = this._snap(); if (window.FPCOIN) window.FPCOIN.config(s);
+      const persons = s.persons || [];
+      let body;
+      if (!this._data) body = `<div class="msg">${esc(this._err ? T.err : T.load)}</div>`;
+      else {
+        const d = this._data; const byId = Object.fromEntries((d.persons || []).map((p) => [p.id, p]));
+        const p = this._who && persons.find((x) => x.id === this._who);
+        body = p && byId[p.id] ? this._person(p, byId[p.id], d) : this._family(persons, byId, d);
+      }
+      const chips = `<div class="bar"><button class="chip${this._who ? '' : ' on'}" data-who="" aria-pressed="${!this._who}"><span class="fi"><ha-icon icon="mdi:account-group"></ha-icon></span>${esc(T.fam)}</button>${persons.map((p) => `<button class="chip${this._who === p.id ? ' on' : ''}" data-who="${esc(p.id)}" aria-pressed="${this._who === p.id}" style="--pc:${COLOR(p.color)}">${av(p, 34)}${esc(p.name)}</button>`).join('')}
+        <div class="seg" role="group">${['w', 'm', 'q'].map((k) => `<button class="${(this._per || 'w') === k ? 'on' : ''}" data-per="${k}" aria-pressed="${(this._per || 'w') === k}">${esc(T.per[k])}</button>`).join('')}</div></div>`;
+      this.shadowRoot.innerHTML = `<style>${CSS}</style><div class="card">${chips}<div class="page">${body}</div></div>`;
+    }
+    // ----------------------------------------------------------------------------------- family
+    _family(persons, byId, d) {
+      const T = this.T; const st = d.settings || {}; const aw = this._awMeta();
+      const tiles = `<div class="tiles4">
+        <div class="tile"><b style="color:#69C350">${d.done}</b><span>${esc(T.choresDone)}</span>${d.ten != null ? `<small>${esc(fmt(T.ofTen, { n: d.ten }))}</small>` : ''}</div>
+        <div class="tile"><b style="color:#F2A541">${d.vol}</b><span>${esc(T.vol)}</span><small>${esc(T.volSub)}</small></div>
+        <div class="tile"><b style="color:#A88BFA">${d.todos}</b><span>${esc(T.todos)}</span><small>${esc(T.todosSub)}</small></div>
+        <div class="tile"><b style="color:#FF8A5B">${esc(fmt(T.allDoneN, { n: d.all_done }))}</b><span>${esc(T.allDone)}</span><small>${esc(fmt(T.record, { n: d.all_done_best }))}</small></div></div>`;
+      const ppl = persons.filter((p) => byId[p.id]);
+      const mx = Math.max(1, ...ppl.map((p) => byId[p.id].done + byId[p.id].vol + byId[p.id].todos));
+      const seg = (n, c) => (n ? `<span style="width:${(n / mx * 100).toFixed(1)}%;min-width:26px;background:${c}">${n}</span>` : '');
+      const who = st.compare === false ? '' : `<section class="sec w5"><h2>${esc(T.who)}</h2>${ppl.map((p) => { const x = byId[p.id]; return `<div class="whorow"><div class="wh">${av(p, 26)}<b>${esc(p.name)}</b><small>${esc(fmt(T.total, { n: x.done + x.vol + x.todos }))}</small></div><div class="stack">${seg(x.done, TYPE_C.chore)}${seg(x.vol, TYPE_C.sonder)}${seg(x.todos, TYPE_C.todo)}</div></div>`; }).join('')}
+        <div class="legend">${['chore', 'sonder', 'todo'].map((k) => `<span><i style="background:${TYPE_C[k]}"></i>${esc(T.types[k])}</span>`).join('')}</div></section>`;
+      const awRow = (list) => list.map(([id, n]) => { const m = aw[id] || { icon: 'mdi:medal', color: '#E0A84F', title: id }; return `<span class="aw" title="${esc(m.title)}"><span class="md" style="--mc:${COLOR(m.color)}"><ha-icon icon="${esc(m.icon)}"></ha-icon></span><b>${n}×</b><small>${esc(m.title)}</small></span>`; }).join('');
+      const awards = `<section class="sec ${st.compare === false ? 'w12' : 'w7'}"><h2>${esc(T.awards)}</h2><div class="awtot"><div><b>${d.awards}</b><small>${esc(T.awPeriod)}</small></div><div><b>${d.awards_all}</b><small>${esc(T.awAll)}</small></div></div>
+        ${ppl.map((p) => { const x = byId[p.id]; return `<div class="awp"><div class="wh">${av(p, 26)}<b>${esc(p.name)}</b><small>${x.awards_all.reduce((a, b) => a + b[1], 0)} ${esc(T.awAll)}</small></div><div class="aws">${x.awards.length ? awRow(x.awards) : `<span class="none">${esc(T.noAw)}</span>`}</div></div>`; }).join('')}</section>`;
+      const rows = d.rows || {}; const mxn = Math.max(1, ...['chore', 'sonder', 'todo'].flatMap((k) => (rows[k] || []).flatMap(([, v]) => Object.values(v))));
+      const cell = (n, c) => (n ? `<span class="ball" style="width:${Math.round(22 + Math.min(1, n / mxn) * 16)}px;height:${Math.round(22 + Math.min(1, n / mxn) * 16)}px;background:${c}">${n}</span>` : '<span class="dash">–</span>');
+      const matrix = st.compare === false ? '' : `<section class="sec w12"><div class="hd"><h2>${esc(T.matrix)}</h2><small>${esc(T.matrixSub)}</small></div><div class="tw"><table><thead><tr><th class="l"></th>${ppl.map((p) => `<th>${esc(p.name)}</th>`).join('')}<th>${esc(T.sum)}</th></tr></thead><tbody>
+        ${['chore', 'sonder', 'todo'].map((k) => ((rows[k] || []).length ? `<tr class="grp"><td colspan="${ppl.length + 2}" style="color:${TYPE_C[k]}">${esc(T.types[k])}</td></tr>${rows[k].map(([title, v]) => `<tr><td class="l">${esc(k === 'todo' && title === 'Planer' ? T.planner : title)}</td>${ppl.map((p) => `<td>${cell(v[p.id] || 0, TYPE_C[k])}</td>`).join('')}<td class="tot">${Object.values(v).reduce((a, b) => a + b, 0)}</td></tr>`).join('')}` : '')).join('')}
+        </tbody></table></div></section>`;
+      const cards = `<div class="hd2"><h2>${esc(T.you)}</h2><small>${esc(T.youSub)}</small><span class="legend r">${[0, 1, 2, 3].map((i) => `<span><i class="o" style="background:${MC[i]}"></i>${esc(T.leg[i])}</span>`).join('')}</span></div>
+        <div class="cards">${ppl.map((p) => this._pcard(p, byId[p.id])).join('')}</div>`;
+      return `${tiles}<div class="grid">${who}${awards}${matrix}</div>${cards}`;
+    }
+    _praise(ten) { const P = this.T.praise; return ten >= 10 ? P[3] : ten >= 9 ? P[2] : ten >= 7 ? P[1] : P[0]; }
+    _dots(ten) { return Array.from({ length: 10 }, (_, i) => `<i class="${i < (ten || 0) ? 'on' : ''}"></i>`).join(''); }
+    _days7(x) {
+      const T = this.T; const now = new Date();
+      return x.week.map(([k, n], i) => { const dd = new Date(now); dd.setDate(now.getDate() - 6 + i); const m = n - k; const today = i === 6;
+        const c = !n ? 'var(--fp-bg4,#2c323d)' : (today && m > 0 ? 'var(--fp-bg4,#2c323d)' : MC[Math.min(3, m)]);
+        return `<span class="d7"><span class="dd" style="background:${c}">${n && m === 0 ? star(15, '#0f1115') : ''}</span><small>${esc(T.wd[dd.getDay()])}</small></span>`; }).join('');
+    }
+    _pcard(p, x) {
+      const T = this.T;
+      return `<button class="pc" data-who="${esc(p.id)}" style="--pc:${COLOR(p.color)}"><div class="pch">${av(p, 56)}<div><b>${esc(p.name)}</b><small>${x.ten != null ? esc(this._praise(x.ten)) : ''}</small></div><ha-icon icon="mdi:chevron-right"></ha-icon></div>
+        ${x.ten != null ? `<div class="rl"><span>${esc(T.rel)}</span><b>${esc(fmt(T.tenOf, { n: x.ten }))}</b></div><div class="ten sm">${this._dots(x.ten)}</div>` : ''}
+        <div class="d7s">${this._days7(x)}</div><div class="stk"><ha-icon icon="mdi:fire"></ha-icon>${esc(fmt(T.streakTxt, { n: x.streak }))}</div></button>`;
+    }
+    // ----------------------------------------------------------------------------------- one person
+    _person(p, x, d) {
+      const T = this.T; const st = d.settings || {}; const s = this._snap(); const cutoff = (s.settings || {}).ontime_time || '20:00'; const aw = this._awMeta();
+      const hero = `<section class="sec hero w5"><div class="lbl"><ha-icon icon="mdi:shield-check-outline"></ha-icon>${esc(T.rel)}</div>
+        <div class="ht">${x.ten != null ? esc(fmt(T.heroT, { name: p.name, n: x.ten })) : esc(T.heroNone)}</div>
+        ${x.ten != null ? `<div class="ten" role="img" aria-label="${esc(fmt(T.tenOf, { n: x.ten }))}">${this._dots(x.ten)}</div>
+        <div class="pr"><ha-icon icon="mdi:emoticon-happy-outline"></ha-icon><div><b>${esc(this._praise(x.ten))}</b><small>${esc(fmt(T.detail, { d: x.done, t: x.total }))}</small></div></div>
+        <div class="tr"><ha-icon icon="${x.trend > 0 ? 'mdi:trending-up' : x.trend < 0 ? 'mdi:trending-down' : 'mdi:trending-neutral'}"></ha-icon>${esc(T.trend[String(x.trend)])}</div>` : ''}</section>`;
+      const tile = (icon, c, n, label, sub) => `<div class="tile t6"><span class="ti" style="--tc:${c}"><ha-icon icon="${icon}"></ha-icon></span><b>${n}</b><span>${esc(label)}</span><small>${sub}</small></div>`;
+      const tiles = `<div class="tiles6 w7">${tile('mdi:check-bold', '#69C350', x.done, T.tDone, esc(fmt(T.tDoneSub, { n: x.total })))}${tile('mdi:hand-heart', '#F2A541', x.vol, T.tVol, esc(T.tVolSub))}
+        ${tile('mdi:checkbox-marked-outline', '#A88BFA', x.todos, T.tTodo, esc(T.tTodoSub))}${tile('mdi:clock-check-outline', '#4FA3E0', x.ontime != null ? x.ontime + ' %' : '–', T.tOn, esc(fmt(T.tOnSub, { t: cutoff })))}
+        ${tile('mdi:fire', '#FF8A5B', x.streak, T.tStreak, esc(fmt(T.tBest, { n: x.best })))}${tile('mdi:star-circle-outline', '#F5C542', `${coin(26)}${x.earned}`, T.tPts, esc(T.tPtsSub))}</div>`;
+      // 7 days as blocks: the blocks shrink when a day has many chores
+      const maxN = Math.max(1, ...x.week.map((w) => w[1])); const bh = Math.max(9, Math.min(28, Math.floor((168 - (maxN - 1) * 4) / maxN)));
+      const now = new Date();
+      const week = `<section class="sec w6"><div class="hd"><h2>${esc(T.week7)}</h2><small>${esc(T.block)}</small></div><div class="blocks">${x.week.map(([k, n], i) => { const dd = new Date(now); dd.setDate(now.getDate() - 6 + i);
+        return `<div class="bc"><span class="bs">${n && k === n ? star(20, '#F5C542') : ''}</span><div class="bk">${Array.from({ length: n }, (_, j) => `<i class="${j < k ? 'on' : ''}" style="height:${bh}px;border-radius:${Math.min(7, Math.round(bh / 3))}px"></i>`).join('')}</div><b>${n ? `${k}/${n}` : '–'}</b><small class="${i === 6 ? 'tdy' : ''}">${esc(i === 6 ? T.today : T.wd[dd.getDay()])}</small></div>`; }).join('')}</div>
+        <div class="legend"><span><i style="background:#69C350"></i>${esc(T.done)}</span><span><i class="dsh"></i>${esc(T.open)}</span><span>${star(14, '#F5C542')}${esc(T.star)}</span></div></section>`;
+      const heatCols = []; for (let w = 0; w < 12; w++) heatCols.push(x.heat.slice(w * 7, w * 7 + 7));
+      const full = x.heat.filter((v) => v === 0).length;
+      const heat = `<section class="sec w6"><div class="hd"><h2>${esc(T.weeks12)}</h2><small>${esc(T.dot)}</small></div><div class="heat">${heatCols.map((c) => `<div>${c.map((v) => `<i style="background:${v < 0 ? 'var(--fp-bg4,#2c323d)' : MC[Math.min(3, v)]}"></i>`).join('')}</div>`).join('')}</div>
+        <div class="legend">${[0, 1, 2, 3, 4].map((i) => `<span><i class="o" style="background:${i < 4 ? MC[i] : 'var(--fp-bg4,#2c323d)'}"></i>${esc(T.legLong[i])}</span>`).join('')}</div><p class="note">${esc(fmt(T.fullDays, { n: full }))}</p></section>`;
+      const tot = { chore: x.done, sonder: x.vol, todo: x.todos }; const all = Math.max(1, x.done + x.vol + x.todos);
+      const did = `<section class="sec w12"><div class="hd"><h2>${esc(T.did)}</h2><small>${esc(fmt(T.things, { n: x.done + x.vol + x.todos }))}</small></div>
+        <div class="stack big">${['chore', 'sonder', 'todo'].map((k) => (tot[k] ? `<span style="width:${(tot[k] / all * 100).toFixed(1)}%;min-width:30px;background:${TYPE_C[k]}">${tot[k]}</span>` : '')).join('')}</div>
+        <div class="cols3">${['chore', 'sonder', 'todo'].map((k) => { const it = (x.types[k] || []).slice(0, 6); const m = it.length ? it[0][1] : 1;
+          return `<div><div class="th"><i style="background:${TYPE_C[k]}"></i><b>${esc(T.types[k])}</b><b class="n">${tot[k]}</b></div>${it.length ? it.map(([t, n]) => `<div class="li"><div><span>${esc(k === 'todo' && t === 'Planer' ? T.planner : t)}</span><b>${n}×</b></div><i><i style="width:${Math.round(n / m * 100)}%;background:${TYPE_C[k]}"></i></i></div>`).join('') : `<span class="none">${esc(T.nothing)}</span>`}</div>`; }).join('')}</div></section>`;
+      // points
+      const earned = Math.max(1, x.earned);
+      const src = x.sources.map(([k, n]) => { const a = T.src[k] || [k, '']; const extra = k === 'award' && x.award_sources.length ? x.award_sources.map(([id, c]) => `${(aw[id] || { title: id }).title}${c > 1 ? ` ${c}×` : ''}`).join(', ') : a[1];
+        return `<div class="srow"><i style="background:${SRC_C[k] || '#888'}"></i><div><b>${esc(a[0])}</b><small>${esc(extra)}</small></div><b>+${n}</b></div>`; }).join('');
+      const jar = x.sources.map(([k, n]) => `<i style="height:${Math.max(6, Math.round(n / earned * 190))}px;background:${SRC_C[k] || '#888'}"></i>`).join('');
+      const dayTxt = (day) => { const t0 = new Date(); const iso = (dd) => `${dd.getFullYear()}-${String(dd.getMonth() + 1).padStart(2, '0')}-${String(dd.getDate()).padStart(2, '0')}`; const y = new Date(t0); y.setDate(t0.getDate() - 1);
+        if (day === iso(t0)) return T.today; if (day === iso(y)) return T.yday; const dd = new Date(day + 'T12:00'); return `${T.wd[dd.getDay()]} ${dd.getDate()}.${dd.getMonth() + 1}.`; };
+      const feedTxt = (f) => (f.kind === 'award' ? ((aw[f.text] || {}).title || f.text) : f.kind === 'bonus' ? (T.src.bonus[0]) : f.kind === 'streak' ? T.src.streak[0] : f.kind === 'level' ? T.src.level[0] : String(f.text || '').replace(/^⭐ /, ''));
+      const pts = `<section class="sec w12 ptsec"><div class="hd"><h2>${esc(T.pts)}</h2><small>${esc(fmt(T.ptsHead, { e: x.earned, s: x.spent }))}</small></div><div class="pgrid">
+        <div class="jarw"><span class="lid"></span><div class="jar" role="img" aria-label="${esc(x.sources.map(([k, n]) => `${(T.src[k] || [k])[0]} ${n}`).join(', '))}">${jar}</div><b>${coin(22)}${x.earned}</b><small>${esc(T.earned)}</small></div>
+        <div class="srcs">${src || `<span class="none">${esc(T.nothing)}</span>`}<div class="srow sp"><ha-icon icon="mdi:gift-outline"></ha-icon><div><b>${esc(T.spent)}</b><small>${esc(x.spent ? x.spent_items.join(', ') : T.saving)}</small></div><b class="neg">${x.spent ? '−' + x.spent : '0'}</b></div></div>
+        <div class="feed"><div class="lbl">${esc(T.last)}</div>${x.feed.map((f) => `<div class="fr"><i style="background:${SRC_C[f.kind === 'fair' ? 'chore' : f.kind] || '#888'}"></i><div><span>${esc(feedTxt(f))}</span><small>${esc(dayTxt(f.day))}</small></div><b class="${f.pts < 0 ? 'neg' : 'pos'}">${f.pts > 0 ? '+' + f.pts : '−' + -f.pts}</b></div>`).join('')}</div></div></section>`;
+      const awRow = (list) => list.map(([id, n]) => { const m = aw[id] || { icon: 'mdi:medal', color: '#E0A84F', title: id }; return `<span class="aw"><span class="md" style="--mc:${COLOR(m.color)}"><ha-icon icon="${esc(m.icon)}"></ha-icon></span><b>${n}×</b><small>${esc(m.title)}</small></span>`; }).join('');
+      const myAw = `<section class="sec w12"><div class="hd"><h2>${esc(T.myAw)}</h2><small>${x.awards.reduce((a, b) => a + b[1], 0)} ${esc(T.awPeriod)} · ${x.awards_all.reduce((a, b) => a + b[1], 0)} ${esc(T.awAll)}</small></div><div class="aws">${x.awards_all.length ? awRow(x.awards_all) : `<span class="none">${esc(T.noAw)}</span>`}</div></section>`;
+      const practice = st.practice === false || !x.miss.length ? '' : `<section class="sec w6"><h2>${esc(T.practice)}</h2>${x.miss.map(([t, n]) => `<div class="mi"><ha-icon icon="mdi:lightbulb-on-outline"></ha-icon><div><b>${esc(t)}</b><small>${esc(fmt(T.missed, { n }))}</small></div></div>`).join('')}<small class="tip">${esc(T.tip)}</small></section>`;
+      const tm = Math.max(1, ...x.tod); const bi = x.tod.some((v) => v) ? x.tod.indexOf(Math.max(...x.tod)) : -1;
+      const when = `<section class="sec ${practice ? 'w6' : 'w12'}"><h2>${esc(T.when)}</h2><div class="tod">${x.tod.map((n, i) => `<div><b>${n}</b><i style="height:${Math.max(6, Math.round(n / tm * 90))}px;background:${['#F5C542', '#4FA3E0', '#A88BFA'][i]}"></i><small>${esc(T.tod[i])}</small></div>`).join('')}</div>${bi >= 0 ? `<p class="note g">${esc(T.todTxt[bi])}</p>` : ''}</section>`;
+      return `<div class="grid">${hero}${tiles}${week}${heat}${did}${pts}${myAw}${practice}${when}</div>`;
+    }
+  }
+
+  const CSS = `
+    :host{display:block}
+    .card{position:relative;background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:16px;color:var(--fp-text,#ececec);font-family:var(--fp-font,system-ui,sans-serif);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
+    button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    h2{margin:0;font-size:17px}small{color:var(--fp-text2,#a9b1bd)}
+    .msg{padding:40px;text-align:center;color:var(--fp-text2,#aaa)}
+    .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+    .chip{display:flex;align-items:center;gap:8px;height:48px;padding:0 16px 0 5px;border-radius:24px;border:2px solid var(--fp-line,#2f3541);background:var(--fp-bg2,#1c2027);font-size:15px;font-weight:600;color:var(--fp-text2,#a9b1bd)}
+    .chip.on{border-color:var(--pc,var(--fp-accent,#69C350));background:var(--fp-bg3,#232831);color:var(--fp-text,#eee)}
+    .chip .fi{width:36px;height:36px;border-radius:50%;background:var(--fp-accent,#69C350);color:var(--fp-on-accent,#111);display:flex;align-items:center;justify-content:center}
+    .seg{margin-left:auto;display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--fp-bg2,#171a20);border:1px solid var(--fp-line,#2f3541)}
+    .seg button{height:40px;padding:0 14px;border:0;border-radius:9px;background:transparent;font-size:14px;font-weight:600;color:var(--fp-text2,#a9b1bd)}
+    .seg button.on{background:var(--fp-accent,#69C350);color:var(--fp-on-accent,#111)}
+    .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;margin-bottom:14px}
+    .sec{background:var(--fp-bg2,#171a20);border:1px solid var(--fp-line,#2f3541);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+    .w5{grid-column:span 5}.w6{grid-column:span 6}.w7{grid-column:span 7}.w12{grid-column:span 12}
+    .hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .tiles4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
+    .tile{background:var(--fp-bg2,#171a20);border:1px solid var(--fp-line,#2f3541);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+    .tile b{font-size:32px;line-height:1.1;display:flex;align-items:center;gap:6px}.tile span{font-size:14px;font-weight:600}.tile small{font-size:12px}
+    .tiles6{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .ti{width:38px;height:38px;border-radius:11px;background:color-mix(in srgb,var(--tc) 18%,transparent);color:var(--tc);display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+    .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--fp-text2,#a9b1bd)}.legend span{display:flex;align-items:center;gap:5px}
+    .legend i{width:13px;height:13px;border-radius:3px;display:inline-block}.legend i.o{border-radius:50%}.legend i.dsh{border:2px dashed var(--fp-text3,#6f7886);box-sizing:border-box}
+    .legend.r{margin-left:auto}
+    .whorow{display:flex;flex-direction:column;gap:6px}.wh{display:flex;align-items:center;gap:8px}.wh small{margin-left:auto}
+    .stack{display:flex;height:26px;border-radius:8px;overflow:hidden;gap:2px}.stack span{display:flex;align-items:center;justify-content:center;color:#111;font-size:12px;font-weight:800}.stack.big{height:30px}
+    .awtot{display:flex;gap:12px}.awtot div{flex:1;background:var(--fp-bg3,#1c2027);border-radius:12px;padding:10px 12px}.awtot b{display:block;font-size:28px;color:#F5C542}
+    .awp{display:flex;flex-direction:column;gap:6px}.aws{display:flex;flex-wrap:wrap;gap:8px}
+    .aw{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;border-radius:18px;background:var(--fp-bg3,#1c2027)}.aw b{font-size:14px}.aw small{font-size:12px}
+    .md{width:28px;height:28px;border-radius:50%;background:color-mix(in srgb,var(--mc) 22%,transparent);color:var(--mc);display:flex;align-items:center;justify-content:center}.md ha-icon{--mdc-icon-size:18px}
+    .none{font-size:13px;color:var(--fp-text3,#8a93a1)}
+    .tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}th{font-size:13px;padding:6px 2px;min-width:64px}th.l,td.l{text-align:left;padding:6px 4px;min-width:150px}
+    td{text-align:center;padding:4px 2px;border-top:1px solid var(--fp-line,#262b34)}tr.grp td{border-top:0;text-align:left;padding:12px 4px 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+    .ball{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:#111;font-size:12px;font-weight:800}.dash{color:var(--fp-text3,#6f7886)}.tot{color:var(--fp-text2,#a9b1bd);font-weight:600}
+    .hd2{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:6px 0 10px}.hd2 h2{font-size:21px}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+    .pc{display:flex;flex-direction:column;gap:12px;text-align:left;padding:16px;border-radius:18px;border:2px solid var(--fp-line,#2f3541);background:var(--fp-bg2,#171a20);box-shadow:inset 0 4px 0 var(--pc)}
+    .pch{display:flex;align-items:center;gap:12px}.pch>div{flex:1;min-width:0}.pch b{display:block;font-size:20px}.pch small{color:#a8e08f;font-weight:600}
+    .rl{display:flex;justify-content:space-between;font-size:13px;color:var(--fp-text2,#a9b1bd)}.rl b{color:var(--fp-text,#eee)}
+    .ten{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px}.ten i{aspect-ratio:1;border-radius:50%;border:2px dashed var(--fp-text3,#6f7886);box-sizing:border-box}.ten i.on{background:#69C350;border:0}.ten.sm{gap:5px}
+    .d7s{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.d7{display:flex;flex-direction:column;align-items:center;gap:3px}.d7 small{font-size:11px}
+    .dd{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+    .stk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--fp-text2,#a9b1bd)}.stk ha-icon{color:#FF8A5B;--mdc-icon-size:18px}
+    .hero .lbl{display:flex;align-items:center;gap:6px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--fp-text2,#a9b1bd)}.hero .lbl ha-icon{color:#69C350;--mdc-icon-size:18px}
+    .ht{font-size:25px;font-weight:800;line-height:1.2}
+    .pr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,#69C350 12%,transparent)}.pr ha-icon{color:#69C350;--mdc-icon-size:30px}.pr b{display:block;color:#a8e08f}
+    .tr{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--fp-text2,#a9b1bd)}.tr ha-icon{color:#4FA3E0}
+    .blocks{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;align-items:end}.bc{display:flex;flex-direction:column;align-items:center;gap:5px}.bs{height:20px}
+    .bk{display:flex;flex-direction:column-reverse;gap:4px;height:168px;width:100%;align-items:center}.bk i{flex:none;width:100%;max-width:54px;box-sizing:border-box;border:2px dashed var(--fp-text3,#6f7886)}.bk i.on{background:#69C350;border:0;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+    .bc b{font-size:13px}.bc small{font-size:12px}.bc small.tdy{color:#69C350;font-weight:700}
+    .heat{display:flex;gap:5px}.heat div{display:grid;grid-template-rows:repeat(7,16px);gap:5px}.heat i{width:16px;height:16px;border-radius:50%}
+    .note{margin:0;font-size:14px}.note.g{color:#a8e08f;font-weight:600}
+    .cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.th{display:flex;align-items:center;gap:8px;margin-bottom:6px}.th i{width:13px;height:13px;border-radius:4px}.th .n{margin-left:auto;font-size:18px}
+    .li{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}.li>div{display:flex;justify-content:space-between;font-size:14px;gap:8px}.li>i{height:8px;border-radius:4px;background:var(--fp-bg4,#2c323d);display:block}.li>i>i{display:block;height:8px;border-radius:4px}
+    .pgrid{display:grid;grid-template-columns:200px minmax(0,1fr) minmax(0,.9fr);gap:18px}
+    .jarw{display:flex;flex-direction:column;align-items:center;gap:6px}.lid{width:130px;height:12px;border-radius:6px 6px 2px 2px;background:var(--fp-bg4,#3a414d)}
+    .jar{width:150px;height:210px;margin-top:-6px;border:3px solid var(--fp-text3,#4a515d);border-top:0;border-radius:10px 10px 30px 30px;padding:5px;box-sizing:border-box;display:flex;flex-direction:column-reverse;gap:2px;overflow:hidden;background:var(--fp-bg0,#12151a)}.jar i{flex:none;border-radius:4px}
+    .jarw b{font-size:26px;color:#F5C542;display:flex;align-items:center;gap:6px}
+    .srcs{display:flex;flex-direction:column;gap:2px}.srow{display:flex;align-items:center;gap:10px;padding:6px 4px;border-bottom:1px solid var(--fp-line,#262b34)}.srow>i{width:13px;height:13px;border-radius:50%;flex:none}.srow>div{flex:1;min-width:0}.srow>div b{display:block;font-size:14px}.srow>div small{font-size:12px}
+    .srow.sp{border:0;margin-top:6px;border-radius:10px;background:color-mix(in srgb,#F08A80 12%,transparent)}.srow.sp ha-icon{color:#F08A80;--mdc-icon-size:18px}
+    .neg{color:#F08A80}.pos{color:#a8e08f}
+    .feed{display:flex;flex-direction:column;gap:7px}.feed .lbl{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--fp-text2,#a9b1bd)}
+    .fr{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:var(--fp-bg3,#1c2027)}.fr>i{width:10px;height:10px;border-radius:50%;flex:none}.fr>div{flex:1;min-width:0}.fr span{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fr small{font-size:11px}
+    .mi{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:color-mix(in srgb,#F2A541 12%,transparent)}.mi ha-icon{color:#F2A541}.mi b{display:block;font-size:15px}.tip{font-size:12px}
+    .tod{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end;height:140px}.tod div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px;height:100%}.tod i{width:100%;max-width:64px;border-radius:10px 10px 4px 4px}.tod small{font-size:12px}
+    @media (max-width:900px){.w5,.w6,.w7{grid-column:span 12}.pgrid{grid-template-columns:1fr 1fr}.feed{grid-column:span 2}.cols3{grid-template-columns:1fr}}
+    @media (max-width:600px){.tiles4{grid-template-columns:repeat(2,minmax(0,1fr))}.tiles6{grid-template-columns:repeat(2,minmax(0,1fr))}.seg{margin-left:0;width:100%}.seg button{flex:1}
+      .chip{padding:0 12px 0 4px}.pgrid{grid-template-columns:1fr}.feed{grid-column:auto}.heat{gap:3px}.heat i{width:12px;height:12px}.heat div{grid-template-rows:repeat(7,12px);gap:3px}.legend.r{margin-left:0}}
+  `;
+  if (!customElements.get('fp-stats-inner')) customElements.define('fp-stats-inner', FpStatsInner);
 })();
 
 // ---------------------------------------------------------------------------
@@ -6317,6 +6713,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('awards', 'awards', 'Pokale & Auszeichnungen', 'Trophies & awards', 'Pro Auszeichnung ein/aus und wie viele Punkte sie bringt (beim Gewinnen, und wieder, wenn man sie neu gewinnt). Klein = ⅓, Mittel = ⅔, Gross = 1×, Riesig = 2× der Punkte für einen ganzen Tag.', 'Per award on/off and how many points it gives (when won, and again when won anew). Small = ⅓, medium = ⅔, large = 1×, giant = 2× the points for a full day.'),
       F('season_start', 'md', 'Neue Level-Saison ab', 'New level season from', 'Jedes Schuljahr starten alle wieder bei Level 1. Freigeschaltete Extras und Punkte zum Einlösen bleiben, der Bestwert wird als Abzeichen gespeichert.', 'Every school year everybody starts again at level 1. Unlocked extras and points to redeem stay; the best level is kept as a badge.'),
       F('level_bonus', 'bool', 'Bonuspunkte beim Level-Aufstieg', 'Bonus points on level up', 'Ein voller Tag Punkte pro Level, drei bei einer neuen Stufe (Silber, Gold, Diamant, Rubin).', 'One full day of points per level, three for a new tier (silver, gold, diamond, ruby).'),
+      F('coin_show', 'bool', 'Punkte als Taler zeigen', 'Show points as a coin', 'Punkte erscheinen mit einem kleinen Taler (Silberring, Goldkern) – bei Ämtli, To-dos, Sonderämtli, Belohnungen und in der Statistik. Beim Abhaken fliegt der Taler zum Bild der Person. Aus = nur die Zahl wie bisher.', 'Points appear with a small coin (silver ring, gold core) – on chores, to-dos, special chores, rewards and in the statistics. When ticking off, the coin flies to the person. Off = just the number as before.'),
+      F('coin_letter', 'text', 'Buchstabe auf dem Taler', 'Letter on the coin', 'Ein Buchstabe oder eine Ziffer, die auf den Taler geprägt wird, z. B. der Anfangsbuchstabe eurer Familie. Leer = kleiner Stern.', 'One letter or digit stamped on the coin, e.g. your family initial. Empty = a small star.', { max: 1 }),
+      F('stats_period', 'select', 'Statistik: Zeitraum beim Öffnen', 'Statistics: period when opening', 'Welcher Zeitraum auf der Statistik-Seite zuerst gezeigt wird; antippen wechselt jederzeit.', 'Which period the statistics page shows first; a tap switches at any time.',
+        { opts: [['w', { de: 'Woche', en: 'Week' }], ['m', { de: 'Monat', en: 'Month' }], ['q', { de: '3 Monate', en: '3 months' }]] }),
+      F('stats_compare', 'bool', 'Statistik: Personen vergleichen', 'Statistics: compare people', 'Zeigt in der Familien-Ansicht „Wer hat was gemacht?“ und „Welche Ämtli – wer wie oft?“ für alle nebeneinander. Aus = nur die Familien-Summen und die eigenen Karten.', 'Shows "Who did what?" and "Which chores – who how often?" side by side for everybody in the family view. Off = only family totals and the own cards.'),
+      F('stats_practice', 'bool', 'Statistik: „Da üben wir noch“', 'Statistics: "Still practising"', 'Zeigt auf der eigenen Seite die Ämtli, die am häufigsten vergessen wurden – freundlich formuliert, nicht als Strafe.', 'Shows the chores forgotten most often on the own page – in a friendly way, not as a punishment.'),
       F('ontime_time', 'time', 'Pünktlich-Profi: rechtzeitig bis', 'On-time pro: in time until', 'Ein Ämtli zählt als rechtzeitig, wenn es vor seinem letzten Tag oder an diesem bis zu dieser Zeit erledigt ist (Standard 20:00, so zählen auch Abend-Ämtli).', 'A chore counts as in time when it is done before its last day or on it by this time (default 20:00, so evening chores count too).'),
       F('confetti', 'bool', 'Konfetti', 'Confetti', 'Kleines Konfetti mit Namen, wenn jemand alle Ämtli des Tages erledigt hat; grösseres in der Pokalfarbe bei Pokalen. Höchstens ein grosses pro Person und Tag.', 'Small confetti with the name when someone has done all chores of the day; bigger ones in the trophy colour for trophies. At most one big one per person and day.'),
       F('reward_notify', 'entities', 'Anfragen zusätzlich melden an', 'Also send requests to', 'z. B. die Handy-App – zusätzlich zur Mitteilung in Home Assistant.', 'e.g. the mobile app – in addition to the Home Assistant notification.', { domain: 'notify' }),
@@ -6401,7 +6803,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   ];
   // tab order on the page
   const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'status'];
-  const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', einstellungen: 'Settings' } };
+  const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', ontime: 'Pünktlich-Profi', volunteer: 'Freiwilligen-Champion', rescue: 'Retter in der Not', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', ontime: 'On-time pro', volunteer: 'Volunteer champion', rescue: 'Rescuer', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
   const AWS = { de: { none: 'Ohne Punkte', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
@@ -6472,7 +6874,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (id === 'general') { const g = clone(d.general); g.mod_week = g.modules.week; g.mod_lists = g.modules.lists; return g; }
       if (id === 'lists') return clone(d.lists_settings);
       if (id === 'points') { const f = clone(d.points); f.ontime_time = (f.awards || {}).ontime_time || '20:00'; f.confetti = (f.awards || {}).confetti !== false;
-        f.season_start = (f.levels || {}).season_start || '08-01'; f.level_bonus = (f.levels || {}).bonus !== false; return f; }
+        f.season_start = (f.levels || {}).season_start || '08-01'; f.level_bonus = (f.levels || {}).bonus !== false; f.coin_show = (f.coin || {}).show !== false; f.coin_letter = (f.coin || {}).letter || ''; const sx = f.stats || {}; f.stats_period = sx.period || 'w'; f.stats_compare = sx.compare !== false; f.stats_practice = sx.practice !== false; return f; }
       return clone(d[id]);
     }
     _input(e, isChange) {
@@ -6552,7 +6954,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const id = this._tab; const f = { ...this._forms[id] };
       if (id === 'general') { f.modules = { week: !!f.mod_week, lists: !!f.mod_lists }; delete f.mod_week; delete f.mod_lists; }
       if (id === 'points') { f.awards = { items: (f.awards || {}).items || {}, ontime_time: f.ontime_time, confetti: !!f.confetti }; delete f.ontime_time; delete f.confetti;
-        f.levels = { season_start: f.season_start, bonus: !!f.level_bonus }; delete f.season_start; delete f.level_bonus; }
+        f.levels = { season_start: f.season_start, bonus: !!f.level_bonus }; delete f.season_start; delete f.level_bonus; f.coin = { show: !!f.coin_show, letter: String(f.coin_letter || '').slice(0, 1) }; delete f.coin_show; delete f.coin_letter; f.stats = { period: f.stats_period, compare: !!f.stats_compare, practice: !!f.stats_practice }; delete f.stats_period; delete f.stats_compare; delete f.stats_practice; }
       if (id === 'vacation' && typeof f.words === 'string') f.words = f.words.split(',').map((x) => x.trim()).filter(Boolean);
       if (id === 'announce' && typeof f.times === 'string') f.times = f.times.split(',').map((x) => x.trim()).filter(Boolean);
       const res = await this._call('family_planer/settings/save', { section: SECTION[id], data: f });
@@ -6704,7 +7106,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const head = `<span class="lt"><b>${esc(L(fd.label, lang))}</b>${fd.desc[lang] ? `<small>${esc(L(fd.desc, lang))}</small>` : ''}</span>`;
       if (fd.type === 'nav') {
         const n = v || { order: [], hidden: [] }; const mods = this._data.general.modules;
-        return `<div class="row col1">${head}<div class="navl">${n.order.map((id, i) => { const off = (id === 'listen' && !mods.lists) || (['planer', 'belohnungen', 'aemtliplan'].includes(id) && !mods.week);
+        return `<div class="row col1">${head}<div class="navl">${n.order.map((id, i) => { const off = (id === 'listen' && !mods.lists) || (['planer', 'belohnungen', 'statistik', 'aemtliplan'].includes(id) && !mods.week);
           return `<div class="nr${off ? ' off' : ''}"><span class="nn">${esc(NAVL[lang][id] || id)}</span><button class="ar" data-navmv="${esc(id)}|-1" ${i ? '' : 'disabled'} aria-label="up">▲</button><button class="ar" data-navmv="${esc(id)}|1" ${i < n.order.length - 1 ? '' : 'disabled'} aria-label="down">▼</button>
             <input type="checkbox" class="sw" data-navtg="${esc(id)}" ${n.hidden.includes(id) ? '' : 'checked'} ${id === 'einstellungen' ? 'disabled' : ''}></div>`; }).join('')}</div></div>`;
       }
@@ -6865,6 +7267,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           ${this._picsView()}${msg}</div>`;
         return;
       }
+      if (window.__fpSetTab) { this._tab = window.__fpSetTab; window.__fpSetTab = null; } // e.g. "Set up a list" on the empty lists page
       const tab = TABS.find((x) => x.id === this._tab) || TABS[0];
       let body = '';
       if (tab.id === 'pics') body = this._picsView();
@@ -7467,8 +7870,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       (hass && ((hass.locale && hass.locale.language) || hass.language)) || 'de').toLowerCase();
     return l.startsWith('de') || l.startsWith('gsw') ? 'de' : 'en';
   };
-  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner', settings: 'fp-settings-inner' };
-  const STORE_VIEWS = ['lists', 'rewards', 'settings'];
+  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner', stats: 'fp-stats-inner', settings: 'fp-settings-inner' };
+  const STORE_VIEWS = ['lists', 'rewards', 'stats', 'settings'];
   const tag = (view, lang) => (!STORE_VIEWS.includes(view) && lang === 'en' ? INNER[view] + '-en' : INNER[view]);
   // designs: CSS variables read by every card (inherited through the shadow roots)
   const SYS = '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif';
@@ -7585,7 +7988,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     _showTodos(on, add) { if (this._win) this._win.style.display = on ? 'flex' : 'none'; if (on && this._todos) { this._todos.update(); if (add && this._todos.focusAdd) setTimeout(() => this._todos.focusAdd(), 50); } }
     getCardSize() { return this._cfg && this._cfg.view === 'plan' ? 10 : 12; }
     getGridOptions() { return { columns: 'full', min_rows: 6 }; }
-    connectedCallback() { this._attach(); }
+    connectedCallback() { this._attach(); const fx = window.FPX || window.FPX_EN; if (fx && fx.fadeIn) fx.fadeIn(this); }
     disconnectedCallback() { if (this._off) { this._off(); this._off = null; } }
     _wrap() { if (!this._wrapped || this._wrappedFor !== this._hass) { this._wrapped = wrapHass(this._hass, this._store); this._wrappedFor = this._hass; } return this._wrapped; }
     _attach() {
@@ -7645,10 +8048,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   if (!customElements.get('family-planer-card')) customElements.define('family-planer-card', FamilyPlanerCard);
 
   // Navigation bar: one button per active module view, same place on every page (also in kiosk mode)
-  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', einstellungen: 'Settings' } };
-  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:format-list-checks', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', einstellungen: 'mdi:cog-outline' };
-  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', einstellungen: null };
-  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', einstellungen: 'settings' };
+  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', einstellungen: 'Settings' } };
+  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:format-list-checks', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', statistik: 'mdi:chart-bar', einstellungen: 'mdi:cog-outline' };
+  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', statistik: 'week', einstellungen: null };
+  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', statistik: 'stats', einstellungen: 'settings' };
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
       design: 'Design', refresh: 'Kalender und Listen aktualisieren', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wds: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
@@ -7682,7 +8085,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     setConfig(c) {
       this._cfg = { ...(c || {}) };
       // paths of the dashboard views, e.g. { planer: 'planer', listen: 'einkauf', aemtliplan: 'aemtliplan' }
-      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
+      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', statistik: 'statistik', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
+      window.__fpPaths = this._paths;
       if (!this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
         this._onClick = (e) => {
@@ -7872,7 +8276,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!this.shadowRoot || !this._cfg) return;
       const s = this._store && this._store.snap; const lang = this._lang(); const T = NAV_T[lang];
       const mods = (s && s.modules) || { week: true, lists: true };
-      const nav = (s && s.settings && s.settings.nav) || { order: ['planer', 'listen', 'belohnungen', 'einstellungen', 'aemtliplan'], hidden: ['aemtliplan'] };
+      const nav = (s && s.settings && s.settings.nav) || { order: ['planer', 'listen', 'belohnungen', 'statistik', 'einstellungen', 'aemtliplan'], hidden: ['aemtliplan'] };
       const order = this._cfg.order || nav.order.filter((k) => !nav.hidden.includes(k));
       if (s) applyTheme(this, this._cfg.theme || s.theme, this._cfg.style || s.style);
       const cur = location.pathname.split('/').filter(Boolean).pop();
@@ -7919,6 +8323,9 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .sug i{font-style:normal;font-size:20px;animation:fpbob 3s ease-in-out infinite}.sug b{display:block;font-size:12px;line-height:1.2}.sug span span{font-size:11px;line-height:1.2}.sug span{color:var(--fp-text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .tl{display:flex;align-items:baseline;gap:10px;height:40px;align-items:center}.bar.nt .clk b{font-size:34px;transition:font-size 1s}.slab{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:12px;white-space:nowrap}
         @keyframes fpsugin{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
+        button.sug{font:inherit;color:inherit;text-align:left;cursor:pointer}
+        @media (min-width:701px) and (max-width:1100px) and (orientation:portrait){.sug{position:relative;width:40px;max-width:40px;padding:0;justify-content:center;overflow:visible}.sug>span{display:none}
+          .sug:focus>span{display:block;position:absolute;top:46px;right:0;width:240px;padding:9px 11px;border-radius:12px;background:var(--fp-pop,var(--fp-bg1));border:1px solid var(--fp-line);box-shadow:0 10px 28px rgba(0,0,0,.45);z-index:6;white-space:normal}.sug:focus>span span{white-space:normal;overflow:visible}}
         button.slab{font:inherit;font-size:12px;cursor:pointer;color:inherit;border:1px solid transparent}.hint.fi{max-width:340px;line-height:1.45}.slab.fun{border-color:var(--fp-acc,#69C350)}.slab.fun ha-icon{--mdc-icon-size:15px;opacity:.8}.slab.fun.on{background:var(--fp-bg3)}@media (max-width:700px){.sug,.wxn span,.slab{display:none}.slab.fun{display:inline-flex}}
       </style><div class="bar${sc.key ? ' sc' : ''}" data-fp-head><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="lft"><span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span>
         <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
@@ -7961,7 +8368,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     _wxCorner(s, lang) {
       const wx = this._wxNow; if (!wx) return '';
       const sg = window.FPSEASON && window.FPSEASON.suggest(s, this._hass, wx, this._fc, new Date());
-      return `<span class="wxc${sg ? '' : ' one'}"><span class="wxn" title="${escN(wx.text)}"><i>${wx.icon}</i>${wx.temp != null ? `<b>${wx.temp}°</b>` : ''}<span>${escN(wx.text)}</span></span>${sg ? `<span class="sug" title="${escN(sg.text)}"><i>${sg.icon}</i><span><b>${escN(sg.title)}</b><span>${escN(sg.text)}</span></span></span>` : ''}</span>`;
+      return `<span class="wxc${sg ? '' : ' one'}"><span class="wxn" title="${escN(wx.text)}"><i>${wx.icon}</i>${wx.temp != null ? `<b>${wx.temp}°</b>` : ''}<span>${escN(wx.text)}</span></span>${sg ? `<button type="button" class="sug" title="${escN(sg.text)}" aria-label="${escN(sg.title)}"><i>${sg.icon}</i><span><b>${escN(sg.title)}</b><span>${escN(sg.text)}</span></span></button>` : ''}</span>`;
     }
     _right(s, lang, review, pending, setBtn = '') {
       if (!s) return '<span></span>';
@@ -8029,6 +8436,6 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
 
   window.customCards = window.customCards || [];
   window.customCards.push(
-    { type: 'family-planer-card', name: 'Family Planer', description: 'view: week (Wochenplan), plan (Ämtliplan), lists (Smarte Listen), rewards (Belohnungen) oder settings (Einstellungen); theme optional', preview: false },
+    { type: 'family-planer-card', name: 'Family Planer', description: 'view: week (Wochenplan), plan (Ämtliplan), lists (Smarte Listen), rewards (Belohnungen), stats (Statistik) oder settings (Einstellungen); theme optional', preview: false },
     { type: 'family-planer-nav-card', name: 'Family Planer Navigation', description: 'Planer · Listen · Ämtliplan', preview: false });
 })();

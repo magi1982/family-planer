@@ -172,3 +172,11 @@ def test_item_points_shown_on_chores():
     # per-chore mode: each chore shows its own points, never negative
     assert R.item_points([("a", 15), ("b", -3)], False, 30) == {"a": 15, "b": 0}
     assert R.item_points([], True, 30) == {}
+
+
+def test_volunteer_points_count_for_pace():
+    # 0.15.0: points from volunteer chores ("sonder") count for the forecast like any other earned points
+    today = date(2026, 11, 10)
+    ledger = [{"pid": "a", "pts": 30, "kind": "chore", "ts": "2026-11-10T10:00"},
+              {"pid": "a", "pts": 40, "kind": "sonder", "ts": "2026-11-10T12:00"}]
+    assert R.pace(ledger, ["a"], today)["persons"]["a"] == 70.0

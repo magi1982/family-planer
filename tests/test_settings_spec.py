@@ -104,7 +104,9 @@ def test_theme_style_migration_and_nav():
     assert patch["theme"] == "rainbow" and patch["style"] == "transparent"
     assert "theme_pin" not in patch
     nav = S.clean_nav({"order": ["belohnungen", "evil", "planer"], "hidden": ["einstellungen", "listen", "x"]})
-    assert nav["order"][:2] == ["belohnungen", "planer"] and set(nav["order"]) == set(S.NAV_IDS)
+    # new buttons join right after the one they follow by default
+    assert nav["order"][:2] == ["belohnungen", "statistik"] and set(nav["order"]) == set(S.NAV_IDS)
+    assert nav["order"].index("planer") < nav["order"].index("listen")
     assert nav["hidden"] == ["listen"]  # settings can never be hidden
     assert S.clean_nav(None)["hidden"] == ["aemtliplan"]
 
@@ -135,3 +137,14 @@ def test_seasons_and_sonder_sections():
     assert se["lead_day"] == 5 and se["wedding"] == "2012-06-09" and se["sug_from"] == "12:00" and "season" in flags
     assert S.sonder({"surprise_per_week": 99}, {})[0]["sonder_settings"]["surprise_per_week"] == 14
     assert S.general({"default_view": "evil"}, {"modules": {}})[0]["default_view"] == "today"
+
+
+def test_coin_settings():
+    # 0.15.0: points as a coin – one letter or digit, anything else falls back to the star
+    assert S.clean_coin(None) == {"show": True, "letter": ""}
+    assert S.clean_coin({"letter": "lea"})["letter"] == "L"
+    assert S.clean_coin({"letter": "<"})["letter"] == ""
+    assert S.clean_coin({"letter": "7", "show": False}) == {"show": False, "letter": "7"}
+    game = {"day_points": 30, "day_bonus": 5, "streak_bonus": 20, "default_points": 10}
+    patch, _ = S.points({"coin": {"letter": "ä"}}, game, "fair", [], cur_coin={"show": False, "letter": "X"})
+    assert patch["coin"] == {"show": False, "letter": "Ä"}

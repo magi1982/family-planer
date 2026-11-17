@@ -78,6 +78,12 @@
       F('awards', 'awards', 'Pokale & Auszeichnungen', 'Trophies & awards', 'Pro Auszeichnung ein/aus und wie viele Punkte sie bringt (beim Gewinnen, und wieder, wenn man sie neu gewinnt). Klein = ⅓, Mittel = ⅔, Gross = 1×, Riesig = 2× der Punkte für einen ganzen Tag.', 'Per award on/off and how many points it gives (when won, and again when won anew). Small = ⅓, medium = ⅔, large = 1×, giant = 2× the points for a full day.'),
       F('season_start', 'md', 'Neue Level-Saison ab', 'New level season from', 'Jedes Schuljahr starten alle wieder bei Level 1. Freigeschaltete Extras und Punkte zum Einlösen bleiben, der Bestwert wird als Abzeichen gespeichert.', 'Every school year everybody starts again at level 1. Unlocked extras and points to redeem stay; the best level is kept as a badge.'),
       F('level_bonus', 'bool', 'Bonuspunkte beim Level-Aufstieg', 'Bonus points on level up', 'Ein voller Tag Punkte pro Level, drei bei einer neuen Stufe (Silber, Gold, Diamant, Rubin).', 'One full day of points per level, three for a new tier (silver, gold, diamond, ruby).'),
+      F('coin_show', 'bool', 'Punkte als Taler zeigen', 'Show points as a coin', 'Punkte erscheinen mit einem kleinen Taler (Silberring, Goldkern) – bei Ämtli, To-dos, Sonderämtli, Belohnungen und in der Statistik. Beim Abhaken fliegt der Taler zum Bild der Person. Aus = nur die Zahl wie bisher.', 'Points appear with a small coin (silver ring, gold core) – on chores, to-dos, special chores, rewards and in the statistics. When ticking off, the coin flies to the person. Off = just the number as before.'),
+      F('coin_letter', 'text', 'Buchstabe auf dem Taler', 'Letter on the coin', 'Ein Buchstabe oder eine Ziffer, die auf den Taler geprägt wird, z. B. der Anfangsbuchstabe eurer Familie. Leer = kleiner Stern.', 'One letter or digit stamped on the coin, e.g. your family initial. Empty = a small star.', { max: 1 }),
+      F('stats_period', 'select', 'Statistik: Zeitraum beim Öffnen', 'Statistics: period when opening', 'Welcher Zeitraum auf der Statistik-Seite zuerst gezeigt wird; antippen wechselt jederzeit.', 'Which period the statistics page shows first; a tap switches at any time.',
+        { opts: [['w', { de: 'Woche', en: 'Week' }], ['m', { de: 'Monat', en: 'Month' }], ['q', { de: '3 Monate', en: '3 months' }]] }),
+      F('stats_compare', 'bool', 'Statistik: Personen vergleichen', 'Statistics: compare people', 'Zeigt in der Familien-Ansicht „Wer hat was gemacht?“ und „Welche Ämtli – wer wie oft?“ für alle nebeneinander. Aus = nur die Familien-Summen und die eigenen Karten.', 'Shows "Who did what?" and "Which chores – who how often?" side by side for everybody in the family view. Off = only family totals and the own cards.'),
+      F('stats_practice', 'bool', 'Statistik: „Da üben wir noch“', 'Statistics: "Still practising"', 'Zeigt auf der eigenen Seite die Ämtli, die am häufigsten vergessen wurden – freundlich formuliert, nicht als Strafe.', 'Shows the chores forgotten most often on the own page – in a friendly way, not as a punishment.'),
       F('ontime_time', 'time', 'Pünktlich-Profi: rechtzeitig bis', 'On-time pro: in time until', 'Ein Ämtli zählt als rechtzeitig, wenn es vor seinem letzten Tag oder an diesem bis zu dieser Zeit erledigt ist (Standard 20:00, so zählen auch Abend-Ämtli).', 'A chore counts as in time when it is done before its last day or on it by this time (default 20:00, so evening chores count too).'),
       F('confetti', 'bool', 'Konfetti', 'Confetti', 'Kleines Konfetti mit Namen, wenn jemand alle Ämtli des Tages erledigt hat; grösseres in der Pokalfarbe bei Pokalen. Höchstens ein grosses pro Person und Tag.', 'Small confetti with the name when someone has done all chores of the day; bigger ones in the trophy colour for trophies. At most one big one per person and day.'),
       F('reward_notify', 'entities', 'Anfragen zusätzlich melden an', 'Also send requests to', 'z. B. die Handy-App – zusätzlich zur Mitteilung in Home Assistant.', 'e.g. the mobile app – in addition to the Home Assistant notification.', { domain: 'notify' }),
@@ -162,7 +168,7 @@
   ];
   // tab order on the page
   const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'status'];
-  const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', einstellungen: 'Settings' } };
+  const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', ontime: 'Pünktlich-Profi', volunteer: 'Freiwilligen-Champion', rescue: 'Retter in der Not', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', ontime: 'On-time pro', volunteer: 'Volunteer champion', rescue: 'Rescuer', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
   const AWS = { de: { none: 'Ohne Punkte', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
@@ -233,7 +239,7 @@
       if (id === 'general') { const g = clone(d.general); g.mod_week = g.modules.week; g.mod_lists = g.modules.lists; return g; }
       if (id === 'lists') return clone(d.lists_settings);
       if (id === 'points') { const f = clone(d.points); f.ontime_time = (f.awards || {}).ontime_time || '20:00'; f.confetti = (f.awards || {}).confetti !== false;
-        f.season_start = (f.levels || {}).season_start || '08-01'; f.level_bonus = (f.levels || {}).bonus !== false; return f; }
+        f.season_start = (f.levels || {}).season_start || '08-01'; f.level_bonus = (f.levels || {}).bonus !== false; f.coin_show = (f.coin || {}).show !== false; f.coin_letter = (f.coin || {}).letter || ''; const sx = f.stats || {}; f.stats_period = sx.period || 'w'; f.stats_compare = sx.compare !== false; f.stats_practice = sx.practice !== false; return f; }
       return clone(d[id]);
     }
     _input(e, isChange) {
@@ -313,7 +319,7 @@
       const id = this._tab; const f = { ...this._forms[id] };
       if (id === 'general') { f.modules = { week: !!f.mod_week, lists: !!f.mod_lists }; delete f.mod_week; delete f.mod_lists; }
       if (id === 'points') { f.awards = { items: (f.awards || {}).items || {}, ontime_time: f.ontime_time, confetti: !!f.confetti }; delete f.ontime_time; delete f.confetti;
-        f.levels = { season_start: f.season_start, bonus: !!f.level_bonus }; delete f.season_start; delete f.level_bonus; }
+        f.levels = { season_start: f.season_start, bonus: !!f.level_bonus }; delete f.season_start; delete f.level_bonus; f.coin = { show: !!f.coin_show, letter: String(f.coin_letter || '').slice(0, 1) }; delete f.coin_show; delete f.coin_letter; f.stats = { period: f.stats_period, compare: !!f.stats_compare, practice: !!f.stats_practice }; delete f.stats_period; delete f.stats_compare; delete f.stats_practice; }
       if (id === 'vacation' && typeof f.words === 'string') f.words = f.words.split(',').map((x) => x.trim()).filter(Boolean);
       if (id === 'announce' && typeof f.times === 'string') f.times = f.times.split(',').map((x) => x.trim()).filter(Boolean);
       const res = await this._call('family_planer/settings/save', { section: SECTION[id], data: f });
@@ -465,7 +471,7 @@
       const head = `<span class="lt"><b>${esc(L(fd.label, lang))}</b>${fd.desc[lang] ? `<small>${esc(L(fd.desc, lang))}</small>` : ''}</span>`;
       if (fd.type === 'nav') {
         const n = v || { order: [], hidden: [] }; const mods = this._data.general.modules;
-        return `<div class="row col1">${head}<div class="navl">${n.order.map((id, i) => { const off = (id === 'listen' && !mods.lists) || (['planer', 'belohnungen', 'aemtliplan'].includes(id) && !mods.week);
+        return `<div class="row col1">${head}<div class="navl">${n.order.map((id, i) => { const off = (id === 'listen' && !mods.lists) || (['planer', 'belohnungen', 'statistik', 'aemtliplan'].includes(id) && !mods.week);
           return `<div class="nr${off ? ' off' : ''}"><span class="nn">${esc(NAVL[lang][id] || id)}</span><button class="ar" data-navmv="${esc(id)}|-1" ${i ? '' : 'disabled'} aria-label="up">▲</button><button class="ar" data-navmv="${esc(id)}|1" ${i < n.order.length - 1 ? '' : 'disabled'} aria-label="down">▼</button>
             <input type="checkbox" class="sw" data-navtg="${esc(id)}" ${n.hidden.includes(id) ? '' : 'checked'} ${id === 'einstellungen' ? 'disabled' : ''}></div>`; }).join('')}</div></div>`;
       }
@@ -626,6 +632,7 @@
           ${this._picsView()}${msg}</div>`;
         return;
       }
+      if (window.__fpSetTab) { this._tab = window.__fpSetTab; window.__fpSetTab = null; } // e.g. "Set up a list" on the empty lists page
       const tab = TABS.find((x) => x.id === this._tab) || TABS[0];
       let body = '';
       if (tab.id === 'pics') body = this._picsView();

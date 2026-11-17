@@ -150,8 +150,8 @@
       (hass && ((hass.locale && hass.locale.language) || hass.language)) || 'de').toLowerCase();
     return l.startsWith('de') || l.startsWith('gsw') ? 'de' : 'en';
   };
-  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner', settings: 'fp-settings-inner' };
-  const STORE_VIEWS = ['lists', 'rewards', 'settings'];
+  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner', stats: 'fp-stats-inner', settings: 'fp-settings-inner' };
+  const STORE_VIEWS = ['lists', 'rewards', 'stats', 'settings'];
   const tag = (view, lang) => (!STORE_VIEWS.includes(view) && lang === 'en' ? INNER[view] + '-en' : INNER[view]);
   // designs: CSS variables read by every card (inherited through the shadow roots)
   const SYS = '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif';
@@ -268,7 +268,7 @@
     _showTodos(on, add) { if (this._win) this._win.style.display = on ? 'flex' : 'none'; if (on && this._todos) { this._todos.update(); if (add && this._todos.focusAdd) setTimeout(() => this._todos.focusAdd(), 50); } }
     getCardSize() { return this._cfg && this._cfg.view === 'plan' ? 10 : 12; }
     getGridOptions() { return { columns: 'full', min_rows: 6 }; }
-    connectedCallback() { this._attach(); }
+    connectedCallback() { this._attach(); const fx = window.FPX || window.FPX_EN; if (fx && fx.fadeIn) fx.fadeIn(this); }
     disconnectedCallback() { if (this._off) { this._off(); this._off = null; } }
     _wrap() { if (!this._wrapped || this._wrappedFor !== this._hass) { this._wrapped = wrapHass(this._hass, this._store); this._wrappedFor = this._hass; } return this._wrapped; }
     _attach() {
@@ -328,10 +328,10 @@
   if (!customElements.get('family-planer-card')) customElements.define('family-planer-card', FamilyPlanerCard);
 
   // Navigation bar: one button per active module view, same place on every page (also in kiosk mode)
-  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', einstellungen: 'Settings' } };
-  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:format-list-checks', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', einstellungen: 'mdi:cog-outline' };
-  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', einstellungen: null };
-  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', einstellungen: 'settings' };
+  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', einstellungen: 'Settings' } };
+  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:format-list-checks', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', statistik: 'mdi:chart-bar', einstellungen: 'mdi:cog-outline' };
+  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', statistik: 'week', einstellungen: null };
+  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', statistik: 'stats', einstellungen: 'settings' };
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
       design: 'Design', refresh: 'Kalender und Listen aktualisieren', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wds: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
@@ -365,7 +365,8 @@
     setConfig(c) {
       this._cfg = { ...(c || {}) };
       // paths of the dashboard views, e.g. { planer: 'planer', listen: 'einkauf', aemtliplan: 'aemtliplan' }
-      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
+      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', statistik: 'statistik', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
+      window.__fpPaths = this._paths;
       if (!this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
         this._onClick = (e) => {
@@ -555,7 +556,7 @@
       if (!this.shadowRoot || !this._cfg) return;
       const s = this._store && this._store.snap; const lang = this._lang(); const T = NAV_T[lang];
       const mods = (s && s.modules) || { week: true, lists: true };
-      const nav = (s && s.settings && s.settings.nav) || { order: ['planer', 'listen', 'belohnungen', 'einstellungen', 'aemtliplan'], hidden: ['aemtliplan'] };
+      const nav = (s && s.settings && s.settings.nav) || { order: ['planer', 'listen', 'belohnungen', 'statistik', 'einstellungen', 'aemtliplan'], hidden: ['aemtliplan'] };
       const order = this._cfg.order || nav.order.filter((k) => !nav.hidden.includes(k));
       if (s) applyTheme(this, this._cfg.theme || s.theme, this._cfg.style || s.style);
       const cur = location.pathname.split('/').filter(Boolean).pop();
@@ -602,6 +603,9 @@
         .sug i{font-style:normal;font-size:20px;animation:fpbob 3s ease-in-out infinite}.sug b{display:block;font-size:12px;line-height:1.2}.sug span span{font-size:11px;line-height:1.2}.sug span{color:var(--fp-text2);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
         .tl{display:flex;align-items:baseline;gap:10px;height:40px;align-items:center}.bar.nt .clk b{font-size:34px;transition:font-size 1s}.slab{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:12px;background:color-mix(in srgb,var(--fp-bg1) 70%,transparent);font-size:12px;white-space:nowrap}
         @keyframes fpsugin{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
+        button.sug{font:inherit;color:inherit;text-align:left;cursor:pointer}
+        @media (min-width:701px) and (max-width:1100px) and (orientation:portrait){.sug{position:relative;width:40px;max-width:40px;padding:0;justify-content:center;overflow:visible}.sug>span{display:none}
+          .sug:focus>span{display:block;position:absolute;top:46px;right:0;width:240px;padding:9px 11px;border-radius:12px;background:var(--fp-pop,var(--fp-bg1));border:1px solid var(--fp-line);box-shadow:0 10px 28px rgba(0,0,0,.45);z-index:6;white-space:normal}.sug:focus>span span{white-space:normal;overflow:visible}}
         button.slab{font:inherit;font-size:12px;cursor:pointer;color:inherit;border:1px solid transparent}.hint.fi{max-width:340px;line-height:1.45}.slab.fun{border-color:var(--fp-acc,#69C350)}.slab.fun ha-icon{--mdc-icon-size:15px;opacity:.8}.slab.fun.on{background:var(--fp-bg3)}@media (max-width:700px){.sug,.wxn span,.slab{display:none}.slab.fun{display:inline-flex}}
       </style><div class="bar${sc.key ? ' sc' : ''}" data-fp-head><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="lft"><span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span>
         <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
@@ -644,7 +648,7 @@
     _wxCorner(s, lang) {
       const wx = this._wxNow; if (!wx) return '';
       const sg = window.FPSEASON && window.FPSEASON.suggest(s, this._hass, wx, this._fc, new Date());
-      return `<span class="wxc${sg ? '' : ' one'}"><span class="wxn" title="${escN(wx.text)}"><i>${wx.icon}</i>${wx.temp != null ? `<b>${wx.temp}°</b>` : ''}<span>${escN(wx.text)}</span></span>${sg ? `<span class="sug" title="${escN(sg.text)}"><i>${sg.icon}</i><span><b>${escN(sg.title)}</b><span>${escN(sg.text)}</span></span></span>` : ''}</span>`;
+      return `<span class="wxc${sg ? '' : ' one'}"><span class="wxn" title="${escN(wx.text)}"><i>${wx.icon}</i>${wx.temp != null ? `<b>${wx.temp}°</b>` : ''}<span>${escN(wx.text)}</span></span>${sg ? `<button type="button" class="sug" title="${escN(sg.text)}" aria-label="${escN(sg.title)}"><i>${sg.icon}</i><span><b>${escN(sg.title)}</b><span>${escN(sg.text)}</span></span></button>` : ''}</span>`;
     }
     _right(s, lang, review, pending, setBtn = '') {
       if (!s) return '<span></span>';
@@ -712,6 +716,6 @@
 
   window.customCards = window.customCards || [];
   window.customCards.push(
-    { type: 'family-planer-card', name: 'Family Planer', description: 'view: week (Wochenplan), plan (Ämtliplan), lists (Smarte Listen), rewards (Belohnungen) oder settings (Einstellungen); theme optional', preview: false },
+    { type: 'family-planer-card', name: 'Family Planer', description: 'view: week (Wochenplan), plan (Ämtliplan), lists (Smarte Listen), rewards (Belohnungen), stats (Statistik) oder settings (Einstellungen); theme optional', preview: false },
     { type: 'family-planer-nav-card', name: 'Family Planer Navigation', description: 'Planer · Listen · Ämtliplan', preview: false });
 })();

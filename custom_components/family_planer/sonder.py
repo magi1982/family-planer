@@ -8,6 +8,7 @@ which is why they live outside the normal chore items.
 from __future__ import annotations
 
 from datetime import date, timedelta
+import hashlib
 import random
 import re
 import secrets
@@ -330,6 +331,15 @@ def _week(d: str) -> tuple[int, int]:
     return date.fromisoformat(d).isocalendar()[:2]
 
 
+def _prio(df: dict, w: dict, today: date) -> tuple:
+    """Order of the volunteer tile (lower first): rare ones (only while someone is away, birthday, wedding day)
+    before own chores before catalogue templates; within that the one that ends first; the rest changes daily."""
+    rare = bool(df.get("away")) or (df.get("anchor") or {}).get("t") in ("bday", "wedding")
+    rank = 0 if rare else (1 if not df.get("tpl") else 2)
+    spin = hashlib.sha256(f"{w.get('sid')}:{today.isoformat()}".encode()).hexdigest()
+    return (rank, w.get("end") or "", spin)
+
+
 def refresh(insts: dict, defs: dict, persons: dict, today: date, ctx: dict, cfg: dict) -> bool:
     """Bring the stored instances up to date (idempotent). Returns True if something changed."""
     cfg = clean_settings(cfg)
@@ -348,13 +358,34 @@ def refresh(insts: dict, defs: dict, persons: dict, today: date, ctx: dict, cfg:
         if expired or gone or inst.get("sid") not in defs:
             insts.pop(iid)
             changed = True
-    for iid, w in want.items():
+    # volunteer tile: catalogue templates shown since an earlier day make room for waiting ones (daily rotation)
+    def is_open(x):
+        return x.get("mode") == "free" and x.get("pid") is None and not x.get("done")
+    waiting = [i for i, w in want.items() if w["mode"] == "free" and i not in insts]
+    if waiting:
+        stale = sorted((i for i, x in insts.items() if is_open(x) and (x.get("shown") or "") < t
+                        and x.get("sid") in defs and _prio(defs[x["sid"]], x, today)[0] == 2),
+                       key=lambda i: _prio(defs[insts[i]["sid"]], insts[i], today), reverse=True)
+        for i in stale[:len(waiting)]:
+            insts.pop(i)
+            changed = True
+    order = sorted(want, key=lambda i: _prio(defs.get(want[i]["sid"]) or {}, want[i], today))
+    for iid in order:
+        w = want[iid]
         if iid in insts:
             continue
         inst = {k: v for k, v in w.items() if k != "elig" or w["mode"] == "free"}
         inst.update(done=False, done_at=None, claimed_at=None)
-        if w["mode"] == "free" and sum(1 for x in insts.values() if x.get("pid") is None and not x.get("done")) >= cfg["max_open"]:
-            continue
+        if w["mode"] == "free":
+            inst["shown"] = t
+            opened = [i for i, x in insts.items() if is_open(x)]
+            if len(opened) >= cfg["max_open"]:
+                # a more important one may push out the least important unclaimed one
+                mine = _prio(defs.get(w["sid"]) or {}, w, today)
+                worst = max(opened, key=lambda i: _prio(defs.get(insts[i]["sid"]) or {}, insts[i], today))
+                if mine[0] == 2 or _prio(defs.get(insts[worst]["sid"]) or {}, insts[worst], today)[0] != 2:
+                    continue
+                insts.pop(worst)
         if w["mode"] == "surprise":
             wk = _week(w["start"])
             load = {p: sum(1 for x in insts.values() if x.get("mode") == "surprise" and x.get("pid") == p

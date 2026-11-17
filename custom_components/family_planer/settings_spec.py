@@ -6,6 +6,7 @@ has to happen afterwards (reload the entry for new timers, run the day change, r
 """
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from . import seasons as seasons_mod, sonder as sonder_mod, validate
@@ -14,15 +15,19 @@ THEMES = ("ha", "light", "dark", "rainbow", "space")
 STYLES = ("standard", "transparent", "glass")
 # designs up to 0.8 -> new set (the old dark designs become "dark")
 THEME_MIGRATE = {"loxone": "dark", "apple": "dark", "google": "dark", "nord": "dark"}
-NAV_IDS = ("planer", "listen", "belohnungen", "einstellungen", "aemtliplan")
-NAV_DEFAULT = {"order": ["planer", "listen", "belohnungen", "einstellungen", "aemtliplan"], "hidden": ["aemtliplan"]}
+NAV_IDS = ("planer", "listen", "belohnungen", "statistik", "einstellungen", "aemtliplan")
+NAV_DEFAULT = {"order": ["planer", "listen", "belohnungen", "statistik", "einstellungen", "aemtliplan"], "hidden": ["aemtliplan"]}
 
 
 def clean_nav(raw) -> dict:
     """Order and visibility of the navigation buttons; settings can never be hidden (way back in)."""
     raw = raw if isinstance(raw, dict) else {}
-    order = [x for x in (raw.get("order") or []) if x in NAV_IDS]
-    order = list(dict.fromkeys(order + [x for x in NAV_DEFAULT["order"] if x not in order]))
+    order = list(dict.fromkeys(x for x in (raw.get("order") or []) if x in NAV_IDS))
+    # new buttons (e.g. statistics) go to their default place: right after the button they follow by default
+    for i, x in enumerate(NAV_DEFAULT["order"]):
+        if x not in order:
+            prev = NAV_DEFAULT["order"][i - 1] if i else None
+            order.insert(order.index(prev) + 1 if prev in order else len(order), x)
     hidden = [x for x in (raw.get("hidden") if isinstance(raw.get("hidden"), list) else NAV_DEFAULT["hidden"])
               if x in NAV_IDS and x != "einstellungen"]
     return {"order": order, "hidden": list(dict.fromkeys(hidden))}
@@ -115,9 +120,31 @@ def clean_levels(raw) -> dict:
     return {"season_start": md, "bonus": bool(raw.get("bonus", True))}
 
 
+_COIN_LETTER = re.compile(r"^[A-Za-z0-9ÄÖÜ]$")
+
+
+STATS_PERIODS = ("w", "m", "q")
+
+
+def clean_stats(raw) -> dict:
+    """Statistics page: {"compare": kids see "who did what" for everybody, "practice": show "still practising",
+    "period": default period w/m/q}"""
+    raw = raw if isinstance(raw, dict) else {}
+    return {"compare": bool(raw.get("compare", True)), "practice": bool(raw.get("practice", True)),
+            "period": raw.get("period") if raw.get("period") in STATS_PERIODS else "w"}
+
+
+def clean_coin(raw) -> dict:
+    """{"show": bool (points as a coin), "letter": one letter or digit on the coin, "" = small star}"""
+    raw = raw if isinstance(raw, dict) else {}
+    letter = str(raw.get("letter") or "").strip()[:1].upper()
+    return {"show": bool(raw.get("show", True)), "letter": letter if _COIN_LETTER.match(letter) else ""}
+
+
 def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list,
            cur_value: float = 20, cur_currency: str = "CHF", cur_awards: dict | None = None,
-           cur_levels: dict | None = None) -> tuple[dict, set[str]]:
+           cur_levels: dict | None = None, cur_coin: dict | None = None,
+           cur_stats: dict | None = None) -> tuple[dict, set[str]]:
     game = {k: validate.integer(data.get(k, v), 0, 1000, v) for k, v in cur_game.items()}
     game["mode"] = data.get("mode") if data.get("mode") in MODES else cur_mode
     notify = validate.entities(data.get("reward_notify", cur_notify), ("notify",))
@@ -132,8 +159,12 @@ def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list,
     cur_lv = clean_levels(cur_levels)
     raw_lv = data.get("levels") if isinstance(data.get("levels"), dict) else {}
     lv = clean_levels({**cur_lv, **raw_lv})
+    raw_coin = data.get("coin") if isinstance(data.get("coin"), dict) else {}
+    coin = clean_coin({**clean_coin(cur_coin), **raw_coin})
+    raw_stats = data.get("stats") if isinstance(data.get("stats"), dict) else {}
+    stats = clean_stats({**clean_stats(cur_stats), **raw_stats})
     return ({"gamification": game, "reward_notify": notify, "reward_value": value, "currency": currency, "awards": aw,
-             "levels": lv},
+             "levels": lv, "coin": coin, "stats": stats},
             {"rebook"})
 
 

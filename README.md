@@ -33,6 +33,7 @@ weather and time of day, through the seasons, Swiss customs and special days. Ev
   - [School & timetable](#school--timetable)
   - [Holidays pause chores](#holidays-pause-chores)
   - [Reliability, points, levels & awards](#reliability-points-levels--awards)
+  - [Statistics](#statistics)
   - [Real rewards](#real-rewards)
   - [Parent PIN](#parent-pin)
   - [To-dos without a date](#to-dos-without-a-date)
@@ -148,7 +149,8 @@ Per child (or person, e.g. university/work):
 
 ![Rewards](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/rewards.png)
 
-- **Reliability** in percent (30 days), coloured band per person.
+- **Reliability** in percent (30 days), coloured band per person. It only counts **assigned chores** – special chores and to-dos never lower it.
+- **Points as a coin** (setting, on by default): points show a small coin – silver ring, gold core, one notch per family member and a letter of your choice (or a little star). Every few seconds a tiny star flashes on it like sun on metal; when a chore is ticked off the coin flies to the person's picture. Off = just the number.
 - **Fair points** (default): whoever finishes **all** of their chores of the day gets the same number of points (default 30) – whether they have 2 or 6 chores. Every finished chore immediately earns its share; 3 of 6 done = 50 % = 15 points. The points in the chore plan act as weights (a heavy chore with 20 counts twice as much as one with 10). Alternatively *per chore* mode: more chores, more points.
 - **Bonuses**: additionally a **day bonus** for a fully completed day and a **streak bonus** for every 7-day streak. If a chore is reopened, its points are booked back.
 - **Levels per school year** (season, starts on 1 August – adjustable): from *Starter* via *Hero* and *Legend* up to wonderfully silly names beyond level 21. The levels come in **tiers – bronze (1–5), silver (6–10), gold (11–15), diamond (16–20) and ruby (21+)**; the level badge on the picture shows the tier colour. Redeemed points never lower the level.
@@ -177,9 +179,19 @@ Per child (or person, e.g. university/work):
 
 - The **best award sets a metallic frame** around the picture (platinum, gold, silver, bronze) with a gentle shine; the crown sits straight above the head.
 - **Points per award**: once per win, and again when it is won anew. Sizes: small = ⅓, medium = ⅔, large = 1×, giant = 2× the points for a full day. Every award can be switched off or resized under *Settings → Points*.
-- **Confetti for everyone** (adults too): small confetti with the name when somebody has done all of their chores for the day; medium or large confetti in the trophy colour for trophies. At most one big confetti per person and day; daily changing awards (streak, busy bee, early bird) get none. Can be switched off; respects *reduce motion*.
+- **Confetti for everyone** (adults too): small confetti with the name when somebody has done all of their chores for the day; medium or large confetti in the trophy colour for trophies. At most one big confetti per person and day; daily changing awards (streak, busy bee) get none. Can be switched off; respects *reduce motion*.
 - **Fair for percentages and awards, too**: in *Fair* mode, reliability, crown of the week, trophy of the month and busy bee count **every day the same** – no matter if 2 or 6 chores. The rate is the average of the daily rates; the busy bee has the most complete chore days. In *Per chore* mode single chores count as before.
 - **History** per person: chores, bonuses, rewards.
+
+### Statistics
+
+A fourth button, **Statistics**, shows what the family has done – simple enough for children.
+
+- **Family first:** chores done, volunteer chores, to-dos, days on which *everybody did everything* (with record), **trophies & awards** of the period and all time per person, **"Who did what?"** (chores / volunteer chores / to-dos per person) and **"Which chores – who how often?"** as a table (bigger circle = more often). Below, one card per person with reliability as **10 dots** (*Lea does 9 of 10 chores*), the last 7 days as coloured dots and the current streak.
+- **Buttons at the top** for *Family* and every person; a tap on a card opens the own page.
+- **Own page:** the 10 dots with a short praise and the trend, tiles (chores, volunteered, to-dos, done in time, days in a row with record, points), the **last 7 days as building blocks** (1 block = 1 chore – the blocks get smaller on busy days, the number below), **12 weeks as dots** (green = all done, yellow-green = 1 forgotten, orange = 2, red = 3 or more, grey = no chores), **What I did** (per type and chore), **Where my points come from** (a points jar with a layer per source: chores, volunteer chores, to-dos, day bonus, streak bonus, awards, level bonus, extra from the parents – plus *redeemed for rewards* and the latest points), **My awards**, **Still practising** (the chores forgotten most often, kindly worded) and **When I help** (morning / afternoon / evening).
+- **Period:** week, month or 3 months (a tap switches). The figures come from the data the planner keeps anyway (about 120 days); which chore was done and when is recorded from version 0.15.0 on.
+- Settings under *Settings → Points*: default period, *compare people* (family tables on/off) and *Still practising* on/off. The button can be hidden like the others.
 
 ### Real rewards
 
@@ -281,6 +293,7 @@ data:
   - **daily** at the configured time, everything still under *Other* is reorganised – optionally with an **AI task** (OpenAI, Google, Ollama …),
   - **never more than 5–20 categories** (selectable per list); rarely used ones are merged into *Other*.
 - **Move an item once – the list remembers it**.
+- **No list yet?** The page shows a short explanation and a **Set up a list** button that opens *Settings → Lists* directly.
 - **Rename, sort, add and delete** categories on the card.
 - Add field, tick off, show/hide and delete completed items. Quantities ("2x milk", "flour 1 kg") are ignored when sorting.
 
@@ -331,6 +344,8 @@ Within a day the same animation plays again for the same time of day; the next d
 | School holidays | from calendar titles: Sportferien, Frühlingsferien, Pfingstferien, Sommerferien (a beach), Herbstferien, Weihnachtsferien | 3 days before |
 | Personal | birthdays, wedding anniversary, couple anniversary | the day itself |
 
+**Info texts:** customs and public holidays (St. Nicholas, Christmas, New Year's Eve, Epiphany, carnival, Easter, Ascension, Whitsun, Swiss National Day, Federal Day of Thanksgiving, the first days of the seasons …) get an ⓘ chip next to the date with a short text for children explaining what is celebrated.
+
 Every event can be switched off or get its own lead time; the *priority* decides when several coincide (default: birthday > anniversary > public holiday > custom > school holidays > long season). Pausing chores during your own family holidays stays in the [holiday check](#holidays-pause-chores).
 
 **Birthdays.** Enter the birth date per person (*Settings → People*, the year is optional). On the day the header gets bunting, balloons and a *Happy Birthday* banner, and the birthday child's row celebrates all day with one of five animations coming from behind the person: confetti cannon, balloon ride, soap bubbles, rainbow disco or star shower – a different one for everybody and every year, or a fixed one per person. **All points of the birthday child count double.**
@@ -346,6 +361,7 @@ Every event can be switched off or get its own lead time; the *priority* decides
 Fun extra jobs that only give **bonus points** – not done or expired never lowers the reliability (%). Under *Settings → Special chores* (parent PIN) there is a catalogue of 58 templates with sensible timing (Christmas baubles for every child from 10 to 24 December, a birthday card 3 days before, raking leaves from Tuesday for 5 days including Saturday, dyeing eggs before Easter, hanging the Swiss flag …); everyday ones start switched off. Create your own with title, symbol, points (small / medium / large / own), assignment, when (once, daily, weekdays, every X days, yearly, at an event, a person's birthday, the wedding anniversary, Advent, weather, temperature), lead time, time to do it, time of day, visibility (always / in a season / with some weather) and *secret*.
 
 - **Volunteer**: the job waits in the *Volunteer* tile next to the people (only visible while something is open). Whoever in the family comes first (grown-ups too) taps *I'll take it!*, picks themselves on the big avatar tile and the job moves into their row. Recurring ones come back every time.
+- **Order in the Volunteer tile:** rare ones first (only while someone is away, birthday, wedding day), then your own special chores, then the catalogue; within that the one that ends first. Catalogue jobs nobody took make room the next day, so the tile changes daily, and a more important job may push out a catalogue job nobody has taken yet.
 - **Every child**, **Surprise** (random, default at most 2 per child and week) or **Fixed**.
 - **Only while away**: limit a chore to days when a chosen grown-up (or any grown-up) is away – same detection as pausing chores (calendar or holiday check). *Needs a grown-up* hides a chore while every grown-up is away.
 - **Secret**: the planner shows *Secret job*; a tap on the eye button on the right reveals it for 5 seconds (yellow while nobody has taken the job, grey after). For birthdays the birthday child never gets it.
@@ -355,10 +371,13 @@ Fun extra jobs that only give **bonus points** – not done or expired never low
 - **Left:** the time with weekday and date beside it, the page buttons below. **Right:** weather and the **holiday check** 🌴 stacked, settings beside them – both sides are built the same way.
 - **Refresh** sits in *Settings* (top bar): it reloads all calendars and lists at once.
 - **Holiday check** 🌴 (each entry can be shown as *Holiday* or *Away*; a day off shows *Away* unless it is a real holiday): a badge shows how many holidays and long events of the next two weeks are undecided (details under *Holidays pause chores*). Parent PIN.
+- **Statistics** is the new fourth button (after *Rewards*); see [Statistics](#statistics).
 - **Order and visible buttons** under *Settings → General*. If a button points to a view your dashboard does not have, it is shown dashed with a hint instead of opening an empty page.
 - **Today**: a red now line separates past and coming events, the next event shows *in 25 min*; ticking off a chore plays a short check animation.
 - **Today view**: *Today | Week* at the top left. *Today* shows only the current day with the people side by side as columns – school, events with the now line, chores (open first), to-dos and special chores; ‹ › for the other days, all filters work. *Settings → General → Default view* decides which one is shown after the idle time and when coming back from another page (default *Today*).
-- **Phone**: the planner shows only today, with ‹ › arrows and swipe for the other days; it returns to today after the idle time.
+- **Filters** *All · Chores · To-dos & special · Events · Timetable*. A day without anything shows *Nothing planned – free!* with the next event (*Tomorrow: …*). Switching between *Today* and *Week* fades in softly.
+- **Tablet in portrait**: the suggestion below the weather shrinks to its symbol; a tap shows the text. In landscape it stays fully visible.
+- **Phone**: the planner shows only today, with ‹ › arrows and swipe for the other days; it returns to today after the idle time. The person cards are compact: picture left, name and badges beside it.
 
 ## Settings in the planner
 
@@ -366,7 +385,7 @@ Fun extra jobs that only give **bonus points** – not done or expired never low
 
 Everything that the Home Assistant dialogs offer, in one clear page – also on the tablet: **Settings** in the navigation.
 - Protected by the **parent PIN** (always, also for admins).
-- **Without the PIN** the page shows only the **pictures** (avatar builder and photo upload). **"Parent PIN"** at the top right opens every tab: *Pictures*, *General* (modules, language, design and style, navigation order, fullscreen, sidebar, day change, …), *People* (order, role child/adult, colour, calendar, nicknames, school calendar, blocks per weekday, travel time), ***Chores*** (the complete chore plan – **"+ Special chore"** and **"+ To-do"** open a form in a popup; the separate chore-plan page is hidden by default), *Points* (incl. every award with on/off and size, early-bird time, confetti), *To-dos*, *Lists*, *Holidays* (holiday check), *Announcements*, ***Status*** (last successful sync and last error for every calendar, list and the day change; sources silent for 30 days disappear).
+- **Without the PIN** the page shows only the **pictures** (avatar builder and photo upload). **"Parent PIN"** at the top right opens every tab: *Pictures*, *General* (modules, language, design and style, navigation order, fullscreen, sidebar, day change, …), *People* (order, role child/adult, colour, calendar, nicknames, school calendar, blocks per weekday, travel time), ***Chores*** (the complete chore plan – **"+ Special chore"** and **"+ To-do"** open a form in a popup; the separate chore-plan page is hidden by default), *Points* (incl. every award with on/off and size, on-time time, confetti, coin, statistics), *To-dos*, *Lists*, *Holidays* (holiday check), *Announcements*, ***Status*** (last successful sync and last error for every calendar, list and the day change; sources silent for 30 days disappear).
 - Every field with a short description; invalid input is refused with a clear message (e.g. announcements without speaker).
 - Changes that need new timers (day change, modules, lists, announcements) reload the integration automatically; the planner reconnects by itself.
 - The dialogs under *Settings → Devices & services → Family Planer → Configure* remain available.
@@ -461,6 +480,12 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Also send requests to | – | additional notification (e.g. mobile app) |
 | Value of a large reward | 20 | money value as a guide; small ¼, medium ½, mega 2×, giant 5× |
 | Currency | CHF | shown after the amounts |
+| On-time pro: in time until | 20:00 | a chore counts as in time before its last day or on it by this time |
+| Show points as a coin | on | coin next to the points; off = only the number |
+| Letter on the coin | – (star) | one letter or digit, e.g. your family initial |
+| Statistics: period when opening | Week | Week · Month · 3 months |
+| Statistics: compare people | on | family tables *Who did what?* and *Which chores – who how often?* |
+| Statistics: "Still practising" | on | chores forgotten most often on the own page |
 
 **Week plan → Announcements on motion**
 
@@ -587,15 +612,15 @@ Not necessary – but possible. The cards are loaded automatically.
 type: vertical-stack
 cards:
   - type: custom:family-planer-nav-card
-    paths: { planer: planer, listen: einkauf, belohnungen: belohnungen, einstellungen: einstellungen }
+    paths: { planer: planer, listen: einkauf, belohnungen: belohnungen, statistik: statistik, einstellungen: einstellungen }
   - type: custom:family-planer-card
-    view: week        # week | plan | lists | rewards | settings
+    view: week        # week | plan | lists | rewards | stats | settings
     theme: space      # optional: ha | light | dark | rainbow | space
     style: glass      # optional: standard | transparent | glass
     language: en      # optional, otherwise the integration setting or the HA language
 ```
 
-For a full-screen tablet, a panel view per page (paths as above) and e.g. *Kiosk Mode* are recommended.
+For a full-screen tablet, a panel view per page (paths as above) and e.g. *Kiosk Mode* are recommended. **New in 0.15.0:** for the *Statistics* button add a view with the path `statistik` and a card with `view: stats` (the sidebar panel needs nothing); until then the button shows as dashed.
 
 ---
 

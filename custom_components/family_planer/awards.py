@@ -46,7 +46,8 @@ MILESTONES = (25, 100, 250)          # days with every own chore done
 MILESTONE_COLOR = {25: "#CD8A4E", 100: "#C9D1D9", 250: "#F5C542"}
 ONTIME_SHARE = 0.8                    # on time: at least 80 % of the week's chores done in time
 ONTIME_MIN = 5
-VOL_KEEP_DAYS = 60
+VOL_KEEP_DAYS = 120
+WINS_KEEP_DAYS = 400
 DIAMOND_DAYS = 30
 CLIMB_MIN = 0.15
 MAX_CELEBRATIONS = 40
@@ -220,7 +221,25 @@ def _state(data: dict) -> dict:
     st.setdefault("week", None)
     st.setdefault("month", None)
     st.setdefault("team", None)
+    if "wins" not in st:
+        # statistics: every win once ({ref: {pid, aid, day}}); first run takes the wins still in the points ledger
+        st["wins"] = {}
+        for e in data.get("ledger", []):
+            ref = str(e.get("ref") or "")
+            if e.get("kind") == "award" and ref.startswith("award:") and ref.count(":") >= 3:
+                aid = ref.split(":")[1]
+                st["wins"][ref] = {"pid": e.get("pid"), "aid": aid, "day": str(e.get("ts") or "")[:10]}
     return st
+
+
+def log_win(st: dict, ref: str, pid: str, aid: str, today: date) -> None:
+    """Remember a win for the statistics (idempotent per ref); keeps WINS_KEEP_DAYS."""
+    wins = st.setdefault("wins", {})
+    if ref not in wins:
+        wins[ref] = {"pid": pid, "aid": aid, "day": today.isoformat()}
+    horizon = (today - timedelta(days=WINS_KEEP_DAYS)).isoformat()
+    for k in [k for k, v in wins.items() if v.get("day", "") < horizon]:
+        wins.pop(k, None)
 
 
 def _celebrate(st: dict, pid: str | None, kind: str, fx: str, color: str, ts: str, today: date, value=None) -> dict | None:
@@ -244,6 +263,7 @@ def _win(data: dict, st: dict, aid: str, pid: str, period: str, cfg: dict, day_p
     item = cfg["items"][aid]
     pts = points_for(size or item["size"], day_points)
     ref = f"award:{aid}:{period}:{pid}"
+    log_win(st, ref, pid, aid, today)
     if pts > 0 and not any(e.get("ref") == ref for e in data.get("ledger", [])):
         ledger_add(data["ledger"], pid, pts, "award", ref, aid, ts)
     if cfg.get("confetti", True):

@@ -380,8 +380,8 @@ Aufbau von oben nach unten, mit grosser Live-Vorschau links (auf dem Handy oben)
 
 ## Ideen für die nächste Version
 
-- README (EN/DE) gesammelt nachführen: Levels, Freischaltungen, Planer-Ansicht „To-dos & Spezial“, Bilder ohne PIN, Ferien-Check v2
-- Release-Checkliste unten an die sparsame Arbeitsweise anpassen (README nur alle paar Releases)
+- ✅ README (EN/DE) nachgeführt in 0.15.0 (Statistik, Taler, Filter „To-dos & Spezial“, Info-Texte, Freiwillig-Reihenfolge, leere Listen, Einstellungen)
+- ✅ Release-Checkliste angepasst (0.15.0)
 
 > **15.11.: Grosses Konzept „Saisons, Wetter & Avatare“ (Ideen 29–40).** Entwurf mit Bildern liegt beim Maintainer. Umgesetzt in 0.11.0. Beispielnamen: Lea, Mia, Nina, Sarah, Tom.
 
@@ -514,9 +514,11 @@ Aufbau von oben nach unten, mit grosser Live-Vorschau links (auf dem Handy oben)
 - [ ] hassfest und die HACS-Prüfung sind grün
 
 ### Qualität und Doku
+- [ ] Vor dem Bauen prüfen, ob es die Funktion (oder Teile davon) schon gibt
 - [ ] Unit-Tests für die neue Logik; alle Tests grün
-- [ ] Frontend neu gebaut, englische Texte ergänzt, alle Designs geprüft
-- [ ] README.md (Englisch) und README.de.md (Deutsch): Funktionsbeschreibung und Tabelle „Alle Einstellungen“ in beiden ergänzt
+- [ ] Frontend neu gebaut (`python frontend_src/build.py`), englische Texte ergänzt, im Browser auf Tablet und Handy angeschaut
+- [ ] Datenschutz-Suche nach echten Namen / Adressen vor jedem Commit; Beispiele nur mit Beispieldaten (Lea, Mia, Sarah, Tom)
+- [ ] README.md (Englisch) und README.de.md (Deutsch): neue Funktionen und Tabelle „Alle Einstellungen“ – bei grossen Releases, sonst gesammelt
 - [ ] CHANGELOG-Eintrag auf Englisch (`## x.y.z – Datum`); Version in `const.py` und `manifest.json` erhöht
 - [ ] **Vor dem Release fragen** – erst nach Freigabe Version erhöhen und hochladen
 - [ ] Release entsteht automatisch (`release.yml`), sobald Validate und Security grün sind – Text aus dem CHANGELOG
@@ -536,7 +538,7 @@ Heute: Reihenfolge der gespeicherten Liste (Vorlagen zuerst), wer drin ist, blei
 3. Der Rest wechselt täglich, damit nicht immer dieselben Vorlagen die Plätze belegen.
 4. Ein Ämtli mit höherem Vorrang darf ein noch nicht genommenes Vorlagen-Ämtli verdrängen.
 Dazu: die Korrektur gegen den Ladefehler nach Updates (Week-View-Element doppelt registriert) ist schon im Code und kommt mit diesem Update.
-**Status:** 💡 Idee – fürs nächste Update
+**Status:** ✅ umgesetzt in 0.15.0
 
 ### 46. Punkte bei To-dos, Ämtli und Sonderämtli im Planer anzeigen
 To-dos geben schon Punkte (nach Grösse S/M/L oder fixem Wert), aber die Kachel zeigt sie nicht. Neu: im Etikett „☑ To-do · +N“ wie bei den Sonderämtli, in der Heute-Ansicht und in der Wochenansicht. Ohne Punkte bleibt das Etikett wie heute.
@@ -544,7 +546,7 @@ To-dos geben schon Punkte (nach Grösse S/M/L oder fixem Wert), aber die Kachel 
 
 ### 47. Kopfszene auf dem Tablet (iPad Air)
 Auf 1180 px quer verdeckt der Vorschlag (z. B. „Familien-Spaziergang“) die untere Hälfte vom Haus, hochkant (820 px) liegt das Haus fast ganz hinter Vorschlag und Navigationsknöpfen. Idee: bei Tablet-Breite den Vorschlag nur als kleines Symbol neben dem Wetter zeigen (antippen = Text) und die Szene so verschieben, dass das Haus in der Lücke rechts neben der Navigation steht; hochkant die Navigation nur mit Symbolen.
-**Status:** 🟡 teilweise: Haus ist jetzt in der Mitte (Navigation links, Szene verschoben) – auf iPad quer und hochkant frei sichtbar. Vorschlag als Symbol bleibt offen.
+**Status:** ✅ umgesetzt in 0.15.0 – Vorschlag als Symbol nur auf dem Tablet im Hochformat (Querformat zeigt ihn ganz, gewünscht)
 
 ### 48. Zuverlässigkeit rechts neben dem Avatar
 Die Prozentzahl (heute grünes Bändeli unter dem Namen) auf die gleiche Höhe wie der Avatar, aber rechts. Drei Vorschläge (Screenshot rel_vorschlaege):
@@ -567,7 +569,7 @@ Aus einer Durchsicht aller Ansichten auf iPad und Handy. Jeder Punkt einzeln wä
 10. **Belohnungen:** Fortschrittsbalken bis zur nächsten Belohnung pro Person, Belohnungen als Kärtchen mit Symbol.
 11. **Nachtmodus fürs Tablet:** nach Sonnenuntergang alles etwas dunkler und ruhiger, Uhr grösser; Gartenlichter passen dazu.
 12. **Weiche Übergänge:** Abhaken mit kurzem Häkchen-Animationseffekt auch in der Wochenansicht, Ansichtswechsel mit sanftem Einblenden.
-**Status:** 🟡 umgesetzt: 2, 4, 5, 6, 7, 10 (Balken pro Belohnung mit Prognose gibt es schon), 11. Offen: 1, 3, 8, 9, 12
+**Status:** ✅ umgesetzt: 1, 2, 4–12 (8, 9, 12 in 0.15.0; Häkchen-Effekt gab es schon, neu ist das sanfte Einblenden). ❌ 3 abgelehnt (Haus auf dem Handy bleibt).
 
 ### 50. Einheitlicher Aufbau der Ämtli- und To-do-Knöpfe
 Regel: Passt alles auf eine Zeile → links Text, daneben Zeit-Info (seit x Tagen, heute fällig, bis Mo); rechts Punkte, links davon die Herkunft (To-do, Liste, Kalender von …, Sonder). Passt es nicht → links oben Text, links unten Zeit-Info, rechts oben Punkte, rechts unten Herkunft. Nur zwei Schriftgrössen (Titel und klein).
@@ -578,13 +580,13 @@ Drei Stil-Vorschläge (Bild buttons.png): **A** ruhig – nur Punkte als Plakett
 Wenn die Aussentemperatur unter einen einstellbaren Wert fällt (Standard −1 °C), wird die ganze Szene eingefroren: Boden mit Raureif (weiss-bläulich, auch ohne Schnee), Bäume und Büsche bereift, Eiszapfen am Dach, Pool zugefroren mit Eisfläche, Fenster mit Eisblumen am Rand, dazu feine glitzernde Eiskristalle in der Luft.
 Temperaturquelle: das Attribut `temperature` der eingestellten Wetter-Entität (keine eigene Sensor-Entität). Optional: eine eigene Temperatur-Entität (z. B. Aussenfühler) in den Einstellungen wählbar, die Vorrang hat.
 Einstellungen: „Frost-Modus“ ein/aus und „Gefroren ab“ (−25 … 0 °C, Standard −1 °C), jeweils mit Beschreibung DE/EN.
-**Status:** ✅ umgesetzt (Quelle: Wetter-Entität), lokal; eigener Aussenfühler als Option noch offen
+**Status:** ✅ umgesetzt (Quelle: Wetter-Entität); eigener Aussenfühler ❌ abgelehnt (Wetter-Entität reicht)
 
 ### 52. Info-Texte auch für Bräuche und Feiertage
 Der Info-Knopf (ⓘ) neben dem Datum gibt es heute nur an den besonderen Tagen. Vorschlag: auch Schweizer Bräuche und Feiertage bekommen einen kurzen, kindgerechten Text (DE/EN), der erklärt, was gefeiert wird.
 Kandidaten: Samichlaus, Heiligabend/Weihnachten, Silvester, Neujahr/Berchtoldstag, Dreikönigstag, Fasnacht, Valentinstag, Karfreitag/Ostern, Tag der Arbeit, Auffahrt, Pfingsten, Muttertag, Vatertag, 1. August, Bettag, Erntedank, Frühlings-/Sommer-/Herbst-/Winteranfang.
 Nicht nötig: Wetter, Jahreszeiten, Ferien, Geburtstag, Hochzeitstag (selbsterklärend).
-**Status:** Idee
+**Status:** ✅ umgesetzt in 0.15.0
 
 ### 53. 40 Ideen zum Antippen (Click me)
 Wie Titanic und Mondfähre: in jeder Szene etwas, das beim Antippen eine kleine Geschichte abspielt; dazu der goldene „Tipp!“-Hinweis. Vorschau: Artefakt „Family Planer – 40 Ideen zum Antippen“.
@@ -646,7 +648,7 @@ Details:
 Einstellungen (mit Beschreibung DE/EN): „Buchstabe auf dem Coin“ (1 Zeichen, Standard: leer → kleiner Stern statt Buchstabe; Eingabe wird auf einen Buchstaben/Ziffer begrenzt) und „Coin anzeigen“ ein/aus (aus = Zahl wie bisher).
 Datenschutz: kein Familienname im Code oder in Beispielen – der Buchstabe kommt nur aus der Einstellung.
 Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
-**Status:** Idee (Design gewählt)
+**Status:** ✅ umgesetzt in 0.15.0 (Einstellungen „Punkte als Taler zeigen“ und „Buchstabe auf dem Taler“)
 
 ## 55 · Welche Tipp-Animation wann läuft
 **Status:** ✅ umgesetzt in 0.14.0
@@ -702,7 +704,7 @@ Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 **Freiwillige Ämtli (umgesetzt):** ohne eigene Personenauswahl kann jetzt die ganze Familie (auch Erwachsene) ein freiwilliges Ämtli übernehmen; verteilte Ämtli (jedes Kind / fix / Überraschung) gehen weiter nur an Kinder. Die Auswahl „Wer nimmt es?“ hat grosse Avatar-Kacheln statt kleiner Knöpfe.
 
 ### 57. Statistik-Seite (4. Knopf in der Navigation)
-Status: Idee – Entwurf im Design-Artefakt „Family Planer – Statistik-Seite (Vorschlag)“, wartet auf „mach es“.
+Status: ✅ umgesetzt in 0.15.0 (inkl. Pokale & Auszeichnungen pro Person und Familie)
 - Neuer Knopf „Statistik“ (mdi:chart-bar) nach Belohnungen; Zeitraum Woche / Monat / 3 Monate.
 - Oben Familie + je ein Knopf pro Person (→ eigene Statistik).
 - Familie: Ämtli geschafft, freiwillige Ämtli, To-dos, Tage „alle alles geschafft“ (+ Rekord).
@@ -711,7 +713,7 @@ Status: Idee – Entwurf im Design-Artefakt „Family Planer – Statistik-Seite
 - Unten Personenkarten (feste Reihenfolge): 10 Punkte Zuverlässigkeit, 7-Tage-Sterne, Serie → antippen = Detailseite.
 - Detailseite: Kacheln, 7 Tage als Bauklötze, 12-Wochen-Kalender, „Was ich gemacht habe“ (Balken nach Art + Liste pro Art: Ämtli, freiwillige Ämtli, To-dos pro Liste), „Da üben wir noch“, „Wann ich helfe“; Knopf „‹ Familie“.
 - „Woher meine Punkte kommen“: Punkte-Glas mit farbigen Schichten, Liste pro Quelle (Ämtli, freiwillige Ämtli, To-dos, Tagesbonus, Serien-Bonus, Auszeichnungen, Level-Bonus, Extra von Mama/Papa), „Für Belohnungen eingelöst“ (minus) und „Letzte Punkte“. Daten: Punkte-Buch (ledger.kind), schon vorhanden.
-- Prüfen: Punkte aus freiwilligen Ämtli (kind „sonder“) zählen heute nicht für Level und Prognose (fehlen in XP_KINDS / EARN_KINDS) – Absicht oder Fehler?
+- ✅ Fehler behoben in 0.15.0: Punkte aus freiwilligen Ämtli zählen fürs Level und die Prognose (Zuverlässigkeit bleibt nur zugewiesene Ämtli)
 - Tages-Punkte (Kalender, 7-Tage-Reihe): grün = alles, gelbgrün = 1 vergessen, orange = 2, rot = 3+, grau = frei.
 - Kein Familien-Ziel, keine Retter-Statistik.
 - Daten: history (120 Tage), done_at; neu nötig: Zähler pro Ämtli + Person (history kennt heute nur verpasste Titel), Titel bei freiwilligen Ämtli merken, awards.vol 60 → 120 Tage, To-do-Zähler pro Person.

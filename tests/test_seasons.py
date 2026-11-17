@@ -211,3 +211,14 @@ def test_event_info_and_british_dedication():
     f = F.dedicate(F.info("uk"), "Sam")
     assert f["info"]["de"].startswith("Dieser Tag ist für Sam") and f["info"]["en"].startswith("This day is for Sam")
     assert F.dedicate(F.info("moon"), "Sam")["info"]["de"].startswith("Am 20. Juli")
+
+
+
+def test_info_texts_for_customs_and_holidays():
+    # 0.15.0: customs and holidays have a short info text in both languages (the ⓘ next to the date)
+    FD = importlib.import_module("fpkg.funday")
+    for key, ev in S.EVENTS.items():
+        if ev[0] in ("holiday", "custom") and key not in ("schulanfang",):
+            de, en = FD.EVENT_INFO[key]
+            assert 40 < len(de) < 320 and 40 < len(en) < 320, key
+    assert "Samichlaus" in FD.EVENT_INFO["samichlaus"][0]

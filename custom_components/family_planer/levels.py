@@ -88,7 +88,7 @@ def season_start(today: date, start_md: str = "08-01") -> date:
     return this_year if today >= this_year else this_year.replace(year=today.year - 1)
 
 
-XP_KINDS = ("chore", "fair", "bonus", "streak", "todo", "award", "adjust")
+XP_KINDS = ("chore", "fair", "bonus", "streak", "todo", "sonder", "award", "adjust")
 
 
 def xp(ledger: list[dict], pid: str, start: date) -> int:

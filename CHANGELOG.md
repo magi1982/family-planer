@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.15.0 – 2026-11-17
+
+### Added
+- **Statistics** (new fourth button after *Rewards*): the family first – chores, volunteer chores, to-dos, days on which everybody did everything (with record), **trophies & awards** per person (period and all time), *Who did what?* per type and *Which chores – who how often?* as a table – then one card per person. The own page shows reliability as **10 dots**, tiles, the last 7 days as **building blocks** (smaller on busy days), 12 weeks as **coloured dots** (green all done, yellow-green 1 forgotten, orange 2, red 3+), *What I did* per type, *Where my points come from* (a points jar per source, redeemed rewards, latest points), *My awards*, *Still practising* and *When I help*. Week, month or 3 months. Settings: default period, compare people, *Still practising*.
+- **Points as a coin** (setting, on by default): a small silver-and-gold coin with one notch per family member and a letter of your choice (or a star) next to the points on chores, to-dos, special chores and rewards; a tiny star flashes on it now and then, and the coin flies to the person's picture when something is ticked off. Respects *reduce motion*.
+- **Info texts for customs and public holidays:** the ⓘ chip next to the date explains St. Nicholas, Advent, Christmas, New Year's Eve, Epiphany, carnival, Easter, Ascension, Whitsun, Swiss National Day, the Federal Day of Thanksgiving, the first days of the seasons and more – short and for children (DE/EN).
+- **Empty lists page:** a short explanation and a **Set up a list** button that opens *Settings → Lists* directly.
+
+### Changed
+- **Volunteer tile order:** rare special chores (only while someone is away, birthday, wedding day) first, then your own, then the catalogue; the one that ends first leads. Catalogue jobs nobody took make room the next day (daily rotation), and a more important job may push out an untaken catalogue job.
+- **"Nothing planned – free!"** instead of *Nothing today*, with a balloon and the next event (*Tomorrow: …*).
+- **Phone:** compact person cards in the Today view (picture left, name and badges beside it).
+- **Tablet in portrait:** the suggestion below the weather shrinks to its symbol, a tap shows the text; landscape is unchanged.
+- **Soft fade-in** when a page opens and when switching between *Today* and *Week*.
+- The planner now records which chore was done and at what hour, which special chores and to-dos were ticked off (with list) and every award won – the data for the statistics (kept about 120 days, awards 400 days). Volunteer chores are kept 120 days instead of 60.
+
+### Fixed
+- **Points from volunteer chores** now count for the level and for the reward forecast (*in about X days*) like all other earned points. Reliability is unchanged: it only ever counts assigned chores.
+
 ## 0.14.0 – 2026-11-17
 
 ### Added

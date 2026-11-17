@@ -9,12 +9,12 @@
   const TXT = {
     de: { add: 'Was fehlt?', addb: 'Hinzufügen', sorting: 'Wird einsortiert …', done: 'Erledigt', clear: 'Erledigte löschen',
       cats: 'Kategorien', optimize: 'Optimieren', optimizing: 'Optimiere …', slow: 'dauert zu lange – später nochmals versuchen', aibg: 'Die KI sortiert den Rest im Hintergrund – die Liste aktualisiert sich gleich.', move: 'Kategorie wählen', learned: 'Gemerkt: „{i}“ → {c}',
-      empty: 'Die Liste ist leer – oben etwas hinzufügen.', nolists: 'Noch keine Liste eingerichtet. Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren → Smarte Listen.',
+      empty: 'Die Liste ist leer – oben etwas hinzufügen.', nolists: 'Noch keine Liste eingerichtet', nolistsSub: 'Einkaufsliste, Bastelliste oder Ferien-Packliste – eine Liste ist schnell angelegt.', setup: 'Liste einrichten',
       unavailable: 'Liste nicht erreichbar', edit: 'Kategorien bearbeiten', limit: '{n} von max. {m}', newcat: '+ Kategorie', save: 'Speichern', cancel: 'Abbrechen',
       other: 'bleibt immer zuletzt', created: 'Neu: {x}', removed: 'Zusammengefasst: {x}', nothing: 'Alles ist schon gut sortiert.', err: 'Fehler: ', del: 'Löschen' },
     en: { add: 'What do you need?', addb: 'Add', sorting: 'Sorting …', done: 'Done', clear: 'Clear done',
       cats: 'Categories', optimize: 'Optimise', optimizing: 'Optimising …', slow: 'taking too long – try again later', aibg: 'The AI sorts the rest in the background – the list updates in a moment.', move: 'Choose category', learned: 'Remembered: "{i}" → {c}',
-      empty: 'The list is empty – add something above.', nolists: 'No list set up yet. Settings → Devices & services → Family Planer → Configure → Smart lists.',
+      empty: 'The list is empty – add something above.', nolists: 'No list set up yet', nolistsSub: 'Shopping, craft supplies or a holiday packing list – a list is set up in no time.', setup: 'Set up a list',
       unavailable: 'List not available', edit: 'Edit categories', limit: '{n} of max. {m}', newcat: '+ Category', save: 'Save', cancel: 'Cancel',
       other: 'always stays last', created: 'New: {x}', removed: 'Merged: {x}', nothing: 'Everything is sorted well already.', err: 'Error: ', del: 'Delete' },
   };
@@ -59,6 +59,7 @@
       const t = e.target; const l = this._cur();
       const tab = t.closest('[data-tab]');
       if (tab) { this._sel = tab.dataset.tab; try { localStorage.setItem('fp_list', this._sel); } catch (er) { /* ignore */ } this._move = null; this._resub(); this._render(); return; }
+      if (t.closest('[data-setup]')) { window.__fpSetTab = 'lists'; (window.FPX || window.FPX_EN).fpNavigate((window.__fpPaths || {}).einstellungen || 'einstellungen'); return; }
       if (!l) return;
       if (t.closest('[data-addb]')) { this._add(); return; }
       const mv = t.closest('[data-mv]');
@@ -107,7 +108,7 @@
       const T = this.T; const ls = this._lists(); const l = this._cur();
       const active = this.shadowRoot.activeElement; const keepFocus = active && active.dataset && active.dataset.addin !== undefined;
       let body = '';
-      if (!l) body = `<div class="empty">${esc(T.nolists)}</div>`;
+      if (!l) body = `<div class="empty nol"><ha-icon icon="mdi:format-list-checks"></ha-icon><b>${esc(T.nolists)}</b><span>${esc(T.nolistsSub)}</span><button class="setup" data-setup><ha-icon icon="mdi:plus"></ha-icon>${esc(T.setup)}</button></div>`;
       else if (this._err) body = `<div class="empty">${esc(T.unavailable)}: ${esc(this._err)}</div>`;
       else if (this._items) {
         const open = this._items.filter((i) => i.status === 'needs_action');
@@ -162,7 +163,7 @@
         .dn{display:flex;gap:10px;margin-top:4px}
         .lnk{display:flex;align-items:center;gap:6px;background:none;border:none;color:#888;font:inherit;font-size:13px;cursor:pointer;padding:6px 4px}
         .donel{columns:3 250px;column-gap:12px;margin-top:6px}
-        .empty{color:#888;padding:30px 10px;text-align:center;font-size:14px}
+        .empty{color:#888;padding:30px 10px;text-align:center;font-size:14px}.nol{display:flex;flex-direction:column;align-items:center;gap:8px;padding:40px 16px}.nol>ha-icon{--mdc-icon-size:48px;color:${G};opacity:.8}.nol b{font-size:17px;color:#e6e6e6}.nol span{max-width:340px;line-height:1.45}.nol .setup{display:flex;align-items:center;gap:6px;margin-top:8px;height:44px;padding:0 18px;border-radius:12px;border:0;background:${G};color:#111;font:inherit;font-size:15px;font-weight:600;cursor:pointer}
         .msg{position:absolute;left:50%;transform:translateX(-50%);top:12px;background:#2e3a2a;border:1px solid ${G};color:#dfe;padding:8px 16px;border-radius:10px;font-size:13px;z-index:5}
         .msg.e{background:#3a2626;border-color:#E06B6B}
         .ov{position:absolute;inset:0;background:rgba(10,10,10,.72);border-radius:16px;display:flex;align-items:flex-start;justify-content:center;padding-top:60px;z-index:4}

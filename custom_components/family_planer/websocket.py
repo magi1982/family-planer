@@ -104,7 +104,7 @@ def _not_found(connection: websocket_api.ActiveConnection, msg: dict[str, Any]) 
 
 @callback
 def async_register_websocket(hass: HomeAssistant) -> None:
-    for handler in (ws_subscribe, ws_set_item, ws_save_chore, ws_delete_chore, ws_update_person, ws_rollover, ws_refresh,
+    for handler in (ws_subscribe, ws_stats, ws_set_item, ws_save_chore, ws_delete_chore, ws_update_person, ws_rollover, ws_refresh,
                     ws_upload_image, ws_list_refresh, ws_list_categories, ws_list_assign,
                     ws_redeem, ws_decide, ws_adjust, ws_announce_test,
                     ws_pin_unlock, ws_pin_change, ws_settings_get, ws_settings_save, ws_person_save, ws_person_remove,
@@ -237,6 +237,18 @@ async def ws_update_person(hass: HomeAssistant, connection: websocket_api.Active
         connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Unknown person")
         return
     connection.send_result(msg["id"])
+
+
+@websocket_api.websocket_command({vol.Required("type"): "family_planer/stats", vol.Optional("entry_id"): str,
+                                  vol.Optional("period"): vol.In(["w", "m", "q"])})
+@callback
+def ws_stats(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    """Statistics page: read-only, same visibility as the planner itself (no PIN)."""
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    connection.send_result(msg["id"], planner.stats(msg.get("period", "")))
 
 
 @websocket_api.websocket_command({vol.Required("type"): "family_planer/refresh", vol.Optional("entry_id"): str})

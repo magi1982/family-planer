@@ -9,7 +9,7 @@ chores:   {chore_id: {"title", "assign": {person_id: {day(str "1".."7"): {"every
             - window: number of days to complete (1 = only that day)
 items:    {item_id: {"chore_id", "person_id", "title", "start": iso, "due": iso, "done": bool, "done_at": iso|None}}
             special chores instead carry "schedule", "persons", "rotate", "window" (see schedule.py)
-history:  {iso_date: {person_id: {"done": n, "total": n, "missed": [titles]}}}
+history:  {iso_date: {person_id: {"done": n, "total": n, "missed": [titles], "titles": [done titles], "hours": [done hours]}}}
 """
 from __future__ import annotations
 
@@ -131,7 +131,10 @@ def rollover(data: dict, today: date, away: dict | None = None) -> bool:
         rec["total"] += 1
         if it.get("done"):
             rec["done"] += 1
+            rec.setdefault("titles", []).append(it.get("title", ""))  # statistics: which chore, how often
             at = str(it.get("done_at") or "")[11:16]  # local HH:MM
+            if at:
+                rec.setdefault("hours", []).append(int(at[:2]))  # statistics: when the family helps
             if at and at > rec.get("last", ""):
                 rec["last"] = at
             # for the on-time award: done before the last day, or the time it was done on the last day

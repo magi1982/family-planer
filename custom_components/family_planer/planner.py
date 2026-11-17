@@ -31,6 +31,7 @@ from . import (
     awards,
     engine,
     levels,
+    stats,
     lists,
     msgqueue,
     persontodos,
@@ -414,6 +415,9 @@ class FamilyPlanner:
             df = self.data["sonder"].get(inst["sid"]) or {}
             rewards._add(self.data["ledger"], inst["pid"], pts, "sonder", ref, "⭐ " + (df.get("title") or ""),
                          dt_util.now().isoformat())
+        df = self.data["sonder"].get(inst["sid"]) or {}
+        stats.log(self.data, ref, {"k": "sonder", "pid": inst["pid"], "t": df.get("title"), "h": dt_util.now().hour}
+                  if done else None, self.today())
         self._changed()
 
     async def async_sonder_release(self, iid: str) -> None:
@@ -698,6 +702,20 @@ class FamilyPlanner:
 
     def level_settings(self) -> dict[str, Any]:
         return settings_spec.clean_levels(self.settings.get("levels"))
+
+    def coin_settings(self) -> dict[str, Any]:
+        return settings_spec.clean_coin(self.settings.get("coin"))
+
+    def stats_settings(self) -> dict[str, Any]:
+        return settings_spec.clean_stats(self.settings.get("stats"))
+
+    def stats(self, per: str) -> dict[str, Any]:
+        """Statistics page (computed on request, not part of every snapshot)."""
+        per = per if per in stats.PERIODS else self.stats_settings()["period"]
+        pids = [pid for pid, _ in self.persons_sorted()]
+        out = stats.family(self.data, pids, self.today(), per, self.points_mode() == "fair",
+                           self.award_settings()["ontime_time"])
+        return {**out, "period": per, "settings": self.stats_settings()}
 
     def award_settings(self) -> dict[str, Any]:
         return awards.clean_settings(self.settings.get("awards"))
@@ -1100,6 +1118,20 @@ class FamilyPlanner:
         if done and pts > 0:
             rewards._add(self.data["ledger"], todo["person_id"], pts, "todo", ref, todo["title"],
                          dt_util.now().isoformat())
+        stats.log(self.data, ref, {"k": "todo", "pid": todo["person_id"], "t": todo.get("title"),
+                                   "src": self._todo_list_name(todo), "h": dt_util.now().hour} if done else None,
+                  self.today())
+
+    def _todo_list_name(self, todo: dict) -> str:
+        """Name of the list a to-do came from (statistics); to-dos made in the planner: "Planer"."""
+        entity = str(todo.get("src") or "").split("|")[0]
+        if not entity:
+            return "Planer"
+        for lst in self.data.get("lists", {}).values():
+            if lst.get("entity") == entity and lst.get("name"):
+                return str(lst["name"])
+        st = self.hass.states.get(entity)
+        return str((st.attributes.get("friendly_name") if st else None) or entity.split(".")[-1])
 
     async def async_refresh_all(self) -> bool:
         """Refresh button in the header: pull all calendars and lists now, then recompute away, season and lists.
@@ -1354,7 +1386,8 @@ class FamilyPlanner:
             "points": {**self.gamification(), "mode": self.points_mode(),
                        "reward_notify": validate.entities(st.get("reward_notify"), ("notify",)),
                        "reward_value": self.sizes()["value"], "currency": self.sizes()["currency"],
-                       "awards": self.award_settings(), "levels": self.level_settings()},
+                       "awards": self.award_settings(), "levels": self.level_settings(), "coin": self.coin_settings(),
+                       "stats": self.stats_settings()},
             "announce": {**DEFAULT_ANNOUNCE, **(st.get("announce") or {})},
             "lists_settings": {"optimize_time": st.get(CONF_OPTIMIZE_TIME) or "03:00", "ai_task": st.get(CONF_AI_TASK),
                                "prune_days": validate.integer(st.get("prune_days"), 7, 365, 30)},
@@ -1382,7 +1415,7 @@ class FamilyPlanner:
         elif section == "points":
             patch, flags = settings_spec.points(data, self.gamification(), self.points_mode(), st.get("reward_notify") or [],
                                                 self.sizes()["value"], self.sizes()["currency"], self.award_settings(),
-                                                self.level_settings())
+                                                self.level_settings(), self.coin_settings(), self.stats_settings())
         elif section == "announce":
             patch, flags = settings_spec.announce(data, {**DEFAULT_ANNOUNCE, **(st.get("announce") or {})},
                                                   self.data["persons"])
@@ -1557,6 +1590,7 @@ class FamilyPlanner:
                          "nav": self.nav(), "nav_title": bool(st.get("nav_title", False)),
                          "ontime_time": self.award_settings()["ontime_time"],
                          "confetti": self.award_settings()["confetti"],
+                         "coin": self.coin_settings(), "stats": self.stats_settings(),
                          "default_view": st.get("default_view") if st.get("default_view") in settings_spec.VIEWS else "today"},
             "season": self.season(),
             "season_cfg": {k: v for k, v in self.season_settings().items()

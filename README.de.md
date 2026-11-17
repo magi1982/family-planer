@@ -32,6 +32,7 @@ Alles wird in der Oberfläche eingerichtet, **kein YAML**.
   - [Schule & Stundenplan](#schule--stundenplan)
   - [Ferien pausieren Ämtli](#ferien-pausieren-ämtli)
   - [Zuverlässigkeit, Punkte, Level & Auszeichnungen](#zuverlässigkeit-punkte-level--auszeichnungen)
+  - [Statistik](#statistik)
   - [Echte Belohnungen](#echte-belohnungen)
   - [Eltern-PIN](#eltern-pin)
   - [To-dos ohne Datum](#to-dos-ohne-datum)
@@ -147,7 +148,8 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 
 ![Belohnungen](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/rewards.png)
 
-- **Zuverlässigkeit** in Prozent (30 Tage), farbiges Band pro Person.
+- **Zuverlässigkeit** in Prozent (30 Tage), farbiges Band pro Person. Sie zählt nur **zugewiesene Ämtli** – Sonderämtli und To-dos senken sie nie.
+- **Punkte als Taler** (Einstellung, standardmässig an): Punkte zeigen einen kleinen Taler – Silberring, Goldkern, eine Kerbe pro Familienmitglied und ein Buchstabe nach Wahl (oder ein kleiner Stern). Alle paar Sekunden blitzt ein kleiner Stern darauf wie Sonne auf Metall; beim Abhaken fliegt der Taler zum Bild der Person. Aus = nur die Zahl.
 - **Faire Punkte** (Standard): Wer **alle** Ämtli des Tages erledigt, bekommt gleich viele Punkte (Standard 30) – egal ob 2 oder 6 Ämtli. Jedes erledigte Ämtli bringt sofort seinen Anteil; 3 von 6 erledigt = 50 % = 15 Punkte. Die Punkte im Ämtliplan wirken als Gewicht (ein schweres Ämtli mit 20 zählt doppelt so viel wie eines mit 10). Alternativ Modus *Pro Ämtli*: mehr Ämtli, mehr Punkte.
 - **Punkte**: zusätzlich **Tagesbonus** für einen ganz erledigten Tag, **Serienbonus** für jede 7-Tage-Serie. Wird ein Ämtli wieder geöffnet, werden die Punkte zurückgebucht.
 - **Level pro Schuljahr** (Saison, beginnt am 1. August – einstellbar): von *Starter* über *Held* und *Legende* bis zu herrlich verrückten Namen ab Level 21. Die Level sind in **Stufen – Bronze (1–5), Silber (6–10), Gold (11–15), Diamant (16–20) und Rubin (ab 21)**; das Level-Abzeichen am Bild zeigt die Stufenfarbe. Eingelöste Punkte senken das Level nie.
@@ -176,9 +178,19 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 
 - Die **beste Auszeichnung legt einen Metall-Rahmen** ums Bild (Platin, Gold, Silber, Bronze) mit sanftem Glanz; die Krone sitzt gerade über dem Kopf.
 - **Punkte pro Auszeichnung**: einmal pro Gewinn, und wieder, wenn man sie neu gewinnt. Grössen: klein = ⅓, mittel = ⅔, gross = 1×, riesig = 2× der Punkte für einen ganzen Tag. Jede Auszeichnung lässt sich unter *Einstellungen → Punkte* ausschalten oder anders gewichten.
-- **Konfetti für alle** (auch Erwachsene): kleines Konfetti mit Namen, wenn jemand alle Ämtli des Tages erledigt hat; mittleres oder grosses in der Pokalfarbe bei Pokalen. Höchstens ein grosses Konfetti pro Person und Tag; täglich wechselnde Auszeichnungen (Serie, Fleissbiene, Frühaufsteher) bekommen keines. Abschaltbar; berücksichtigt *Bewegung reduzieren*.
+- **Konfetti für alle** (auch Erwachsene): kleines Konfetti mit Namen, wenn jemand alle Ämtli des Tages erledigt hat; mittleres oder grosses in der Pokalfarbe bei Pokalen. Höchstens ein grosses Konfetti pro Person und Tag; täglich wechselnde Auszeichnungen (Serie, Fleissbiene) bekommen keines. Abschaltbar; berücksichtigt *Bewegung reduzieren*.
 - **Fair auch bei Prozent und Auszeichnungen**: Im Modus *Fair* zählt bei der Zuverlässigkeit, der Krone der Woche, dem Pokal des Monats und der Fleissbiene **jeder Tag gleich viel** – egal ob 2 oder 6 Ämtli. Die Quote ist der Durchschnitt der Tagesquoten; die Fleissbiene hat die meisten ganzen Ämtli-Tage. Im Modus *Pro Ämtli* zählen wie bisher die einzelnen Ämtli.
 - **Verlauf** pro Person: Ämtli, Boni, Belohnungen.
+
+### Statistik
+
+Ein vierter Knopf, **Statistik**, zeigt, was die Familie geschafft hat – so einfach, dass es auch Kinder verstehen.
+
+- **Zuerst die Familie:** geschaffte Ämtli, freiwillige Ämtli, To-dos, Tage, an denen *alle alles geschafft* haben (mit Rekord), **Pokale & Auszeichnungen** im Zeitraum und insgesamt pro Person, **„Wer hat was gemacht?“** (Ämtli / freiwillige Ämtli / To-dos pro Person) und **„Welche Ämtli – wer wie oft?“** als Tabelle (grösserer Kreis = öfter). Darunter eine Karte pro Person mit der Zuverlässigkeit als **10 Punkte** (*Lea schafft 9 von 10 Ämtli*), den letzten 7 Tagen als farbige Punkte und der aktuellen Serie.
+- **Knöpfe oben** für *Familie* und jede Person; ein Tipp auf eine Karte öffnet die eigene Seite.
+- **Eigene Seite:** die 10 Punkte mit kurzem Lob und Trend, Kacheln (Ämtli, freiwillig geholfen, To-dos, rechtzeitig fertig, Tage am Stück mit Rekord, Punkte), die **letzten 7 Tage als Bauklötze** (1 Klotz = 1 Ämtli – an vollen Tagen werden die Klötze kleiner, die Zahl steht darunter), **12 Wochen als Punkte** (grün = alles, gelbgrün = 1 vergessen, orange = 2, rot = 3 oder mehr, grau = keine Ämtli), **Was ich gemacht habe** (pro Art und Ämtli), **Woher meine Punkte kommen** (ein Punkte-Glas mit einer Schicht pro Quelle: Ämtli, freiwillige Ämtli, To-dos, Tagesbonus, Serien-Bonus, Auszeichnungen, Level-Bonus, Extra von Mama/Papa – dazu *für Belohnungen eingelöst* und die letzten Punkte), **Meine Auszeichnungen**, **Da üben wir noch** (die am häufigsten vergessenen Ämtli, freundlich formuliert) und **Wann ich helfe** (Morgen / Nachmittag / Abend).
+- **Zeitraum:** Woche, Monat oder 3 Monate (ein Tipp wechselt). Die Zahlen kommen aus den Daten, die der Planer ohnehin führt (rund 120 Tage); welches Ämtli wann erledigt wurde, wird ab Version 0.15.0 festgehalten.
+- Einstellungen unter *Einstellungen → Punkte*: Zeitraum beim Öffnen, *Personen vergleichen* (Familien-Tabellen ein/aus) und *Da üben wir noch* ein/aus. Der Knopf lässt sich wie die anderen ausblenden.
 
 ### Echte Belohnungen
 
@@ -280,6 +292,7 @@ data:
   - **täglich** zur eingestellten Uhrzeit wird alles, was noch unter *Sonstiges* liegt, neu geordnet – optional mit einer **KI-Aufgabe** (OpenAI, Google, Ollama …),
   - **nie mehr als 5–20 Kategorien** (pro Liste wählbar); selten genutzte werden unter *Sonstiges* zusammengefasst.
 - Eintrag **einmal verschieben – die Liste merkt es sich**.
+- **Noch keine Liste?** Die Seite zeigt eine kurze Erklärung und einen Knopf **Liste einrichten**, der direkt *Einstellungen → Listen* öffnet.
 - Kategorien auf der Karte **umbenennen, sortieren, hinzufügen, löschen**.
 - Hinzufügen-Feld, abhaken, erledigte ein-/ausblenden und löschen. Mengenangaben („2x Milch“, „Mehl 1 kg“) werden beim Einordnen ignoriert.
 
@@ -331,6 +344,8 @@ Innerhalb eines Tages läuft zur gleichen Tageszeit wieder dieselbe Animation, a
 | Schulferien | aus den Kalendertiteln: Sportferien, Frühlingsferien, Pfingstferien, Sommerferien (ein Strand), Herbstferien, Weihnachtsferien | 3 Tage vorher |
 | Persönlich | Geburtstage, Hochzeitstag, Kennenlerntag | am Tag selbst |
 
+**Info-Texte:** Bräuche und Feiertage (Samichlaus, Weihnachten, Silvester, Dreikönigstag, Fasnacht, Ostern, Auffahrt, Pfingsten, 1. August, Bettag, die Jahreszeiten-Anfänge …) bekommen neben dem Datum einen ⓘ-Chip mit einem kurzen, kindgerechten Text, was gefeiert wird.
+
 Jedes Ereignis lässt sich ausschalten oder bekommt eine eigene Vorlaufzeit; der *Vorrang* entscheidet, wenn mehreres zusammenfällt (Standard: Geburtstag > Jahrestag > Feiertag > Brauch > Schulferien > lange Saison). Ob in den eigenen Familienferien Ämtli pausieren, bleibt im [Ferien-Check](#ferien-pausieren-ämtli).
 
 **Geburtstage.** Geburtsdatum pro Person unter *Einstellungen → Personen* (Jahr freiwillig). Am Tag gibt es oben Wimpel, Ballone und ein „Happy Birthday“-Band, und die Zeile des Geburtstagskinds feiert den ganzen Tag mit einer von fünf Animationen, die hinter der Person hervorkommen: Konfetti-Kanone, Ballon-Fahrt, Seifenblasen, Regenbogen-Disco oder Sternenregen – für alle verschieden und jedes Jahr eine andere, oder fest pro Person. **Alle Punkte des Geburtstagskinds zählen doppelt.**
@@ -346,6 +361,7 @@ Jedes Ereignis lässt sich ausschalten oder bekommt eine eigene Vorlaufzeit; der
 Lustige Extra-Ämtli, die nur **Bonuspunkte** geben – nicht erledigt oder abgelaufen verschlechtert die Zuverlässigkeit (%) nie. Unter *Einstellungen → Sonderämtli* (Eltern-PIN) gibt es 58 Vorlagen mit passendem Zeitpunkt (Christbaumkugeln für jedes Kind vom 10. bis 24. Dezember, Geburtstagskarte 3 Tage vorher, Laub rechen ab Dienstag 5 Tage inkl. Samstag, Eier färben vor Ostern, Schweizerfahne aufhängen …); alltägliche starten ausgeschaltet. Eigene mit Titel, Symbol, Punkten (klein / mittel / gross / eigene), Vergabe, Wann (einmalig, täglich, Wochentage, alle X Tage, jährlich, bei einem Ereignis, am Geburtstag einer Person, am Hochzeitstag, im Advent, bei Wetter, ab Temperatur), Vorlauf, Frist, Uhrzeit, Sichtbarkeit (immer / in einer Saison / bei Wetter) und *geheim*.
 
 - **Freiwillig**: Das Ämtli wartet in der Kachel *Freiwillig* neben den Personen (nur sichtbar, wenn etwas offen ist). Wer aus der Familie zuerst kommt (auch Erwachsene), tippt *Ich nehm's!*, wählt sich auf der grossen Avatar-Kachel aus, und das Ämtli wandert in seine Zeile. Wiederkehrende kommen jedes Mal neu.
+- **Reihenfolge in der Kachel Freiwillig:** zuerst seltene (nur wenn jemand weg ist, Geburtstag, Hochzeitstag), dann eigene Sonderämtli, dann der Katalog; innerhalb davon das, das zuerst endet. Katalog-Ämtli, die niemand genommen hat, machen am nächsten Tag Platz – so wechselt die Kachel täglich, und ein wichtigeres Ämtli darf ein noch nicht genommenes Katalog-Ämtli verdrängen.
 - **Jedes Kind**, **Überraschung** (zufällig, standardmässig höchstens 2 pro Kind und Woche) oder **Fix**.
 - **Nur wenn weg**: ein Ämtli nur an Tagen, an denen ein bestimmter Erwachsener (oder irgendein Erwachsener) weg ist – gleiche Erkennung wie beim Pausieren der Ämtli (Kalender oder Ferien-Check). *Braucht einen Erwachsenen* blendet ein Ämtli aus, solange alle Erwachsenen weg sind.
 - **Geheim**: Im Planer steht „Geheim-Ämtli“, ein Tipp auf den Augen-Knopf rechts zeigt es 5 Sekunden (gelb, solange es niemand genommen hat, danach grau). Bei Geburtstagen bekommt das Geburtstagskind es nie.
@@ -355,10 +371,13 @@ Lustige Extra-Ämtli, die nur **Bonuspunkte** geben – nicht erledigt oder abge
 - **Links:** die Uhrzeit mit Wochentag und Datum daneben, darunter die Seiten-Knöpfe. **Rechts:** Wetter und **Ferien-Check** 🌴 übereinander, daneben die Einstellungen – beide Seiten gleich aufgebaut.
 - **Aktualisieren** ist in den *Einstellungen* (obere Leiste): lädt alle Kalender und Listen auf einmal neu.
 - **Ferien-Check** 🌴 (jeder Eintrag lässt sich als *Ferien* oder *Abwesend* anzeigen; ein freier Tag heisst *Nicht da*, ausser es sind echte Ferien): Ein Zähler zeigt, wie viele Ferien und lange Termine der nächsten zwei Wochen noch offen sind (Details unter *Ferien pausieren Ämtli*). Eltern-PIN.
+- **Statistik** ist der neue vierte Knopf (nach *Belohnungen*); siehe [Statistik](#statistik).
 - **Reihenfolge und sichtbare Knöpfe** unter *Einstellungen → Allgemein*. Zeigt ein Knopf auf eine Ansicht, die es im Dashboard nicht gibt, erscheint er gestrichelt mit Hinweis statt einer leeren Seite.
 - **Heute**: Eine rote Jetzt-Linie trennt vergangene und kommende Termine, beim nächsten steht *in 25 Min*; beim Abhaken gibt es eine kleine Häkchen-Animation.
 - **Ansicht Heute**: oben links *Heute | Woche*. *Heute* zeigt nur den aktuellen Tag, die Personen als Spalten nebeneinander – Schule, Termine mit Jetzt-Linie, Ämtli (offene zuerst), To-dos und Sonderämtli; ‹ › für die anderen Tage, alle Filter funktionieren. *Einstellungen → Allgemein → Standard-Ansicht* bestimmt, welche Ansicht nach der Ruhezeit und beim Zurückkehren aus einem Menü kommt (Standard *Heute*).
-- **Handy**: Der Planer zeigt nur heute, mit ‹ › Pfeilen und Wischen für die anderen Tage; nach der Ruhezeit springt er zurück auf heute.
+- **Filter** *Alles · Ämtli · To-dos & Spezial · Termine · Stundenplan*. Ein Tag ohne alles zeigt *Nichts geplant – frei!* mit dem nächsten Termin (*Morgen: …*). Der Wechsel zwischen *Heute* und *Woche* blendet sanft ein.
+- **Tablet im Hochformat**: der Vorschlag unter dem Wetter wird zum Symbol; antippen zeigt den Text. Im Querformat bleibt er ganz sichtbar.
+- **Handy**: Der Planer zeigt nur heute, mit ‹ › Pfeilen und Wischen für die anderen Tage; nach der Ruhezeit springt er zurück auf heute. Die Personenkarten sind kompakt: Bild links, Name und Abzeichen daneben.
 
 ## Einstellungen im Planer
 
@@ -366,7 +385,7 @@ Lustige Extra-Ämtli, die nur **Bonuspunkte** geben – nicht erledigt oder abge
 
 Alles, was die Home-Assistant-Dialoge bieten, auf einer übersichtlichen Seite – auch am Tablet: **Einstellungen** in der Navigation.
 - Geschützt mit der **Eltern-PIN** (immer, auch für Admins).
-- **Ohne PIN** zeigt die Seite nur die **Bilder** (Avatar-Baukasten und Foto hochladen). **„Eltern-PIN“** oben rechts öffnet alle Register: *Bilder*, *Allgemein* (Module, Sprache, Design und Stil, Reihenfolge der Navigation, Vollbild, Seitenleiste, Tageswechsel …), *Personen* (Reihenfolge, Rolle Kind/Erwachsen, Farbe, Kalender, Spitznamen, Schulkalender, Blöcke pro Wochentag, Schulweg), ***Ämtli*** (der ganze Ämtliplan – **„+ Besonderes Ämtli“** und **„+ To-do“** öffnen ein Formular im Popup; die eigene Ämtliplan-Seite ist standardmässig ausgeblendet), *Punkte* (inkl. jeder Auszeichnung mit ein/aus und Grösse, Frühaufsteher-Zeit, Konfetti), *To-dos*, *Listen*, *Ferien* (Ferien-Check), *Ansagen*, ***Status*** (letzter erfolgreicher Abgleich und letzter Fehler pro Kalender, Liste und Tageswechsel; Quellen ohne Meldung seit 30 Tagen verschwinden).
+- **Ohne PIN** zeigt die Seite nur die **Bilder** (Avatar-Baukasten und Foto hochladen). **„Eltern-PIN“** oben rechts öffnet alle Register: *Bilder*, *Allgemein* (Module, Sprache, Design und Stil, Reihenfolge der Navigation, Vollbild, Seitenleiste, Tageswechsel …), *Personen* (Reihenfolge, Rolle Kind/Erwachsen, Farbe, Kalender, Spitznamen, Schulkalender, Blöcke pro Wochentag, Schulweg), ***Ämtli*** (der ganze Ämtliplan – **„+ Besonderes Ämtli“** und **„+ To-do“** öffnen ein Formular im Popup; die eigene Ämtliplan-Seite ist standardmässig ausgeblendet), *Punkte* (inkl. jeder Auszeichnung mit ein/aus und Grösse, Pünktlich-Zeit, Konfetti, Taler, Statistik), *To-dos*, *Listen*, *Ferien* (Ferien-Check), *Ansagen*, ***Status*** (letzter erfolgreicher Abgleich und letzter Fehler pro Kalender, Liste und Tageswechsel; Quellen ohne Meldung seit 30 Tagen verschwinden).
 - Jedes Feld mit kurzer Beschreibung; ungültige Eingaben werden mit klarer Meldung abgelehnt (z. B. Ansagen ohne Lautsprecher).
 - Änderungen, die neue Zeitpläne brauchen (Tageswechsel, Module, Listen, Ansagen), laden die Integration automatisch neu; der Planer verbindet sich selbst wieder.
 - Die Dialoge unter *Einstellungen → Geräte & Dienste → Family Planer → Konfigurieren* bleiben verfügbar.
@@ -461,6 +480,12 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Anfragen melden an | – | zusätzliche Benachrichtigung (z. B. Handy-App) |
 | Gegenwert einer grossen Belohnung | 20 | Geldwert zur Orientierung; Klein ¼, Mittel ½, Mega 2×, Riesig 5× |
 | Währung | CHF | wird hinter den Beträgen angezeigt |
+| Pünktlich-Profi: rechtzeitig bis | 20:00 | ein Ämtli zählt als rechtzeitig vor seinem letzten Tag oder an diesem bis zu dieser Zeit |
+| Punkte als Taler zeigen | an | Taler neben den Punkten; aus = nur die Zahl |
+| Buchstabe auf dem Taler | – (Stern) | ein Buchstabe oder eine Ziffer, z. B. der Anfangsbuchstabe der Familie |
+| Statistik: Zeitraum beim Öffnen | Woche | Woche · Monat · 3 Monate |
+| Statistik: Personen vergleichen | an | Familien-Tabellen *Wer hat was gemacht?* und *Welche Ämtli – wer wie oft?* |
+| Statistik: „Da üben wir noch“ | an | am häufigsten vergessene Ämtli auf der eigenen Seite |
 
 **Wochenplan → Ansagen bei Bewegung**
 
@@ -587,15 +612,15 @@ Nicht nötig – aber möglich. Die Karten werden automatisch geladen.
 type: vertical-stack
 cards:
   - type: custom:family-planer-nav-card
-    paths: { planer: planer, listen: einkauf, belohnungen: belohnungen, einstellungen: einstellungen }
+    paths: { planer: planer, listen: einkauf, belohnungen: belohnungen, statistik: statistik, einstellungen: einstellungen }
   - type: custom:family-planer-card
-    view: week        # week | plan | lists | rewards | settings
+    view: week        # week | plan | lists | rewards | stats | settings
     theme: space      # optional: ha | light | dark | rainbow | space
     style: glass      # optional: standard | transparent | glass
     language: de      # optional, sonst Einstellung der Integration bzw. HA-Sprache
 ```
 
-Für ein Vollbild-Tablet empfiehlt sich eine Panel-Ansicht pro Seite (Pfade wie oben) und z. B. *Kiosk Mode*.
+Für ein Vollbild-Tablet empfiehlt sich eine Panel-Ansicht pro Seite (Pfade wie oben) und z. B. *Kiosk Mode*. **Neu in 0.15.0:** Für den Knopf *Statistik* eine Ansicht mit dem Pfad `statistik` und eine Karte mit `view: stats` anlegen (das Seitenleisten-Panel braucht nichts); bis dahin erscheint der Knopf gestrichelt.
 
 ---
 

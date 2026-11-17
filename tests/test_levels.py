@@ -50,3 +50,11 @@ def test_level_up_bonus_unlocks_and_reset():
     st = data["levels"]["lea"]
     assert st["level"] == 1 and st["best"]["2026-08-01"] == 5 and "hamster" in st["unlocked"]
     assert L.view(data, "lea", GAME, date(2027, 8, 2), "08-01", "de")["level"] == 1
+
+
+def test_volunteer_points_count_as_xp():
+    ledger = [{"pid": "lea", "pts": 30, "kind": "chore", "ts": "2026-09-01T10:00"},
+              {"pid": "lea", "pts": 40, "kind": "sonder", "ts": "2026-09-02T10:00"},
+              {"pid": "lea", "pts": -50, "kind": "reward", "ts": "2026-09-03T10:00"},
+              {"pid": "lea", "pts": 60, "kind": "level", "ts": "2026-09-03T10:00"}]
+    assert L.xp(ledger, "lea", date(2026, 8, 1)) == 70  # rewards and level bonuses never count
