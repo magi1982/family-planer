@@ -1,7 +1,7 @@
 """Special chores ("Sonderämtli"): fun extra jobs for bonus points (no HA imports, unit-tested).
 
 A *definition* says what, when and for whom; every day the planner turns the definitions into *instances*
-(one job with a time window). Open "free" instances wait in the volunteer tile until the fastest child
+(one job with a time window). Open "free" instances wait in the volunteer tile until the fastest family member
 claims them. Special chores only ever give points: missed or expired ones never count against reliability,
 which is why they live outside the normal chore items.
 """
@@ -266,8 +266,12 @@ def _season_ok(df: dict, d: date, ctx: dict) -> bool:
 
 
 def _eligible(df: dict, persons: dict) -> list[str]:
+    """Who may do it: the chosen persons, otherwise for volunteer chores the whole family; chores that are
+    handed out (each / fixed / surprise) still go to the children only."""
     if df["persons"]:
         return [p for p in df["persons"] if p in persons]
+    if df.get("mode", "free") == "free":
+        return list(persons)
     kids = [p for p, x in persons.items() if x.get("role", "kid") != "adult"]
     return kids or list(persons)
 
@@ -367,7 +371,7 @@ def refresh(insts: dict, defs: dict, persons: dict, today: date, ctx: dict, cfg:
 
 
 def claim(insts: dict, defs: dict, persons: dict, iid: str, pid: str, ts: str) -> dict:
-    """Fastest child wins: a free instance becomes theirs. Raises ValueError when not possible."""
+    """Fastest family member wins: a free instance becomes theirs. Raises ValueError when not possible."""
     inst = insts.get(iid)
     if inst is None:
         raise KeyError(iid)

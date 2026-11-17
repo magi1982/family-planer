@@ -43,7 +43,7 @@ def test_birthday_card_three_days_before_and_secret():
     c = ctx(date(2026, 8, 7), birthdays={"a": "2016-08-10"})
     w = SO.desired(defs, PERSONS, date(2026, 8, 7), c)
     (inst,) = w.values()
-    assert inst["for"] == "a" and inst["elig"] == ["b"] and inst["end"] == "2026-08-10"
+    assert inst["for"] == "a" and inst["elig"] == ["b", "c"] and inst["end"] == "2026-08-10"
     assert defs["k"]["secret"] is True
     assert SO.desired(defs, PERSONS, date(2026, 8, 6), c) == {}
 
@@ -119,7 +119,10 @@ def test_volunteer_keeps_eligible_and_max_open():
     defs = {f"d{i}": SO.clean_def({"title": f"X{i}", "anchor": {"t": "daily"}, "span": 1}, PERSONS) for i in range(5)}
     insts = {}
     SO.refresh(insts, defs, PERSONS, date(2026, 10, 5), ctx(date(2026, 10, 5)), {"max_open": 3})
-    assert len(insts) == 3 and all(i["elig"] == ["a", "b"] for i in insts.values())
+    # volunteer chores are open to the whole family (grown-ups too)
+    assert len(insts) == 3 and all(i["elig"] == ["a", "b", "c"] for i in insts.values())
+    iid = next(iter(insts))
+    assert SO.claim(insts, defs, PERSONS, iid, "c", "2026-10-05T10:00")["pid"] == "c"
 
 
 def test_only_while_a_grown_up_is_away():
@@ -128,7 +131,7 @@ def test_only_while_a_grown_up_is_away():
     today = date(2026, 10, 6)
     assert SO.desired({"x": df}, persons, today, ctx(today)) == {}
     w = SO.desired({"x": df}, persons, today, ctx(today, away={"d"}))
-    assert list(w.values())[0]["elig"] == ["a", "b"]
+    assert list(w.values())[0]["elig"] == ["a", "b", "c"]
     anyone = {**SO.from_template("wegznacht"), "on": True}
     assert SO.from_template("wegznacht")["on"] is False  # templates for away days start switched off
     assert SO.desired({"y": anyone}, persons, today, ctx(today, away={"c"}))

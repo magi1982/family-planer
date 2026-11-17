@@ -688,9 +688,13 @@ Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 4. **Helferherz:** Ein Ämtli eines anderen übernommen oder ein Zusatz-/Sonder-Ämtli freiwillig gemacht.
 5. **Aufholjagd:** Die eigene Quote gegenüber der Vorwoche am stärksten verbessert (fair für alle Stufen).
 
-**Weitere Vorschläge aus vorhandenen Daten (Ersatz Frühaufsteher, Wahl offen):**
+**Weitere Vorschläge aus vorhandenen Daten (Entscheid: 6 Freiwilligen-Champion und 7 Pünktlich-Profi kommen; Pünktlich-Profi ersetzt den Frühaufsteher):**
 6. **Freiwilligen-Champion:** am meisten freiwillige Sonder-Ämtli der Woche übernommen und erledigt (Sonder-Ämtli: wer übernommen, wann erledigt).
 7. **Pünktlich-Profi:** höchster Anteil Ämtli, die vor ihrer Fälligkeit erledigt wurden (Ämtli: Start, Fälligkeit, erledigt um) – Abend-Ämtli zählen bis zum Abend.
 8. **Sofort-Macher:** höchster Anteil Ämtli, die innerhalb von 30 Minuten nach ihrem Start erledigt wurden – fair, weil jedes Ämtli ab seiner eigenen Startzeit zählt.
 9. **To-do-Held:** am meisten eigene To-dos der Woche abgehakt (To-dos: erledigt um).
 10. **Sparfuchs:** am meisten Punkte der Woche gesammelt und behalten statt eingelöst (Punktebuch).
+11. **Retter in der Not:** ein freiwilliges Sonder-Ämtli übernommen, das schon am längsten offen war (Sonder-Ämtli: seit wann offen, wann übernommen).
+12. **Allrounder:** in der Woche die meisten *verschiedenen* Ämtli erledigt (Ämtli-Art pro erledigtem Ämtli).
+
+**Freiwillige Ämtli (umgesetzt):** ohne eigene Personenauswahl kann jetzt die ganze Familie (auch Erwachsene) ein freiwilliges Ämtli übernehmen; verteilte Ämtli (jedes Kind / fix / Überraschung) gehen weiter nur an Kinder. Die Auswahl „Wer nimmt es?“ hat grosse Avatar-Kacheln statt kleiner Knöpfe.

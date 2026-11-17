@@ -8,6 +8,7 @@
 - **Summer at home:** from the first day of the summer holidays beach and house with pool take turns day by day; outside the holidays summer is shown at home, so the pool animations play too.
 
 ### Changed
+- **Volunteer chores** are open to the whole family (grown-ups too) unless persons are chosen for the chore; chores that are handed out (each / fixed / surprise) still go to the children. The "Who takes it?" picker now shows big avatar tiles that are easy to hit on a tablet.
 - **Titanic and lunar module** now start like every other animation: a tap anywhere on the free picture; their own arrow hints are gone.
 - **Double tap:** the header picture never toggles fullscreen any more (a tap there plays an animation); buttons in the header always keep their own function.
 - **Lists – Optimise** answers at once: a list read in the last 45 s is reused, the keywords sort right away and the AI sorts the rest in the background (the list updates live when it is done).
