@@ -634,7 +634,7 @@ Wie Titanic und Mondfähre: in jeder Szene etwas, das beim Antippen eine kleine 
 **Verworfen („Nein“):** 32, 43, 46, 47, 53, 64, 69, 81, 82, 84, 85, 90, 91, 95, 96, 100, 102, 104, 108.
 **In Arbeit (Runde 5, im Artefakt „Family Planer – Tipp-Animationen Runde 5“):** 7, 16, 19, 35, 38, 39, 42, 49, 52, 56, 59, 61, 63, 65, 68, 74, 75, 76, 77, 80 sowie 10 gigantische neue: 81 Riesen-Roboter, 82 Konfetti-Tsunami, 83 Riesen-Krake im Pool, 84 Schutzschild, 85 Zeitportal, 86 Himmelswal, 87 Feuer-Phönix, 88 Schwarzes Loch, 89 Süssigkeiten-Lawine, 90 Domino-Kette.
 **Tipp-Hinweis:** sitzt immer am selben Ort – im Himmel zwischen Baum und Haus (HTML-Overlay, an den Bildrand geklemmt, nie ausserhalb); die ganze Szene ist Tippfläche. Objekte, die „hinter“ etwas durchgehen (Schiff hinter Hütte/Palmen/Schirm, Sonne/Mond hinter Haus und Hügeln), werden mit Masken versteckt.
-**Status:** Prototyp, noch nicht im Planer eingebaut.
+**Status:** ✅ umgesetzt in 0.14.0 (62 Animationen, Auswahl siehe 55)
 
 ### 54. Punkte als Coin („Kerben-Taler“)
 Punkte werden überall (Ämtli-Plakette, Punktestand, Belohnungen) mit einem eigenen Coin statt nur einer Zahl gezeigt. Gewählt: „Kerben-Taler ohne Doppelrand“ – flach (2D), Silberscheibe, Goldkern, ein geprägter Buchstabe in der Mitte und 5 eingeprägte Kerben im Silberring. Kein Dauerglanz: nur alle 5–9 s blitzt ein kleiner Stern kurz an einer Stelle auf (wie Sonne auf Metall), jeder Coin in eigenem Takt.
@@ -648,7 +648,8 @@ Datenschutz: kein Familienname im Code oder in Beispielen – der Buchstabe komm
 Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 **Status:** Idee (Design gewählt)
 
-## 55 · Welche Tipp-Animation wann läuft (Vorschlag, noch nicht gebaut)
+## 55 · Welche Tipp-Animation wann läuft
+**Status:** ✅ umgesetzt in 0.14.0
 
 **Zeitfenster:** Tag (06–17 Uhr), Abend (17–20 Uhr), Nacht (20–06 Uhr, wie die Szene). Pro Zeitfenster und Tag wird **eine** Animation fest ausgewählt (vom Datum abgeleitet, nicht dieselbe wie in den letzten Tagen) → 2–3 verschiedene pro Tag; nochmal tippen spielt dieselbe nochmal.
 
@@ -674,7 +675,8 @@ Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 - Buttons im oberen Bereich (links Navigation, rechts weitere Knöpfe wie Info ⓘ) behalten immer ihre Funktion: ein Tipp auf einen Button startet nie eine Animation; nur freie Bildfläche zählt.
 - Einstellungen: „Tipp-Animationen“ an/aus, „Überraschungen“ (aus / selten ≈ 1 Tag pro Woche / oft ≈ 3 Tage pro Woche), Standard: selten (entschieden).
 
-## 56 · Fairere Auszeichnungen (Ideen, noch nicht gebaut)
+## 56 · Fairere Auszeichnungen
+**Status:** ✅ umgesetzt in 0.14.0 (Meilensteine nach Tagen, Pünktlich-Profi, Freiwilligen-Champion, Retter in der Not)
 
 **Problem Meilensteine (100 / 500 / 1000 Ämtli):** Wer mehr Ämtli im Plan hat, erreicht sie schneller.
 - **Entscheid: A.** A) **Alles-erledigt-Tage:** Meilenstein zählt Tage, an denen *alle eigenen* Ämtli erledigt waren (z. B. 25 / 100 / 250 Tage) – unabhängig davon, wie viele Ämtli ein Kind hat.
