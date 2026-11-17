@@ -3280,8 +3280,10 @@ class LoxWochenplanerCard extends FpBase {
   }
   _fit() {
     const root = this.shadowRoot; if (!root) return;
-    root.querySelectorAll('.bin').forEach((b) => { b.classList.remove('two'); const l = b.firstElementChild; const r = b.lastElementChild;
-      if (l.scrollWidth + r.scrollWidth + 8 > b.clientWidth) b.classList.add('two'); });
+    root.querySelectorAll('.tcol').forEach((c) => c.classList.toggle('nar', c.clientWidth > 0 && c.clientWidth < 320));
+    // a title that does not fit on one line (cut with "…" or pushing the chips to a second line) switches the button to two lines
+    root.querySelectorAll('.bin').forEach((b) => { b.classList.remove('two'); const x = b.querySelector('.bx'); const l = b.firstElementChild; const r = b.lastElementChild;
+      if ((x && x.scrollWidth > x.clientWidth + 1) || (r && l && r.offsetTop > l.offsetTop + 2) || b.closest('.tcol.nar')) b.classList.add('two'); });
   }
   _listName(t) {
     const ent = String(t.src || '').split('|')[0]; const st = ent && this._hass && this._hass.states[ent];
@@ -3671,7 +3673,7 @@ class LoxWochenplanerCard extends FpBase {
           <div class="tbody">${body}</div></div>`;
       });
       if (volHtml && isT && !['termine', 'schule'].includes(modeX)) cols.push(`<div class="tcol volc"><div class="lab th vol"><div class="ring vr" style="width:64px;height:64px"><span>🙋</span></div><div class="lt"><div class="nm vl1">${TX.vol} <span class="vs2">${TX.volSub}</span></div></div></div><div class="tbody">${volHtml}</div></div>`);
-      todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(${cols.length},minmax(0,1fr))`}">${cols.join('')}</div>`;
+      todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(auto-fit,minmax(min(100%,150px),1fr))`}">${cols.join('')}</div>`;
     }
 
     this.shadowRoot.innerHTML = `<style>
@@ -3744,7 +3746,7 @@ class LoxWochenplanerCard extends FpBase {
       .aw0{color:var(--fp-text3,#888);font-size:13px}
       .rl2{display:grid;grid-template-columns:22px 140px 1fr;gap:3px 10px;align-items:center;font-size:12px;color:var(--fp-text2,#aaa);padding:7px 0;border-top:1px solid var(--fp-line,#2a2a2a)}.rl2 b{color:var(--fp-text,#ddd)}
       .rl2 em{grid-column:3;font-style:normal;color:#e0a84f;font-size:11px}
-      .nm{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .nm{font-size:15px;font-weight:600;line-height:1.2;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
       .lv{font-size:11px;margin-top:2px}
       .cls{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:2px}.cl{font-size:11px;color:var(--fp-text3,#7a7a7a);display:flex;align-items:center;gap:4px}.cl i{width:7px;height:7px;border-radius:50%;display:inline-block}
       .streak{font-size:11px;color:var(--fp-text2,#9a9a9a);display:flex;align-items:center;gap:3px;margin-top:3px}.streak ha-icon{--mdc-icon-size:13px;color:#e0a84f}
@@ -3795,32 +3797,32 @@ class LoxWochenplanerCard extends FpBase {
       .tgrid{display:grid;gap:8px;align-items:start}.tcol{background:var(--fp-bg2,#232323);border-radius:12px;min-width:0;box-shadow:inset 0 3px 0 var(--pc,#555);overflow:hidden}
       .tcol .lab.th{background:transparent;padding:12px 10px 8px;position:relative;overflow:visible}
       .lab.th .flg{position:absolute;top:-1px;right:24px;width:42px;padding:7px 0 15px;background:var(--rc);color:var(--fp-on-accent,#141414);font-size:13px;font-weight:800;text-align:center;letter-spacing:.2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);z-index:2}
-      .lab.th .nm{padding-right:50px}.lab.th .lv2:empty{display:none}
+      .lab.th .nm{padding-right:50px}.tcol.nar .lab.th{flex-direction:column;align-items:flex-start;gap:6px}.tcol.nar .btn{padding:6px 7px;gap:6px;font-size:12.5px}.tcol.nar .btn .cb{width:19px;height:19px}.tcol.nar .btn.done .cb::after{left:5px;top:1px}.tcol.nar .vcard{grid-template-columns:24px minmax(0,1fr);padding:8px;gap:6px}.tcol.nar .vcard .vi{font-size:18px}.tcol.nar .lab.th .lt{width:100%}.tcol.nar .lab.th .nm{padding-right:0}.lab.th .lv2:empty{display:none}
       .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .tcol .lab.th{flex-direction:row;align-items:center;gap:12px;padding:10px 12px 8px}.card.phone .tcol .lab.th .lt{flex:1;min-width:0}.card.phone .lab.th .nm{padding-right:46px}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
       .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:600;color:#a3a3a3;text-transform:uppercase;letter-spacing:.9px;margin:4px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
-      .bg.one{grid-template-columns:1fr}
+      .bg.one{grid-template-columns:minmax(0,1fr)}
 
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
-      .bin{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l r";align-items:center;column-gap:8px}
-      .bl{grid-area:l;display:flex;align-items:center;gap:6px;min-width:0}.br{grid-area:r;display:flex;align-items:center;gap:5px;justify-content:flex-end}
-      .bx{white-space:nowrap;min-width:0}
-      .bin.two{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"t t p" "m s s";row-gap:4px;align-items:start}.bin.two .bl,.bin.two .br{display:contents}
-      .bin.two .bx{grid-area:t;white-space:normal;overflow-wrap:break-word;hyphens:auto}.bin.two .bl > :not(.bx){grid-area:m;justify-self:start}
-      .bin.two .ptr{grid-area:p;justify-self:end}.c .bg:not(.one) .bin.two .tag .tl,.c .spw .bin.two .tag .tl{display:none}.bin.two .br > .tag{grid-area:s;justify-self:end}
+      .bin{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+      .bl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;flex:1 1 auto}.br{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px;justify-content:flex-end;flex:0 1 auto;min-width:0;margin-left:auto}
+      .bx{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+      .bin.two{align-items:flex-start}.bin.two .bl{flex:1 1 100%}
+      .bin.two .bx{flex:1 1 100%;white-space:normal;overflow:visible;overflow-wrap:break-word;word-break:normal;hyphens:manual;line-height:1.3}
+      .c .bg:not(.one) .bin.two .tag .tl,.c .spw .bin.two .tag .tl{display:none}.btn .tag{max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
       .btn .tag,.due,.age,.ptr{display:inline-block;margin:0;font-style:normal;font-size:11px;font-weight:700;line-height:17px;padding:0 8px;border-radius:9px;white-space:nowrap;letter-spacing:.2px}
       .age{color:#aab2bf;border:1px solid #4a505c;line-height:15px;font-weight:600}
       .ptr{background:rgba(245,197,66,.18);color:#f5c542}.ptr .fpcoin{margin:0 3px 0 -5px}.btn.done .ptr,.btn.done .tag,.btn.done .age{opacity:.6}
       .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542;background:rgba(245,197,66,.18)}
-      .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
+      .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}.spw .br{flex:0 1 auto;min-width:0}.tcol .spw .rvb{min-width:40px;width:40px;padding:0}.tcol .spw .rvb svg{width:22px;height:16px}.tcol.nar .spw{flex-direction:column}.tcol.nar .spw .rvb{width:auto;height:34px}
       .rvb.on{background:rgba(245,197,66,.18);border-color:#f5c542}.rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#f5c542;background:#f5c542}
       .ptp{display:inline-block;margin-left:6px;padding:0 7px;border-radius:9px;background:rgba(245,197,66,.16);color:#f5c542;font-size:11px;font-weight:700;line-height:17px;vertical-align:middle;white-space:nowrap;font-style:normal}.done .ptp{opacity:.6}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),var(--fp-bg2,#232323) 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--fp-bg3,#2b2b2b);font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
       .vs2{font-size:11px;font-weight:400;color:var(--fp-text3,#8a8a8a)}.rvx{display:inline-block;animation:fprvx 5s ease-out both;background:linear-gradient(100deg,currentColor 40%,#ffe27a 50%,currentColor 60%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}@keyframes fprvx{0%{opacity:0;filter:blur(8px);transform:scale(.5) rotate(-6deg);background-position:100% 0}12%{opacity:1;filter:blur(0);transform:scale(1.15) rotate(2deg)}20%{transform:scale(1) rotate(0)}40%{background-position:0 0}86%{opacity:1;filter:blur(0)}100%{opacity:.25;filter:blur(4px)}}@media (prefers-reduced-motion:reduce){.rvx{animation:none}}.vl1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
-      .vcard .vi{font-size:22px;text-align:center}.vcard .vt{min-width:0;font-size:13px;line-height:1.3}
+      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
+      .vcard .vi{font-size:22px;text-align:center;align-self:start}.vcard .vt{min-width:0;font-size:13px;line-height:1.3;overflow-wrap:break-word}.vcard > .ptr{grid-column:2;justify-self:start}
       .vcard .vbtn,.vcard .vpick{grid-column:1 / -1}.vbtn{display:flex;gap:8px}.vbtn .take{flex:1 1 auto;max-width:200px;height:40px;animation:fppul 2.4s ease-in-out infinite}
       .c.vc2{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;align-content:flex-start;align-items:flex-start}.c.vc2 .vcard{flex:1 1 240px;max-width:340px}
-      .c .bg:not(.one) > .spw{grid-column:span 2}.c .spw .btn .bin{min-width:0;overflow:hidden}.c .spw .rvb{width:36px;min-width:36px;height:auto;padding:0}.c .spw .rvb svg{width:22px;height:16px}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
+      .c .bg:not(.one) > .spw{grid-column:span 2}.c .spw .btn .bin{min-width:0}.c .spw .rvb{width:36px;min-width:36px;height:auto;padding:0}.c .spw .rvb svg{width:22px;height:16px}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
       .take{border:none;border-radius:10px;padding:8px 12px;background:#f5c542;color:var(--fp-on-accent,#141414);font:inherit;font-size:13px;font-weight:700;cursor:pointer;animation:fpwig 2.4s ease-in-out infinite}
       .vpick{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:12px;background:var(--fp-bg2,#232323);animation:fpvin .25s ease-out}.vq{font-size:13px;font-weight:600;color:var(--fp-text,#ddd)}
       .vps{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px}
@@ -4658,8 +4660,10 @@ class LoxWochenplanerCard extends FpBase {
   }
   _fit() {
     const root = this.shadowRoot; if (!root) return;
-    root.querySelectorAll('.bin').forEach((b) => { b.classList.remove('two'); const l = b.firstElementChild; const r = b.lastElementChild;
-      if (l.scrollWidth + r.scrollWidth + 8 > b.clientWidth) b.classList.add('two'); });
+    root.querySelectorAll('.tcol').forEach((c) => c.classList.toggle('nar', c.clientWidth > 0 && c.clientWidth < 320));
+    // a title that does not fit on one line (cut with "…" or pushing the chips to a second line) switches the button to two lines
+    root.querySelectorAll('.bin').forEach((b) => { b.classList.remove('two'); const x = b.querySelector('.bx'); const l = b.firstElementChild; const r = b.lastElementChild;
+      if ((x && x.scrollWidth > x.clientWidth + 1) || (r && l && r.offsetTop > l.offsetTop + 2) || b.closest('.tcol.nar')) b.classList.add('two'); });
   }
   _listName(t) {
     const ent = String(t.src || '').split('|')[0]; const st = ent && this._hass && this._hass.states[ent];
@@ -5049,7 +5053,7 @@ class LoxWochenplanerCard extends FpBase {
           <div class="tbody">${body}</div></div>`;
       });
       if (volHtml && isT && !['termine', 'schule'].includes(modeX)) cols.push(`<div class="tcol volc"><div class="lab th vol"><div class="ring vr" style="width:64px;height:64px"><span>🙋</span></div><div class="lt"><div class="nm vl1">${TX.vol} <span class="vs2">${TX.volSub}</span></div></div></div><div class="tbody">${volHtml}</div></div>`);
-      todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(${cols.length},minmax(0,1fr))`}">${cols.join('')}</div>`;
+      todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(auto-fit,minmax(min(100%,150px),1fr))`}">${cols.join('')}</div>`;
     }
 
     this.shadowRoot.innerHTML = `<style>
@@ -5122,7 +5126,7 @@ class LoxWochenplanerCard extends FpBase {
       .aw0{color:var(--fp-text3,#888);font-size:13px}
       .rl2{display:grid;grid-template-columns:22px 140px 1fr;gap:3px 10px;align-items:center;font-size:12px;color:var(--fp-text2,#aaa);padding:7px 0;border-top:1px solid var(--fp-line,#2a2a2a)}.rl2 b{color:var(--fp-text,#ddd)}
       .rl2 em{grid-column:3;font-style:normal;color:#e0a84f;font-size:11px}
-      .nm{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .nm{font-size:15px;font-weight:600;line-height:1.2;overflow:hidden;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
       .lv{font-size:11px;margin-top:2px}
       .cls{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:2px}.cl{font-size:11px;color:var(--fp-text3,#7a7a7a);display:flex;align-items:center;gap:4px}.cl i{width:7px;height:7px;border-radius:50%;display:inline-block}
       .streak{font-size:11px;color:var(--fp-text2,#9a9a9a);display:flex;align-items:center;gap:3px;margin-top:3px}.streak ha-icon{--mdc-icon-size:13px;color:#e0a84f}
@@ -5173,32 +5177,32 @@ class LoxWochenplanerCard extends FpBase {
       .tgrid{display:grid;gap:8px;align-items:start}.tcol{background:var(--fp-bg2,#232323);border-radius:12px;min-width:0;box-shadow:inset 0 3px 0 var(--pc,#555);overflow:hidden}
       .tcol .lab.th{background:transparent;padding:12px 10px 8px;position:relative;overflow:visible}
       .lab.th .flg{position:absolute;top:-1px;right:24px;width:42px;padding:7px 0 15px;background:var(--rc);color:var(--fp-on-accent,#141414);font-size:13px;font-weight:800;text-align:center;letter-spacing:.2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);z-index:2}
-      .lab.th .nm{padding-right:50px}.lab.th .lv2:empty{display:none}
+      .lab.th .nm{padding-right:50px}.tcol.nar .lab.th{flex-direction:column;align-items:flex-start;gap:6px}.tcol.nar .btn{padding:6px 7px;gap:6px;font-size:12.5px}.tcol.nar .btn .cb{width:19px;height:19px}.tcol.nar .btn.done .cb::after{left:5px;top:1px}.tcol.nar .vcard{grid-template-columns:24px minmax(0,1fr);padding:8px;gap:6px}.tcol.nar .vcard .vi{font-size:18px}.tcol.nar .lab.th .lt{width:100%}.tcol.nar .lab.th .nm{padding-right:0}.lab.th .lv2:empty{display:none}
       .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .tcol .lab.th{flex-direction:row;align-items:center;gap:12px;padding:10px 12px 8px}.card.phone .tcol .lab.th .lt{flex:1;min-width:0}.card.phone .lab.th .nm{padding-right:46px}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
       .tsec{display:flex;flex-direction:column;gap:4px}.tsh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;font-weight:600;color:#a3a3a3;text-transform:uppercase;letter-spacing:.9px;margin:4px 2px 0;white-space:nowrap}.tsh > span:first-child{overflow:hidden;text-overflow:ellipsis}
-      .bg.one{grid-template-columns:1fr}
+      .bg.one{grid-template-columns:minmax(0,1fr)}
 
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
-      .bin{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l r";align-items:center;column-gap:8px}
-      .bl{grid-area:l;display:flex;align-items:center;gap:6px;min-width:0}.br{grid-area:r;display:flex;align-items:center;gap:5px;justify-content:flex-end}
-      .bx{white-space:nowrap;min-width:0}
-      .bin.two{grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"t t p" "m s s";row-gap:4px;align-items:start}.bin.two .bl,.bin.two .br{display:contents}
-      .bin.two .bx{grid-area:t;white-space:normal;overflow-wrap:break-word;hyphens:auto}.bin.two .bl > :not(.bx){grid-area:m;justify-self:start}
-      .bin.two .ptr{grid-area:p;justify-self:end}.c .bg:not(.one) .bin.two .tag .tl,.c .spw .bin.two .tag .tl{display:none}.bin.two .br > .tag{grid-area:s;justify-self:end}
+      .bin{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+      .bl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;flex:1 1 auto}.br{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px;justify-content:flex-end;flex:0 1 auto;min-width:0;margin-left:auto}
+      .bx{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+      .bin.two{align-items:flex-start}.bin.two .bl{flex:1 1 100%}
+      .bin.two .bx{flex:1 1 100%;white-space:normal;overflow:visible;overflow-wrap:break-word;word-break:normal;hyphens:manual;line-height:1.3}
+      .c .bg:not(.one) .bin.two .tag .tl,.c .spw .bin.two .tag .tl{display:none}.btn .tag{max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
       .btn .tag,.due,.age,.ptr{display:inline-block;margin:0;font-style:normal;font-size:11px;font-weight:700;line-height:17px;padding:0 8px;border-radius:9px;white-space:nowrap;letter-spacing:.2px}
       .age{color:#aab2bf;border:1px solid #4a505c;line-height:15px;font-weight:600}
       .ptr{background:rgba(245,197,66,.18);color:#f5c542}.ptr .fpcoin{margin:0 3px 0 -5px}.btn.done .ptr,.btn.done .tag,.btn.done .age{opacity:.6}
       .btn.spc2{border-color:rgba(245,197,66,.55)}.btn.spc2 .tag{color:#f5c542;background:rgba(245,197,66,.18)}
-      .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}
+      .spw{display:flex;gap:6px;align-items:stretch;min-width:0}.spw > .btn{flex:1;min-width:0}.spw .br{flex:0 1 auto;min-width:0}.tcol .spw .rvb{min-width:40px;width:40px;padding:0}.tcol .spw .rvb svg{width:22px;height:16px}.tcol.nar .spw{flex-direction:column}.tcol.nar .spw .rvb{width:auto;height:34px}
       .rvb.on{background:rgba(245,197,66,.18);border-color:#f5c542}.rvb{flex:none;display:flex;align-items:center;justify-content:center;min-width:56px;border:1px solid #444;background:transparent;border-radius:10px;padding:6px 12px;cursor:pointer}.rvb svg{display:block}.rvb.y{border-color:#f5c542;background:#f5c542}
       .ptp{display:inline-block;margin-left:6px;padding:0 7px;border-radius:9px;background:rgba(245,197,66,.16);color:#f5c542;font-size:11px;font-weight:700;line-height:17px;vertical-align:middle;white-space:nowrap;font-style:normal}.done .ptp{opacity:.6}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),var(--fp-bg2,#232323) 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--fp-bg3,#2b2b2b);font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
       .vs2{font-size:11px;font-weight:400;color:var(--fp-text3,#8a8a8a)}.rvx{display:inline-block;animation:fprvx 5s ease-out both;background:linear-gradient(100deg,currentColor 40%,#ffe27a 50%,currentColor 60%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}@keyframes fprvx{0%{opacity:0;filter:blur(8px);transform:scale(.5) rotate(-6deg);background-position:100% 0}12%{opacity:1;filter:blur(0);transform:scale(1.15) rotate(2deg)}20%{transform:scale(1) rotate(0)}40%{background-position:0 0}86%{opacity:1;filter:blur(0)}100%{opacity:.25;filter:blur(4px)}}@media (prefers-reduced-motion:reduce){.rvx{animation:none}}.vl1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
-      .vcard .vi{font-size:22px;text-align:center}.vcard .vt{min-width:0;font-size:13px;line-height:1.3}
+      .vcard{display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;gap:8px 8px;padding:10px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);border:1px solid rgba(245,197,66,.4);animation:fpvin .5s ease-out}
+      .vcard .vi{font-size:22px;text-align:center;align-self:start}.vcard .vt{min-width:0;font-size:13px;line-height:1.3;overflow-wrap:break-word}.vcard > .ptr{grid-column:2;justify-self:start}
       .vcard .vbtn,.vcard .vpick{grid-column:1 / -1}.vbtn{display:flex;gap:8px}.vbtn .take{flex:1 1 auto;max-width:200px;height:40px;animation:fppul 2.4s ease-in-out infinite}
       .c.vc2{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;align-content:flex-start;align-items:flex-start}.c.vc2 .vcard{flex:1 1 240px;max-width:340px}
-      .c .bg:not(.one) > .spw{grid-column:span 2}.c .spw .btn .bin{min-width:0;overflow:hidden}.c .spw .rvb{width:36px;min-width:36px;height:auto;padding:0}.c .spw .rvb svg{width:22px;height:16px}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
+      .c .bg:not(.one) > .spw{grid-column:span 2}.c .spw .btn .bin{min-width:0}.c .spw .rvb{width:36px;min-width:36px;height:auto;padding:0}.c .spw .rvb svg{width:22px;height:16px}.vbtn .rvb{width:52px;height:40px;min-width:52px;padding:0}.vcard .vt small{display:block;color:#f5c542;font-size:11px;margin-top:2px}
       .take{border:none;border-radius:10px;padding:8px 12px;background:#f5c542;color:var(--fp-on-accent,#141414);font:inherit;font-size:13px;font-weight:700;cursor:pointer;animation:fpwig 2.4s ease-in-out infinite}
       .vpick{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:12px;background:var(--fp-bg2,#232323);animation:fpvin .25s ease-out}.vq{font-size:13px;font-weight:600;color:var(--fp-text,#ddd)}
       .vps{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px}
@@ -8244,6 +8248,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     getGridOptions() { return { columns: 'full', rows: 1 }; }
     _lang() { return LANG(this._hass, this._cfg, this._store); }
+    // a button whose view is missing is only shown while the dashboard is being edited (kids never see the hint)
+    _editing() { return !!(this.editMode || /[?&]edit=1\b/.test(window.location.search || '')); }
     _flash(msg) { this._err = msg; clearTimeout(this._et); this._et = setTimeout(() => { this._err = ''; this._render(); }, 3500); this._render(); }
     async _save(data) {
       const s = this._store && this._store.snap; if (!s || !window.FPPIN) return;
@@ -8375,7 +8381,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           .sug:focus>span{display:block;position:absolute;top:46px;right:0;width:240px;padding:9px 11px;border-radius:12px;background:var(--fp-pop,var(--fp-bg1));border:1px solid var(--fp-line);box-shadow:0 10px 28px rgba(0,0,0,.45);z-index:6;white-space:normal}.sug:focus>span span{white-space:normal;overflow:visible}}
         button.slab{font:inherit;font-size:12px;cursor:pointer;color:inherit;border:1px solid transparent}.hint.fi{max-width:340px;line-height:1.45}.slab.fun{border-color:var(--fp-acc,#69C350)}.slab.fun ha-icon{--mdc-icon-size:15px;opacity:.8}.slab.fun.on{background:var(--fp-bg3)}@media (max-width:700px){.sug,.wxn span,.slab{display:none}.slab.fun{display:inline-flex}}
       </style><div class="bar${sc.key ? ' sc' : ''}" data-fp-head><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="lft"><span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span>
-        <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
+        <div class="mid">${btns.filter((k) => k !== 'einstellungen' && (this._editing() || !this._views || this._views.has(this._paths[k]))).map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
         ${this._right(s, lang, review, pending, btns.includes('einstellungen') ? this._navBtn('einstellungen', lang, cur) : '')}</div>`;
       const bar = this.shadowRoot.querySelector('.bar');
       if (sc.key && bar) {
@@ -8404,6 +8410,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     _navBtn(k, lang, cur) {
       const T = NAV_T[lang]; const miss = this._views && !this._views.has(this._paths[k]);
+      if (miss && !this._editing()) return '';
       return `<button class="sq${this._paths[k] === cur ? ' on' : ''}${miss ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(miss ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon></button>`;
     }
     _seasonLabel(s, lang) {

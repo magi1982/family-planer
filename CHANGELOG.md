@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.16.1 – 2026-11-18
+
+### Fixed
+- **Tablet layout of the planer:** chore, to-do and special-chore buttons no longer overlap (emoji, *Special* tag and points lay on top of the title, text ran out of the card). The button is now a simple wrapping row: title first, then the chips; in narrow columns the title gets the full width.
+- **No more one-word-per-line text with syllable breaks** ("Plan-zen zu-sam-men"): titles wrap at word boundaries and use the whole width of the button.
+- **Names are no longer cut to "M…":** names wrap to two lines; in narrow columns the picture sits on top and the name below it.
+- **Points and tags no longer stick out of narrow columns**, also in the volunteer cards (*I'll take it!*) – their points moved under the text.
+- **Many people on a small screen:** person columns wrap to a second row instead of becoming too narrow.
+- **Navigation:** a button whose dashboard view does not exist is hidden; it (and the hint how to add the view) only shows while the dashboard is being edited – no red error box for the kids.
+
 ## 0.16.0 – 2026-11-17
 
 ### Added

@@ -501,6 +501,8 @@
     }
     getGridOptions() { return { columns: 'full', rows: 1 }; }
     _lang() { return LANG(this._hass, this._cfg, this._store); }
+    // a button whose view is missing is only shown while the dashboard is being edited (kids never see the hint)
+    _editing() { return !!(this.editMode || /[?&]edit=1\b/.test(window.location.search || '')); }
     _flash(msg) { this._err = msg; clearTimeout(this._et); this._et = setTimeout(() => { this._err = ''; this._render(); }, 3500); this._render(); }
     async _save(data) {
       const s = this._store && this._store.snap; if (!s || !window.FPPIN) return;
@@ -632,7 +634,7 @@
           .sug:focus>span{display:block;position:absolute;top:46px;right:0;width:240px;padding:9px 11px;border-radius:12px;background:var(--fp-pop,var(--fp-bg1));border:1px solid var(--fp-line);box-shadow:0 10px 28px rgba(0,0,0,.45);z-index:6;white-space:normal}.sug:focus>span span{white-space:normal;overflow:visible}}
         button.slab{font:inherit;font-size:12px;cursor:pointer;color:inherit;border:1px solid transparent}.hint.fi{max-width:340px;line-height:1.45}.slab.fun{border-color:var(--fp-acc,#69C350)}.slab.fun ha-icon{--mdc-icon-size:15px;opacity:.8}.slab.fun.on{background:var(--fp-bg3)}@media (max-width:700px){.sug,.wxn span,.slab{display:none}.slab.fun{display:inline-flex}}
       </style><div class="bar${sc.key ? ' sc' : ''}" data-fp-head><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="lft"><span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span>
-        <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
+        <div class="mid">${btns.filter((k) => k !== 'einstellungen' && (this._editing() || !this._views || this._views.has(this._paths[k]))).map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
         ${this._right(s, lang, review, pending, btns.includes('einstellungen') ? this._navBtn('einstellungen', lang, cur) : '')}</div>`;
       const bar = this.shadowRoot.querySelector('.bar');
       if (sc.key && bar) {
@@ -661,6 +663,7 @@
     }
     _navBtn(k, lang, cur) {
       const T = NAV_T[lang]; const miss = this._views && !this._views.has(this._paths[k]);
+      if (miss && !this._editing()) return '';
       return `<button class="sq${this._paths[k] === cur ? ' on' : ''}${miss ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(miss ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon></button>`;
     }
     _seasonLabel(s, lang) {
