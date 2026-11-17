@@ -746,3 +746,10 @@ Status: Ideensammlung – wartet auf Auswahl. Grundregel für alle Spiele: freig
 10. Kopfrechnen-Blitz: 60 s Rechnen passend zum Alter, eigener Rekord statt Rangliste.
 11. Memory mit Avataren und Saison-Bildern.
 12. Glücksrad am Sonntag für eine perfekte Woche (kleiner Bonus oder Avatar-Extra).
+
+### 60. Ämtli-Haustier und Glücksrad am Sonntag (aus #59, Punkte 1 und 12)
+Status: Entwürfe zum Durchschauen im Artefakt „Family Planer – Ämtli-Haustier & Glücksrad (Entwürfe)“ (Ja / Nein / Verbessern pro Karte), wartet auf Auswahl.
+- Wo im Planer: A klein neben dem Bild · B im Garten der Kopfszene · C eigene Zeile „Haustiere“ · D Haustier-Haus auf der Belohnungen-Seite.
+- 10 Tiere (Drache, Hamster, Fuchs, Pinguin, Katze, Hase, Eule, Schildkröte, Axolotl, Igel): Ei → Baby (3 ganze Tage) → Jung (15) → Gross (40); froh, müde (gestern etwas vergessen, erstes Ämtli weckt es), schläft (nachts). Stirbt nie.
+- Glücksrad: 3 Stile (bunt, Neon, Jahrmarkt-Holz), drehen nach guter Woche (Vorschlag: an 6 von 7 Tagen alles), 1× pro Sonntag.
+- Preise (Chance): +25 Taler 22 % · Avatar-Effekt 1 Woche 18 % · +50 Taler 12 % · doppelte Punkte 1 Tag 10 % · Haustier-Extra 10 % · Jubel-Effekt 1 Woche 9 % · nochmals drehen 8 % · Kopfbild wählen 1 Tag 5 % · Ämtli-Joker 3 % · Jackpot +100 Taler 2 % · Überraschung von den Eltern 1 %.
