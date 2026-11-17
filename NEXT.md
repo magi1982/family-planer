@@ -700,3 +700,15 @@ Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 12. **Allrounder:** in der Woche die meisten *verschiedenen* Ämtli erledigt (Ämtli-Art pro erledigtem Ämtli).
 
 **Freiwillige Ämtli (umgesetzt):** ohne eigene Personenauswahl kann jetzt die ganze Familie (auch Erwachsene) ein freiwilliges Ämtli übernehmen; verteilte Ämtli (jedes Kind / fix / Überraschung) gehen weiter nur an Kinder. Die Auswahl „Wer nimmt es?“ hat grosse Avatar-Kacheln statt kleiner Knöpfe.
+
+### 57. Statistik-Seite (4. Knopf in der Navigation)
+Status: Idee – Entwurf im Design-Artefakt „Family Planer – Statistik-Seite (Vorschlag)“, wartet auf „mach es“.
+- Neuer Knopf „Statistik“ (mdi:chart-bar) nach Belohnungen; eigene Ansicht pro Person + „Familie“.
+- Zeitraum: Woche / Monat / 3 Monate (History reicht 120 Tage).
+- Zuverlässigkeit als 10 Punkte („Lea schafft 9 von 10 Ämtli“) + Lob-Satz + Trend.
+- Kacheln: Ämtli erledigt, freiwillig geholfen, To-dos abgehakt, rechtzeitig fertig, Tage am Stück (+ Rekord), Punkte.
+- 7 Tage als Bauklötze (1 Klotz = 1 Ämtli, Stern bei „alles geschafft“), 12-Wochen-Punktekalender.
+- „Das mache ich am meisten“, „Da üben wir noch“ (statt „verpasst“), „Wann ich helfe“ (Morgen/Nachmittag/Abend).
+- Familie: Team-Summe, Familien-Ziel, Familien-Serie, Retter-Einsätze, stärkster Tag, Familien-Mauer.
+- Daten: history, done_at, awards.vol (auf 120 Tage verlängern), Punkte-Verlauf; neu: To-do-Zähler pro Person.
+- Einstellungen: Statistik-Knopf ein/aus · Kinder vergleichen (Standard aus) · „Da üben wir noch“ ein/aus · Standard-Zeitraum.
