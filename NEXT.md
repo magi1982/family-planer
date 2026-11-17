@@ -710,6 +710,8 @@ Status: Idee – Entwurf im Design-Artefakt „Family Planer – Statistik-Seite
 - „Welche Ämtli – wer wie oft?“: Tabelle Ämtli × Person mit Anzahl (auch freiwillige Ämtli und To-dos).
 - Unten Personenkarten (feste Reihenfolge): 10 Punkte Zuverlässigkeit, 7-Tage-Sterne, Serie → antippen = Detailseite.
 - Detailseite: Kacheln, 7 Tage als Bauklötze, 12-Wochen-Kalender, „Was ich gemacht habe“ (Balken nach Art + Liste pro Art: Ämtli, freiwillige Ämtli, To-dos pro Liste), „Da üben wir noch“, „Wann ich helfe“; Knopf „‹ Familie“.
+- „Woher meine Punkte kommen“: Punkte-Glas mit farbigen Schichten, Liste pro Quelle (Ämtli, freiwillige Ämtli, To-dos, Tagesbonus, Serien-Bonus, Auszeichnungen, Level-Bonus, Extra von Mama/Papa), „Für Belohnungen eingelöst“ (minus) und „Letzte Punkte“. Daten: Punkte-Buch (ledger.kind), schon vorhanden.
+- Prüfen: Punkte aus freiwilligen Ämtli (kind „sonder“) zählen heute nicht für Level und Prognose (fehlen in XP_KINDS / EARN_KINDS) – Absicht oder Fehler?
 - Tages-Punkte (Kalender, 7-Tage-Reihe): grün = alles, gelbgrün = 1 vergessen, orange = 2, rot = 3+, grau = frei.
 - Kein Familien-Ziel, keine Retter-Statistik.
 - Daten: history (120 Tage), done_at; neu nötig: Zähler pro Ämtli + Person (history kennt heute nur verpasste Titel), Titel bei freiwilligen Ämtli merken, awards.vol 60 → 120 Tage, To-do-Zähler pro Person.
