@@ -673,3 +673,17 @@ Vorschau: Artefakt „Family Planer – Kerben-Taler, ganz schlicht“ (Nr. 4).
 - Entscheid Titanic & Mondfähre: werden genau gleich ausgelöst wie alle anderen – Tipp irgendwo aufs Bild, gleicher „Tipp!“-Hinweis am gleichen Ort im gleichen Stil; die eigenen Hinweise bei Schiff und Fähre fallen weg.
 - Buttons im oberen Bereich (links Navigation, rechts weitere Knöpfe wie Info ⓘ) behalten immer ihre Funktion: ein Tipp auf einen Button startet nie eine Animation; nur freie Bildfläche zählt.
 - Einstellungen: „Tipp-Animationen“ an/aus, „Überraschungen“ (aus / selten ≈ 1 Tag pro Woche / oft ≈ 3 Tage pro Woche), Standard: selten (entschieden).
+
+## 56 · Fairere Auszeichnungen (Ideen, noch nicht gebaut)
+
+**Problem Meilensteine (100 / 500 / 1000 Ämtli):** Wer mehr Ämtli im Plan hat, erreicht sie schneller.
+- A) **Alles-erledigt-Tage:** Meilenstein zählt Tage, an denen *alle eigenen* Ämtli erledigt waren (z. B. 25 / 100 / 250 Tage) – unabhängig davon, wie viele Ämtli ein Kind hat.
+- B) **Quote statt Anzahl:** Meilenstein für die Erledigungsquote über 30 Tage (z. B. 80 % / 90 % / 100 %).
+- C) **Persönliches Ziel:** Ziel pro Kind = eigene Ämtli pro Woche × Wochen (z. B. „10 Wochen Plan geschafft“).
+
+**Problem Frühaufsteher:** Abend-Ämtli können gar nicht früh erledigt werden. Ersatz-Vorschläge:
+1. **Pünktlich:** Jedes Ämtli zählt, wenn es innerhalb seines eigenen Zeitfensters erledigt wurde (Abend-Ämtli bis zur Abendzeit) – Auszeichnung für die höchste Pünktlichkeitsquote der Woche.
+2. **Ohne Erinnerung:** Ämtli erledigt, bevor die Erinnerung/Durchsage kam.
+3. **Kein Aufschieben:** Die ganze Woche kein Ämtli überfällig in den nächsten Tag gerutscht.
+4. **Helferherz:** Ein Ämtli eines anderen übernommen oder ein Zusatz-/Sonder-Ämtli freiwillig gemacht.
+5. **Aufholjagd:** Die eigene Quote gegenüber der Vorwoche am stärksten verbessert (fair für alle Stufen).
