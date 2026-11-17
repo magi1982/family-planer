@@ -360,6 +360,12 @@
         .vb button.on.away{background:rgba(79,163,224,.18);border-color:#4FA3E0;color:#4FA3E0}.vb button.on.home{background:color-mix(in srgb,var(--fp-accent) 18%,transparent)}
         .hint{font-size:13px;color:var(--fp-text2);margin:0 2px 10px}
 `;
+  // "Tap!" sign settings and neon colour by season (special days green)
+  const hintMode = (s) => { const m = s && s.season_cfg && s.season_cfg.tap_hint; return ['off', 'activity', 'always'].includes(m) ? m : 'activity'; };
+  const hintMinutes = (s) => { const n = Number(s && s.season_cfg && s.season_cfg.tap_hint_min); return Number.isFinite(n) ? Math.max(1, Math.min(10, Math.round(n))) : 2; };
+  const hintColor = (s) => { const se = (s && s.season) || {}; if (se.fun || ['geburtstag', 'fasnacht', 'ostern', 'august', 'halloween'].includes(se.vis)) return '#8CFF6A';
+    return ({ winter: '#7FE3FF', sommer: '#FF6FD8', herbst: '#FFB347', fruehling: '#8CFF6A' })[se.jz] || '#8CFF6A'; };
+  window.FPHINT = { hintMode, hintMinutes, hintColor };
   const escN = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   class FamilyPlanerNavCard extends HTMLElement {
     setConfig(c) {
@@ -395,6 +401,9 @@
         // a tap outside a popup closes it
         this._outside = (e) => { const path = e.composedPath(); if (this.isConnected && this._open && !path.includes(this) && !path.includes(this._layer)) { this._open = null; this._render(); } };
         window.addEventListener('pointerdown', this._outside, true);
+        this._hintUntil = 0; this._hintNext = 0; this._poke = () => this._pokeHint();
+        window.addEventListener('pointerdown', this._poke, { capture: true, passive: true });
+        this._hintT = setInterval(() => this._hintTick(), 1000);
         window.addEventListener('location-changed', () => this._render());
         this._tick = setInterval(() => this._clock(), 15000);
         window.addEventListener('resize', () => { this._placeHint(); if (this._narrowNow() !== this._wasNarrow || this._topNow() !== this._wasTop) { this._wasNarrow = this._narrowNow(); this._wasTop = this._topNow(); this._render(); } });
@@ -544,13 +553,27 @@
       clearTimeout(this._playT); this._playT = setTimeout(() => { if (this._scnEl) this._scnEl.classList.remove('playing'); }, ms);
       return true;
     }
-    // the "Tap!" hint: always at the same spot in the sky between the tree and the house, kept inside the header
+    // the "Tap!" sign: hangs from the top edge above the middle of the scene (over the house roof), kept inside the header
     _placeHint() {
       const scn = this._scnEl; const h = scn && scn.querySelector('.fphint'); const svg = scn && scn.querySelector('svg');
       if (!h || !svg || !svg.getScreenCTM) return;
-      const m = svg.getScreenCTM(); if (!m) return; const pt = svg.createSVGPoint(); pt.x = 528; pt.y = 30; const p = pt.matrixTransform(m);
+      const m = svg.getScreenCTM(); if (!m) return; const pt = svg.createSVGPoint(); pt.x = 654; pt.y = 3; const p = pt.matrixTransform(m);
       const r = scn.getBoundingClientRect(); if (!r.width) return;
-      h.style.left = `${Math.max(36, Math.min(r.width - 36, p.x - r.left))}px`; h.style.top = `${Math.max(34, Math.min(r.height - 6, p.y - r.top))}px`;
+      h.style.left = `${Math.max(40, Math.min(r.width - 40, p.x - r.left))}px`; h.style.top = `${Math.max(2, Math.min(r.height - 30, p.y - r.top))}px`;
+    }
+    // after activity (any tap on the planer, or a motion sensor of the announcements) the sign shows every 10 s for
+    // a few minutes, then rests; "always" shows it every 30 s; never while a tap story plays
+    _pokeHint() { const now = Date.now(); if (now >= this._hintUntil) this._hintNext = now + 1500; this._hintUntil = now + hintMinutes(this._store && this._store.snap) * 60000; }
+    _hintTick() {
+      const s = this._store && this._store.snap; const mode = hintMode(s); if (mode === 'off' || !this.isConnected) return;
+      const now = Date.now(); const h = this._hass;
+      if (h && s && (s.hint_motion || []).some((e) => h.states[e] && h.states[e].state === 'on')) this._pokeHint();
+      if (mode === 'activity' && now >= this._hintUntil) return;
+      if (now < this._hintNext) return; this._hintNext = now + (mode === 'always' ? 30000 : 10000);
+      const scn = this._scnEl; const el = scn && scn.querySelector('.fphint');
+      if (!el || el.hidden || scn.classList.contains('playing') || Date.now() < (this._playUntil || 0)) return;
+      el.classList.remove('go'); void el.offsetWidth; el.classList.add('go');
+      clearTimeout(this._hintOff); this._hintOff = setTimeout(() => el.classList.remove('go'), 2100);
     }
     _render() {
       if (!this.shadowRoot || !this._cfg) return;
@@ -588,13 +611,14 @@
         button.vac{position:relative;color:#4FA3E0;border-color:rgba(79,163,224,.55)}button.vac.quiet{color:inherit;border-color:var(--fp-line)}.vac .dot{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:#E06B6B;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box}
         .mid button.miss{opacity:.55;border-style:dashed}.err{white-space:normal;max-width:min(460px,90vw);position:absolute;right:0;top:48px;background:#3a2626;border:1px solid #E06B6B;color:#fdd;padding:6px 12px;border-radius:10px;font-size:13px;z-index:31}
         @media (max-width:700px){.clk .dt{display:none}.wxn{padding:0 8px}}
-        .fphint{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px;animation:fphn 7s ease-in-out infinite;opacity:0;z-index:2}
-        .fphint b{font:900 13px/1 system-ui,sans-serif;color:#141414;background:#FFE27A;border-radius:12px;padding:5px 11px;box-shadow:0 2px 8px rgba(0,0,0,.4),0 0 0 3px rgba(255,226,122,.35)}
-        .fphint i{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #FFE27A;animation:fphb .7s ease-in-out infinite;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
-        .fphint u{position:absolute;top:100%;width:40px;height:14px;margin-top:2px;border:2px solid #FFE27A;border-radius:50%;animation:fphr 1.4s ease-out infinite}
-        @keyframes fphn{0%,62%,100%{opacity:0}68%,94%{opacity:1}}@keyframes fphb{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}@keyframes fphr{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.8);opacity:0}}
+        .fphint{position:absolute;left:50%;top:2px;width:72px;height:26px;margin-left:-36px;pointer-events:none;z-index:2;opacity:0;--nc:#8CFF6A}
+        .fphint .hang{position:absolute;inset:0;transform-origin:36px -4px}.fphint .w{position:absolute;top:-30px;width:1.5px;height:34px;background:#3b4048}.fphint .w1{left:12px}.fphint .w2{right:12px}
+        .fphint b{position:absolute;left:0;top:3px;width:72px;height:21px;box-sizing:border-box;border:2px solid var(--nc);border-radius:8px;background:rgba(20,12,30,.6);color:#fff;font:900 11.5px/17px system-ui,sans-serif;letter-spacing:2.5px;text-align:center;box-shadow:0 0 6px var(--nc),inset 0 0 6px var(--nc);text-shadow:0 0 4px var(--nc),0 0 8px var(--nc)}
+        .fphint.go{opacity:1}.fphint.go .hang{animation:fphang 2s ease-out forwards}.fphint.go b{animation:fpflk 2s steps(1) forwards}
+        @keyframes fphang{0%{opacity:0;transform:translateY(-40px)}10%{opacity:1;transform:translateY(3px)}16%{transform:translateY(-1px) rotate(4deg)}30%{transform:rotate(-3deg)}44%{transform:rotate(2deg)}56%{transform:rotate(-1deg)}70%{opacity:1;transform:rotate(0)}84%,100%{opacity:0;transform:translateY(-40px)}}
+        @keyframes fpflk{0%{opacity:0}3%{opacity:1}6%{opacity:.2}9%{opacity:1}12%{opacity:.35}15%{opacity:1}62%{opacity:1}65%{opacity:.4}68%{opacity:1}74%{opacity:.2}78%,100%{opacity:0}}
         .scn.playing .fphint,.fphint[hidden]{display:none}.bar.sc{cursor:pointer}.bar.sc button{cursor:pointer}
-        @media (prefers-reduced-motion:reduce){.fphint{animation:none;opacity:1}.fphint i,.fphint u{animation:none}}
+        @media (prefers-reduced-motion:reduce){.fphint.go .hang,.fphint.go b{animation:none}}
         .bar.sc{min-height:96px;padding-top:10px;padding-bottom:10px}.bar.sc > :not(.scn){position:relative;z-index:1}.bar.sc .clk b,.bar.sc .clk span,.bar.sc .ttl{text-shadow:0 1px 3px rgba(0,0,0,.55)}
         .bar.sc .mid button:not(.on),.bar.sc .rt > button,.bar.sc .stk button{background:color-mix(in srgb,var(--fp-bg3) 82%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
         .wxc{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px;min-width:0}.wxc.one{justify-content:center}
@@ -617,11 +641,15 @@
         this._scnKey = sc.key;
         let hint = this._scnEl.querySelector('.fphint');
         if (!hint) {
+          // the "Tap!" neon sign hangs from the top edge on two short wires (see _hintTick for when it shows)
           hint = document.createElement('div'); hint.className = 'fphint'; hint.setAttribute('aria-hidden', 'true');
-          const b = document.createElement('b'); b.textContent = lang === 'en' ? 'Tap!' : 'Tipp!';
-          hint.append(b, document.createElement('i'), document.createElement('u')); this._scnEl.appendChild(hint);
+          const hang = document.createElement('div'); hang.className = 'hang';
+          const w1 = document.createElement('i'); w1.className = 'w w1'; const w2 = document.createElement('i'); w2.className = 'w w2';
+          const b = document.createElement('b'); b.textContent = lang === 'en' ? 'TAP!' : 'TIPP!';
+          hang.append(w1, w2, b); hint.appendChild(hang); this._scnEl.appendChild(hint);
         }
-        const ctx = this._tapCtx(); hint.hidden = !ctx || !window.FPSEASON.canPlay(ctx);
+        hint.style.setProperty('--nc', hintColor(s));
+        const ctx = this._tapCtx(); hint.hidden = !ctx || !window.FPSEASON.canPlay(ctx) || hintMode(s) === 'off';
         window.requestAnimationFrame(() => this._placeHint());
       } else { this._scnEl = null; this._scnKey = ''; }
       this._popLayer(this._popHtml, NAV_POPCSS);

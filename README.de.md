@@ -320,7 +320,7 @@ Jedes Design gibt es in drei **Stilen**: *Standard*, *Transparent* und *Glas* (M
 **Besondere Tage.** An manchen Tagen bekommt der Kopfbereich eine eigene Szene: Dino-Tag (20.2.), 1. April, erster Handy-Anruf (3.4.), Titanic (15.4.), Mondlandung (20.7.) und ein Vulkan (27.8.); Sputnik fliegt vom 4. bis 11. Oktober nachts über den Himmel, die Concorde am 26. November. Feiertage, Bräuche und Geburtstage haben immer Vorrang. Ein Chip neben dem Datum mit ⓘ erklärt den Tag. **British Days**: an zehn zufälligen gewöhnlichen Tagen im Jahr steht der Buckingham Palace mit der Königsgarde da; mit *British Day für* lassen sie sich jemandem widmen. Am 15. April kann man die Titanic antippen – sie sinkt und taucht wieder auf. Beides lässt sich unter *Einstellungen → Saisons & Wetter* ausschalten. Über 30 °C gibt es eine Poolparty und der Rasensprenger läuft.
 
 
-**Tipp-Animationen** (Einstellung, standardmässig an). Ein Tipp auf das freie Bild oben spielt eine Animation, die zum Tag passt – es gibt über 60. Ein gelber Hinweis *Tipp!* im Himmel zwischen Baum und Haus zeigt, wann eine bereitsteht. Welche läuft, wird in dieser Reihenfolge gewählt:
+**Tipp-Animationen** (Einstellung, standardmässig an). Ein Tipp auf das freie Bild oben spielt eine Animation, die zum Tag passt – es gibt über 60. Ein leuchtendes Neon-Schild *TIPP!*, das vom oberen Rand über dem Haus herunterhängt, zeigt, wann eine bereitsteht; die Farbe passt zur Jahreszeit. Die Einstellung **Tipp-Schild** bestimmt, wann es erscheint: *Aus*, *Nach Aktivität* (Standard – eine Weile alle 10 Sekunden, nachdem jemand den Planer antippt oder ein Bewegungsmelder der Ansagen Bewegung meldet, siehe **Nach Aktivität so lange zeigen**, 1–10 Minuten) oder *Immer* (alle 30 Sekunden). Während einer Animation erscheint es nie. Welche läuft, wird in dieser Reihenfolge gewählt:
 
 | Stufe | Wann | Beispiele |
 |---|---|---|
@@ -553,7 +553,7 @@ Die Navigation ist auf allen Seiten oben in der Mitte an derselben Stelle.
 - Ämtli direkt antippen zum Abhaken; Fristen („bis Sa“, „heute fällig“) sichtbar.
 - Person antippen: Zuverlässigkeit, Serie, Auszeichnungen und wie man sie bekommt.
 
-**Listen** – Tabs pro Liste, Hinzufügen-Feld, Kategorien als Kacheln, *Kategorien* und *Optimieren*.
+**Listen** – Tabs pro Liste, Hinzufügen-Feld, Kategorien als Kacheln, *Kategorien* und *Optimieren* (läuft im Hintergrund: ein kleines Ladezeichen zeigt, dass gearbeitet wird, die Seite bleibt bedienbar und das Ergebnis erscheint, sobald es fertig ist).
 
 **Ämtliplan** – Wochenübersicht, Ämtli nach Wochentag, **besondere Ämtli** und **To-dos** darunter; *+ Besonderes Ämtli* und *+ To-do* oben öffnen ein Popup.
 

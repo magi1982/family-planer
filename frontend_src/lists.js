@@ -19,6 +19,13 @@
       other: 'always stays last', created: 'New: {x}', removed: 'Merged: {x}', nothing: 'Everything is sorted well already.', err: 'Error: ', del: 'Delete' },
   };
   const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => (o[k] == null ? '' : o[k]));
+  // optimise button: has the background run for this list finished? 'wait' | 'done' | 'gone' (gave up after 2 min)
+  const optState = (lst, pend, now) => {
+    const r = lst && lst.opt_result;
+    if (lst && !lst.busy && r && r.at && r.at !== pend.prev) return 'done';
+    return now - pend.t < 120000 ? 'wait' : 'gone';
+  };
+  window.FPLISTOPT = optState;
 
   class FpListsInner extends HTMLElement {
     setConfig(cfg) {
@@ -37,7 +44,23 @@
     set hass(h) { const first = !this._hass; this._hass = h; if (first) this._resub(); }
     disconnectedCallback() { this._unsub(); }
     connectedCallback() { if (this._hass && !this._sub) this._resub(); }
-    update() { this._resub(); this._render(); }
+    update() { this._resub(); this._checkOpt(); this._render(); }
+    _checkOpt() {
+      // the optimise result arrives with the next snapshot: show it once, then forget the pending click
+      const p = this._pend; if (!p) return;
+      this._lists().forEach((x) => {
+        const w = p[x.id]; if (!w) return;
+        const state = optState(x, w, Date.now()); if (state === 'wait') return;
+        delete p[x.id];
+        if (state !== 'done') return;
+        const r = x.opt_result;
+        const parts = [];
+        if (!r.ok) { this._flash(this.T.err + this.T.slow, true); return; }
+        if (r.created && r.created.length) parts.push(fmt(this.T.created, { x: r.created.join(', ') }));
+        if (r.removed && r.removed.length) parts.push(fmt(this.T.removed, { x: r.removed.join(', ') }));
+        this._flash(parts.join(' · ') || this.T.nothing);
+      });
+    }
     _lists() { return (this._store && this._store.snap && this._store.snap.lists) || []; }
     _cur() { const ls = this._lists(); return ls.find((l) => l.id === this._sel) || ls[0] || null; }
     _unsub() { if (this._sub) { this._sub.then((u) => u && u()).catch(() => {}); this._sub = null; this._subEnt = null; } }
@@ -77,17 +100,13 @@
       if (t.closest('[data-clear]')) { this._hass.callService('todo', 'remove_completed_items', {}, { entity_id: l.entity }).catch((er) => (er === (window.FPPIN && window.FPPIN.CANCEL) ? null : this._flash(this.T.err + (er.message || er), true))); return; }
       if (t.closest('[data-showdone]')) { this._showDone = !this._showDone; this._render(); return; }
       if (t.closest('[data-opt]')) {
-        if (this._busy) return; this._busy = true; this._render();
-        try {
-          const r = await Promise.race([this._store.pws('family_planer/list/refresh', { list_id: l.id, ai: true }),
-            new Promise((_res, rej) => setTimeout(() => rej(new Error(this.T.slow)), 25000))]);
-          const parts = [];
-          if (r && r.created && r.created.length) parts.push(fmt(this.T.created, { x: r.created.join(', ') }));
-          if (r && r.removed && r.removed.length) parts.push(fmt(this.T.removed, { x: r.removed.join(', ') }));
-          if (r && r.ai_pending) parts.push(this.T.aibg);
-          this._flash(parts.join(' · ') || this.T.nothing);
-        } catch (er) { this._flash(this.T.err + (er.message || er), true); }
-        this._busy = false; this._render(); return;
+        // everything runs in the background on the server; the page stays usable and only shows a small spinner
+        this._pend = this._pend || {};
+        if (l.busy || this._pend[l.id]) return;
+        this._pend[l.id] = { prev: (l.opt_result && l.opt_result.at) || '', t: Date.now() }; this._render();
+        this._store.pws('family_planer/list/refresh', { list_id: l.id, ai: true, background: true })
+          .catch((er) => { delete this._pend[l.id]; if (er !== (window.FPPIN && window.FPPIN.CANCEL)) this._flash(this.T.err + (er.message || er), true); else this._render(); });
+        return;
       }
       if (t.closest('[data-cats]')) { this._edit = l.categories.map((c) => ({ ...c })); this._render(); return; }
       if (this._edit) {
@@ -105,7 +124,7 @@
     }
     _render() {
       if (!this.shadowRoot || !this._cfg) return;
-      const T = this.T; const ls = this._lists(); const l = this._cur();
+      const T = this.T; const ls = this._lists(); const l = this._cur(); const optBusy = !!(l && (l.busy || (this._pend && this._pend[l.id])));
       const active = this.shadowRoot.activeElement; const keepFocus = active && active.dataset && active.dataset.addin !== undefined;
       let body = '';
       if (!l) body = `<div class="empty nol"><ha-icon icon="mdi:format-list-checks"></ha-icon><b>${esc(T.nolists)}</b><span>${esc(T.nolistsSub)}</span><button class="setup" data-setup><ha-icon icon="mdi:plus"></ha-icon>${esc(T.setup)}</button></div>`;
@@ -142,7 +161,8 @@
         .tab em{font-style:normal;font-size:11px;background:#333;color:#ddd;border-radius:9px;padding:1px 7px}
         .tab.on em{background:${G};color:#141414}
         .tb{display:flex;align-items:center;gap:6px;height:40px;padding:0 14px;border-radius:10px;border:1px solid #333;background:#262626;color:#bbb;font:inherit;font-size:13px;cursor:pointer}
-        .tb.busy ha-icon{animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+        .ld{width:20px;height:20px;flex:none;border-radius:50%;border:2.5px solid #3a3a3a;border-top-color:${G};animation:sp .8s linear infinite;align-self:center}@keyframes sp{to{transform:rotate(360deg)}}
+        @media (prefers-reduced-motion:reduce){.ld{animation-duration:2.4s}}
         ha-icon{--mdc-icon-size:18px}
         .addr{display:flex;gap:8px;margin:14px 0 16px}
         .in{flex:1;height:44px;border-radius:10px;border:1px solid #333;background:#141414;color:#eee;font:inherit;font-size:15px;padding:0 14px;outline:none;min-width:0}
@@ -185,7 +205,7 @@
       </style>
       <div class="card">
         <div class="top"><div class="tabs">${ls.map((x) => { const n = openCount(x); return `<button class="tab${l && x.id === l.id ? ' on' : ''}" data-tab="${esc(x.id)}"><ha-icon icon="${esc(x.icon || 'mdi:format-list-checks')}"></ha-icon>${esc(x.name)}${n ? `<em>${n}</em>` : ''}</button>`; }).join('')}</div>
-          ${l ? `<button class="tb" data-cats><ha-icon icon="mdi:shape-outline"></ha-icon>${esc(T.cats)}</button><button class="tb${this._busy ? ' busy' : ''}" data-opt><ha-icon icon="mdi:auto-fix"></ha-icon>${esc(this._busy ? T.optimizing : T.optimize)}</button>` : ''}</div>
+          ${l ? `<button class="tb" data-cats><ha-icon icon="mdi:shape-outline"></ha-icon>${esc(T.cats)}</button><button class="tb" data-opt${optBusy ? ' aria-busy="true"' : ''}><ha-icon icon="mdi:auto-fix"></ha-icon>${esc(T.optimize)}</button>${optBusy ? `<span class="ld" role="status" title="${esc(T.optimizing)}" aria-label="${esc(T.optimizing)}"></span>` : ''}` : ''}</div>
         ${l ? `<div class="addr"><input class="in" data-addin placeholder="${esc(T.add)}" value="${esc(this._draft || '')}" enterkeyhint="done"><button class="addb" data-addb title="${esc(T.addb)}"><ha-icon icon="mdi:plus"></ha-icon></button></div>` : ''}
         ${body}
         ${moveDlg}${editDlg}

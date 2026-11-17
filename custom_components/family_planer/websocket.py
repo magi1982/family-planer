@@ -299,7 +299,7 @@ async def ws_upload_image(hass: HomeAssistant, connection: websocket_api.ActiveC
 
 @websocket_api.websocket_command({
     vol.Required("type"): "family_planer/list/refresh", vol.Optional("entry_id"): str, vol.Optional("token"): TOKEN,
-    vol.Required("list_id"): str, vol.Optional("ai", default=True): bool,
+    vol.Required("list_id"): str, vol.Optional("ai", default=True): bool, vol.Optional("background", default=False): bool,
 })
 @websocket_api.async_response
 async def ws_list_refresh(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
@@ -311,6 +311,9 @@ async def ws_list_refresh(hass: HomeAssistant, connection: websocket_api.ActiveC
     if not _change(connection, msg, planner):
         return
     try:
+        if msg["background"]:
+            connection.send_result(msg["id"], {"started": planner.start_list_optimize(msg["list_id"])})
+            return
         result = await planner.async_refresh_list(msg["list_id"], use_ai=msg["ai"], ai_background=True)
     except KeyError:
         connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Unknown list")

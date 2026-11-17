@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.16.0 – 2026-11-17
+
+### Added
+- **Tap sign:** a glowing neon sign *TAP!* hangs down from the top edge above the house on two short wires, swings out and disappears again – it shows that an animation is ready in the picture at the top. Its colour matches the season (winter ice blue, summer pink, autumn amber, spring and special days green). New settings under *Seasons & weather*: **Tap sign** – *Off*, *After activity* (default: every 10 seconds after someone taps the planner or a motion sensor of the announcements reports movement, then it rests) or *Always (every 30 seconds)* – and **After activity, show for** (1–10 minutes, default 2). It never shows while an animation plays.
+
+### Changed
+- **Optimise (smart lists) now runs completely in the background:** the button answers at once, a small spinner next to it shows that the planner is working, and the page stays fully usable. The result (new or removed categories) appears when it is done, also when the AI takes a while.
+- The yellow *Tap!* bubble in the sky is replaced by the tap sign.
+
 ## 0.15.0 – 2026-11-17
 
 ### Added

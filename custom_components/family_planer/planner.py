@@ -139,6 +139,8 @@ class FamilyPlanner:
         self._ai_last: dict[str, datetime] = {}
         self._items_cache: dict[str, tuple[datetime, list[dict]]] = {}
         self._ai_running: set[str] = set()
+        self._opt_busy: set[str] = set()          # lists the optimise button is working on (in the background)
+        self._opt_result: dict[str, dict[str, Any]] = {}
         self._refresh_last: datetime | None = None
         self.closing = False
         self.busy: dict[str, list[list]] = {}  # today's timed events per person (suggestions)
@@ -1044,6 +1046,37 @@ class FamilyPlanner:
         return {"created": result.created if result else [], "removed": result.removed if result else [],
                 "assigned": result.assigned if result else 0, "ai_pending": ai_pending}
 
+    def start_list_optimize(self, list_id: str) -> bool:
+        """Optimise button: do the whole work (list read, keywords, AI) in the background and answer at once.
+
+        The snapshot shows the list as busy until it is done, then carries the result, so the page never waits.
+        Returns False when this list is already being optimised.
+        """
+        if list_id not in self.data["lists"]:
+            raise KeyError(list_id)
+        if list_id in self._opt_busy:
+            return False
+        self._opt_busy.add(list_id)
+        self._changed(save=False)
+        self.hass.async_create_task(self._async_optimize_bg(list_id))
+        return True
+
+    async def _async_optimize_bg(self, list_id: str) -> None:
+        res: dict[str, Any] = {"created": [], "removed": [], "assigned": 0, "ok": False}
+        try:
+            res = {**await self.async_refresh_list(list_id, use_ai=True, ai_background=False), "ok": True}
+        except KeyError:
+            pass
+        except Exception as err:  # noqa: BLE001 - never leave the button spinning
+            _LOGGER.warning("Optimising list %s failed: %s", list_id, err)
+        finally:
+            self._opt_busy.discard(list_id)
+            if list_id in self.data["lists"]:
+                self._opt_result[list_id] = {"created": res.get("created", [])[:20], "removed": res.get("removed", [])[:20],
+                                             "assigned": res.get("assigned", 0), "ok": res.get("ok", False),
+                                             "at": dt_util.now().isoformat()}
+            self._changed(save=False)
+
     async def _async_ai_pass(self, list_id: str, open_names: list[str], names: list[str]) -> None:
         """Second, slow step of the optimise button: ask the AI about what the keywords could not place."""
         try:
@@ -1596,7 +1629,9 @@ class FamilyPlanner:
             "season_cfg": {k: v for k, v in self.season_settings().items()
                            if k in ("weather", "storm_kmh", "intensity", "sug_enabled", "sug_from", "pool", "pool_min",
                                     "jacuzzi", "jacuzzi_min", "xmas_snow", "anim_bday", "night_mode",
-                                    "frost_mode", "frost_below", "tap_anims", "surprises")},
+                                    "frost_mode", "frost_below", "tap_anims", "surprises", "tap_hint", "tap_hint_min")},
+            # the motion sensors of the announcements also wake the "Tap!" sign (nothing else of them is sent)
+            "hint_motion": validate.entities((st.get("announce") or {}).get("motion"), ("binary_sensor",)),
             "busy": self.busy,
             "away_kind": self.away_kind,
             "away_badge": {pid: b for pid, spans in self.away_spans.items() if (b := vacation.badge_at(spans, dt_util.now()))},
@@ -1641,7 +1676,8 @@ class FamilyPlanner:
             "lists": [{"id": lid, "name": lst["name"], "entity": lst["entity"], "icon": lst.get("icon"),
                        "max_categories": lst.get("max_categories"), "auto": lst.get("auto", True),
                        "categories": [{"id": c["id"], "name": c["name"], "icon": c.get("icon")} for c in lst["categories"]],
-                       "map": self.list_maps.get(lid, {})}
+                       "map": self.list_maps.get(lid, {}),
+                       "busy": lid in self._opt_busy, "opt_result": self._opt_result.get(lid)}
                       for lid, lst in self.data["lists"].items()],
         }
 

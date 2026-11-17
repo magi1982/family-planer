@@ -320,7 +320,7 @@ Each design comes in three **styles**: *Standard*, *Transparent* and *Glass* (fr
 
 **Special days.** On some days the header gets its own scene: Dinosaur Day (20 Feb), April Fools' Day, the first mobile phone call (3 Apr), Titanic (15 Apr), Moon landing (20 Jul) and a volcano (27 Aug); Sputnik crosses the night sky from 4 to 11 October and Concorde flies by on 26 November. Holidays, customs and birthdays always come first. A chip next to the date with an ⓘ explains the day. **British Days**: ten random ordinary days a year show Buckingham Palace with the King's Guard; with *British Day for* you can dedicate them to someone. On 15 April you can tap the Titanic – it sinks and comes back. Both can be switched off under *Settings → Seasons & weather*. Above 30 °C there is a pool party and the sprinkler runs.
 
-**Tap animations** (setting, on by default). A tap on the free picture at the top plays an animation that fits the day – there are more than 60. A yellow *Tap!* hint in the sky between the tree and the house shows when one is ready. Which one plays is chosen in this order:
+**Tap animations** (setting, on by default). A tap on the free picture at the top plays an animation that fits the day – there are more than 60. A glowing neon sign *TAP!* hanging down from the top edge above the house shows when one is ready; its colour matches the season. The setting **Tap sign** decides when it shows: *Off*, *After activity* (default – every 10 seconds for a while after someone taps the planner or a motion sensor of the announcements reports movement, see **After activity, show for**, 1–10 minutes) or *Always* (every 30 seconds). It never shows while an animation plays. Which one plays is chosen in this order:
 
 | Step | When | Examples |
 |---|---|---|
@@ -553,7 +553,7 @@ The navigation is in the same place at the top centre on every page.
 - Tap chores directly to tick them off; deadlines ("until Sat", "due today") are visible.
 - Tap a person: reliability, streak, awards and how to earn them.
 
-**Lists** – tabs per list, add field, categories as tiles, *Categories* and *Optimise*.
+**Lists** – tabs per list, add field, categories as tiles, *Categories* and *Optimise* (runs in the background: a small spinner shows the work, the page stays usable and the result appears when it is done).
 
 **Chore plan** – week overview, chores by weekday, **special chores** and **to-dos** below; *+ Special chore* and *+ To-do* at the top open a popup.
 

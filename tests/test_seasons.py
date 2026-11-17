@@ -222,3 +222,14 @@ def test_info_texts_for_customs_and_holidays():
             de, en = FD.EVENT_INFO[key]
             assert 40 < len(de) < 320 and 40 < len(en) < 320, key
     assert "Samichlaus" in FD.EVENT_INFO["samichlaus"][0]
+
+
+def test_tap_sign_settings():
+    c = S.clean_settings({})
+    assert c["tap_hint"] == "activity" and c["tap_hint_min"] == 2
+    c = S.clean_settings({"tap_hint": "always", "tap_hint_min": 7})
+    assert c["tap_hint"] == "always" and c["tap_hint_min"] == 7
+    c = S.clean_settings({"tap_hint": "blink", "tap_hint_min": 99})
+    assert c["tap_hint"] == "activity" and c["tap_hint_min"] == 10
+    assert S.clean_settings({"tap_hint_min": "x"})["tap_hint_min"] == 2
+    assert S.clean_settings({"tap_hint": "off", "tap_hint_min": 0})["tap_hint_min"] == 1

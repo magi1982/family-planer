@@ -219,10 +219,11 @@ DEFAULTS = {
     "enabled": True, "lead_day": 3, "lead_school": 3, "christmas_start": "advent", "xmas_snow": True,
     "weather": None, "storm_kmh": 50, "intensity": "normal", "priority": list(PRIORITY),
     "events": {}, "wedding": "", "couple": "", "anim_bday": True, "night_mode": True, "fun_days": True, "uk_days": True, "uk_for": "", "frost_mode": True, "frost_below": -1,
-    "tap_anims": True, "surprises": "rare",
+    "tap_anims": True, "surprises": "rare", "tap_hint": "activity", "tap_hint_min": 2,
 }
 INTENSITY = ("calm", "normal", "lots")
 SURPRISES = ("off", "rare", "often")
+TAP_HINT = ("off", "activity", "always")   # the hanging "Tap!" neon sign: never, after activity, every 30 s
 
 
 def _short(val) -> str:
@@ -275,6 +276,8 @@ def clean_settings(raw) -> dict:
         "frost_below": _frost(raw.get("frost_below")),
         "tap_anims": bool(raw.get("tap_anims", True)),
         "surprises": raw.get("surprises") if raw.get("surprises") in SURPRISES else "rare",
+        "tap_hint": raw.get("tap_hint") if raw.get("tap_hint") in TAP_HINT else "activity",
+        "tap_hint_min": validate.integer(raw.get("tap_hint_min"), 1, 10, 2),
     }
 
 
