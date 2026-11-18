@@ -901,3 +901,7 @@ Heute: ein neues Ei gibt es nur, wenn das aktive Tierchen „Gross“ wird (norm
 - **B – Gross bleibt, dazu zwei Extra-Wege (Vorschlag):** Glücksrad-Feld „Ei“ (2 von 24 Feldern, ~1× pro 12 Tage → ~7 in 3 Monaten, Ei nur wenn noch kein ungeschlüpftes Ei wartet) und ein Bonus-Ei für eine 7-Tage-Serie (alle Ämtli 7 Tage am Stück). Zusammen ~10–12 in 3 Monaten, die Tiere wachsen trotzdem gross.
 - **Einstellung „Neue Eier“:** selten (nur Gross) / normal (Gross + Glücksrad) / oft (Gross + Glücksrad + Serie) – mit Beschreibung.
 - Obergrenze bleibt: höchstens 1 wartendes Ei gleichzeitig, Sammlung max. 42 Arten.
+- **Zusatz (18.11.): mehr Punkte und mehr Sonderdinge.** Vorschlag:
+  - Glücksrad neu (24 Felder): Wachstums-Pille 5, Extra/Sonderding 6 (vorher 5), Futter 2 (vorher 4), Punkte 4 mit **+30 statt +20**, Entwicklungs-Pille 2, **Ei 2 (neu)**, nochmal drehen 2, Stern 1.
+  - Fundsachen beim Ämtli: Pillen-Chance = Punkte × 1.5 in Prozent (vorher × 1), höchstens 60 % (vorher 50 %); Sonderämtli weiterhin doppelt.
+  - Bonus für 7-Tage-Serie: Ei + 1 Extra.
