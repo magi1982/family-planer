@@ -42,6 +42,7 @@ Alles wird in der Oberfläche eingerichtet, **kein YAML**.
 - [Designs](#designs)
 - [Saisons & Wetter](#saisons--wetter)
 - [Sonderämtli für Freiwillige](#sonderämtli-für-freiwillige)
+- [Tierchen](#tierchen)
 - [Navigation](#navigation)
 - [Einstellungen im Planer](#einstellungen-im-planer)
 - [Vollbild per Doppeltippen](#vollbild-per-doppeltippen)
@@ -145,6 +146,8 @@ Pro Kind (oder Person, z. B. Studium/Arbeit):
 - Im Planer erscheint 🌴 *Ferien*. Schulferien im Schulkalender pausieren bewusst **nicht** (wer daheim ist, macht Ämtli).
 
 ### Zuverlässigkeit, Punkte, Level & Auszeichnungen
+
+> Seit 0.17.0 heisst die Belohnungs-Währung überall **Münzen** (Planer, Belohnungen, Statistik, Einstellungen, Ansagen). *Punkte* sind nur noch die [Tierchen-Punkte](#tierchen).
 
 ![Belohnungen](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/rewards.png)
 
@@ -366,6 +369,23 @@ Lustige Extra-Ämtli, die nur **Bonuspunkte** geben – nicht erledigt oder abge
 - **Nur wenn weg**: ein Ämtli nur an Tagen, an denen ein bestimmter Erwachsener (oder irgendein Erwachsener) weg ist – gleiche Erkennung wie beim Pausieren der Ämtli (Kalender oder Ferien-Check). *Braucht einen Erwachsenen* blendet ein Ämtli aus, solange alle Erwachsenen weg sind.
 - **Geheim**: Im Planer steht „Geheim-Ämtli“, ein Tipp auf den Augen-Knopf rechts zeigt es 5 Sekunden (gelb, solange es niemand genommen hat, danach grau). Bei Geburtstagen bekommt das Geburtstagskind es nie.
 
+## Tierchen
+
+Jede Person in der Familie kann kleine Tierchen aufziehen, die mit den Ämtli wachsen – wie ein kleines Sammelspiel auf dem Tablet. Erwachsene starten mit ausgeschalteten Tierchen und können sie selbst einschalten.
+
+- **Münzen und Punkte:** Jedes Ämtli gibt **Münzen** (für echte Belohnungen, siehe [Echte Belohnungen](#echte-belohnungen)) und bei eingeschalteten Tierchen **gleich viele Tierchen-Punkte**. Punkte sind nur für die Tierchen; Münzen ausgeben nimmt nie Punkte weg. Ausgeschaltet gibt es weiter Münzen, aber keine Punkte – und nichts, was schon da war, geht verloren.
+- **Auf der Personen-Karte:** Das aktuelle Tierchen sitzt unten rechts am Bild (ein Ei wackelt); ein Tipp öffnet die Tierchen-Seite dieser Person. Das schlichte **Glücksrad** oben rechts ist bunt, solange es frei ist, und grau, wenn heute schon gedreht.
+- **Beim Abhaken** steigt langsam auf, was das Ämtli gebracht hat: *+10 Münzen*, *+10 Punkte* und Fundsachen (Futter, manchmal eine Pille). Nochmals abhaken bringt nichts Neues.
+- **Wachsen:** *Punkte einsetzen* (bis 50 pro Tipp) füllt den Wachstums-Balken. **Schlüpfen und Entwickeln macht immer das Kind selbst**: Ist der Balken voll, wird *Schlüpfen lassen* bzw. *Entwickeln* gelb. Stufen: Ei → Baby (30) → Jungtier (150) → Gross (450) → Endform (800) → Schein (1150) → Legende (1750). Wer *Gross* erreicht, bekommt ein **neues Ei** mit einer Art, die das Kind noch nicht hat (höchstens 3 pro Art).
+- **Entwickeln** öffnet den Entwicklungsbaum: bis zu drei Wege (Farbe, Aussehen, Themen-Linie wie Feuer, Wasser, Nacht). Der Baum zeigt den Weg bis jetzt; was danach kommt, bleibt geheim.
+- **Pflegen:** Hunger, Durst, Energie und Laune sinken langsam und nie unter 10 % – Tierchen leiden nie, in den Ferien steht alles still. Futter, Getränke, Leckerli und Pillen werden nur verbraucht, wenn das Tierchen sie braucht; Spielsachen bleiben.
+- **Pillen:** Wachstums-Pillen S/M/L geben Wachstum, die **Entwicklungs-Pille** bringt ein Tierchen sofort eine ganze Stufe weiter (auch ein Ei).
+- **Glücksrad:** einmal am Tag pro Person, um Mitternacht wieder frei. Jeder Dreh bringt Futter und Wasser und dazu einen Gewinn: Wachstums-Pille, Haustier-Extra, Futterpaket, +20 Punkte, Entwicklungs-Pille, nochmals drehen oder das Sternfeld (Fabelwesen-Ei, Artefakt oder Jackpot). Das Feld bestimmt der Server, das Rad zeigt es nur. Ein Fabelwesen-Ei kommt spätestens nach 60 Drehs.
+- **Tierchen-Seite** (🐾 in der Navigation): *Garten* (dasselbe Haus, derselbe Pool und dieselbe Saison wie oben, mit grossem Vorgarten, in dem die Tierchen laufen, klettern, sich verstecken und baden), *Aktuelles Tierchen* (entwickeln und pflegen auf einem Bildschirm), *Inventar*, *Sammlung* (Karten mit Linie, Spezial-Fähigkeit, Futter, Lieblingsplätzen und Tagen zusammen; unbekannte Arten als Silhouette) und *Statistik*.
+- **Namen:** Jedes Tierchen kann einen eigenen Namen bekommen (bis 16 Zeichen); gross steht der Name, klein daneben die Art.
+- **Oben im Kopfbild** laufen bis zu 8 Tierchen der Familie um Haus und Pool; läuft eine Kopfbild-Geschichte, treten sie dahinter zurück.
+- Die Grafiken stecken in einer eigenen Datei (`family-planer-pets.js`), die nur bei eingeschalteten Tierchen geladen wird – der Planer bleibt schnell.
+
 ## Navigation
 
 - **Links:** die Uhrzeit mit Wochentag und Datum daneben, darunter die Seiten-Knöpfe. **Rechts:** Wetter und **Ferien-Check** 🌴 übereinander, daneben die Einstellungen – beide Seiten gleich aufgebaut.
@@ -465,7 +485,7 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Kalender prüfen alle | 30 min | Wie oft auf neue Ferien geprüft wird |
 | Neu durchsuchen | – | Kalender erneut nach Ferien-Wörtern durchsuchen |
 
-**Wochenplan → Punkte & Belohnungen**
+**Wochenplan → Münzen & Belohnungen**
 
 | Einstellung | Standard | Bedeutung |
 |---|---|---|
@@ -486,6 +506,16 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Statistik: Zeitraum beim Öffnen | Woche | Woche · Monat · 3 Monate |
 | Statistik: Personen vergleichen | an | Familien-Tabellen *Wer hat was gemacht?* und *Welche Ämtli – wer wie oft?* |
 | Statistik: „Da üben wir noch“ | an | am häufigsten vergessene Ämtli auf der eigenen Seite |
+
+**Tierchen** (*Einstellungen → Tierchen*)
+
+| Einstellung | Standard | Bedeutung |
+|---|---|---|
+| Tierchen | an | Tierchen-Seite, Tierchen auf den Karten und im Kopfbild, Glücksrad; aus blendet alles aus, nichts geht verloren |
+| Erwachsene starten mit Tierchen | aus | für neu angelegte Erwachsene; jede Person kann ihre Tierchen auf der Tierchen-Seite selbst ein- und ausschalten |
+| Glücksrad | an | einmal am Tag pro Person, um Mitternacht wieder frei |
+| Wachstums-Tempo | Normal | Langsam / Normal / Schnell – wie viel Wachstum eine Stufe braucht (normal: Schlüpfen nach etwa 3 Ämtli, Endform nach rund 2 Monaten) |
+| Hunger & Co. sinken | Langsam | Gar nicht / Langsam / Normal – Hunger, Durst, Energie und Laune; nie unter 10 %, in den Ferien pausiert |
 
 **Wochenplan → Ansagen bei Bewegung**
 

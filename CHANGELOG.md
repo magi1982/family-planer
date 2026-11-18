@@ -1,7 +1,18 @@
 # Changelog
 
-## 0.16.5 – unreleased
+## 0.17.0 – unreleased
+### Added
+- **Pets (Tierchen):** every family member can raise little pets that grow with the chores. Every chore gives coins (rewards) and, with pets on, the same number of pet points. Points are put into a pet's growth; hatching and evolving are always the child's own action (choice of up to three ways in the evolution tree). Reaching *grown* brings a new egg with a kind the child does not have yet. Care (hunger, thirst, energy, mood) goes down slowly, never below 10 % and pauses during holidays; things are only used when needed, toys stay.
+- **Pets page** (new 🐾 navigation button): garden with the header's house, pool and season, *current pet* (develop and care in one screen), inventory, collection cards, pet statistics. Pets can get their own name.
+- **On the person card:** the current pet at the picture and a plain **wheel of fortune** (once a day, free again at midnight; the server picks the field). Up to 8 pets walk in the header and step back behind header stories.
+- **Settings → Pets:** on/off, grown-ups start with pets (off by default), wheel, growth speed, how fast needs go down – each with a description. Everyone can switch their own pets on or off on the pets page (behind ⚙️ with a confirmation); nothing is lost.
+- The pet graphics come in their own file (`family-planer-pets.js`), loaded only when pets are on.
+
 ### Changed
+- **The reward currency is called *coins* (Münzen) everywhere** – planner, *Coins & rewards*, statistics, settings, Home Assistant dialogs, sensors and announcements. *Points* are only the pet points. A coin without a family letter shows a small ring instead of a star (the star belongs to the pet points).
+- **Ticking off a chore:** instead of a coin flying to the picture, what was earned rises slowly above the chore (*+10 coins*, *+10 points*, things found).
+- **Reliability and level as one capsule** on the person card (reliability left, level right; tap the level as before).
+- **One tile style everywhere:** statistics now have the season line on top like every page; statistics, rewards and lists tiles use the planer's coloured top line.
 - **Volunteer button wiggles only slightly** (about 2° instead of 9°, no zoom, softer glow).
 - **Secret chores in the volunteer popup** use the same split tile as in the columns: chore left, eye right, one border.
 

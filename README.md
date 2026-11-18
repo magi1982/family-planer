@@ -43,6 +43,7 @@ weather and time of day, through the seasons, Swiss customs and special days. Ev
 - [Designs](#designs)
 - [Seasons & weather](#seasons--weather)
 - [Special chores for volunteers](#special-chores-for-volunteers)
+- [Pets (Tierchen)](#pets-tierchen)
 - [Navigation](#navigation)
 - [Settings in the planner](#settings-in-the-planner)
 - [Fullscreen on double tap](#fullscreen-on-double-tap)
@@ -146,6 +147,8 @@ Per child (or person, e.g. university/work):
 - The planner shows 🌴 *Holiday*. School holidays in the school calendar deliberately do **not** pause chores (whoever is at home does chores).
 
 ### Reliability, points, levels & awards
+
+> Since 0.17.0 the reward currency is called **coins** everywhere (planner, rewards, statistics, settings, announcements). *Points* are only the [pet points](#pets-tierchen).
 
 ![Rewards](https://raw.githubusercontent.com/magi1982/family-planer/main/docs/rewards.png)
 
@@ -366,6 +369,23 @@ Fun extra jobs that only give **bonus points** – not done or expired never low
 - **Only while away**: limit a chore to days when a chosen grown-up (or any grown-up) is away – same detection as pausing chores (calendar or holiday check). *Needs a grown-up* hides a chore while every grown-up is away.
 - **Secret**: the planner shows *Secret job*; a tap on the eye button on the right reveals it for 5 seconds (yellow while nobody has taken the job, grey after). For birthdays the birthday child never gets it.
 
+## Pets (Tierchen)
+
+Every family member can raise little pets that grow with the chores – like a small collecting game on the tablet. Grown-ups start with pets switched off and can switch them on themselves.
+
+- **Coins and points:** every chore gives **coins** (for real rewards, see [Real rewards](#real-rewards)) and, with pets on, **the same number of pet points**. Points are only for the pets; spending coins never takes points away. Switched off, a person still earns coins but no points – and nothing that was there is lost.
+- **On the person card:** the current pet sits at the bottom right of the picture (an egg wobbles); a tap opens the pets page for this person. The plain **wheel** at the top right is colourful when it is free and grey once spun today.
+- **When a chore is ticked off**, what it brought rises slowly above it: *+10 coins*, *+10 points* and things found (food, sometimes a pill). Ticking off again brings nothing new.
+- **Growth:** *Use points* (up to 50 per tap) fills the growth bar. **Hatching and evolving are always the child's own action**: when the bar is full, *Hatch* or *Evolve* turns yellow. Steps: egg → baby (30) → young (150) → grown (450) → final form (800) → glow (1150) → legend (1750). Reaching *grown* brings a **new egg**, with a kind the child does not have yet (at most 3 of a kind).
+- **Evolving** opens the evolution tree: up to three ways (colour, look, theme line such as fire, water, night). The tree shows the way so far; what comes next stays secret.
+- **Care:** hunger, thirst, energy and mood go down slowly and never below 10 % – pets never suffer, and during holidays everything pauses. Food, drinks, treats and pills are only used when the pet needs them; toys stay.
+- **Pills:** growth pills S/M/L add growth, the **evolution pill** takes a pet a whole step further at once (also an egg).
+- **Wheel of fortune:** once a day per person, free again at midnight. Every spin brings food and water plus a prize: growth pill, pet extra, food pack, +20 points, evolution pill, spin again or the star field (fable egg, artefact or jackpot). The server chooses the field; the wheel only shows it. A fable egg comes at the latest after 60 spins.
+- **Pets page** (🐾 in the navigation): *Garden* (the same house, pool and season as the header, with a big front garden where the pets run, climb, hide and swim), *Current pet* (develop and care in one screen), *Inventory*, *Collection* (cards with line, special ability, food, favourite places and days together; unknown kinds as silhouettes) and *Statistics*.
+- **Names:** every pet can get its own name (up to 16 characters); the name shows big, the kind small beside it.
+- **In the header** up to 8 pets of the family walk around the house and pool; when a header story plays, they step back behind it.
+- The graphics come in their own file (`family-planer-pets.js`) that is only loaded when pets are on, so the planner stays fast.
+
 ## Navigation
 
 - **Left:** the time with weekday and date beside it, the page buttons below. **Right:** weather and the **holiday check** 🌴 stacked, settings beside them – both sides are built the same way.
@@ -465,7 +485,7 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Check calendars every | 30 min | how often new holidays are checked |
 | Search again | – | search the calendars for holiday words again |
 
-**Week plan → Points & rewards**
+**Week plan → Coins & rewards**
 
 | Setting | Default | Meaning |
 |---|---|---|
@@ -486,6 +506,16 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Statistics: period when opening | Week | Week · Month · 3 months |
 | Statistics: compare people | on | family tables *Who did what?* and *Which chores – who how often?* |
 | Statistics: "Still practising" | on | chores forgotten most often on the own page |
+
+**Pets** (*Settings → Pets*)
+
+| Setting | Default | Meaning |
+|---|---|---|
+| Pets | on | pets page, pets on the cards and in the header, wheel of fortune; off hides everything, nothing is lost |
+| Grown-ups start with pets | off | for newly added grown-ups; everyone can switch their own pets on and off on the pets page |
+| Wheel of fortune | on | once a day per person, free again at midnight |
+| Growth speed | Normal | Slow / Normal / Fast – how much growth each step needs (normal: hatching after about 3 chores, final form after about 2 months) |
+| Needs go down | Slowly | Not at all / Slowly / Normal – hunger, thirst, energy and mood; never below 10 %, paused during holidays |
 
 **Week plan → Announcements on motion**
 
