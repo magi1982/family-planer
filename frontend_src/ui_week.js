@@ -514,17 +514,15 @@ class LoxWochenplanerCard extends FpBase {
     }
     return `<div class="none2"><ha-icon icon="mdi:balloon"></ha-icon><div><b>${esc(TX.none)}</b>${sub}</div></div>`;
   }
-  // coin flies from the points plaque to the person's picture (today view), the picture hops
+  // what a chore brings rises slowly above it: coins (rewards) and, with pets on, the same number of Tierchen points
   _coinFly(btn) {
     try {
-      if (!window.FPCOIN || !btn) return;
+      if (!btn || !window.FPPET) return;
       const ptr = btn.querySelector('.ptr'); const col = btn.closest('.tcol'); const lab = col && col.querySelector('.lab.th');
-      if (!ptr || !lab) return;
-      const who = lab.dataset.person;
-      window.FPCOIN.fly(ptr.querySelector('svg') || ptr, lab.querySelector('.ring') || lab, () => {
-        const l2 = [...this.shadowRoot.querySelectorAll('.lab.th')].find((x) => x.dataset.person === who);
-        window.FPCOIN.hop(l2 && (l2.querySelector('.ring') || l2));
-      });
+      const pts = Number(((ptr && ptr.textContent) || '').replace(/[^0-9]/g, '')) || 0; if (!pts || !lab) return;
+      const snap = (this.fpStore && this.fpStore.snap) || {}; const pr = (snap.persons || []).find((x) => x.name === lab.dataset.person); if (!pr) return;
+      const r = btn.getBoundingClientRect(); const coin = ptr.querySelector('svg');
+      window.FPPET.onTick(snap, pr.id, r.left + r.width / 2, r.top - 6, pts, coin ? coin.outerHTML : '');
     } catch (e) { /* no animation */ }
   }
   _volCards(snap, tStr, persons) {
@@ -557,6 +555,12 @@ class LoxWochenplanerCard extends FpBase {
     const v = this._lvState(name); if (!v) return '';
     const g = v.up && v.taps < 20 ? (v.taps < 5 ? 'glow' : 'fade') : '';
     return `<button class="lvb t-${v.pt.tier} ${g}" data-lvtap="${esc(name)}" style="--lc:${v.pt.tier_color};--g:${g === 'fade' ? (20 - v.taps) / 15 : 0}" title="Level ${v.pt.level} · ${esc(v.pt.name)}">${v.pt.level}</button>`;
+  }
+  _lvCap(name, relC, pct, title) {
+    const v = this._lvState(name);
+    const lvl = v ? (() => { const g = v.up && v.taps < 20 ? (v.taps < 5 ? 'glow' : 'fade') : '';
+      return `<button class="lvl ${g}" data-lvtap="${esc(name)}" style="--lc:${v.pt.tier_color};--g:${g === 'fade' ? (20 - v.taps) / 15 : 0}" title="Level ${v.pt.level} · ${esc(v.pt.name)}"><i>★</i><b>${v.pt.level}</b><small>${esc(v.pt.name)}</small></button>`; })() : '';
+    return `<div class="cap"><span class="rel" style="--rc:${relC}" title="${title}"><i>✓</i><b>${pct}%</b></span>${lvl}</div>`;
   }
   _lvTap(name, el) {
     const v = this._lvState(name); if (!v) return;
@@ -601,6 +605,10 @@ class LoxWochenplanerCard extends FpBase {
       .filter((p) => (planZ(p.m)[kid] || []).includes(wd) && planActive(p.m, kid, wd, date)).map((p) => { const f = (p.m.f || {})[`${kid}|${wd}`] || 1; return f > 1 ? `${p.t} (bis ${WD[(wd - 1 + f - 1) % 7]})` : p.t; }).sort((a, b) => a.localeCompare(b, 'de'));
   }
   _onClick(e) {
+    const fpp = e.target.closest('[data-fppet]');
+    if (fpp) { window.__fpPetPerson = fpp.dataset.fppet; window.__fpPetTab = 'tier'; fpNavigate((window.__fpPaths || {}).tierchen || 'tierchen'); return; }
+    const fpw = e.target.closest('[data-fpwheel]');
+    if (fpw && window.FPPET && this.fpStore) { window.FPPET.openWheel(this.fpStore, fpw.dataset.fpwheel); return; }
     if (e.target.closest('[data-x]')) { this._detail = null; this._render(); return; }
     if (e.target.closest('[data-keep]')) return;
     if (e.target.closest('[data-close]')) { this._detail = null; this._render(); return; }
@@ -658,6 +666,9 @@ class LoxWochenplanerCard extends FpBase {
   }
   _render() {
     if (!this.shadowRoot || !this._cfg) return;
+    // Tierchen: graphics come from their own file (once), found things rise above the chore that brought them
+    const fpSnap = this.fpStore && this.fpStore.snap;
+    if (window.FPPET && fpSnap && window.FPPET.enabled(fpSnap)) { if (!window.FPPETS && !this._petLoad) { this._petLoad = true; window.FPPET.load().then(() => this._render()).catch(() => {}); } window.FPPET.onSnap(fpSnap); }
     const now = new Date(); const today = startOfDay(fpDay()); const tStr = ymd(today);
     const phone = this._isPhone(); this._phoneOn = phone;
     const ws = this._weekStart(); const sel = addDays(today, phone ? (this._dayOff || 0) : 0);
@@ -869,15 +880,16 @@ class LoxWochenplanerCard extends FpBase {
         const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
         const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || this._noneBox(k, dSel, evWho);
-        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
-          <span class="flg" style="--rc:${lv.c}" title="${TX.rel}">${st.pct}%</span><div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
+        const petBits = window.FPPET ? window.FPPET.headBits(snapX, pidOf[k.name]) : ['', ''];
+        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th${petBits[1] ? ' fphas' : ''}" data-person="${esc(k.name)}">
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${petBits[0]}</div>${petBits[1]}
+          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(auto-fit,minmax(min(100%,150px),1fr))`}">${cols.join('')}</div>`;
     }
 
-    this.shadowRoot.innerHTML = `<style>
+    this.shadowRoot.innerHTML = `<style>${window.FPPET ? window.FPPET.CARD_CSS : ''}${window.FPPETS ? window.FPPETS.P4.CSS : ''}
       :host{display:block}
       .card{position:relative;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:16px;padding:14px 16px;color:#ececec;font-family:${FONT}}
       .top{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
@@ -999,6 +1011,12 @@ class LoxWochenplanerCard extends FpBase {
       .seg.vw{margin-left:0}.seg.vw + .seg{margin-left:auto}
       .tgrid{display:grid;gap:8px;align-items:start}.tcol{background:#232323;border-radius:12px;min-width:0;box-shadow:inset 0 3px 0 var(--pc,#555);overflow:hidden}
       .tcol .lab.th{background:transparent;padding:12px 10px 8px;position:relative;overflow:visible}
+      .lab.th .cap{display:inline-flex;align-items:stretch;margin:6px 0 2px;border-radius:999px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.08);font:800 12px/1 system-ui,sans-serif;max-width:100%}
+      .lab.th .cap>*{display:flex;align-items:center;gap:5px;padding:5px 10px 5px 7px;color:#141414;white-space:nowrap;border:0;font:inherit;cursor:default}
+      .lab.th .cap i{font-style:normal;width:17px;height:17px;border-radius:50%;background:rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:#fff}
+      .lab.th .cap .rel{background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 82%,white),var(--rc))}
+      .lab.th .cap .lvl{cursor:pointer;background:linear-gradient(180deg,color-mix(in srgb,var(--lc) 78%,white),var(--lc));border-left:1px solid rgba(0,0,0,.25)}.lab.th .cap .lvl small{font:700 10px system-ui,sans-serif;opacity:.75}
+      .lab.th .cap .lvl.glow{animation:fplvglow 1.6s ease-in-out infinite}.tcol.nar .lab.th .cap .lvl small{display:none}
       .lab.th .flg{position:absolute;top:-1px;right:24px;width:42px;padding:7px 0 15px;background:var(--rc);color:#141414;font-size:13px;font-weight:800;text-align:center;letter-spacing:.2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);z-index:2}
       .lab.th .nm{padding-right:50px}.tcol.nar .lab.th{flex-direction:column;align-items:flex-start;gap:6px}.tcol.nar .btn{padding:6px 7px;gap:6px;font-size:12.5px}.tcol.nar .btn .cb{width:19px;height:19px}.tcol.nar .btn.done .cb::after{left:5px;top:1px}.tcol.nar .vcard{grid-template-columns:24px minmax(0,1fr);padding:8px;gap:6px}.tcol.nar .vcard .vi{font-size:18px}.tcol.nar .lab.th .lt{width:100%}.tcol.nar .lab.th .nm{padding-right:0}.lab.th .lv2:empty{display:none}
       .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .tcol .lab.th{flex-direction:row;align-items:center;gap:12px;padding:10px 12px 8px}.card.phone .tcol .lab.th .lt{flex:1;min-width:0}.card.phone .lab.th .nm{padding-right:46px}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}

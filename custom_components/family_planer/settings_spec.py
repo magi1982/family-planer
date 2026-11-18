@@ -15,8 +15,8 @@ THEMES = ("ha", "light", "dark", "rainbow", "space")
 STYLES = ("standard", "transparent", "glass")
 # designs up to 0.8 -> new set (the old dark designs become "dark")
 THEME_MIGRATE = {"loxone": "dark", "apple": "dark", "google": "dark", "nord": "dark"}
-NAV_IDS = ("planer", "listen", "belohnungen", "statistik", "einstellungen", "aemtliplan")
-NAV_DEFAULT = {"order": ["planer", "listen", "belohnungen", "statistik", "einstellungen", "aemtliplan"], "hidden": ["aemtliplan"]}
+NAV_IDS = ("planer", "listen", "belohnungen", "statistik", "tierchen", "einstellungen", "aemtliplan")
+NAV_DEFAULT = {"order": ["planer", "listen", "belohnungen", "statistik", "tierchen", "einstellungen", "aemtliplan"], "hidden": ["aemtliplan"]}
 
 
 def clean_nav(raw) -> dict:

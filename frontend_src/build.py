@@ -90,11 +90,11 @@ if missing:
 
 VERSION = re.search(r'VERSION = "([^"]+)"', (src.parent / "custom_components/family_planer/const.py").read_text()).group(1)
 PETS_FILE = "family-planer-pets.js"
-PET_LIBS = ("pets4", "motion", "header", "world", "tree", "icons", "care", "wheel")
+PET_LIBS = ("pets4", "motion", "header", "world", "tree", "icons", "care", "wheel", "libcss")
 # Tierchen graphics live in their own file and are loaded only when pets are switched on (keeps the planer fast)
 PETS_LOADER = (f"window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => {{"
                f" if (window.FPPETS) {{ res(window.FPPETS); return; }}"
-               f" const s = document.createElement('script'); s.src = '/family_planer_static/{PETS_FILE}?v={VERSION}';"
+               f" const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/{PETS_FILE}?v={VERSION}';"
                f" s.onload = () => res(window.FPPETS); s.onerror = () => {{ window.__fpPetsP = null; rej(new Error('pets')); }};"
                f" document.head.appendChild(s); }}));")
 
@@ -117,6 +117,7 @@ body = "\n".join([
     (src / "pin.js").read_text(),
     (src / "kiosk.js").read_text(),
     (src / "confetti.js").read_text(),
+    (src / "pets_ui.js").read_text(),
     (src / "bridge.js").read_text(),
 ])
 out.parent.mkdir(parents=True, exist_ok=True)
@@ -128,6 +129,6 @@ out.write_text(body)
 pets_body = "\n".join(["// Family Planer Tierchen graphics – built by frontend_src/build.py, do not edit"]
                        + [(src / "pets" / f"{n}.js").read_text() for n in PET_LIBS]
                        + ["window.FPPETS = { P4: window.P4, M: window.FPMOTION, HEADER: window.FPHEADER, WORLD: window.FPWORLD,"
-                          " TREE: window.FPTREE, ICO: window.FPICO, CARE: window.FPCARE, WHEEL: window.FPWHEEL };"])
+                          " TREE: window.FPTREE, ICO: window.FPICO, CARE: window.FPCARE, WHEEL: window.FPWHEEL, CSS: window.FPLIBCSS };"])
 pets_out.write_text(pets_body)
 print(out.name, len(body), pets_out.name, len(pets_body))

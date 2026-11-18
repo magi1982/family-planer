@@ -150,8 +150,8 @@
       (hass && ((hass.locale && hass.locale.language) || hass.language)) || 'de').toLowerCase();
     return l.startsWith('de') || l.startsWith('gsw') ? 'de' : 'en';
   };
-  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner', stats: 'fp-stats-inner', settings: 'fp-settings-inner' };
-  const STORE_VIEWS = ['lists', 'rewards', 'stats', 'settings'];
+  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner', stats: 'fp-stats-inner', pets: 'fp-pets-inner', settings: 'fp-settings-inner' };
+  const STORE_VIEWS = ['lists', 'rewards', 'stats', 'pets', 'settings'];
   const tag = (view, lang) => (!STORE_VIEWS.includes(view) && lang === 'en' ? INNER[view] + '-en' : INNER[view]);
   // designs: CSS variables read by every card (inherited through the shadow roots)
   const SYS = '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif';
@@ -328,10 +328,10 @@
   if (!customElements.get('family-planer-card')) customElements.define('family-planer-card', FamilyPlanerCard);
 
   // Navigation bar: one button per active module view, same place on every page (also in kiosk mode)
-  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', einstellungen: 'Settings' } };
-  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:format-list-checks', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', statistik: 'mdi:chart-bar', einstellungen: 'mdi:cog-outline' };
-  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', statistik: 'week', einstellungen: null };
-  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', statistik: 'stats', einstellungen: 'settings' };
+  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
+  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:format-list-checks', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', statistik: 'mdi:chart-bar', tierchen: 'mdi:paw', einstellungen: 'mdi:cog-outline' };
+  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', statistik: 'week', tierchen: 'week', einstellungen: null };
+  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', statistik: 'stats', tierchen: 'pets', einstellungen: 'settings' };
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
       design: 'Design', refresh: 'Kalender und Listen aktualisieren', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wds: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
@@ -372,7 +372,7 @@
     setConfig(c) {
       this._cfg = { ...(c || {}) };
       // paths of the dashboard views, e.g. { planer: 'planer', listen: 'einkauf', aemtliplan: 'aemtliplan' }
-      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', statistik: 'statistik', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
+      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', statistik: 'statistik', tierchen: 'tierchen', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
       window.__fpPaths = this._paths;
       if (!this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
@@ -587,11 +587,11 @@
       if (!this.shadowRoot || !this._cfg) return;
       const s = this._store && this._store.snap; const lang = this._lang(); const T = NAV_T[lang];
       const mods = (s && s.modules) || { week: true, lists: true };
-      const nav = (s && s.settings && s.settings.nav) || { order: ['planer', 'listen', 'belohnungen', 'statistik', 'einstellungen', 'aemtliplan'], hidden: ['aemtliplan'] };
+      const nav = (s && s.settings && s.settings.nav) || { order: ['planer', 'listen', 'belohnungen', 'statistik', 'tierchen', 'einstellungen', 'aemtliplan'], hidden: ['aemtliplan'] };
       const order = this._cfg.order || nav.order.filter((k) => !nav.hidden.includes(k));
       if (s) applyTheme(this, this._cfg.theme || s.theme, this._cfg.style || s.style);
       const cur = location.pathname.split('/').filter(Boolean).pop();
-      const btns = order.filter((k) => NAV[lang][k] && (!NAV_MOD[k] || mods[NAV_MOD[k]] !== false));
+      const btns = order.filter((k) => NAV[lang][k] && (!NAV_MOD[k] || mods[NAV_MOD[k]] !== false) && (k !== 'tierchen' || !s || (s.pets_cfg || {}).enabled));
       const title = this._cfg.titel || this._cfg.title || (s && s.title) || 'Family Planer';
       const showTitle = !!(s && s.settings && s.settings.nav_title);
       const n = new Date(); const p2 = (x) => String(x).padStart(2, '0');
@@ -659,6 +659,7 @@
         hint.style.setProperty('--nc', hintColor(s));
         const ctx = this._tapCtx(); hint.hidden = !ctx || !window.FPSEASON.canPlay(ctx) || hintMode(s) === 'off';
         window.requestAnimationFrame(() => this._placeHint());
+        if (window.FPPET) window.requestAnimationFrame(() => window.FPPET.banner(bar, s, this));
       } else { this._scnEl = null; this._scnKey = ''; }
       this._popLayer(this._popHtml, NAV_POPCSS);
       const lt = this._light(); const hr = new Date().getHours();

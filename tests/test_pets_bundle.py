@@ -10,7 +10,7 @@ VERSION = re.search(r'VERSION = "([^"]+)"', (_fe.parent / "const.py").read_text(
 
 def test_planer_loads_the_pet_file_lazily_with_the_version():
     assert "window.fpLoadPets" in CARDS
-    assert f"/family_planer_static/family-planer-pets.js?v={VERSION}" in CARDS
+    assert "'/family_planer_static'" in CARDS and f"/family-planer-pets.js?v={VERSION}" in CARDS
 
 
 def test_pet_file_exports_its_parts():

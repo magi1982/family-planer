@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = '/family_planer_static/family-planer-pets.js?v=0.16.5'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.16.5'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
@@ -3337,17 +3337,15 @@ class LoxWochenplanerCard extends FpBase {
     }
     return `<div class="none2"><ha-icon icon="mdi:balloon"></ha-icon><div><b>${esc(TX.none)}</b>${sub}</div></div>`;
   }
-  // coin flies from the points plaque to the person's picture (today view), the picture hops
+  // what a chore brings rises slowly above it: coins (rewards) and, with pets on, the same number of Tierchen points
   _coinFly(btn) {
     try {
-      if (!window.FPCOIN || !btn) return;
+      if (!btn || !window.FPPET) return;
       const ptr = btn.querySelector('.ptr'); const col = btn.closest('.tcol'); const lab = col && col.querySelector('.lab.th');
-      if (!ptr || !lab) return;
-      const who = lab.dataset.person;
-      window.FPCOIN.fly(ptr.querySelector('svg') || ptr, lab.querySelector('.ring') || lab, () => {
-        const l2 = [...this.shadowRoot.querySelectorAll('.lab.th')].find((x) => x.dataset.person === who);
-        window.FPCOIN.hop(l2 && (l2.querySelector('.ring') || l2));
-      });
+      const pts = Number(((ptr && ptr.textContent) || '').replace(/[^0-9]/g, '')) || 0; if (!pts || !lab) return;
+      const snap = (this.fpStore && this.fpStore.snap) || {}; const pr = (snap.persons || []).find((x) => x.name === lab.dataset.person); if (!pr) return;
+      const r = btn.getBoundingClientRect(); const coin = ptr.querySelector('svg');
+      window.FPPET.onTick(snap, pr.id, r.left + r.width / 2, r.top - 6, pts, coin ? coin.outerHTML : '');
     } catch (e) { /* no animation */ }
   }
   _volCards(snap, tStr, persons) {
@@ -3380,6 +3378,12 @@ class LoxWochenplanerCard extends FpBase {
     const v = this._lvState(name); if (!v) return '';
     const g = v.up && v.taps < 20 ? (v.taps < 5 ? 'glow' : 'fade') : '';
     return `<button class="lvb t-${v.pt.tier} ${g}" data-lvtap="${esc(name)}" style="--lc:${v.pt.tier_color};--g:${g === 'fade' ? (20 - v.taps) / 15 : 0}" title="Level ${v.pt.level} · ${esc(v.pt.name)}">${v.pt.level}</button>`;
+  }
+  _lvCap(name, relC, pct, title) {
+    const v = this._lvState(name);
+    const lvl = v ? (() => { const g = v.up && v.taps < 20 ? (v.taps < 5 ? 'glow' : 'fade') : '';
+      return `<button class="lvl ${g}" data-lvtap="${esc(name)}" style="--lc:${v.pt.tier_color};--g:${g === 'fade' ? (20 - v.taps) / 15 : 0}" title="Level ${v.pt.level} · ${esc(v.pt.name)}"><i>★</i><b>${v.pt.level}</b><small>${esc(v.pt.name)}</small></button>`; })() : '';
+    return `<div class="cap"><span class="rel" style="--rc:${relC}" title="${title}"><i>✓</i><b>${pct}%</b></span>${lvl}</div>`;
   }
   _lvTap(name, el) {
     const v = this._lvState(name); if (!v) return;
@@ -3424,6 +3428,10 @@ class LoxWochenplanerCard extends FpBase {
       .filter((p) => (planZ(p.m)[kid] || []).includes(wd) && planActive(p.m, kid, wd, date)).map((p) => { const f = (p.m.f || {})[`${kid}|${wd}`] || 1; return f > 1 ? `${p.t} (bis ${WD[(wd - 1 + f - 1) % 7]})` : p.t; }).sort((a, b) => a.localeCompare(b, 'de'));
   }
   _onClick(e) {
+    const fpp = e.target.closest('[data-fppet]');
+    if (fpp) { window.__fpPetPerson = fpp.dataset.fppet; window.__fpPetTab = 'tier'; fpNavigate((window.__fpPaths || {}).tierchen || 'tierchen'); return; }
+    const fpw = e.target.closest('[data-fpwheel]');
+    if (fpw && window.FPPET && this.fpStore) { window.FPPET.openWheel(this.fpStore, fpw.dataset.fpwheel); return; }
     if (e.target.closest('[data-x]')) { this._detail = null; this._render(); return; }
     if (e.target.closest('[data-keep]')) return;
     if (e.target.closest('[data-close]')) { this._detail = null; this._render(); return; }
@@ -3481,6 +3489,9 @@ class LoxWochenplanerCard extends FpBase {
   }
   _render() {
     if (!this.shadowRoot || !this._cfg) return;
+    // Tierchen: graphics come from their own file (once), found things rise above the chore that brought them
+    const fpSnap = this.fpStore && this.fpStore.snap;
+    if (window.FPPET && fpSnap && window.FPPET.enabled(fpSnap)) { if (!window.FPPETS && !this._petLoad) { this._petLoad = true; window.FPPET.load().then(() => this._render()).catch(() => {}); } window.FPPET.onSnap(fpSnap); }
     const now = new Date(); const today = startOfDay(fpDay()); const tStr = ymd(today);
     const phone = this._isPhone(); this._phoneOn = phone;
     const ws = this._weekStart(); const sel = addDays(today, phone ? (this._dayOff || 0) : 0);
@@ -3692,15 +3703,16 @@ class LoxWochenplanerCard extends FpBase {
         const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
         const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || this._noneBox(k, dSel, evWho);
-        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
-          <span class="flg" style="--rc:${lv.c}" title="${TX.rel}">${st.pct}%</span><div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
+        const petBits = window.FPPET ? window.FPPET.headBits(snapX, pidOf[k.name]) : ['', ''];
+        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th${petBits[1] ? ' fphas' : ''}" data-person="${esc(k.name)}">
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${petBits[0]}</div>${petBits[1]}
+          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(auto-fit,minmax(min(100%,150px),1fr))`}">${cols.join('')}</div>`;
     }
 
-    this.shadowRoot.innerHTML = `<style>
+    this.shadowRoot.innerHTML = `<style>${window.FPPET ? window.FPPET.CARD_CSS : ''}${window.FPPETS ? window.FPPETS.P4.CSS : ''}
       :host{display:block}
       .card{position:relative;background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:14px 16px;color:var(--fp-text,#ececec);font-family:var(--fp-font)}
       .top{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
@@ -3822,6 +3834,12 @@ class LoxWochenplanerCard extends FpBase {
       .seg.vw{margin-left:0}.seg.vw + .seg{margin-left:auto}
       .tgrid{display:grid;gap:8px;align-items:start}.tcol{background:var(--fp-bg2,#232323);border-radius:12px;min-width:0;box-shadow:inset 0 3px 0 var(--pc,#555);overflow:hidden}
       .tcol .lab.th{background:transparent;padding:12px 10px 8px;position:relative;overflow:visible}
+      .lab.th .cap{display:inline-flex;align-items:stretch;margin:6px 0 2px;border-radius:999px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.08);font:800 12px/1 system-ui,sans-serif;max-width:100%}
+      .lab.th .cap>*{display:flex;align-items:center;gap:5px;padding:5px 10px 5px 7px;color:var(--fp-on-accent,#141414);white-space:nowrap;border:0;font:inherit;cursor:default}
+      .lab.th .cap i{font-style:normal;width:17px;height:17px;border-radius:50%;background:rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--fp-text,#fff)}
+      .lab.th .cap .rel{background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 82%,white),var(--rc))}
+      .lab.th .cap .lvl{cursor:pointer;background:linear-gradient(180deg,color-mix(in srgb,var(--lc) 78%,white),var(--lc));border-left:1px solid rgba(0,0,0,.25)}.lab.th .cap .lvl small{font:700 10px system-ui,sans-serif;opacity:.75}
+      .lab.th .cap .lvl.glow{animation:fplvglow 1.6s ease-in-out infinite}.tcol.nar .lab.th .cap .lvl small{display:none}
       .lab.th .flg{position:absolute;top:-1px;right:24px;width:42px;padding:7px 0 15px;background:var(--rc);color:var(--fp-on-accent,#141414);font-size:13px;font-weight:800;text-align:center;letter-spacing:.2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);z-index:2}
       .lab.th .nm{padding-right:50px}.tcol.nar .lab.th{flex-direction:column;align-items:flex-start;gap:6px}.tcol.nar .btn{padding:6px 7px;gap:6px;font-size:12.5px}.tcol.nar .btn .cb{width:19px;height:19px}.tcol.nar .btn.done .cb::after{left:5px;top:1px}.tcol.nar .vcard{grid-template-columns:24px minmax(0,1fr);padding:8px;gap:6px}.tcol.nar .vcard .vi{font-size:18px}.tcol.nar .lab.th .lt{width:100%}.tcol.nar .lab.th .nm{padding-right:0}.lab.th .lv2:empty{display:none}
       .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .tcol .lab.th{flex-direction:row;align-items:center;gap:12px;padding:10px 12px 8px}.card.phone .tcol .lab.th .lt{flex:1;min-width:0}.card.phone .lab.th .nm{padding-right:46px}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
@@ -4755,17 +4773,15 @@ class LoxWochenplanerCard extends FpBase {
     }
     return `<div class="none2"><ha-icon icon="mdi:balloon"></ha-icon><div><b>${esc(TX.none)}</b>${sub}</div></div>`;
   }
-  // coin flies from the points plaque to the person's picture (today view), the picture hops
+  // what a chore brings rises slowly above it: coins (rewards) and, with pets on, the same number of Tierchen points
   _coinFly(btn) {
     try {
-      if (!window.FPCOIN || !btn) return;
+      if (!btn || !window.FPPET) return;
       const ptr = btn.querySelector('.ptr'); const col = btn.closest('.tcol'); const lab = col && col.querySelector('.lab.th');
-      if (!ptr || !lab) return;
-      const who = lab.dataset.person;
-      window.FPCOIN.fly(ptr.querySelector('svg') || ptr, lab.querySelector('.ring') || lab, () => {
-        const l2 = [...this.shadowRoot.querySelectorAll('.lab.th')].find((x) => x.dataset.person === who);
-        window.FPCOIN.hop(l2 && (l2.querySelector('.ring') || l2));
-      });
+      const pts = Number(((ptr && ptr.textContent) || '').replace(/[^0-9]/g, '')) || 0; if (!pts || !lab) return;
+      const snap = (this.fpStore && this.fpStore.snap) || {}; const pr = (snap.persons || []).find((x) => x.name === lab.dataset.person); if (!pr) return;
+      const r = btn.getBoundingClientRect(); const coin = ptr.querySelector('svg');
+      window.FPPET.onTick(snap, pr.id, r.left + r.width / 2, r.top - 6, pts, coin ? coin.outerHTML : '');
     } catch (e) { /* no animation */ }
   }
   _volCards(snap, tStr, persons) {
@@ -4798,6 +4814,12 @@ class LoxWochenplanerCard extends FpBase {
     const v = this._lvState(name); if (!v) return '';
     const g = v.up && v.taps < 20 ? (v.taps < 5 ? 'glow' : 'fade') : '';
     return `<button class="lvb t-${v.pt.tier} ${g}" data-lvtap="${esc(name)}" style="--lc:${v.pt.tier_color};--g:${g === 'fade' ? (20 - v.taps) / 15 : 0}" title="Level ${v.pt.level} · ${esc(v.pt.name)}">${v.pt.level}</button>`;
+  }
+  _lvCap(name, relC, pct, title) {
+    const v = this._lvState(name);
+    const lvl = v ? (() => { const g = v.up && v.taps < 20 ? (v.taps < 5 ? 'glow' : 'fade') : '';
+      return `<button class="lvl ${g}" data-lvtap="${esc(name)}" style="--lc:${v.pt.tier_color};--g:${g === 'fade' ? (20 - v.taps) / 15 : 0}" title="Level ${v.pt.level} · ${esc(v.pt.name)}"><i>★</i><b>${v.pt.level}</b><small>${esc(v.pt.name)}</small></button>`; })() : '';
+    return `<div class="cap"><span class="rel" style="--rc:${relC}" title="${title}"><i>✓</i><b>${pct}%</b></span>${lvl}</div>`;
   }
   _lvTap(name, el) {
     const v = this._lvState(name); if (!v) return;
@@ -4842,6 +4864,10 @@ class LoxWochenplanerCard extends FpBase {
       .filter((p) => (planZ(p.m)[kid] || []).includes(wd) && planActive(p.m, kid, wd, date)).map((p) => { const f = (p.m.f || {})[`${kid}|${wd}`] || 1; return f > 1 ? `${p.t} (until ${WD[(wd - 1 + f - 1) % 7]})` : p.t; }).sort((a, b) => a.localeCompare(b, 'de'));
   }
   _onClick(e) {
+    const fpp = e.target.closest('[data-fppet]');
+    if (fpp) { window.__fpPetPerson = fpp.dataset.fppet; window.__fpPetTab = 'tier'; fpNavigate((window.__fpPaths || {}).tierchen || 'tierchen'); return; }
+    const fpw = e.target.closest('[data-fpwheel]');
+    if (fpw && window.FPPET && this.fpStore) { window.FPPET.openWheel(this.fpStore, fpw.dataset.fpwheel); return; }
     if (e.target.closest('[data-x]')) { this._detail = null; this._render(); return; }
     if (e.target.closest('[data-keep]')) return;
     if (e.target.closest('[data-close]')) { this._detail = null; this._render(); return; }
@@ -4899,6 +4925,9 @@ class LoxWochenplanerCard extends FpBase {
   }
   _render() {
     if (!this.shadowRoot || !this._cfg) return;
+    // Tierchen: graphics come from their own file (once), found things rise above the chore that brought them
+    const fpSnap = this.fpStore && this.fpStore.snap;
+    if (window.FPPET && fpSnap && window.FPPET.enabled(fpSnap)) { if (!window.FPPETS && !this._petLoad) { this._petLoad = true; window.FPPET.load().then(() => this._render()).catch(() => {}); } window.FPPET.onSnap(fpSnap); }
     const now = new Date(); const today = startOfDay(fpDay()); const tStr = ymd(today);
     const phone = this._isPhone(); this._phoneOn = phone;
     const ws = this._weekStart(); const sel = addDays(today, phone ? (this._dayOff || 0) : 0);
@@ -5110,15 +5139,16 @@ class LoxWochenplanerCard extends FpBase {
         const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
         const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || this._noneBox(k, dSel, evWho);
-        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th" data-person="${esc(k.name)}">
-          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${this._lvBadge(k.name)}</div>
-          <span class="flg" style="--rc:${lv.c}" title="${TX.rel}">${st.pct}%</span><div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
+        const petBits = window.FPPET ? window.FPPET.headBits(snapX, pidOf[k.name]) : ['', ''];
+        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th${petBits[1] ? ' fphas' : ''}" data-person="${esc(k.name)}">
+          <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${petBits[0]}</div>${petBits[1]}
+          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(auto-fit,minmax(min(100%,150px),1fr))`}">${cols.join('')}</div>`;
     }
 
-    this.shadowRoot.innerHTML = `<style>
+    this.shadowRoot.innerHTML = `<style>${window.FPPET ? window.FPPET.CARD_CSS : ''}${window.FPPETS ? window.FPPETS.P4.CSS : ''}
       :host{display:block}
       .card{position:relative;background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:14px 16px;color:var(--fp-text,#ececec);font-family:var(--fp-font)}
       .top{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
@@ -5240,6 +5270,12 @@ class LoxWochenplanerCard extends FpBase {
       .seg.vw{margin-left:0}.seg.vw + .seg{margin-left:auto}
       .tgrid{display:grid;gap:8px;align-items:start}.tcol{background:var(--fp-bg2,#232323);border-radius:12px;min-width:0;box-shadow:inset 0 3px 0 var(--pc,#555);overflow:hidden}
       .tcol .lab.th{background:transparent;padding:12px 10px 8px;position:relative;overflow:visible}
+      .lab.th .cap{display:inline-flex;align-items:stretch;margin:6px 0 2px;border-radius:999px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.08);font:800 12px/1 system-ui,sans-serif;max-width:100%}
+      .lab.th .cap>*{display:flex;align-items:center;gap:5px;padding:5px 10px 5px 7px;color:var(--fp-on-accent,#141414);white-space:nowrap;border:0;font:inherit;cursor:default}
+      .lab.th .cap i{font-style:normal;width:17px;height:17px;border-radius:50%;background:rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--fp-text,#fff)}
+      .lab.th .cap .rel{background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 82%,white),var(--rc))}
+      .lab.th .cap .lvl{cursor:pointer;background:linear-gradient(180deg,color-mix(in srgb,var(--lc) 78%,white),var(--lc));border-left:1px solid rgba(0,0,0,.25)}.lab.th .cap .lvl small{font:700 10px system-ui,sans-serif;opacity:.75}
+      .lab.th .cap .lvl.glow{animation:fplvglow 1.6s ease-in-out infinite}.tcol.nar .lab.th .cap .lvl small{display:none}
       .lab.th .flg{position:absolute;top:-1px;right:24px;width:42px;padding:7px 0 15px;background:var(--rc);color:var(--fp-on-accent,#141414);font-size:13px;font-weight:800;text-align:center;letter-spacing:.2px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);z-index:2}
       .lab.th .nm{padding-right:50px}.tcol.nar .lab.th{flex-direction:column;align-items:flex-start;gap:6px}.tcol.nar .btn{padding:6px 7px;gap:6px;font-size:12.5px}.tcol.nar .btn .cb{width:19px;height:19px}.tcol.nar .btn.done .cb::after{left:5px;top:1px}.tcol.nar .vcard{grid-template-columns:24px minmax(0,1fr);padding:8px;gap:6px}.tcol.nar .vcard .vi{font-size:18px}.tcol.nar .lab.th .lt{width:100%}.tcol.nar .lab.th .nm{padding-right:0}.lab.th .lv2:empty{display:none}
       .card.phone .lab.th .flg{right:12px;width:36px;font-size:11px;padding:5px 0 12px}.card.phone .tcol .lab.th{flex-direction:row;align-items:center;gap:12px;padding:10px 12px 8px}.card.phone .tcol .lab.th .lt{flex:1;min-width:0}.card.phone .lab.th .nm{padding-right:46px}.tbody{padding:0 8px 10px;display:flex;flex-direction:column;gap:8px}
@@ -6917,7 +6953,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   ];
   // tab order on the page
   const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'status'];
-  const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', einstellungen: 'Settings' } };
+  const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', ontime: 'Pünktlich-Profi', volunteer: 'Freiwilligen-Champion', rescue: 'Retter in der Not', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', ontime: 'On-time pro', volunteer: 'Volunteer champion', rescue: 'Rescuer', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
   const AWS = { de: { none: 'Ohne Punkte', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
@@ -7223,7 +7259,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const head = `<span class="lt"><b>${esc(L(fd.label, lang))}</b>${fd.desc[lang] ? `<small>${esc(L(fd.desc, lang))}</small>` : ''}</span>`;
       if (fd.type === 'nav') {
         const n = v || { order: [], hidden: [] }; const mods = this._data.general.modules;
-        return `<div class="row col1">${head}<div class="navl">${n.order.map((id, i) => { const off = (id === 'listen' && !mods.lists) || (['planer', 'belohnungen', 'statistik', 'aemtliplan'].includes(id) && !mods.week);
+        return `<div class="row col1">${head}<div class="navl">${n.order.map((id, i) => { const off = (id === 'listen' && !mods.lists) || (['planer', 'belohnungen', 'statistik', 'tierchen', 'aemtliplan'].includes(id) && !mods.week);
           return `<div class="nr${off ? ' off' : ''}"><span class="nn">${esc(NAVL[lang][id] || id)}</span><button class="ar" data-navmv="${esc(id)}|-1" ${i ? '' : 'disabled'} aria-label="up">▲</button><button class="ar" data-navmv="${esc(id)}|1" ${i < n.order.length - 1 ? '' : 'disabled'} aria-label="down">▼</button>
             <input type="checkbox" class="sw" data-navtg="${esc(id)}" ${n.hidden.includes(id) ? '' : 'checked'} ${id === 'einstellungen' ? 'disabled' : ''}></div>`; }).join('')}</div></div>`;
       }
@@ -7836,6 +7872,475 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   window.FPCONFETTI = { check, rain, banner, burst };
 })();
 
+// Tierchen: pet + wheel on the person card, rising rewards after a chore, pets in the banner, the wheel,
+// hatching and evolving, and the Tierchen page (fp-pets-inner). The graphics come from family-planer-pets.js
+// (window.fpLoadPets); every action goes to the server (family_planer/pet), which checks it.
+(() => {
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const L = () => window.FPPETS || null;
+  const load = () => (window.fpLoadPets ? window.fpLoadPets() : Promise.reject(new Error('pets')));
+  const TXT = {
+    de: { steps: ['Ei', 'Baby', 'Jungtier', 'Gross', 'Endform', 'Schein', 'Legende'], egg: 'Dein Ei', active: 'aktiv', pts: 'Punkte', coins: 'Münzen',
+      who: 'Wessen Tierchen?', off: 'Tierchen aus', tabs: { garten: 'Garten', tier: 'Aktuelles Tierchen', inv: 'Inventar', samm: 'Sammlung', stat: 'Statistik' },
+      dev: 'Entwicklung', hatchT: 'Ei ausbrüten', evolve: 'Entwickeln', hatch: 'Schlüpfen lassen', spend: 'Punkte einsetzen', tree: '🌿 Entwicklungsbaum',
+      full: 'voll', noPts: 'keine Punkte', ready: 'Bereit!', grown: 'Ganz ausgewachsen 👑', left: 'noch {n}', care: 'Pflegen & spielen', careH: 'antippen · Spielsachen bleiben',
+      nothing: 'Nichts mehr da – erledige Ämtli oder dreh am Glücksrad.', eggHint: 'Setze Punkte ein – bei {n} schlüpft dein Ei.', careThis: 'Dieses jetzt pflegen', name: 'Name geben', save: 'Speichern', back: 'Zurück',
+      backColl: 'Zurück zur Sammlung', nameHint: 'z. B. Flocke', otherP: 'Andere Person', settings: 'Tierchen-Einstellungen',
+      offInfo: 'Wer keine Tierchen möchte, kann sie ausschalten. Ämtli zählen weiter für Belohnungen, nur Tierchen-Punkte gibt es dann keine. Nichts geht verloren – Tierchen, Inventar und Punkte bleiben gespeichert.',
+      offBtn: 'Tierchen ausschalten …', sure: 'Wirklich ausschalten?', cancel: 'Abbrechen', yesOff: 'Ja, ausschalten', offH: 'Tierchen sind ausgeschaltet',
+      offP1: 'Deine Ämtli zählen ganz normal für Belohnungen – nur Tierchen-Punkte sammelst du keine.', offP2: 'Nichts geht verloren: Tierchen, Inventar und Punkte (⭐ {n}) bleiben gespeichert.', onBtn: 'Tierchen wieder einschalten',
+      garden: 'Hier wohnen deine Tierchen – derselbe Garten wie oben im Banner. Sie klettern, verstecken sich und gehen baden.', gardenEmpty: 'Der Garten ist noch leer – sobald dein Ei geschlüpft ist, zieht dein Tierchen hier ein.',
+      collected: 'Gesammelt {a} von {b} · Endformen {c} · Fabelwesen {d} von {e}', unknown: 'Noch nicht entdeckt · {n}', wheelOnly: '🔒 Glücksrad', line: 'Linie', special: 'Spezial', eats: 'Frisst', likes: 'Mag', together: 'Zusammen', days: '{n} Tage',
+      noneYet: 'Noch keines – brüte dein Ei mit Punkten aus.', inv: { care: 'Füttern & pflegen', toys: 'Spielsachen (bleiben)', pills: 'Pillen fürs Wachsen', sleep: 'Schlafen & Garten', art: 'Artefakte' }, useAt: 'Benutzen bei Aktuelles Tierchen',
+      kpi: { pets: 'Tierchen gesammelt', endf: 'Endformen', evos: 'Entwicklungen', days: 'Tage mit {n}', fed: 'Mal gefüttert', spins: 'Mal Glücksrad' },
+      wheel: 'Glücksrad', spin: 'Drehen!', spun: 'Heute schon gedreht – wieder ab Mitternacht', won: 'Gewonnen!', inInv: '📦 Liegt jetzt in deinem Inventar.', daily: 'Dazu: Futter und Wasser für deine Tierchen.',
+      chooseWay: 'Entwickeln – wähle den Weg', ways: 'Dein Tierchen ist bereit! Wähle einen von {n} Wegen. Das kann man nicht rückgängig machen.', oneWay: 'Dein Tierchen ist bereit! Hier gibt es nur einen Weg.', pick: 'Ja, {n} wählen!',
+      hatching: 'Dein Ei schlüpft!', hatched: 'Es ist ein {n}! Es wohnt jetzt in deinem Garten.', foggy: '🌫️ Was nach {n} kommt, bleibt geheim – grün ist dein Weg bis jetzt.', nowLooks: 'So sieht es jetzt aus',
+      prize: { grow: ['Wachstumspille', 'Für ein Tierchen deiner Wahl.'], extra: ['Haustier-Extra', 'Leckerli, Spielzeug, Energydrink, Happy-Pille …'], food: ['Futterpaket', '3 Futter und 3 Wasser.'], p20: ['+20 Punkte', 'Direkt zu deinen Tierchen-Punkten.'],
+        dev: ['Entwicklungs-Pille', 'Bringt ein Tierchen sofort eine ganze Stufe weiter.'], again: ['Nochmals drehen!', 'Du darfst gleich noch einmal.'], star: ['Sternfeld', 'Fabelwesen-Ei, Artefakt oder Jackpot +100.'],
+        fabel_egg: ['Fabelwesen-Ei!', 'Ein ganz besonderes Ei liegt jetzt in deiner Sammlung.'], artefact: ['Artefakt!', 'Etwas Seltenes für deine Tierchen.'], jackpot: ['Jackpot +100 Punkte', 'Direkt zu deinen Tierchen-Punkten.'] },
+      err: { not_needed: 'Das braucht dein Tierchen gerade nicht – es bleibt in deinem Inventar.', no_item: 'Davon hast du gerade nichts.', too_tired: 'Zu müde zum Spielen – gib zuerst einen Energydrink.', bar_full: 'Der Balken ist schon voll – jetzt entwickeln!',
+        fully_grown: 'Schon ganz ausgewachsen.', no_points: 'Keine Punkte – erledige Ämtli.', not_ready: 'Noch nicht bereit.', egg: 'Ein Ei braucht noch keine Pflege.', spun: 'Heute schon gedreht.', off: 'Tierchen sind ausgeschaltet.', x: 'Hat nicht geklappt.' },
+      it: { futter: 'Futter', wasser: 'Wasser', keks: 'Leckerli', energy: 'Energydrink', seife: 'Seife', happy: 'Happy-Pille', ball: 'Ball', wolle: 'Wollknäuel', blasen: 'Seifenblasen', buerste: 'Bürste', wachs_s: 'Pille S', wachs_m: 'Pille M', wachs_l: 'Pille L',
+        glitzerpille: 'Entwicklungs-Pille', kissen: 'Sternkissen', laterne: 'Laterne', sternenstein: 'Sternenstein', weitblick: 'Weitblick-Kristall', zauberspiegel: 'Zauberspiegel', traumkristall: 'Traumkristall', regenbogenfeder: 'Regenbogenfeder' } },
+    en: { steps: ['Egg', 'Baby', 'Young', 'Grown', 'Final form', 'Glow', 'Legend'], egg: 'Your egg', active: 'active', pts: 'points', coins: 'coins',
+      who: 'Whose pets?', off: 'Pets off', tabs: { garten: 'Garden', tier: 'Current pet', inv: 'Inventory', samm: 'Collection', stat: 'Statistics' },
+      dev: 'Growing', hatchT: 'Hatch the egg', evolve: 'Evolve', hatch: 'Hatch', spend: 'Use points', tree: '🌿 Evolution tree',
+      full: 'full', noPts: 'no points', ready: 'Ready!', grown: 'Fully grown 👑', left: '{n} to go', care: 'Care & play', careH: 'tap · toys stay',
+      nothing: 'Nothing left – do chores or spin the wheel.', eggHint: 'Use points – at {n} your egg hatches.', careThis: 'Care for this one now', name: 'Give a name', save: 'Save', back: 'Back',
+      backColl: 'Back to the collection', nameHint: 'e.g. Fluffy', otherP: 'Other person', settings: 'Pet settings',
+      offInfo: 'Anyone who does not want pets can switch them off. Chores still count for rewards, there are just no pet points. Nothing is lost – pets, inventory and points are kept.',
+      offBtn: 'Switch pets off …', sure: 'Really switch off?', cancel: 'Cancel', yesOff: 'Yes, switch off', offH: 'Pets are switched off',
+      offP1: 'Your chores count for rewards as usual – you just collect no pet points.', offP2: 'Nothing is lost: pets, inventory and points (⭐ {n}) are kept.', onBtn: 'Switch pets on again',
+      garden: 'Your pets live here – the same garden as in the banner. They climb, hide and go for a swim.', gardenEmpty: 'The garden is still empty – once your egg hatches, your pet moves in.',
+      collected: 'Collected {a} of {b} · final forms {c} · fable creatures {d} of {e}', unknown: 'Not discovered yet · {n}', wheelOnly: '🔒 Wheel', line: 'Line', special: 'Special', eats: 'Eats', likes: 'Likes', together: 'Together', days: '{n} days',
+      noneYet: 'None yet – hatch your egg with points.', inv: { care: 'Food & care', toys: 'Toys (they stay)', pills: 'Growth pills', sleep: 'Sleep & garden', art: 'Artefacts' }, useAt: 'Use under Current pet',
+      kpi: { pets: 'Pets collected', endf: 'Final forms', evos: 'Evolutions', days: 'Days with {n}', fed: 'Times fed', spins: 'Wheel spins' },
+      wheel: 'Wheel', spin: 'Spin!', spun: 'Already spun today – again after midnight', won: 'You won!', inInv: '📦 It is in your inventory now.', daily: 'Plus: food and water for your pets.',
+      chooseWay: 'Evolve – choose the way', ways: 'Your pet is ready! Choose one of {n} ways. This cannot be undone.', oneWay: 'Your pet is ready! There is only one way here.', pick: 'Yes, choose {n}!',
+      hatching: 'Your egg hatches!', hatched: 'It is a {n}! It lives in your garden now.', foggy: '🌫️ What comes after {n} stays secret – green is your way so far.', nowLooks: 'This is how it looks now',
+      prize: { grow: ['Growth pill', 'For a pet of your choice.'], extra: ['Pet extra', 'Treat, toy, energy drink, happy pill …'], food: ['Food pack', '3 food and 3 water.'], p20: ['+20 points', 'Straight to your pet points.'],
+        dev: ['Evolution pill', 'Takes a pet a whole step further at once.'], again: ['Spin again!', 'You may spin once more.'], star: ['Star field', 'Fable egg, artefact or jackpot +100.'],
+        fabel_egg: ['Fable egg!', 'A very special egg is in your collection now.'], artefact: ['Artefact!', 'Something rare for your pets.'], jackpot: ['Jackpot +100 points', 'Straight to your pet points.'] },
+      err: { not_needed: 'Your pet does not need that right now – it stays in your inventory.', no_item: 'You have none of that right now.', too_tired: 'Too tired to play – give an energy drink first.', bar_full: 'The bar is full – evolve now!',
+        fully_grown: 'Already fully grown.', no_points: 'No points – do chores.', not_ready: 'Not ready yet.', egg: 'An egg needs no care yet.', spun: 'Already spun today.', off: 'Pets are switched off.', x: 'That did not work.' },
+      it: { futter: 'Food', wasser: 'Water', keks: 'Treat', energy: 'Energy drink', seife: 'Soap', happy: 'Happy pill', ball: 'Ball', wolle: 'Wool ball', blasen: 'Bubbles', buerste: 'Brush', wachs_s: 'Pill S', wachs_m: 'Pill M', wachs_l: 'Pill L',
+        glitzerpille: 'Evolution pill', kissen: 'Star pillow', laterne: 'Lantern', sternenstein: 'Star stone', weitblick: 'Far-sight crystal', zauberspiegel: 'Magic mirror', traumkristall: 'Dream crystal', regenbogenfeder: 'Rainbow feather' } },
+  };
+  const T = (snap) => TXT[(snap && snap.lang) === 'en' ? 'en' : 'de'];
+  const fmt = (s, o) => String(s).replace(/\{(\w)\}/g, (_, k) => (o[k] != null ? o[k] : ''));
+  const ST = ['ei', 'baby', 'jung', 'gross', 'gross', 'gross', 'gross'];
+  const NEED = { hunger: ['🍎', '#7CD06A'], durst: ['💧', '#5ec3ec'], energie: ['⚡', '#FFD34D'], laune: ['😊', '#FF8FC8'] };
+  const EFF = { futter: [['hunger', '+35']], wasser: [['durst', '+40']], keks: [['laune', '+20']], energy: [['energie', 'voll']], seife: [['laune', '+10']], happy: [['laune', 'voll']],
+    ball: [['laune', '+20'], ['energie', '−10']], wolle: [['laune', '+20'], ['energie', '−10']], blasen: [['laune', '+20'], ['energie', '−10']], buerste: [['laune', '+15']] };
+  const ANIM = { futter: 'futter', wasser: 'trinken', keks: 'leckerli', energy: 'energy', seife: 'baden', happy: 'happy', ball: 'ball', wolle: 'ball', blasen: 'ball', buerste: 'buerste' };
+  const CARE_ITEMS = ['futter', 'wasser', 'keks', 'energy', 'seife', 'happy'];
+  const TOYS = ['ball', 'buerste', 'wolle', 'blasen'];
+  const PILLS = [['wachs_s', 15], ['wachs_m', 30], ['wachs_l', 60]];
+  const DEV = 'glitzerpille';
+  const THC = { feuer: '#FF8A3D', schnee: '#9fe6ff', nacht: '#B58CFF', wald: '#7CD06A', suess: '#FF8FC8', himmel: '#FFE27A', wasser: '#5ec3ec' };
+  const FIELD_LOOK = { grow: ['grow', '#69C350'], extra: ['pet', '#3FA66B'], food: ['futter', '#E0A84F'], p20: ['coin', '#F5C542'], dev: ['devpill', '#8C5CE0'], again: ['again', '#4FA3E0'], star: ['star', '#FFC21A'] };
+
+  // ------------------------------------------------------------- helpers (need the graphics file)
+  const hash = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
+  const starters = () => L().P4.LIST.map((x) => x[0]).filter((k) => !L().TREE.FABEL.includes(k));
+  const eggKind = (id, p) => (p.fabel ? L().TREE.FABEL[hash(id) % L().TREE.FABEL.length] : starters()[hash(id) % starters().length]);
+  const kindName = (k) => (L().P4.LIST.find((x) => x[0] === k) || [])[1] || k || '';
+  const kindOf = (p) => (p.step >= 4 && p.name ? p.name : kindName(p.kind));
+  const titleOf = (p, t) => (p.step === 0 ? t.egg : p.nick || kindOf(p));
+  const svgOf = (id, p, mood) => (p.step === 0 ? L().P4.egg(p.kind || eggKind(id, p)) : L().P4.svg(p.kind, ST[p.step], mood || 'froh', { noShadow: 1, ...(p.look || {}) }));
+  const themeOf = (p) => (p.look && p.look.theme) || L().TREE.TH[p.kind] || 'wald';
+  const colOf = (p, fb) => (p.step ? THC[themeOf(p)] || '#FFE27A' : fb);
+  const pctOf = (p, steps) => { if (p.need == null) return 100; const base = steps[p.step] || 0; return Math.max(0, Math.min(100, Math.round((p.g - base) / Math.max(1, p.need - base) * 100))); };
+  const errMsg = (t, e) => t.err[String((e && e.code) || '').replace(/^pet_/, '')] || t.err.x;
+  const call = (store, pid, action, extra) => store.ws('family_planer/pet', { person_id: pid, action, ...(extra || {}) });
+  const person = (snap, pid) => (snap.persons || []).find((p) => p.id === pid) || {};
+  const avatar = (pr, size) => { const fx = window.FPX || window.FPX_EN; return fx && fx.avatarHtml ? fx.avatarHtml({ name: pr.name, farbe: pr.color, bild: pr.image }, size) : ''; };
+  const pcol = (pr) => (/^#[0-9a-f]{6}$/i.test(pr.color || '') ? pr.color : '#69C350');
+  const enabled = (snap) => !!(snap && snap.pets_cfg && snap.pets_cfg.enabled);
+  const toast = (host, text) => { const d = document.createElement('div'); d.className = 'pptoast'; d.textContent = text; host.appendChild(d); setTimeout(() => d.remove(), 2800); };
+
+  // ------------------------------------------------------------- a popup (own shadow root on the body, closes on ✕ or outside)
+  const MODAL_CSS = `:host{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(5,7,10,.72);font-family:var(--fp-font,system-ui,sans-serif)}
+    .box{position:relative;background:#171a20;color:#eef1f5;border:1px solid #2f3541;border-radius:16px;padding:16px;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+    .box::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--mc,#F5C542)}
+    h3{margin:0 40px 10px 0;font-size:17px}.x{position:absolute;right:10px;top:10px;width:34px;height:34px;border-radius:9px;border:1px solid #2f3541;background:#2c323d;color:#eef1f5;font-size:16px;cursor:pointer}
+    .hint{color:#9aa3b2;font-size:13px}.okb{background:#2c323d;border:1px solid #2f3541;color:#eef1f5;border-radius:9px;padding:9px 16px;font:700 14px system-ui;cursor:pointer}.okb.go{background:#F5C542;border-color:#F5C542;color:#141414}
+    .eopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:10px 0}.eo{display:flex;flex-direction:column;align-items:center;gap:2px;background:#1c2027;border:2px solid #2f3541;border-radius:12px;padding:8px;color:#eef1f5;cursor:pointer}
+    .eo.on{border-color:var(--tc,#F5C542);box-shadow:0 0 0 3px color-mix(in srgb,var(--tc,#F5C542) 30%,transparent)}.eo svg{width:110px;height:110px;overflow:visible}.eo b{font-size:13px}.eo small{font-size:11px;color:#9aa3b2}
+    .econf{display:flex;flex-direction:column;align-items:center;gap:10px}.cbox3{width:100%;max-width:320px;height:240px}
+    .pz{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:center;background:#1c2027;border-radius:12px;padding:14px;box-shadow:inset 0 3px 0 var(--zc)}.pzp{display:flex;justify-content:center}
+    .pz small{color:#F5C542;font:800 12px system-ui;text-transform:uppercase;letter-spacing:.08em}.pz b{display:block;font-size:20px;margin:2px 0}.pz p{margin:4px 0;font-size:13px;color:#c9ced6}
+    .wheelbox{margin:0;background:none;padding:6px 0}.fogbar{font-size:12.5px;color:#cfd6df;margin-bottom:8px}`;
+  const modal = (title, html, setup, color) => {
+    const host = document.createElement('div'); const root = host.attachShadow({ mode: 'open' });
+    root.innerHTML = `<style>${MODAL_CSS}${L() ? L().P4.CSS + L().CARE.CSS + L().CSS : ''}</style><div class="box" style="--mc:${color || '#F5C542'}"><button class="x" aria-label="✕">✕</button><h3>${esc(title)}</h3>${html}</div>`;
+    const close = () => host.remove();
+    root.querySelector('.x').addEventListener('click', close);
+    host.addEventListener('click', (e) => { if (e.composedPath()[0] === host) close(); });
+    document.body.appendChild(host); if (setup) setup(root, close);
+    return { root, close };
+  };
+
+  // ------------------------------------------------------------- the wheel: the server chooses the field, the wheel shows it
+  const openWheel = async (store, pid) => {
+    await load(); const snap = store.snap; const t = T(snap); const st = (snap.pets || {})[pid]; if (!st) return; const W = L().WHEEL;
+    const fields = (snap.pets_cfg || {}).fields || []; const pr = person(snap, pid);
+    const hub = String(pr.image || '').startsWith('av2:') && window.FPAV && window.FPAV.svg ? window.FPAV.svg(pr.image, pcol(pr)) : '';
+    const svg = W.wheelSvg(hub, fields, fields.map((f) => (FIELD_LOOK[f] || ['star', '#888'])[1]), fields.map((f) => (FIELD_LOOK[f] || ['star'])[0]));
+    modal(`🎡 ${t.wheel} · ${pr.name || ''}`, `<div class="wheelbox"><div class="wwrap">${W.ptrSvg}${svg}</div><button class="spin" ${st.spun ? 'disabled' : ''}>${st.spun ? t.spun : t.spin}</button><div class="res"></div></div>`, (root) => {
+      const b = root.querySelector('.spin');
+      b.addEventListener('click', async () => {
+        b.disabled = true; let res;
+        try { res = await call(store, pid, 'spin'); } catch (e) { root.querySelector('.res').textContent = errMsg(t, e); return; }
+        await W.spin(root.querySelector('.wwrap'), fields.length, res.field);
+        const key = res.star || res.prize; const [title, what] = t.prize[key] || [key, '']; const it = (res.items || [])[0];
+        const pic = it ? L().ICO.icoB(it, 96) : `<svg viewBox="0 0 24 24" width="96" height="96" style="color:#fff;background:${(FIELD_LOOK[res.prize] || ['', '#888'])[1]};border-radius:24px;padding:14px">${W.WICON[(FIELD_LOOK[res.prize] || ['star'])[0]] || ''}</svg>`;
+        root.querySelector('.res').innerHTML = `<div class="pz" style="--zc:${(FIELD_LOOK[res.prize] || ['', '#F5C542'])[1]}"><div class="pzp">${pic}</div><div><small>${t.won}</small><b>${esc(it ? t.it[it] || title : title)}</b><p>${esc(what)}</p><p class="hint">${it ? t.inInv + ' ' : ''}${t.daily}</p></div></div>`;
+        if (res.prize === 'again') { b.disabled = false; b.textContent = t.spin; } else b.textContent = t.spun;
+      });
+    }, '#FFC21A');
+  };
+
+  // ------------------------------------------------------------- evolving: up to three ways from the tree (the current form is found by its name)
+  const evolveOpts = (p) => {
+    const TR = L().TREE; const tr = TR.tree(p.kind);
+    const find = (nd, f) => (f(nd) ? nd : (nd.kids || []).reduce((r, c) => r || find(c, f), null));
+    const cur = (p.step >= 3 && p.name && find(tr, (nd) => nd.name === p.name)) || find(tr, (nd) => nd.st === ST[p.step]);
+    return ((cur && cur.kids) || []).slice(0, 3).map((o) => ({ ...o, theme: o.theme || Object.keys(TR.WORD).find((th) => TR.WORD[th].some((w) => String(o.name || '').startsWith(w))) }));
+  };
+  const openEvolve = async (store, pid, id, after) => {
+    await load(); const t = T(store.snap); const p = store.snap.pets[pid].pets[id]; const opts = evolveOpts(p); const TR = L().TREE;
+    if (!opts.length) { after && after(); return; }
+    modal(t.chooseWay, `<p class="hint">${opts.length > 1 ? fmt(t.ways, { n: opts.length }) : t.oneWay}</p><div class="eopts">${opts.map((o, i) => `<button class="eo" data-i="${i}" style="--tc:${THC[o.theme] || '#FFE27A'}">${L().P4.svg(p.kind, o.st, 'froh', { noShadow: 1, ...TR.look(o) })}<b>${esc(o.name)}</b>${o.theme ? `<small>${esc(TR.THEME_TXT[o.theme] || '')}</small>` : ''}</button>`).join('')}</div><div class="econf"></div>`, (root, close) => {
+      root.querySelectorAll('.eo').forEach((b) => b.addEventListener('click', () => {
+        const o = opts[+b.dataset.i]; root.querySelectorAll('.eo').forEach((x) => x.classList.toggle('on', x === b));
+        const cf = root.querySelector('.econf'); cf.innerHTML = `<button class="okb go">${esc(fmt(t.pick, { n: o.name }))}</button><div class="cbox3"></div>`;
+        cf.querySelector('.okb').addEventListener('click', async () => {
+          const look = TR.look(o); cf.querySelector('.okb').remove();
+          try { await call(store, pid, 'evolve', { pet: id, look, name: String(o.name || '').slice(0, 24) }); } catch (e) { cf.insertAdjacentText('afterbegin', errMsg(t, e)); return; }
+          const cr = new (L().CARE.Care)(cf.querySelector('.cbox3'), p.kind, ST[p.step], { look: p.look || {}, noBars: 1 }); cr.evolve(o.st, look, `${o.name}!`);
+          setTimeout(() => { close(); if (after) after(); }, 3400);
+        });
+      }));
+    });
+  };
+  const openHatch = async (store, pid, id, after) => {
+    await load(); const t = T(store.snap); const p = store.snap.pets[pid].pets[id];
+    modal(t.hatching, '<div class="cbox3" style="margin:auto"></div><p class="hint" style="text-align:center;font-size:14px">…</p>', async (root) => {
+      const cr = new (L().CARE.Care)(root.querySelector('.cbox3'), p.kind || eggKind(id, p), 'baby', { noBars: 1 }); cr.run('schluepfen');
+      let res; try { res = await call(store, pid, 'hatch', { pet: id }); } catch (e) { root.querySelector('.hint').textContent = errMsg(t, e); return; }
+      setTimeout(() => { root.querySelector('.hint').textContent = fmt(t.hatched, { n: kindName(res.kind) }); if (after) after(); }, 3200);
+    });
+  };
+
+  // ------------------------------------------------------------- person card: pet bottom-right at the avatar (60 px), the plain wheel top-right
+  const CARD_CSS = `.ring{overflow:visible}.fppet{position:absolute;right:-31px;bottom:-17px;width:60px;height:60px;padding:0;border:0;background:none;cursor:pointer;z-index:5}.fppet svg{width:100%;height:100%;overflow:visible}
+    .fppet.egg svg{animation:fpwob 2.2s ease-in-out infinite;transform-origin:50% 90%}@keyframes fpwob{0%,70%,100%{transform:rotate(0)}76%{transform:rotate(-8deg)}84%{transform:rotate(7deg)}92%{transform:rotate(-3deg)}}
+    .fppet .need{position:absolute;right:-6px;top:-6px;font-style:normal;font-size:12px;background:#fff;border-radius:10px;padding:1px 3px}
+    .fpwh{position:absolute;right:12px;top:12px;width:34px;height:34px;padding:0;border:0;background:none;cursor:pointer;z-index:6}.fpwh svg{width:100%;height:100%}.fpwh.used svg{filter:grayscale(1) brightness(.75);opacity:.55}
+    .lab.th.fphas .nm{padding-right:42px}@media (prefers-reduced-motion:reduce){.fppet.egg svg{animation:none}}`;
+  let wheelIcon = '';
+  // returns [pet button (goes into the avatar ring), wheel button (top right of the card head)]
+  const headBits = (snap, pid) => {
+    if (!enabled(snap) || !snap.pets || !snap.pets[pid] || !snap.pets[pid].on || !L()) return ['', ''];
+    const st = snap.pets[pid]; const p = st.pets[st.active]; const t = T(snap);
+    if (!wheelIcon) { const d = document.createElement('div'); d.innerHTML = L().WHEEL.knob('#888', true); const s = d.querySelector('svg'); wheelIcon = s ? s.outerHTML : '🎡'; }
+    const hungry = p && p.step > 0 && p.v && p.v.hunger < 30;
+    return [p ? `<button class="fppet${p.step === 0 ? ' egg' : ''}" data-fppet="${esc(pid)}" aria-label="${esc(titleOf(p, t))}">${svgOf(st.active, p)}${hungry ? '<i class="need">🍎</i>' : ''}</button>` : '',
+      (snap.pets_cfg || {}).wheel ? `<button class="fpwh${st.spun ? ' used' : ''}" data-fpwheel="${esc(pid)}" aria-label="${t.wheel}">${wheelIcon}</button>` : ''];
+  };
+
+  // ------------------------------------------------------------- after a chore: what was earned rises slowly above it
+  const RISE_CSS = '.fprise{position:fixed;z-index:9999;display:flex;align-items:center;gap:6px;background:#11141a;border:1px solid #3a404c;border-radius:16px;padding:2px 10px 2px 2px;pointer-events:none;white-space:nowrap;color:#fff;font:700 12px system-ui}.fprise .em{font-size:18px;padding:0 2px 0 6px}';
+  const rise = (x, y, list) => {
+    if (!document.getElementById('fprisecss')) { const s = document.createElement('style'); s.id = 'fprisecss'; s.textContent = RISE_CSS; document.head.appendChild(s); }
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    list.forEach(([ic, text], n) => setTimeout(() => {
+      const d = document.createElement('div'); d.className = 'fprise'; d.style.left = `${x}px`; d.style.top = `${y}px`;
+      d.innerHTML = `${ic.startsWith('<') ? ic : `<span class="em">${esc(ic)}</span>`}<b>${esc(text)}</b>`; document.body.appendChild(d);
+      if (reduce || !d.animate) { setTimeout(() => d.remove(), 2000); return; }
+      d.animate([{ transform: 'translate(-50%,0) scale(.6)', opacity: 0 }, { transform: 'translate(-50%,-10px) scale(1.08)', opacity: 1, offset: 0.1 }, { transform: 'translate(-50%,-16px) scale(1)', opacity: 1, offset: 0.2 },
+        { transform: 'translate(-50%,-70px)', opacity: 1, offset: 0.85 }, { transform: 'translate(-50%,-84px)', opacity: 0 }], { duration: 4200, easing: 'linear' }).onfinish = () => d.remove();
+    }, n * 900));
+  };
+  const lastTick = {}; const lastInv = {};
+  const onTick = (snap, pid, x, y, pts, coinHtml) => {
+    if (!(pts > 0)) return; const t = T(snap); const on = enabled(snap) && snap.pets && snap.pets[pid] && snap.pets[pid].on;
+    lastTick[pid] = { x, y, at: Date.now() };
+    rise(x, y, [[coinHtml || '🪙', `+${pts} ${t.coins}`], ...(on ? [['⭐', `+${pts} ${t.pts}`]] : [])]);
+  };
+  // found things (food, pills) arrive with the next update: shown at the chore that brought them
+  const onSnap = (snap) => {
+    if (!snap || !snap.pets) return; const t = T(snap);
+    Object.entries(snap.pets).forEach(([pid, st]) => {
+      const before = lastInv[pid]; lastInv[pid] = { ...st.inv }; const tk = lastTick[pid];
+      if (!before || !tk || Date.now() - tk.at > 6000 || !L()) return;
+      const got = Object.entries(st.inv).filter(([k, n]) => n > (before[k] || 0)).map(([k, n]) => [L().ICO.icoB(k, 24), `+${n - (before[k] || 0)} ${t.it[k] || k}`]);
+      if (got.length) { delete lastTick[pid]; setTimeout(() => rise(tk.x, tk.y - 4, got), 1800); }
+    });
+  };
+
+  // ------------------------------------------------------------- pets in the banner: a transparent pet layer laid exactly over the planer scene
+  const SCN_CSS = '.fpscene,.fpscene.gwrap{background:none!important;border-radius:0!important}.fpscene .gscene{background:none!important}.fpscene .gdark,.fpscene .gwater{display:none}.fpscene{transition:opacity .4s}';
+  const cropOf = (svg) => { const sr = svg.getBoundingClientRect(); const inv = svg.getScreenCTM().inverse(); const pt = (x, y) => { const q = svg.createSVGPoint(); q.x = x; q.y = y; return q.matrixTransform(inv); }; const a = pt(sr.left, sr.top); const b = pt(sr.right, sr.bottom); return [a.x, a.y, b.x, b.y]; };
+  const bannerState = new WeakMap(); let bannerSheet = null;
+  const bannerPets = (snap) => { const out = []; if (!enabled(snap) || !snap.pets) return out;
+    (snap.persons || []).forEach((pr) => { const st = snap.pets[pr.id]; if (!st || !st.on) return; const order = [st.active, ...Object.keys(st.pets).filter((k) => k !== st.active)];
+      order.forEach((id) => { const p = st.pets[id]; if (p && p.step > 0) out.push([p.kind, ST[p.step], p.look || {}]); }); });
+    return out.slice(0, 8); };
+  // owner = the navigation card: the pet layer belongs to it and survives every redraw of the banner (pets keep walking)
+  const banner = (bar, snap, owner) => {
+    if (!bar || !owner) return; if (!enabled(snap)) { const old = bannerState.get(owner); if (old) { old.host.remove(); bannerState.delete(owner); } return; }
+    if (!L()) { load().then(() => banner(bar, snap, owner)).catch(() => {}); return; }
+    const svg = bar.querySelector('.scn svg'); if (!svg || !svg.getScreenCTM()) return; const sr = svg.getBoundingClientRect(); if (!sr.width) return;
+    const root = bar.getRootNode(); if (!bannerSheet) { bannerSheet = new CSSStyleSheet(); bannerSheet.replaceSync(L().P4.CSS + L().M.CSS + SCN_CSS); }
+    if (root.adoptedStyleSheets && !root.adoptedStyleSheets.includes(bannerSheet)) root.adoptedStyleSheets = [...root.adoptedStyleSheets, bannerSheet];
+    const want = bannerPets(snap); const wkey = JSON.stringify(want); const br = bar.getBoundingClientRect();
+    const key = cropOf(svg).map((v) => Math.round(v)).join(',') + '|' + Math.round(sr.width);
+    let s = bannerState.get(owner);
+    if (!s || s.key !== key || s.wkey !== wkey) {
+      if (s) s.host.remove();
+      const host = document.createElement('div'); host.className = 'fpscene';
+      host.style.cssText = `position:absolute;left:${sr.left - br.left}px;top:${sr.top - br.top}px;width:${sr.width}px;height:${sr.height}px;z-index:1;pointer-events:none;overflow:hidden`;
+      bar.appendChild(host);
+      const scene = new (L().M.Scene)(host, { geo: { ...L().HEADER.HEADER, draw: () => '' }, crop: cropOf(svg) }); scene.social = 0.4; try { scene.setPool(true); } catch (e) { /* no pool */ }
+      want.forEach(([k, stg, look], n) => { const a = scene.add(k, stg, n % 2 ? 730 + Math.random() * 150 : 420 + Math.random() * 130, 104 + Math.random() * 8); if (look && Object.keys(look).length) { a.var = { ...look }; a.deco = [...(look.deco || [])]; a.key = ''; a.setView('front'); } });
+      s = { host, scene, key, wkey, bar }; bannerState.set(owner, s);
+      // a banner story plays: the pets step back behind it
+      s.iv = setInterval(() => { if (!owner.isConnected) { clearInterval(s.iv); return; } const scn = s.bar.querySelector('.scn'); s.host.style.opacity = scn && scn.classList.contains('playing') ? '0' : '1'; }, 400);
+    } else if (s.host.parentNode !== bar) bar.appendChild(s.host);
+    s.bar = bar;
+    bar.querySelectorAll(':scope > *:not(.fpscene):not(.scn)').forEach((c) => { if (getComputedStyle(c).position === 'static') c.style.position = 'relative'; if (!c.style.zIndex) c.style.zIndex = '2'; });
+  };
+
+  window.FPPET = { load, enabled, headBits, CARD_CSS, openWheel, onTick, onSnap, banner, rise, TXT };
+
+  // ============================================================= the Tierchen page
+  const PAGE_CSS = `:host{display:block}
+    .card{position:relative;background:var(--fp-bg1,#171a20);border:1px solid var(--fp-line,#2f3541);border-radius:var(--fp-radius,16px);padding:14px 16px;color:var(--fp-text,#eef1f5);font-family:var(--fp-font,system-ui,sans-serif)}
+    .card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}
+    .tile{position:relative;background:var(--fp-bg2,#1c2027);border-radius:12px;padding:12px;margin:0 0 10px;box-shadow:inset 0 3px 0 var(--pc,#4a4f5a)}
+    .hint{color:var(--fp-text2,#9aa3b2);font-size:13px;margin:6px 0 0}.sec{font:700 10.5px system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--fp-text2,#9aa3b2);margin:0 0 8px}
+    button{font-family:inherit}.okb{background:var(--fp-bg3,#2c323d);border:1px solid var(--fp-line,#2f3541);color:var(--fp-text,#eef1f5);border-radius:9px;padding:8px 14px;font:700 13px system-ui;cursor:pointer}
+    .okb.green{background:#69C350;border-color:#69C350;color:#10200c}
+    h2{margin:2px 0 12px;font:700 19px system-ui}
+    .av{position:relative;display:inline-block;width:64px;height:64px;flex:none}.av .ava{display:block;width:64px;height:64px;border-radius:50%;overflow:hidden}.av .ava>*{width:100%!important;height:100%!important}
+    .av .pet{position:absolute;right:-31px;bottom:-17px;width:60px;height:60px}.av .pet svg{width:100%;height:100%;overflow:visible}
+    .who{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+    .kid{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:12px 10px 10px;margin:0;cursor:pointer;border:0;color:inherit;font:inherit}
+    .kid .nm{font:600 15px system-ui;margin-top:8px}.kid small{color:var(--fp-text2,#9aa3b2);font-size:12px;margin:2px 0 8px}
+    .chip{display:inline-flex;align-items:center;gap:5px;background:var(--fp-bg3,#2c323d);border:1px solid var(--fp-line,#2f3541);border-radius:9px;padding:6px 10px;font-size:13px}.chip b{font-size:15px}
+    .bar{display:flex;align-items:center;gap:10px;padding:10px 12px 12px}.bar .av{margin-right:22px}
+    .sw{background:none;border:0;color:inherit;font:700 17px system-ui;padding:6px 8px;cursor:pointer;white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}.sw span{color:var(--fp-text2,#9aa3b2);font-size:13px}
+    .tabs{display:flex;gap:4px;background:var(--fp-bg1,#171a20);border-radius:12px;padding:4px;margin:0 auto 0 8px;flex-wrap:wrap}
+    .tabs button{background:transparent;border:0;color:var(--fp-text2,#9aa3b2);border-radius:9px;padding:8px 13px;font:700 13.5px system-ui;cursor:pointer}.tabs button.on{background:var(--fp-bg3,#2c323d);color:var(--fp-text,#eef1f5)}
+    .set{width:40px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:var(--fp-bg3,#2c323d);border:1px solid var(--fp-line,#2f3541);color:var(--fp-text2,#9aa3b2);cursor:pointer}.set ha-icon{--mdc-icon-size:20px}
+    .conf{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}.conf .yes{background:#5a2a2a;border-color:#a14a4a}
+    .dev{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:10px;align-items:start}.dev.two{align-items:stretch}
+    .big{display:flex;flex-direction:column;align-items:center;text-align:center}.big .top{align-self:stretch;display:flex;justify-content:space-between;align-items:center}
+    .stg{font:800 11px system-ui;text-transform:uppercase;letter-spacing:.06em;background:color-mix(in srgb,var(--pc) 22%,#1c2027);color:var(--pc);border-radius:7px;padding:3px 8px}
+    .act{font:800 10px system-ui;font-style:normal;text-transform:uppercase;letter-spacing:.05em;background:#69C350;color:#10200c;border-radius:6px;padding:2px 6px}
+    .spot{width:100%;display:flex;justify-content:center;background:radial-gradient(ellipse 45% 18% at 50% 88%,color-mix(in srgb,var(--tc) 45%,transparent),transparent 70%),radial-gradient(circle at 50% 45%,color-mix(in srgb,var(--tc) 16%,transparent),transparent 62%);margin:4px 0 2px}
+    .big .spot svg{width:180px;height:180px;overflow:visible}.cbox{width:100%;margin:2px 0 0;border-radius:10px;overflow:hidden}
+    .spot2{background:radial-gradient(ellipse 40% 10% at 50% 93%,color-mix(in srgb,var(--tc) 40%,transparent),transparent 70%),radial-gradient(circle at 50% 52%,color-mix(in srgb,var(--tc) 12%,transparent),transparent 60%)!important}
+    .nrow{display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:6px}.nrow b{font:800 18px system-ui}.nrow small{color:var(--fp-text2,#9aa3b2);font:600 12px system-ui}
+    .pen{background:none;border:0;cursor:pointer;color:var(--fp-text2,#9aa3b2);padding:2px 4px}.pen ha-icon{--mdc-icon-size:16px}
+    .nick{display:flex;gap:6px;margin-top:8px;justify-content:center}.nick:empty{display:none}.nick input{height:36px;border-radius:9px;border:1px solid #F5C542;background:#11141a;color:#fff;font:600 15px system-ui;padding:0 10px;width:160px;outline:none}
+    .vals{align-self:stretch;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:auto;padding-top:8px}
+    .ring{display:flex;flex-direction:column;align-items:center}.ring svg{width:52px;height:52px}.ring b{font:800 13px system-ui}.ring small{font:600 11px system-ui;color:var(--fp-text2,#9aa3b2)}
+    .mk{margin-top:auto;padding:11px 18px;font:800 15px system-ui}
+    .side{display:flex;flex-direction:column}.dev.two .side>.tile:nth-child(2){flex:1}
+    .gl{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}.gl b{font:800 15px system-ui}.gl span{color:var(--fp-text2,#9aa3b2);font:600 12.5px system-ui}
+    .gl .tree{margin-left:auto;align-self:center;background:var(--fp-bg3,#2c323d);border:1px solid var(--fp-line,#2f3541);color:inherit;border-radius:9px;padding:6px 10px;font:700 12.5px system-ui;cursor:pointer}
+    .gt{position:relative;height:26px;border-radius:9px;background:var(--fp-bg3,#2c323d);margin:0 0 10px;overflow:hidden}.gt i{display:block;height:100%;background:linear-gradient(90deg,#69C350,#B58CFF);border-radius:9px;transition:width .6s}.gt.ready i{background:#F5C542}
+    .gt span{position:absolute;inset:0;display:flex;align-items:center;padding-left:10px;font:800 12.5px system-ui;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7)}
+    .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .acts button{min-height:46px;border-radius:10px;font:800 15px system-ui;cursor:pointer;border:1px solid var(--fp-line,#2f3541);background:var(--fp-bg3,#2c323d);color:inherit;display:flex;align-items:center;justify-content:center;gap:6px}
+    .acts button small{font:600 12px system-ui;color:var(--fp-text2,#9aa3b2)}.acts button[disabled]{color:#6b7380;cursor:default}
+    .acts .evo:not([disabled]){background:#F5C542;color:#141414;border-color:#F5C542;box-shadow:0 3px 0 #b8902a}
+    .pills{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px}
+    .pill{display:flex;align-items:center;gap:5px;background:var(--fp-bg1,#232831);border:1px solid var(--fp-line,#2f3541);border-radius:9px;padding:4px 8px 4px 5px;color:inherit;cursor:pointer}.pill svg{width:22px;height:22px}.pill b{font:700 12px system-ui}.pill i{font:800 11px system-ui;font-style:normal;color:var(--fp-text2,#9aa3b2)}
+    .things{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+    .thing{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 3px;background:var(--fp-bg1,#232831);border:1px solid var(--fp-line,#2f3541);border-radius:10px;color:inherit;cursor:pointer}
+    .thing svg{width:28px;height:28px}.thing b{font:700 11.5px system-ui;line-height:1.15;text-align:center}.thing .tg{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
+    .thing i{position:absolute;top:4px;right:6px;font:800 11px system-ui;font-style:normal;color:var(--fp-text2,#9aa3b2)}.thing.none{opacity:.4;cursor:default}
+    .tag{font:800 10.5px system-ui;padding:2px 6px;border-radius:6px;background:color-mix(in srgb,var(--nc) 20%,#1c2027);color:var(--nc);white-space:nowrap}
+    .back{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .gos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:10px}
+    .go{display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;margin:0;font:inherit;color:inherit;border:0}.go .top{align-self:stretch;display:flex;justify-content:space-between;align-items:center}
+    .go .spot svg{width:96px;height:96px;overflow:visible}.go .n{font:800 16px system-ui;margin-top:2px}.go .k{color:var(--fp-text2,#9aa3b2);font:600 11.5px system-ui;min-height:14px}
+    .rows{align-self:stretch;display:flex;flex-direction:column;gap:3px;margin:8px 0;padding:8px 0;border-top:1px solid var(--fp-line,#2a303a);border-bottom:1px solid var(--fp-line,#2a303a)}
+    .rows>div{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:baseline}.rows span{font:600 11.5px system-ui;color:var(--fp-text2,#9aa3b2);white-space:nowrap}.rows b{font:700 12px system-ui;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .gb{align-self:stretch;height:8px;border-radius:4px;background:var(--fp-bg3,#2c323d);overflow:hidden}.gb i{display:block;height:100%;background:linear-gradient(90deg,#69C350,#B58CFF)}.gb.ready i{background:#F5C542}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px}.unk{background:var(--fp-bg1,#232831);border-radius:10px;padding:6px;text-align:center}.unk svg{width:54px;height:54px;filter:brightness(0) opacity(.45)}.unk small{display:block;font-size:11px;color:var(--fp-text2,#9aa3b2)}
+    .sfil{font-size:13px;color:var(--fp-text2,#9aa3b2);margin:2px 0 10px}
+    .inv .ih{display:flex;align-items:center;gap:10px;margin-bottom:8px}.inv .ih .sec{margin:0;flex:1}
+    .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}.kpis .tile{display:flex;flex-direction:column;gap:2px}.kpis span{font-size:18px}.kpis b{font:800 24px system-ui;color:var(--pc)}.kpis small{color:var(--fp-text2,#9aa3b2);font-size:12px}
+    .gw{border-radius:10px;overflow:hidden}.gw .gwater,.gw .gdark{display:none}
+    .tw2{margin:0}.offbox h3{margin:0 0 6px;font-size:17px}.offbox p{font-size:14px;margin:6px 0}
+    .pptoast{position:absolute;left:50%;top:40%;transform:translateX(-50%);z-index:20;background:#11141a;border:1px solid #F5C542;color:#fff;border-radius:12px;padding:10px 14px;font:600 13px system-ui;max-width:90%;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.6)}
+    @media (max-width:760px){.dev{grid-template-columns:1fr}.gos{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:repeat(3,1fr)}.things{grid-template-columns:repeat(4,1fr)}.bar{flex-wrap:wrap}.tabs{margin:0}}`;
+
+  class FpPetsInner extends HTMLElement {
+    setConfig(cfg) {
+      this._cfg = cfg || {};
+      if (!this.shadowRoot) { this.attachShadow({ mode: 'open' }); this.shadowRoot.addEventListener('click', (e) => this._click(e)); }
+      this._tab = this._tab || 'garten'; this.update();
+    }
+    set store(s) { this._store = s; }
+    set hass(h) { this._hass = h; }
+    disconnectedCallback() { clearInterval(this._vt); }
+    _snap() { return (this._store && this._store.snap) || {}; }
+    _t() { return T(this._snap()); }
+    update() {
+      if (!this.shadowRoot) return;
+      if (!L()) { this.shadowRoot.innerHTML = `<style>${PAGE_CSS}</style><div class="card"><p class="hint">…</p></div>`; load().then(() => this.update()).catch(() => {}); return; }
+      if (window.__fpPetPerson) { this._pid = window.__fpPetPerson; this._tab = window.__fpPetTab || 'tier'; window.__fpPetPerson = null; window.__fpPetTab = null; this._sub = null; }
+      // busy with a care animation or a typed name: the next update waits
+      if (this._hold && Date.now() < this._hold) { clearTimeout(this._ht); this._ht = setTimeout(() => this.update(), this._hold - Date.now() + 50); return; }
+      this._render();
+    }
+    _render() {
+      const s = this._snap(); const t = this._t(); clearInterval(this._vt);
+      if (!enabled(s)) { this.shadowRoot.innerHTML = `<style>${PAGE_CSS}</style><div class="card"><p class="hint">${t.off}</p></div>`; return; }
+      const head = `<style>${PAGE_CSS}${L().P4.CSS}${L().M.CSS}${L().CARE.CSS}${L().CSS}</style>`;
+      if (!this._pid || !(s.pets || {})[this._pid]) { this.shadowRoot.innerHTML = `${head}<div class="card">${this._who()}</div>`; return; }
+      const pr = person(s, this._pid); const st = s.pets[this._pid];
+      const bar = `<div class="tile bar" style="--pc:${pcol(pr)}">${this._av(pr, st)}<button class="sw" data-who>${esc(pr.name)} <span>▾</span></button>
+        ${st.on ? `<div class="tabs">${Object.entries(t.tabs).map(([k, n]) => `<button data-tab="${k}" class="${this._tab === k ? 'on' : ''}">${n}</button>`).join('')}</div><span class="chip">⭐ <b>${st.pts}</b></span><button class="set" data-set aria-label="${t.settings}"><ha-icon icon="mdi:cog-outline"></ha-icon></button>` : '<span style="flex:1"></span>'}</div>`;
+      const setBox = this._setOpen ? `<div class="tile" style="--pc:#9aa3b2"><div class="sec">${t.settings}</div><p class="hint">${t.offInfo}</p><div class="conf">${this._sure ? `<b>${t.sure}</b><button class="okb" data-setx>${t.cancel}</button><button class="okb yes" data-off>${t.yesOff}</button>` : `<button class="okb" data-sure>${t.offBtn}</button>`}</div></div>` : '';
+      const body = st.on ? this._body(s, t, pr, st) : `<div class="tile offbox" style="--pc:#555"><h3>${t.offH}</h3><p>${t.offP1}</p><p>${fmt(t.offP2, { n: st.pts })}</p><button class="okb green" data-on>${t.onBtn}</button></div>`;
+      this.shadowRoot.innerHTML = `${head}<div class="card">${bar}${setBox}<div class="body">${body}</div></div>`;
+      this._after(s, t, pr, st);
+    }
+    _av(pr, st) { const p = st && st.on ? st.pets[st.active] : null; return `<span class="av"><span class="ava">${avatar(pr, 64)}</span>${p ? `<span class="pet">${svgOf(st.active, p)}</span>` : ''}</span>`; }
+    _who() {
+      const s = this._snap(); const t = this._t();
+      return `<h2>${t.who}</h2><div class="who">${(s.persons || []).filter((pr) => s.pets && s.pets[pr.id]).map((pr) => { const st = s.pets[pr.id]; const p = st.pets[st.active];
+        return `<button class="tile kid" data-kid="${esc(pr.id)}" style="--pc:${pcol(pr)}">${this._av(pr, st)}<b class="nm">${esc(pr.name)}</b><small>${!st.on ? t.off : p ? esc(p.step ? `${titleOf(p, t)} · ${p.nick ? kindOf(p) : t.steps[p.step]}` : t.steps[0]) : ''}</small>${st.on ? `<span class="chip">⭐ <b>${st.pts}</b> ${t.pts}</span>` : ''}</button>`; }).join('')}</div>`;
+    }
+    _body(s, t, pr, st) {
+      if (this._sub && this._sub.tree) return this._tree(s, t, st, this._sub.tree);
+      if (this._sub && this._sub.pet && st.pets[this._sub.pet]) return `<div class="back"><button class="okb" data-back>‹ ${t.backColl}</button></div>${this._petView(s, t, pr, st, this._sub.pet)}`;
+      if (this._tab === 'tier') return this._petView(s, t, pr, st, st.active);
+      if (this._tab === 'inv') return this._inv(t, st);
+      if (this._tab === 'samm') return this._coll(s, t, st);
+      if (this._tab === 'stat') return this._stats(t, pr, st);
+      return `<div class="tile" style="--pc:${pcol(pr)}"><div class="gw"></div><p class="hint">${Object.values(st.pets).some((p) => p.step > 0) ? t.garden : t.gardenEmpty}</p></div>`;
+    }
+    _tag(n, v) { return `<span class="tag" style="--nc:${NEED[n][1]}">${NEED[n][0]} ${v}</span>`; }
+    _thing(t, st, id) { return `<button class="thing" data-use="${id}">${L().ICO.icoB(id === 'futter' ? (L().ICO.FOOD[(st.pets[st.active] || {}).kind] || 'apfel') : id, 34)}<b>${esc(t.it[id] || id)}</b><span class="tg">${(EFF[id] || []).map(([n, v]) => this._tag(n, v)).join('')}</span><i>${st.inv[id] || 0}×</i></button>`; }
+    _petView(s, t, pr, st, id) {
+      const p = st.pets[id]; const steps = (s.pets_cfg || {}).steps || []; const act = id === st.active; const egg = p.step === 0; const cares = act && !egg;
+      const col = colOf(p, pcol(pr)); const nx = p.need; const amt = nx != null ? Math.min((s.pets_cfg || {}).spend || 50, st.pts, Math.max(0, nx - p.g)) : 0; const can = nx != null && !p.ready && amt > 0;
+      const pills = [...PILLS.map(([k, v]) => [k, `+${v}`]), [DEV, t.it[DEV] && (s.lang === 'en' ? 'whole step' : 'ganze Stufe')]].filter(([k]) => (st.inv[k] || 0) > 0);
+      const have = [...CARE_ITEMS, ...TOYS].filter((k) => (st.inv[k] || 0) > 0);
+      return `<div class="dev${cares ? ' two' : ''}">
+        <div class="tile big" style="--pc:${col}"><div class="top"><span class="stg">${esc(t.steps[p.step])}</span>${act ? `<em class="act">${t.active}</em>` : ''}</div>
+          ${cares ? `<div class="cbox" data-cbox="${esc(id)}"></div>` : `<div class="spot" style="--tc:${col}">${svgOf(id, p)}</div>`}
+          <div class="nrow"><b>${esc(titleOf(p, t))}</b>${!egg && p.nick ? `<small>${esc(kindOf(p))}</small>` : ''}${egg ? '' : `<button class="pen" data-pen="${esc(id)}" aria-label="${t.name}"><ha-icon icon="mdi:pencil"></ha-icon></button>`}</div><div class="nick"></div>
+          ${cares ? '<div class="vals"></div>' : egg ? `<p class="hint">${fmt(t.eggHint, { n: nx })}</p>` : `<button class="okb green mk" data-mk="${esc(id)}">${t.careThis}</button>`}</div>
+        <div class="side"><div class="tile" style="--pc:${col}"><div class="gl"><b>${egg ? t.hatchT : t.dev}</b><span>${esc(t.steps[p.step])}${nx != null ? ` → ${esc(t.steps[p.step + 1])}` : ''}</span>${egg ? '' : `<button class="tree" data-tree="${esc(id)}">${t.tree}</button>`}</div>
+          <div class="gt${p.ready ? ' ready' : ''}"><i style="width:${pctOf(p, steps)}%"></i><span>${nx == null ? t.grown : p.ready ? t.ready : `${p.g} / ${nx} · ${fmt(t.left, { n: nx - p.g })}`}</span></div>
+          <div class="acts"><button class="evo" data-evo="${esc(id)}" ${p.ready ? '' : 'disabled'}>${egg ? t.hatch : t.evolve}</button><button data-spend="${esc(id)}" ${can ? '' : 'disabled'}>${t.spend} <small>${can ? `${amt} ⭐ → +${amt}` : nx == null || p.ready ? t.full : t.noPts}</small></button></div>
+          ${pills.length ? `<div class="pills">${pills.map(([k, v]) => `<button class="pill" data-use="${k}" data-pet="${esc(id)}">${L().ICO.icoB(k, 22)}<b>${esc(t.it[k])}</b><span class="tag" style="--nc:#B58CFF">${esc(v)}</span><i>${st.inv[k]}×</i></button>`).join('')}</div>` : ''}</div>
+          ${cares ? `<div class="tile" style="--pc:${col}"><div class="gl"><b>${t.care}</b><span>${t.careH}</span></div>${have.length ? `<div class="things">${have.map((k) => this._thing(t, st, k)).join('')}</div>` : `<p class="hint">${t.nothing}</p>`}</div>` : ''}</div></div>`;
+    }
+    _inv(t, st) {
+      const G = [['care', '#69C350', CARE_ITEMS, true], ['toys', '#4FA3E0', TOYS, true], ['pills', '#E36BD2', ['wachs_s', 'wachs_m', 'wachs_l', DEV], true], ['sleep', '#9aa3b2', ['kissen', 'laterne']], ['art', '#B58CFF', ['sternenstein', 'weitblick', 'zauberspiegel', 'traumkristall', 'regenbogenfeder']]];
+      return G.map(([g, c, ids, use]) => `<div class="tile inv" style="--pc:${c}"><div class="ih"><div class="sec">${t.inv[g]}</div>${use ? `<button class="okb" data-tab="tier">⭐ ${t.useAt}</button>` : ''}</div><div class="things">${ids.map((k) => `<div class="thing ${st.inv[k] ? '' : 'none'}">${L().ICO.icoB(k, 34)}<b>${esc(t.it[k] || k)}</b><span class="tg">${(EFF[k] || []).map(([n, v]) => this._tag(n, v)).join('')}</span><i>${st.inv[k] || 0}×</i></div>`).join('')}</div></div>`).join('');
+    }
+    _coll(s, t, st) {
+      const steps = (s.pets_cfg || {}).steps || []; const own = Object.entries(st.pets).filter(([, p]) => p.step > 0); const eggs = Object.entries(st.pets).filter(([, p]) => p.step === 0);
+      const have = new Set(own.map(([, p]) => p.kind)); const all = L().P4.LIST.map((x) => x[0]); const FAB = L().TREE.FABEL;
+      const favs = (k) => Object.keys(((L().M.AB || {})[k] || {}).fav || {}).slice(0, 2).map((f) => f.charAt(0).toUpperCase() + f.slice(1)).join(', ');
+      const row = (ic, l, v) => `<div><span>${ic} ${l}</span><b title="${esc(v)}">${esc(v)}</b></div>`;
+      const card = ([id, p]) => { const col = colOf(p, '#FFE27A'); return `<button class="tile go" style="--pc:${col}" data-card="${esc(id)}"><div class="top"><span class="stg">${esc(t.steps[p.step])}</span>${id === st.active ? `<em class="act">${t.active}</em>` : ''}</div>
+        <div class="spot" style="--tc:${col}">${svgOf(id, p)}</div><b class="n">${esc(titleOf(p, t))}</b><small class="k">${p.step && p.nick ? esc(kindOf(p)) : '&nbsp;'}</small>
+        ${p.step ? `<div class="rows">${row('🔥', t.line, (L().TREE.THEME_TXT[themeOf(p)] || '').replace('-Linie', ''))}${row('✦', t.special, ((L().M.SPECIAL || {})[p.kind] || {}).n || '–')}${row('🍎', t.eats, ((L().ICO.FNAME || {})[L().ICO.FOOD[p.kind]]) || '')}${row('📍', t.likes, favs(p.kind))}${row('📅', t.together, fmt(t.days, { n: Math.max(1, Math.round((Date.now() - new Date(p.since).getTime()) / 864e5)) }))}</div>` : ''}
+        <div class="gb${p.ready ? ' ready' : ''}"><i style="width:${pctOf(p, steps)}%"></i></div></button>`; };
+      const unk = all.filter((k) => !have.has(k));
+      return `<div class="sfil">${esc(fmt(t.collected, { a: have.size, b: all.length, c: own.filter(([, p]) => p.step >= 4).length, d: own.filter(([, p]) => FAB.includes(p.kind)).length, e: FAB.length }))}</div>
+        ${own.length || eggs.length ? `<div class="gos">${[...own, ...eggs].map(card).join('')}</div>` : `<div class="tile" style="--pc:#555"><p class="hint">${t.noneYet}</p></div>`}
+        <div class="tile" style="--pc:#555"><div class="sec">${esc(fmt(t.unknown, { n: unk.length }))}</div><div class="grid">${unk.map((k) => `<div class="unk">${L().P4.svg(k, 'gross', 'froh', { noShadow: 1 })}<small>${FAB.includes(k) ? t.wheelOnly : '???'}</small></div>`).join('')}</div></div>`;
+    }
+    _stats(t, pr, st) {
+      const own = Object.values(st.pets).filter((p) => p.step > 0); const p = st.pets[st.active] || {};
+      const days = p.since ? Math.max(1, Math.round((Date.now() - new Date(p.since).getTime()) / 864e5)) : 0;
+      const k = (ic, v, l, c) => `<div class="tile" style="--pc:${c}"><span>${ic}</span><b>${esc(v)}</b><small>${esc(l)}</small></div>`;
+      return `<div class="kpis">${[k('🐾', own.length, t.kpi.pets, '#69C350'), k('👑', own.filter((x) => x.step >= 4).length, t.kpi.endf, '#F5C542'), k('⭐', st.stats.evos || 0, t.kpi.evos, '#B58CFF'),
+        k('📅', days, fmt(t.kpi.days, { n: titleOf(p, t) }), '#4FA3E0'), k('🍎', st.stats.fed || 0, t.kpi.fed, '#FF8A3D'), k('🎡', st.stats.spins || 0, t.kpi.spins, '#E36BD2')].join('')}</div>`;
+    }
+    _tree(s, t, st, id) {
+      const p = st.pets[id];
+      return `<div class="back"><button class="okb" data-back>‹ ${t.back}</button><b>${t.tree} · ${esc(titleOf(p, t))}</b></div><div class="tile" style="--pc:#69C350"><div class="fogbar hint">${esc(fmt(t.foggy, { n: t.steps[Math.min(p.step, 3)] }))}</div><div class="tw2"></div></div>`;
+    }
+    // after the HTML is in place: care box, values, garden, tree
+    _after(s, t, pr, st) {
+      const R = this.shadowRoot;
+      const cb = R.querySelector('[data-cbox]');
+      if (cb) {
+        const id = cb.dataset.cbox; const p = st.pets[id]; const key = this._pid + id + p.step + JSON.stringify(p.look || {});
+        this._care = new (L().CARE.Care)(cb, p.kind, ST[p.step], { look: p.look || {}, mood: p.v.hunger < 30 ? 'hungrig' : 'froh', noBars: 1 }); this._care.v = { ...this._care.v, ...p.v }; this._care.bars(); this._careKey = key;
+        cb.classList.add('spot2'); cb.style.setProperty('--tc', colOf(p, pcol(pr)));
+        const vals = () => { const el = R.querySelector('.vals'); if (!el || !this._care) return; el.innerHTML = Object.keys(NEED).map((n) => { const v = Math.round(Math.max(0, Math.min(100, this._care.v[n]))); const r = 19; const C = 2 * Math.PI * r;
+          return `<div class="ring"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="${r}" fill="none" stroke="#2c323d" stroke-width="5"/><circle cx="24" cy="24" r="${r}" fill="none" stroke="${NEED[n][1]}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(C * v / 100).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 24 24)"/><text x="24" y="29" text-anchor="middle" font-size="15">${NEED[n][0]}</text></svg><b>${v}%</b><small>${esc({ hunger: 'Hunger', durst: s.lang === 'en' ? 'Thirst' : 'Durst', energie: s.lang === 'en' ? 'Energy' : 'Energie', laune: s.lang === 'en' ? 'Mood' : 'Laune' }[n])}</small></div>`; }).join(''); };
+        vals(); this._vt = setInterval(vals, 500);
+      }
+      const gw = R.querySelector('.gw'); if (gw) this._garden(gw, st);
+      const tw = R.querySelector('.tw2'); if (tw && this._sub && this._sub.tree) { const p = st.pets[this._sub.tree]; L().TREE.render(tw, p.kind, { size: 40, gap: 4, colW: 72, fog: Math.min(p.step, 3) }); }
+    }
+    _garden(g, st) {
+      const mine = Object.values(st.pets).filter((p) => p.step > 0).slice(0, 8);
+      const bar = (() => { const out = []; const walk = (n) => { if (!n || out.length) return; if (n.matches && n.matches('.bar .scn svg')) { out.push(n); return; } if (n.shadowRoot) walk(n.shadowRoot); for (const c of n.children || []) walk(c); }; walk(document.body); return out[0]; })();
+      const W0 = L().WORLD; const Pt = W0.parts; const m = new Date().getMonth(); const base = m >= 2 && m <= 4 ? 'fruehling' : m >= 5 && m <= 7 ? 'sommer' : m >= 8 && m <= 10 ? 'herbst' : 'winter'; const pal = { ...W0.PAL[base], base };
+      const GD = { ...L().M.GARDEN, pond: { cx: 500, cy: 213, rx: 128, ry: 13 }, roof: { x: 500, y: 236, z: 150 }, y0: 238, y1: 505, slots: { ...L().M.GARDEN.slots, seerose: [[450, 213], [545, 214], [500, 216]] } };
+      let ban = '';
+      if (bar) { const c = bar.cloneNode(true); c.setAttribute('viewBox', '390 0 500 120'); c.setAttribute('preserveAspectRatio', 'none'); c.removeAttribute('class'); c.setAttribute('style', 'position:absolute;left:0;top:0;width:1000px;height:240px;z-index:0;pointer-events:none'); ban = c.outerHTML; }
+      const ground = base === 'winter' ? '#e8eef4' : base === 'herbst' ? '#b39a5c' : '#8FC060';
+      GD.draw = () => [ban, Pt.svgL(1000, 520, 1, `<rect y="234" width="1000" height="290" fill="${ground}"/>`), Pt.svgL(1000, 520, 250, Pt.gHedge(pal, -10, 330, 252) + Pt.gHedge(pal, 680, 1010, 252)),
+        Pt.svgL(1000, 520, 300, Pt.gMaple(pal, 985, 300, 1.15)), Pt.svgL(1000, 520, 338, Pt.gTree(pal)), Pt.svgL(1000, 520, 340, Pt.gBush(pal, 252, 340, 26) + Pt.gBush(pal, 690, 330, 22)),
+        Pt.svgL(1000, 520, 404, Pt.gLamp()), Pt.svgL(1000, 520, 470, Pt.gBush(pal, 820, 470, 24)), Pt.svgL(1000, 520, 480, Pt.gFlowers(pal)), Pt.svgL(1000, 520, 506, Pt.gBush(pal, 70, 512, 34) + Pt.gBush(pal, 960, 512, 30))].join('');
+      const host = document.createElement('div'); g.appendChild(host);
+      const sc = new (L().M.Scene)(host, { geo: GD, labels: false }); sc.social = 0.4; try { sc.setPool(true); } catch (e) { /* no pool */ }
+      mine.forEach((p, n) => { const a = sc.add(p.kind, ST[p.step], 120 + ((n * 137) % 760), 300 + ((n * 71) % 180)); if (p.look && Object.keys(p.look).length) { a.var = { ...p.look }; a.deco = [...(p.look.deco || [])]; a.key = ''; a.setView('front'); } });
+    }
+    async _act(action, extra, okFn) {
+      const t = this._t(); try { const r = await call(this._store, this._pid, action, extra); if (okFn) okFn(r); return r; } catch (e) { toast(this.shadowRoot.querySelector('.card') || this.shadowRoot, errMsg(t, e)); return null; }
+    }
+    _click(e) {
+      const q = (sel) => e.target.closest(sel);
+      let b;
+      if ((b = q('[data-kid]'))) { this._pid = b.dataset.kid; this._tab = 'garten'; this._sub = null; this._setOpen = false; this._render(); return; }
+      if (q('[data-who]')) { this._pid = null; this._sub = null; this._render(); return; }
+      if ((b = q('[data-tab]'))) { this._tab = b.dataset.tab; this._sub = null; this._render(); return; }
+      if (q('[data-set]')) { this._setOpen = !this._setOpen; this._sure = false; this._render(); return; }
+      if (q('[data-sure]')) { this._sure = true; this._render(); return; }
+      if (q('[data-setx]')) { this._setOpen = false; this._sure = false; this._render(); return; }
+      if (q('[data-off]')) { this._setOpen = false; this._sure = false; this._act('onoff', { on: false }); return; }
+      if (q('[data-on]')) { this._act('onoff', { on: true }); return; }
+      if (q('[data-back]')) { this._sub = this._sub && this._sub.tree && this._sub.from ? { pet: this._sub.from } : null; this._render(); return; }
+      if ((b = q('[data-card]'))) { this._sub = { pet: b.dataset.card }; this._render(); return; }
+      if ((b = q('[data-tree]'))) { this._sub = { tree: b.dataset.tree, from: this._sub && this._sub.pet }; this._render(); return; }
+      if ((b = q('[data-mk]'))) { this._sub = null; this._tab = 'tier'; this._act('active', { pet: b.dataset.mk }); return; }
+      if ((b = q('[data-spend]'))) { this._act('spend', { pet: b.dataset.spend, amount: (this._snap().pets_cfg || {}).spend || 50 }); return; }
+      if ((b = q('[data-evo]'))) { const st = this._snap().pets[this._pid]; const p = st.pets[b.dataset.evo]; if (!p || !p.ready) return;
+        if (p.step === 0) openHatch(this._store, this._pid, b.dataset.evo, () => this.update()); else openEvolve(this._store, this._pid, b.dataset.evo, () => this.update()); return; }
+      if ((b = q('[data-pen]'))) { const w = this.shadowRoot.querySelector('.nick'); const p = this._snap().pets[this._pid].pets[b.dataset.pen]; const t = this._t(); this._hold = Date.now() + 120000;
+        w.innerHTML = `<input maxlength="16" autocomplete="off" enterkeyhint="done" placeholder="${esc(t.nameHint)}" value="${esc(p.nick || '')}"><button class="okb" data-nicksave="${esc(b.dataset.pen)}">${t.save}</button>`;
+        const inp = w.querySelector('input'); inp.focus(); inp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') w.querySelector('[data-nicksave]').click(); }); return; }
+      if ((b = q('[data-nicksave]'))) { const v = this.shadowRoot.querySelector('.nick input').value; this._hold = 0; this._act('nick', { pet: b.dataset.nicksave, nick: v.slice(0, 16) }); return; }
+      if ((b = q('[data-use]'))) {
+        const item = b.dataset.use; const st = this._snap().pets[this._pid]; const id = b.dataset.pet || st.active; const anim = ANIM[item];
+        this._act('use', { pet: id, item }, () => { if (anim && this._care) { this._hold = Date.now() + 2600; this._care.run(anim); } else if (item.startsWith('wachs') && this._care) { this._hold = Date.now() + 2400; this._care.run('wachsen'); }
+          if (item === DEV) { setTimeout(() => { const now = this._snap().pets[this._pid].pets[id]; if (now && now.ready) (now.step === 0 ? openHatch : openEvolve)(this._store, this._pid, id, () => this.update()); }, 900); } });
+      }
+    }
+  }
+  if (!customElements.get('fp-pets-inner')) customElements.define('fp-pets-inner', FpPetsInner);
+})();
+
 // ---------------------------------------------------------------------------
 // Family Planer integration bridge
 // Feeds the dashboard UI from the integration (websocket "family_planer/subscribe")
@@ -7988,8 +8493,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       (hass && ((hass.locale && hass.locale.language) || hass.language)) || 'de').toLowerCase();
     return l.startsWith('de') || l.startsWith('gsw') ? 'de' : 'en';
   };
-  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner', stats: 'fp-stats-inner', settings: 'fp-settings-inner' };
-  const STORE_VIEWS = ['lists', 'rewards', 'stats', 'settings'];
+  const INNER = { week: 'fp-week-inner', plan: 'fp-plan-inner', lists: 'fp-lists-inner', rewards: 'fp-rewards-inner', stats: 'fp-stats-inner', pets: 'fp-pets-inner', settings: 'fp-settings-inner' };
+  const STORE_VIEWS = ['lists', 'rewards', 'stats', 'pets', 'settings'];
   const tag = (view, lang) => (!STORE_VIEWS.includes(view) && lang === 'en' ? INNER[view] + '-en' : INNER[view]);
   // designs: CSS variables read by every card (inherited through the shadow roots)
   const SYS = '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif';
@@ -8166,10 +8671,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   if (!customElements.get('family-planer-card')) customElements.define('family-planer-card', FamilyPlanerCard);
 
   // Navigation bar: one button per active module view, same place on every page (also in kiosk mode)
-  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', einstellungen: 'Settings' } };
-  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:format-list-checks', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', statistik: 'mdi:chart-bar', einstellungen: 'mdi:cog-outline' };
-  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', statistik: 'week', einstellungen: null };
-  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', statistik: 'stats', einstellungen: 'settings' };
+  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
+  const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:format-list-checks', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', statistik: 'mdi:chart-bar', tierchen: 'mdi:paw', einstellungen: 'mdi:cog-outline' };
+  const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', statistik: 'week', tierchen: 'week', einstellungen: null };
+  const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', statistik: 'stats', tierchen: 'pets', einstellungen: 'settings' };
   const NAV_T = {
     de: { wd: ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'], mon: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
       design: 'Design', refresh: 'Kalender und Listen aktualisieren', style: 'Stil', err: 'Konnte nicht gespeichert werden.', vac: 'Ferien prüfen', vacHint: 'In den nächsten zwei Wochen stehen Ferien im Kalender. Für wen gelten sie, und seid ihr weg oder hier?', vacEmpty: 'In den nächsten zwei Wochen steht keine Abwesenheit im Kalender.', awWho: 'Wer ist weg?', awNone: 'Gerade ist niemand weg.', awUntil: 'weg bis {d}', awAt: 'heute ab {t} weg', awTomAt: 'morgen ab {t} weg', awTom: 'ab morgen weg', wds: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
@@ -8210,7 +8715,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     setConfig(c) {
       this._cfg = { ...(c || {}) };
       // paths of the dashboard views, e.g. { planer: 'planer', listen: 'einkauf', aemtliplan: 'aemtliplan' }
-      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', statistik: 'statistik', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
+      this._paths = { planer: 'planer', listen: 'listen', aemtliplan: 'aemtliplan', belohnungen: 'belohnungen', statistik: 'statistik', tierchen: 'tierchen', einstellungen: 'einstellungen', ...(this._cfg.paths || this._cfg.pfade || {}) };
       window.__fpPaths = this._paths;
       if (!this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
@@ -8425,11 +8930,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!this.shadowRoot || !this._cfg) return;
       const s = this._store && this._store.snap; const lang = this._lang(); const T = NAV_T[lang];
       const mods = (s && s.modules) || { week: true, lists: true };
-      const nav = (s && s.settings && s.settings.nav) || { order: ['planer', 'listen', 'belohnungen', 'statistik', 'einstellungen', 'aemtliplan'], hidden: ['aemtliplan'] };
+      const nav = (s && s.settings && s.settings.nav) || { order: ['planer', 'listen', 'belohnungen', 'statistik', 'tierchen', 'einstellungen', 'aemtliplan'], hidden: ['aemtliplan'] };
       const order = this._cfg.order || nav.order.filter((k) => !nav.hidden.includes(k));
       if (s) applyTheme(this, this._cfg.theme || s.theme, this._cfg.style || s.style);
       const cur = location.pathname.split('/').filter(Boolean).pop();
-      const btns = order.filter((k) => NAV[lang][k] && (!NAV_MOD[k] || mods[NAV_MOD[k]] !== false));
+      const btns = order.filter((k) => NAV[lang][k] && (!NAV_MOD[k] || mods[NAV_MOD[k]] !== false) && (k !== 'tierchen' || !s || (s.pets_cfg || {}).enabled));
       const title = this._cfg.titel || this._cfg.title || (s && s.title) || 'Family Planer';
       const showTitle = !!(s && s.settings && s.settings.nav_title);
       const n = new Date(); const p2 = (x) => String(x).padStart(2, '0');
@@ -8497,6 +9002,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         hint.style.setProperty('--nc', hintColor(s));
         const ctx = this._tapCtx(); hint.hidden = !ctx || !window.FPSEASON.canPlay(ctx) || hintMode(s) === 'off';
         window.requestAnimationFrame(() => this._placeHint());
+        if (window.FPPET) window.requestAnimationFrame(() => window.FPPET.banner(bar, s, this));
       } else { this._scnEl = null; this._scnKey = ''; }
       this._popLayer(this._popHtml, NAV_POPCSS);
       const lt = this._light(); const hr = new Date().getHours();
