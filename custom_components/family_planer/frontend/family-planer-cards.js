@@ -2440,7 +2440,7 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     const r = (a0) => { const a = a0.filter((v) => !LOCKED.includes(v)); return a[Math.floor(Math.random() * a.length)]; };
     const o = { fig: fig || r(FIG), hair: r(HAIR), hc: r(Object.keys(HC)), sk: r(Object.keys(SK)), shirt: r(Object.keys(SHIRT)),
       head: Math.random() < 0.5 ? r(HEAD) : '0', face: Math.random() < 0.4 ? r(FACE) : '0', neck: Math.random() < 0.3 ? r(NECK) : '0',
-      motif: Math.random() < 0.5 ? r(MOTIF) : '0', pet: Math.random() < 0.5 ? r(PET) : '0', bg: Math.random() < 0.6 ? r(BG) : '0', cost: Math.random() < 0.2 ? r(COST) : '0', fx: '0', fxb: '0' };
+      motif: Math.random() < 0.5 ? r(MOTIF) : '0', pet: '0', bg: Math.random() < 0.6 ? r(BG) : '0', cost: Math.random() < 0.2 ? r(COST) : '0', fx: '0', fxb: '0' };
     return code(norm(o));
   };
 
@@ -2647,7 +2647,7 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     if (costume) s += costume[1]();
     if (o.head !== '0') s += headArt[o.head]();
     // companions and small effects sit a bit inside, so nothing is cut off by the round picture
-    if (o.pet !== '0') s += `<g transform="translate(32 34) scale(.84) translate(-32 -34)">${petArt[o.pet]()}</g>`;
+    // companions (o.pet) are no longer drawn – the Tierchen took their place; stored codes keep working
     if (o.fx !== '0') s += ['leuchtaugen', 'goldglanz', 'rubinglanz'].includes(o.fx) ? fxArt[o.fx]() : `<g transform="translate(32 33) scale(.8) translate(-32 -33)">${fxArt[o.fx]()}</g>`;
     return `<svg viewBox="${view || '0 0 64 64'}" width="100%" height="100%" aria-hidden="true">${s}</svg>`;
   };
@@ -2662,7 +2662,7 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     de: { sk: 'Hautfarbe', hc: 'Haarfarbe', fig: 'Person', hair: 'Frisur', rnd: 'Zufall', none: 'Nichts', shirt: 'T-Shirt-Farbe', motif: 'Motiv', neck: 'Am Hals',
       c: { porzellan: 'Porzellan', hell: 'Hell', pfirsich: 'Pfirsich', mittel: 'Mittel', oliv: 'Oliv', karamell: 'Karamell', braun: 'Braun', tief: 'Dunkelbraun', espresso: 'Espresso', platin: 'Platinblond', blond: 'Blond', rotblond: 'Rotblond', hellbraun: 'Hellbraun', schwarz: 'Schwarz', rot: 'Rot', grau: 'Grau', rosa: 'Rosa', blau: 'Blau', lila: 'Lila', gruen: 'Grün', weiss: 'Weiss', orange: 'Orange', gelb: 'Gelb', tuerkis: 'Türkis', pink: 'Pink' },
       tabs: { head: 'Kopf', face: 'Gesicht', cloth: 'Kleidung', pet: 'Begleiter', bg: 'Hintergrund', cost: 'Verkleidung', fx: '✨ Effekte', season: '🎄 Saison' }, fxNone: 'Effekte schaltest du mit Levels frei – ab Level 5 geht es los!', small: 'Kleine Effekte', big: 'Grosse Effekte', lock: 'Mit Levels freigeschaltet',
-      costHint: 'Verkleidungen liegen über der Person – Hintergrund und Begleiter bleiben.',
+      costHint: 'Verkleidungen liegen über der Person – der Hintergrund bleibt.',
       n: { skaterhelm: 'Skater-Helm', edelkrone: 'Edelstein-Krone', rubinkrone: 'Rubin-Krone', diamantbrille: 'Diamant-Brille', rubinmaske: 'Rubin-Maske', rubinumhang: 'Rubin-Umhang',
         babydrache: 'Baby-Drache', phoenix: 'Phönix-Küken', kristallfuchs: 'Kristall-Fuchs', rubindrache: 'Rubin-Drache', szepter: 'Szepter', comic: 'Comic-Explosion', sonnenuntergang: 'Sonnenuntergang',
         kristallhoehle: 'Kristallhöhle', lavagalaxie: 'Lava-Galaxie', rennfahrer: 'Rennfahrer', goldritter: 'Goldritter', eiskoenig: 'Eiskönig', feuertitan: 'Feuer-Titan',
@@ -2680,7 +2680,7 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     en: { sk: 'Skin tone', hc: 'Hair colour', fig: 'Person', hair: 'Hair', rnd: 'Random', none: 'None', shirt: 'T-shirt colour', motif: 'Motif', neck: 'Around the neck',
       c: { porzellan: 'Porcelain', hell: 'Light', pfirsich: 'Peach', mittel: 'Medium', oliv: 'Olive', karamell: 'Caramel', braun: 'Brown', tief: 'Dark brown', espresso: 'Espresso', platin: 'Platinum blonde', blond: 'Blonde', rotblond: 'Strawberry blonde', hellbraun: 'Light brown', schwarz: 'Black', rot: 'Red', grau: 'Grey', rosa: 'Pink', blau: 'Blue', lila: 'Purple', gruen: 'Green', weiss: 'White', orange: 'Orange', gelb: 'Yellow', tuerkis: 'Turquoise', pink: 'Pink' },
       tabs: { head: 'Head', face: 'Face', cloth: 'Clothes', pet: 'Buddy', bg: 'Background', cost: 'Costume', fx: '✨ Effects', season: '🎄 Season' }, fxNone: 'Effects are unlocked with levels – it starts at level 5!', small: 'Small effects', big: 'Big effects', lock: 'Unlocked with levels',
-      costHint: 'Costumes go over the person – background and buddy stay.',
+      costHint: 'Costumes go over the person – the background stays.',
       n: { skaterhelm: 'Skater helmet', edelkrone: 'Jewel crown', rubinkrone: 'Ruby crown', diamantbrille: 'Diamond glasses', rubinmaske: 'Ruby mask', rubinumhang: 'Ruby cape',
         babydrache: 'Baby dragon', phoenix: 'Phoenix chick', kristallfuchs: 'Crystal fox', rubindrache: 'Ruby dragon', szepter: 'Sceptre', comic: 'Comic burst', sonnenuntergang: 'Sunset',
         kristallhoehle: 'Crystal cave', lavagalaxie: 'Lava galaxy', rennfahrer: 'Racing driver', goldritter: 'Golden knight', eiskoenig: 'Ice king', feuertitan: 'Fire titan',
@@ -2698,7 +2698,8 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
   };
   Object.assign(T.de.n, { 'head:katze': 'Katzenohren', 'head:hase': 'Hasenohren', 'pet:katze': 'Katze', 'pet:hase': 'Hase', 'pet:fussball': 'Fussball' });
   Object.assign(T.en.n, { 'head:katze': 'Cat ears', 'head:hase': 'Bunny ears', 'pet:katze': 'Cat', 'pet:hase': 'Bunny', 'pet:fussball': 'Football' });
-  const TABS = ['head', 'face', 'cloth', 'pet', 'bg', 'cost', 'fx', 'season'];
+  // no companions any more: every person has real pets (Tierchen) next to the avatar
+  const TABS = ['head', 'face', 'cloth', 'bg', 'cost', 'fx', 'season'];
   // builder html: buttons carry data-avb="part|value" (or data-avtab / data-avrnd); the host keeps code and tab
   const builder = (c, personColor, lang, tab, unlocked, extra) => {
     const mine = new Set(unlocked || []); const ok = (v) => !LOCKED.includes(v) || mine.has(v);

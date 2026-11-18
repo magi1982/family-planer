@@ -4,6 +4,8 @@
 ### Added
 - **Inventory explained:** every thing can be tapped – what it is, its effect, three illustrated steps how to use it, a live preview on your own pet, where it comes from; things you have can be used right there.
 - **Special things work:** star pillow and lantern (stay like toys), star stone (whole step + star aura), far-sight crystal (whole tree for 1 hour), magic mirror and rainbow feather (special colours), dream crystal (pick the animal of your egg). Tests cover every effect.
+### Changed
+- **Avatar builder without companions:** every person has real pets now, so the companion tab is gone and companions are no longer drawn on avatars (saved avatars keep working).
 ### Fixed
 - **Evolution tree:** the column labels overlapped the boxes ("Wachstum" was hidden) and the hint on the right was cut off on narrow screens.
 

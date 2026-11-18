@@ -73,3 +73,10 @@ def test_every_inventory_thing_has_an_explanation_in_both_languages():
         keys = set(re.findall(r"^\s+([a-z_]+): \[", block, re.M))
         assert set(mod.ITEMS) <= keys, set(mod.ITEMS) - keys
     assert "data-info=" in ui and "_info(k)" in ui
+
+
+def test_avatar_builder_has_no_companions_any_more():
+    import pathlib
+    av = (pathlib.Path(__file__).parents[1] / "frontend_src/avatar.js").read_text()
+    assert "const TABS = ['head', 'face', 'cloth', 'bg', 'cost', 'fx', 'season'];" in av
+    assert "${petArt[o.pet]()}" not in av
