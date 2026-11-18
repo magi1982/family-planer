@@ -365,7 +365,8 @@
   const hintMinutes = (s) => { const n = Number(s && s.season_cfg && s.season_cfg.tap_hint_min); return Number.isFinite(n) ? Math.max(1, Math.min(10, Math.round(n))) : 2; };
   const hintColor = (s) => { const se = (s && s.season) || {}; if (se.fun || ['geburtstag', 'fasnacht', 'ostern', 'august', 'halloween'].includes(se.vis)) return '#8CFF6A';
     return ({ winter: '#7FE3FF', sommer: '#FF6FD8', herbst: '#FFB347', fruehling: '#8CFF6A' })[se.jz] || '#8CFF6A'; };
-  window.FPHINT = { hintMode, hintMinutes, hintColor };
+  const HINT_QUIET = 8000;
+  window.FPHINT = { hintMode, hintMinutes, hintColor, HINT_QUIET };
   const escN = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   class FamilyPlanerNavCard extends HTMLElement {
     setConfig(c) {
@@ -401,7 +402,9 @@
         // a tap outside a popup closes it
         this._outside = (e) => { const path = e.composedPath(); if (this.isConnected && this._open && !path.includes(this) && !path.includes(this._layer)) { this._open = null; this._render(); } };
         window.addEventListener('pointerdown', this._outside, true);
-        this._hintUntil = 0; this._hintNext = 0; this._poke = () => this._pokeHint();
+        // one shared timer for all planer cards: switching pages (new card) must not restart the sign
+        if (!window.__fpHintSt) window.__fpHintSt = { until: 0, next: 0 };
+        this._poke = () => this._pokeHint();
         window.addEventListener('pointerdown', this._poke, { capture: true, passive: true });
         this._hintT = setInterval(() => this._hintTick(), 1000);
         window.addEventListener('location-changed', () => this._render());
@@ -565,13 +568,15 @@
     }
     // after activity (any tap on the planer, or a motion sensor of the announcements) the sign shows every 10 s for
     // a few minutes, then rests; "always" shows it every 30 s; never while a tap story plays
-    _pokeHint() { const now = Date.now(); if (now >= this._hintUntil) this._hintNext = now + 1500; this._hintUntil = now + hintMinutes(this._store && this._store.snap) * 60000; }
+    // the sign waits for a quiet moment: never right after a tap (e.g. a page button), only after HINT_QUIET ms without one
+    _pokeHint() { const st = window.__fpHintSt; const now = Date.now(); st.next = Math.max(st.next, now + HINT_QUIET); st.until = now + hintMinutes(this._store && this._store.snap) * 60000; }
     _hintTick() {
       const s = this._store && this._store.snap; const mode = hintMode(s); if (mode === 'off' || !this.isConnected) return;
       const now = Date.now(); const h = this._hass;
       if (h && s && (s.hint_motion || []).some((e) => h.states[e] && h.states[e].state === 'on')) this._pokeHint();
-      if (mode === 'activity' && now >= this._hintUntil) return;
-      if (now < this._hintNext) return; this._hintNext = now + (mode === 'always' ? 30000 : 10000);
+      const st = window.__fpHintSt;
+      if (mode === 'activity' && now >= st.until) return;
+      if (now < st.next) return; st.next = now + (mode === 'always' ? 30000 : 10000);
       const scn = this._scnEl; const el = scn && scn.querySelector('.fphint');
       if (!el || el.hidden || scn.classList.contains('playing') || Date.now() < (this._playUntil || 0)) return;
       el.classList.remove('go'); void el.offsetWidth; el.classList.add('go');

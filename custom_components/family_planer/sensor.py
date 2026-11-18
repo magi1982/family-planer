@@ -49,7 +49,7 @@ class ReliabilitySensor(PersonEntity, SensorEntity):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         s = self._stats()
-        all_stats = self.planner.stats()
+        all_stats = self.planner.reliability_stats()
         streaks = {p: x["streak"] for p, x in all_stats.items()}
         awards = fp_awards.person_awards(self.planner.data, streaks).get(self.person_id, [])
         return {

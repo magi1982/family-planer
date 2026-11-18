@@ -1592,7 +1592,7 @@ class FamilyPlanner:
         return out
 
     # ------------------------------------------------------------------ read model
-    def stats(self) -> dict[str, dict]:
+    def reliability_stats(self) -> dict[str, dict]:
         today = self.today()
         fair = self.points_mode() == "fair"
         return {pid: engine.person_stats(self.data["history"], self.data["items"], pid, today, self.reliability_days(), fair)
@@ -1605,7 +1605,7 @@ class FamilyPlanner:
     def snapshot(self) -> dict[str, Any]:
         """Everything the dashboard cards need, JSON serializable."""
         today = self.today()
-        stats = self.stats()
+        stats = self.reliability_stats()
         limit = (today - timedelta(days=62)).isoformat()
         st = self.settings
         return {

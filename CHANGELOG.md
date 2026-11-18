@@ -2,6 +2,12 @@
 
 ## 0.16.3 – 2026-11-18
 ### Fixed
+- **Statistics page was empty** ("could not be loaded"): a second method with the same name replaced the statistics query. Renamed; a new test catches duplicate method names.
+- **"Tap!" sign after every button:** the sign came 1.5 s after each tap and restarted on every page. It now waits for 8 s without a tap and shares one timer across all pages.
+
+### Changed
+- **Volunteer chores as a yellow button:** free special chores no longer add a sixth column (which made every family column narrower). A wiggling yellow *🙋 Volunteer* button with the count sits in the toolbar and opens a popup with the cards and *I'll take it!*.
+- Filter **"To-dos & Spezial" is now "Extras"**.
 - **E-mail address on to-do chips:** to-dos from an account list (named "<e-mail> <list>", e.g. Outlook / Microsoft To Do) showed the e-mail address on the tablet. The chip now shows the owner's name (matched against names and nicknames), else the list name – never the address. Statistics use the same label.
 
 ## 0.16.2 – 2026-11-18
