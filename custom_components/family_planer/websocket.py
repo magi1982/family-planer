@@ -375,7 +375,7 @@ PET_ACTIONS = ("spend", "use", "hatch", "evolve", "active", "nick", "onoff", "sp
 @websocket_api.websocket_command({
     vol.Required("type"): "family_planer/pet", vol.Optional("entry_id"): str,
     vol.Required("person_id"): vol.All(str, vol.Length(max=80)), vol.Required("action"): vol.In(PET_ACTIONS),
-    vol.Optional("pet"): vol.All(str, vol.Length(max=20)), vol.Optional("item"): vol.All(str, vol.Length(max=24)),
+    vol.Optional("pet"): vol.All(str, vol.Length(max=20)), vol.Optional("item"): vol.All(str, vol.Length(max=24)), vol.Optional("kind"): vol.All(str, vol.Match(r"^[a-z]{2,20}$")),
     vol.Optional("amount"): vol.All(int, vol.Range(min=1, max=50)), vol.Optional("nick"): vol.All(str, vol.Length(max=40)),
     vol.Optional("name"): vol.All(str, vol.Length(max=40)), vol.Optional("look"): vol.All(dict, vol.Length(max=16)),
     vol.Optional("on"): bool,
@@ -388,7 +388,7 @@ async def ws_pet(hass: HomeAssistant, connection: websocket_api.ActiveConnection
     if planner is None:
         _not_found(connection, msg)
         return
-    args = {k: msg[k] for k in ("pet", "item", "amount", "nick", "name", "look", "on") if k in msg}
+    args = {k: msg[k] for k in ("pet", "item", "amount", "nick", "name", "look", "on", "kind") if k in msg}
     try:
         res = await planner.async_pet(msg["person_id"], msg["action"], args)
     except KeyError:

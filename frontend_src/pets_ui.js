@@ -25,7 +25,31 @@
       prize: { grow: ['Wachstumspille', 'Für ein Tierchen deiner Wahl.'], extra: ['Haustier-Extra', 'Leckerli, Spielzeug, Energydrink, Happy-Pille …'], food: ['Futterpaket', '3 Futter und 3 Wasser.'], pts: ['+30 Punkte', 'Direkt zu deinen Tierchen-Punkten.'], egg: ['Ein neues Ei!', 'Es liegt jetzt in deiner Sammlung – setze Punkte ein, dann schlüpft es.'], eggPill: ['Grosse Wachstumspille', 'Ein Ei wartet schon – darum gibt es diesmal eine grosse Wachstumspille.'],
         dev: ['Entwicklungs-Pille', 'Bringt ein Tierchen sofort eine ganze Stufe weiter.'], again: ['Nochmals drehen!', 'Du darfst gleich noch einmal.'], star: ['Sternfeld', 'Fabelwesen-Ei, Artefakt oder Jackpot +100.'],
         fabel_egg: ['Fabelwesen-Ei!', 'Ein ganz besonderes Ei liegt jetzt in deiner Sammlung.'], artefact: ['Artefakt!', 'Etwas Seltenes für deine Tierchen.'], jackpot: ['Jackpot +100 Punkte', 'Direkt zu deinen Tierchen-Punkten.'] },
-      err: { not_needed: 'Das braucht dein Tierchen gerade nicht – es bleibt in deinem Inventar.', no_item: 'Davon hast du gerade nichts.', too_tired: 'Zu müde zum Spielen – gib zuerst einen Energydrink.', bar_full: 'Der Balken ist schon voll – jetzt entwickeln!',
+      info: { what: 'Was ist das?', eff: 'Wirkung', how: 'So setzt du es ein', from: 'Woher bekommst du es?', have: 'Du hast', of: 'von höchstens', demo: '▶ Vorschau', useNow: 'Jetzt einsetzen', pick: 'Welches Tier soll aus deinem Ei schlüpfen?', wished: 'Gewünscht: {n} – es schlüpft beim nächsten Schlüpfen.', sightOn: 'Weitblick aktiv: Der ganze Entwicklungsbaum ist bis {n} Uhr sichtbar.', noEgg: 'Dafür brauchst du ein Ei, das noch nicht geschlüpft ist.', noPet: 'Dafür brauchst du ein geschlüpftes Tierchen.', tapHint: 'Tippe auf ein Ding für eine Erklärung.',
+        s1: 'Tierchen-Seite', s2: 'Aktuelles Tierchen', s3care: 'Pflegen & spielen: antippen', s3pill: 'Entwicklung: Pille antippen', s3art: 'Jetzt einsetzen', s3wish: 'Jetzt einsetzen und Tier aussuchen', tapIt: 'Ding antippen',
+        x: {
+          futter: ['Das Lieblingsessen deines Tierchens – jedes Tier hat sein eigenes.', 'Hunger +35', 'Bei Ämtli (abwechselnd mit Wasser), jeden Tag 2 vom Glücksrad, Futterpaket'],
+          wasser: ['Frisches Wasser zum Trinken.', 'Durst +40', 'Bei Ämtli (abwechselnd mit Futter), jeden Tag 2 vom Glücksrad, Futterpaket'],
+          keks: ['Ein kleines Leckerli zwischendurch.', 'Laune +20', 'Glücksrad: Haustier-Extra'],
+          energy: ['Ein Energydrink, wenn dein Tierchen müde ist.', 'Energie voll', 'Glücksrad: Haustier-Extra'],
+          seife: ['Seife für ein Schaumbad.', 'Laune +10', 'Glücksrad: Haustier-Extra'],
+          happy: ['Macht dein Tierchen sofort wieder fröhlich.', 'Laune voll', 'Manchmal bei Ämtli, Glücksrad: Haustier-Extra'],
+          ball: ['Ein Ball zum Spielen. Spielsachen bleiben – du kannst sie immer wieder benutzen.', 'Laune +20, Energie −10', 'Glücksrad: Haustier-Extra'],
+          wolle: ['Ein Wollknäuel zum Spielen. Bleibt in deinem Inventar.', 'Laune +20, Energie −10', 'Glücksrad: Haustier-Extra'],
+          blasen: ['Seifenblasen zum Fangen. Bleiben in deinem Inventar.', 'Laune +20, Energie −10', 'Glücksrad: Haustier-Extra'],
+          buerste: ['Eine weiche Bürste fürs Fell. Bleibt in deinem Inventar.', 'Laune +15', 'Glücksrad: Haustier-Extra'],
+          wachs_s: ['Eine kleine Wachstumspille.', '+15 Wachstum', 'Manchmal bei Ämtli, Glücksrad: Wachstumspille'],
+          wachs_m: ['Eine mittlere Wachstumspille.', '+30 Wachstum', 'Manchmal bei Ämtli, Glücksrad: Wachstumspille'],
+          wachs_l: ['Eine grosse Wachstumspille.', '+60 Wachstum', 'Bei grossen Ämtli, Glücksrad: Wachstumspille oder Ei-Feld'],
+          glitzerpille: ['Die Entwicklungs-Pille füllt den Balken sofort – danach tippst du auf Entwickeln.', 'Ganze Stufe', 'Glücksrad (spätestens nach 24 Drehs), selten bei Ämtli'],
+          kissen: ['Ein Sternkissen zum Ausruhen. Bleibt in deinem Inventar.', 'Energie +40', 'Glücksrad: Haustier-Extra'],
+          laterne: ['Eine Laterne für gemütliches Licht. Bleibt in deinem Inventar.', 'Laune +15', 'Glücksrad: Haustier-Extra'],
+          sternenstein: ['Ein Stein voller Sternenstaub: Der Balken ist sofort voll, und dein Tierchen bekommt eine Sternen-Aura.', 'Ganze Stufe + Sternen-Aura', 'Glücksrad: Sternfeld (Artefakt)'],
+          weitblick: ['Mit dem Weitblick-Kristall siehst du eine Stunde lang den ganzen Entwicklungsbaum – auch die geheimen Formen.', 'Ganzer Baum 1 Stunde', 'Glücksrad: Sternfeld (Artefakt)'],
+          zauberspiegel: ['Ein Zauberspiegel verwandelt dein Tierchen in eine glitzernde Kristall-Farbe.', 'Kristall-Farbe', 'Glücksrad: Sternfeld (Artefakt)'],
+          traumkristall: ['Der Traumkristall erfüllt einen Wunsch: Du suchst aus, welches Tier aus deinem Ei schlüpft.', 'Wunsch-Tier', 'Glücksrad: Sternfeld (Artefakt)'],
+          regenbogenfeder: ['Eine Regenbogenfeder färbt dein Tierchen in Regenbogenfarben.', 'Regenbogen-Farbe', 'Glücksrad: Sternfeld (Artefakt)'] } },
+      err: { not_needed: 'Das braucht dein Tierchen gerade nicht – es bleibt in deinem Inventar.', no_item: 'Davon hast du gerade nichts.', too_tired: 'Zu müde zum Spielen – gib zuerst einen Energydrink.', not_egg: 'Das geht nur mit einem Ei, das noch nicht geschlüpft ist.', bad_wish: 'Dieses Tier geht hier nicht – wähle ein anderes.', fully_grown: 'Dein Tierchen ist schon ganz gross.', egg: 'Zuerst muss dein Ei schlüpfen.', bar_full: 'Der Balken ist schon voll – jetzt entwickeln!',
         fully_grown: 'Schon ganz ausgewachsen.', no_points: 'Keine Punkte – erledige Ämtli.', not_ready: 'Noch nicht bereit.', egg: 'Ein Ei braucht noch keine Pflege.', spun: 'Heute schon gedreht.', off: 'Tierchen sind ausgeschaltet.', x: 'Hat nicht geklappt.' },
       it: { futter: 'Futter', wasser: 'Wasser', keks: 'Leckerli', energy: 'Energydrink', seife: 'Seife', happy: 'Happy-Pille', ball: 'Ball', wolle: 'Wollknäuel', blasen: 'Seifenblasen', buerste: 'Bürste', wachs_s: 'Pille S', wachs_m: 'Pille M', wachs_l: 'Pille L',
         glitzerpille: 'Entwicklungs-Pille', kissen: 'Sternkissen', laterne: 'Laterne', sternenstein: 'Sternenstein', weitblick: 'Weitblick-Kristall', zauberspiegel: 'Zauberspiegel', traumkristall: 'Traumkristall', regenbogenfeder: 'Regenbogenfeder' } },
@@ -48,7 +72,31 @@
       prize: { grow: ['Growth pill', 'For a pet of your choice.'], extra: ['Pet extra', 'Treat, toy, energy drink, happy pill …'], food: ['Food pack', '3 food and 3 water.'], pts: ['+30 points', 'Straight to your pet points.'], egg: ['A new egg!', 'It is in your collection now – put points in and it hatches.'], eggPill: ['Big growth pill', 'An egg is already waiting – so this time you get a big growth pill.'],
         dev: ['Evolution pill', 'Takes a pet a whole step further at once.'], again: ['Spin again!', 'You may spin once more.'], star: ['Star field', 'Fable egg, artefact or jackpot +100.'],
         fabel_egg: ['Fable egg!', 'A very special egg is in your collection now.'], artefact: ['Artefact!', 'Something rare for your pets.'], jackpot: ['Jackpot +100 points', 'Straight to your pet points.'] },
-      err: { not_needed: 'Your pet does not need that right now – it stays in your inventory.', no_item: 'You have none of that right now.', too_tired: 'Too tired to play – give an energy drink first.', bar_full: 'The bar is full – evolve now!',
+      info: { what: 'What is it?', eff: 'Effect', how: 'How to use it', from: 'Where do you get it?', have: 'You have', of: 'of at most', demo: '▶ Preview', useNow: 'Use now', pick: 'Which animal should hatch from your egg?', wished: 'Wished: {n} – it hatches next time.', sightOn: 'Far-sight active: the whole evolution tree is visible until {n}.', noEgg: 'You need an egg that has not hatched yet.', noPet: 'You need a hatched pet for this.', tapHint: 'Tap a thing for an explanation.',
+        s1: 'Pets page', s2: 'Current pet', s3care: 'Care & play: tap it', s3pill: 'Growth: tap the pill', s3art: 'Use now', s3wish: 'Use now and pick an animal', tapIt: 'Tap the thing',
+        x: {
+          futter: ['Your pet\'s favourite food – every animal has its own.', 'Hunger +35', 'With chores (taking turns with water), 2 a day from the wheel, food pack'],
+          wasser: ['Fresh water to drink.', 'Thirst +40', 'With chores (taking turns with food), 2 a day from the wheel, food pack'],
+          keks: ['A little treat.', 'Mood +20', 'Wheel: pet extra'],
+          energy: ['An energy drink when your pet is tired.', 'Energy full', 'Wheel: pet extra'],
+          seife: ['Soap for a bubble bath.', 'Mood +10', 'Wheel: pet extra'],
+          happy: ['Makes your pet happy again right away.', 'Mood full', 'Sometimes with chores, wheel: pet extra'],
+          ball: ['A ball to play with. Toys stay – you can use them again and again.', 'Mood +20, energy −10', 'Wheel: pet extra'],
+          wolle: ['A wool ball to play with. It stays in your inventory.', 'Mood +20, energy −10', 'Wheel: pet extra'],
+          blasen: ['Bubbles to catch. They stay in your inventory.', 'Mood +20, energy −10', 'Wheel: pet extra'],
+          buerste: ['A soft brush for the fur. It stays in your inventory.', 'Mood +15', 'Wheel: pet extra'],
+          wachs_s: ['A small growth pill.', '+15 growth', 'Sometimes with chores, wheel: growth pill'],
+          wachs_m: ['A medium growth pill.', '+30 growth', 'Sometimes with chores, wheel: growth pill'],
+          wachs_l: ['A big growth pill.', '+60 growth', 'With big chores, wheel: growth pill or egg field'],
+          glitzerpille: ['The evolution pill fills the bar at once – then tap Evolve.', 'Whole step', 'Wheel (after 24 spins at the latest), rarely with chores'],
+          kissen: ['A star pillow to rest on. It stays in your inventory.', 'Energy +40', 'Wheel: pet extra'],
+          laterne: ['A lantern for a cosy light. It stays in your inventory.', 'Mood +15', 'Wheel: pet extra'],
+          sternenstein: ['A stone full of stardust: the bar is full at once and your pet gets a star aura.', 'Whole step + star aura', 'Wheel: star field (artefact)'],
+          weitblick: ['With the far-sight crystal you see the whole evolution tree for one hour – even the secret forms.', 'Whole tree for 1 hour', 'Wheel: star field (artefact)'],
+          zauberspiegel: ['A magic mirror turns your pet into a sparkling crystal colour.', 'Crystal colour', 'Wheel: star field (artefact)'],
+          traumkristall: ['The dream crystal grants a wish: you pick which animal hatches from your egg.', 'Wished animal', 'Wheel: star field (artefact)'],
+          regenbogenfeder: ['A rainbow feather paints your pet in rainbow colours.', 'Rainbow colour', 'Wheel: star field (artefact)'] } },
+      err: { not_needed: 'Your pet does not need that right now – it stays in your inventory.', no_item: 'You have none of that right now.', too_tired: 'Too tired to play – give an energy drink first.', not_egg: 'This only works with an egg that has not hatched yet.', bad_wish: 'This animal does not work here – pick another one.', fully_grown: 'Your pet is fully grown.', egg: 'Your egg has to hatch first.', bar_full: 'The bar is full – evolve now!',
         fully_grown: 'Already fully grown.', no_points: 'No points – do chores.', not_ready: 'Not ready yet.', egg: 'An egg needs no care yet.', spun: 'Already spun today.', off: 'Pets are switched off.', x: 'That did not work.' },
       it: { futter: 'Food', wasser: 'Water', keks: 'Treat', energy: 'Energy drink', seife: 'Soap', happy: 'Happy pill', ball: 'Ball', wolle: 'Wool ball', blasen: 'Bubbles', buerste: 'Brush', wachs_s: 'Pill S', wachs_m: 'Pill M', wachs_l: 'Pill L',
         glitzerpille: 'Evolution pill', kissen: 'Star pillow', laterne: 'Lantern', sternenstein: 'Star stone', weitblick: 'Far-sight crystal', zauberspiegel: 'Magic mirror', traumkristall: 'Dream crystal', regenbogenfeder: 'Rainbow feather' } },
@@ -59,7 +107,10 @@
   const NEED = { hunger: ['🍎', '#7CD06A'], durst: ['💧', '#5ec3ec'], energie: ['⚡', '#FFD34D'], laune: ['😊', '#FF8FC8'] };
   const EFF = { futter: [['hunger', '+35']], wasser: [['durst', '+40']], keks: [['laune', '+20']], energy: [['energie', 'voll']], seife: [['laune', '+10']], happy: [['laune', 'voll']],
     ball: [['laune', '+20'], ['energie', '−10']], wolle: [['laune', '+20'], ['energie', '−10']], blasen: [['laune', '+20'], ['energie', '−10']], buerste: [['laune', '+15']] };
-  const ANIM = { futter: 'futter', wasser: 'trinken', keks: 'leckerli', energy: 'energy', seife: 'baden', happy: 'happy', ball: 'ball', wolle: 'ball', blasen: 'ball', buerste: 'buerste' };
+  const ANIM = { futter: 'futter', wasser: 'trinken', keks: 'leckerli', energy: 'energy', seife: 'baden', happy: 'happy', ball: 'ball', wolle: 'ball', blasen: 'ball', buerste: 'buerste', kissen: 'schlafen', laterne: 'happy', glitzerpille: 'entwpille', wachs_s: 'wachsen', wachs_m: 'wachsen', wachs_l: 'wachsen', sternenstein: 'sternenstein', regenbogenfeder: 'regenbogenfeder', zauberspiegel: 'zauberspiegel', weitblick: 'weitblick', traumkristall: 'traumkristall' };
+  const CAPS = { futter: 30, wasser: 30, keks: 20, energy: 10, seife: 10, happy: 10, wachs_s: 20, wachs_m: 20, wachs_l: 20, glitzerpille: 5 };
+  const ARTS = ['sternenstein', 'weitblick', 'zauberspiegel', 'traumkristall', 'regenbogenfeder'];
+  const KIND_OF = (k) => (CARE_ITEMS.includes(k) || TOYS.includes(k) || k === 'kissen' || k === 'laterne' ? 'care' : k.startsWith('wachs') || k === DEV ? 'pill' : 'art');
   const CARE_ITEMS = ['futter', 'wasser', 'keks', 'energy', 'seife', 'happy'];
   const TOYS = ['ball', 'buerste', 'wolle', 'blasen'];
   const PILLS = [['wachs_s', 15], ['wachs_m', 30], ['wachs_l', 60]];
@@ -87,7 +138,12 @@
   const toast = (host, text) => { const d = document.createElement('div'); d.className = 'pptoast'; d.textContent = text; host.appendChild(d); setTimeout(() => d.remove(), 2800); };
 
   // ------------------------------------------------------------- a popup (own shadow root on the body, closes on ✕ or outside)
-  const MODAL_CSS = `/* hatching and evolving: the same dark stage with a soft light as on the pet page */.spot2{background:radial-gradient(ellipse 40% 10% at 50% 93%,color-mix(in srgb,var(--tc) 40%,transparent),transparent 70%),radial-gradient(circle at 50% 52%,color-mix(in srgb,var(--tc) 12%,transparent),transparent 60%)!important}:host{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(5,7,10,.72);font-family:var(--fp-font,system-ui,sans-serif)}
+  const MODAL_CSS = `/* info window of an inventory thing */.ib{display:flex;gap:14px;align-items:center;margin:2px 0 10px}.ib .ic{flex:none;width:76px;height:76px;border-radius:18px;background:color-mix(in srgb,var(--ic,#69C350) 18%,#1b1f27);display:flex;align-items:center;justify-content:center}.ib b{font:700 18px system-ui;display:block}.ib small{color:#9aa3b2;font-size:13px}
+.isec{margin:10px 0 0}.isec h4{margin:0 0 4px;font:700 10.5px system-ui;letter-spacing:.08em;text-transform:uppercase;color:#9aa3b2}.isec p{margin:0;font-size:14px;line-height:1.4;color:#eef1f5}.effp{display:inline-block;background:color-mix(in srgb,var(--ic,#69C350) 22%,transparent);color:#eef1f5;border-radius:8px;padding:3px 9px;font:700 13px system-ui}
+.steps{display:flex;align-items:stretch;gap:6px;margin-top:4px}.steps .st{flex:1;background:#232833;border:1px solid #2f3541;border-radius:10px;padding:8px 6px;text-align:center;font-size:12px;color:#cfd6df;display:flex;flex-direction:column;align-items:center;gap:5px}.steps .st .n{font:700 11px system-ui;color:#10200c;background:var(--ic,#69C350);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center}.steps .st .g{font-size:20px;height:26px;display:flex;align-items:center}.steps .ar{align-self:center;color:#5c6575;font-size:16px}
+.demo{position:relative;margin-top:10px;height:240px;border-radius:12px;overflow:hidden}.demo .cbox3{width:100%;max-width:none;height:240px}.okb.green{background:#69C350;border-color:#69C350;color:#10200c}.dbtn{position:absolute;right:8px;bottom:8px;z-index:3}.irow{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}.ierr{color:#F5A3A3;font-size:13px;margin-top:8px;min-height:1em}
+.wish{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;max-height:260px;overflow:auto;margin-top:8px}.wish button{background:#232833;border:1px solid #2f3541;border-radius:10px;padding:6px 2px;color:#eef1f5;font:600 11px system-ui;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}.wish button svg{width:48px;height:48px}
+/* hatching and evolving: the same dark stage with a soft light as on the pet page */.spot2{background:radial-gradient(ellipse 40% 10% at 50% 93%,color-mix(in srgb,var(--tc) 40%,transparent),transparent 70%),radial-gradient(circle at 50% 52%,color-mix(in srgb,var(--tc) 12%,transparent),transparent 60%)!important}:host{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(5,7,10,.72);font-family:var(--fp-font,system-ui,sans-serif)}
     .box{position:relative;background:#171a20;color:#eef1f5;border:1px solid #2f3541;border-radius:16px;padding:16px;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
     .box::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--mc,#F5C542)}
     h3{margin:0 40px 10px 0;font-size:17px}.x{position:absolute;right:10px;top:10px;width:34px;height:34px;border-radius:9px;border:1px solid #2f3541;background:#2c323d;color:#eef1f5;font-size:16px;cursor:pointer}
@@ -365,7 +421,7 @@
       const p = st.pets[id]; const steps = (s.pets_cfg || {}).steps || []; const act = id === st.active; const egg = p.step === 0; const cares = act && !egg;
       const col = colOf(p, pcol(pr)); const nx = p.need; const amt = nx != null ? Math.min((s.pets_cfg || {}).spend || 50, st.pts, Math.max(0, nx - p.g)) : 0; const can = nx != null && !p.ready && amt > 0;
       const pills = [...PILLS.map(([k, v]) => [k, `+${v}`]), [DEV, t.it[DEV] && (s.lang === 'en' ? 'whole step' : 'ganze Stufe')]].filter(([k]) => (st.inv[k] || 0) > 0);
-      const have = [...CARE_ITEMS, ...TOYS].filter((k) => (st.inv[k] || 0) > 0);
+      const have = [...CARE_ITEMS, ...TOYS, 'kissen', 'laterne'].filter((k) => (st.inv[k] || 0) > 0);
       return `<div class="dev${cares ? ' two' : ''}">
         <div class="tile big" style="--pc:${col}"><div class="top"><span class="stg">${esc(t.steps[p.step])}</span>${act ? `<em class="act">${t.active}</em>` : ''}</div>
           ${cares ? `<div class="cbox" data-cbox="${esc(id)}"></div>` : `<div class="spot" style="--tc:${col}">${svgOf(id, p)}</div>`}
@@ -377,9 +433,58 @@
           ${pills.length ? `<div class="pills">${pills.map(([k, v]) => `<button class="pill" data-use="${k}" data-pet="${esc(id)}">${L().ICO.icoB(k, 22)}<b>${esc(t.it[k])}</b><span class="tag" style="--nc:#B58CFF">${esc(v)}</span><i>${st.inv[k]}×</i></button>`).join('')}</div>` : ''}</div>
           ${cares ? `<div class="tile" style="--pc:${col}"><div class="gl"><b>${t.care}</b><span>${t.careH}</span></div>${have.length ? `<div class="things">${have.map((k) => this._thing(t, st, k)).join('')}</div>` : `<p class="hint">${t.nothing}</p>`}</div>` : ''}</div></div>`;
     }
+    // tap on a thing: what it is, what it does, how to use it (steps + a preview on your own pet), where it comes from
+    _info(k) {
+      const t = this._t(); const I = t.info; const st = this._snap().pets[this._pid]; const x = I.x[k] || ['', '', ''];
+      const col = { care: '#69C350', pill: '#E36BD2', art: '#B58CFF' }[KIND_OF(k)]; const have = st.inv[k] || 0; const kind = KIND_OF(k);
+      const pet = st.pets[st.active]; const hatched = Object.entries(st.pets).find(([id, p]) => id === st.active && p.step > 0) || Object.entries(st.pets).find(([, p]) => p.step > 0);
+      const egg = Object.entries(st.pets).find(([, p]) => p.step === 0);
+      const s3 = kind === 'care' ? I.s3care : kind === 'pill' ? I.s3pill : k === 'traumkristall' ? I.s3wish : I.s3art;
+      const ico = (n) => L().ICO.icoB(k === 'futter' ? (L().ICO.FOOD[(pet || {}).kind] || 'apfel') : k, n);
+      const steps = (kind === 'art' ? [['🎒', t.tabs.inv], [ico(24), I.tapIt], [k === 'traumkristall' ? '🥚' : '✨', s3]] : [['🐾', I.s1], ['⭐', I.s2], [ico(24), s3]])
+        .map(([g, l], n) => `<div class="st"><span class="n">${n + 1}</span><span class="g">${g}</span>${esc(l)}</div>`).join('<span class="ar">›</span>');
+      const demoPet = k === 'traumkristall' ? null : hatched;
+      const html = `<div style="--ic:${col}"><div class="ib"><div class="ic">${ico(56)}</div><div><b>${esc(t.it[k] || k)}</b><small>${esc(I.have)} ${have}×${CAPS[k] ? ` ${esc(I.of)} ${CAPS[k]}` : ''}</small></div></div>
+        <div class="isec"><h4>${esc(I.what)}</h4><p>${esc(x[0])}</p></div>
+        <div class="isec"><h4>${esc(I.eff)}</h4><span class="effp">${esc(x[1])}</span></div>
+        <div class="isec"><h4>${esc(I.how)}</h4><div class="steps">${steps}</div></div>
+        ${demoPet || k === 'traumkristall' ? `<div class="demo"><div class="cbox3 spot2" style="--tc:${col}"></div><button class="okb dbtn" data-demo>${esc(I.demo)}</button></div>` : ''}
+        <div class="isec"><h4>${esc(I.from)}</h4><p>${esc(x[2])}</p></div>
+        <div class="ierr"></div>
+        ${have ? `<div class="irow"><button class="okb green" data-now>${esc(I.useNow)}</button></div>` : ''}</div>`;
+      modal(t.it[k] || k, html, (root, close) => {
+        const box = root.querySelector('.cbox3'); let care = null;
+        if (box) care = k === 'traumkristall' ? new (L().CARE.Care)(box, (egg && egg[1].kind) || 'koala', 'ei', { noBars: 1, wish: 'koala' }) : new (L().CARE.Care)(box, demoPet[1].kind, ST[demoPet[1].step], { look: demoPet[1].look || {}, noBars: 1 });
+        const playDemo = () => { if (care && ANIM[k]) { care.busy = false; care.run(ANIM[k]); } };
+        const dm = root.querySelector('[data-demo]'); if (dm) dm.addEventListener('click', playDemo);
+        setTimeout(playDemo, 500); // the preview plays once by itself – nothing is used up
+        const err = (e) => { root.querySelector('.ierr').textContent = errMsg(t, e); };
+        const now = root.querySelector('[data-now]');
+        if (now) now.addEventListener('click', async () => {
+          if (k === 'traumkristall') {
+            if (!egg) { root.querySelector('.ierr').textContent = I.noEgg; return; }
+            const pool = egg[1].fabel ? L().TREE.FABEL : starters();
+            now.parentElement.outerHTML = `<div class="isec"><h4>${esc(I.pick)}</h4><div class="wish">${pool.map((a) => `<button data-wish="${a}">${L().P4.svg(a, 'baby', 'froh', { noShadow: 1 })}${esc(kindName(a))}</button>`).join('')}</div></div>`;
+            root.querySelectorAll('[data-wish]').forEach((b) => b.addEventListener('click', async () => {
+              try { await call(this._store, this._pid, 'use', { pet: egg[0], item: k, kind: b.dataset.wish }); } catch (e) { err(e); return; }
+              root.querySelector('.wish').outerHTML = `<p class="hint">💗 ${esc(fmt(I.wished, { n: kindName(b.dataset.wish) }))}</p>`;
+              if (care) { care.o.wish = b.dataset.wish; care.busy = false; care.run('traumkristall'); }
+              setTimeout(() => { close(); this.update(); }, 3600);
+            }));
+            return;
+          }
+          const target = k === 'weitblick' ? st.active : kind === 'pill' ? st.active : (hatched && hatched[0]);
+          if (!target) { root.querySelector('.ierr').textContent = I.noPet; return; }
+          let res; try { res = await call(this._store, this._pid, 'use', { pet: target, item: k }); } catch (e) { err(e); return; }
+          now.disabled = true; playDemo();
+          if (k === 'weitblick' && res && res.sight) { const d = new Date(res.sight); root.querySelector('.ierr').textContent = fmt(I.sightOn, { n: `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` }); }
+          setTimeout(() => { close(); this.update(); if ((k === DEV || k === 'sternenstein')) { const p = this._snap().pets[this._pid].pets[target]; if (p && p.ready) (p.step === 0 ? openHatch : openEvolve)(this._store, this._pid, target, () => this.update()); } }, 2600);
+        });
+      }, col);
+    }
     _inv(t, st) {
       const G = [['care', '#69C350', CARE_ITEMS, true], ['toys', '#4FA3E0', TOYS, true], ['pills', '#E36BD2', ['wachs_s', 'wachs_m', 'wachs_l', DEV], true], ['sleep', '#9aa3b2', ['kissen', 'laterne']], ['art', '#B58CFF', ['sternenstein', 'weitblick', 'zauberspiegel', 'traumkristall', 'regenbogenfeder']]];
-      return G.map(([g, c, ids, use]) => `<div class="tile inv" style="--pc:${c}"><div class="ih"><div class="sec">${t.inv[g]}</div>${use ? `<button class="okb" data-tab="tier">⭐ ${t.useAt}</button>` : ''}</div><div class="things">${ids.map((k) => `<div class="thing ${st.inv[k] ? '' : 'none'}">${L().ICO.icoB(k, 34)}<b>${esc(t.it[k] || k)}</b><span class="tg">${(EFF[k] || []).map(([n, v]) => this._tag(n, v)).join('')}</span><i>${st.inv[k] || 0}×</i></div>`).join('')}</div></div>`).join('');
+      return G.map(([g, c, ids, use]) => `<div class="tile inv" style="--pc:${c}"><div class="ih"><div class="sec">${t.inv[g]}</div>${use ? `<button class="okb" data-tab="tier">⭐ ${t.useAt}</button>` : ''}</div><div class="things">${ids.map((k) => `<button class="thing ${st.inv[k] ? '' : 'none'}" data-info="${k}">${L().ICO.icoB(k, 34)}<b>${esc(t.it[k] || k)}</b><span class="tg">${(EFF[k] || []).map(([n, v]) => this._tag(n, v)).join('')}</span><i>${st.inv[k] || 0}×</i></button>`).join('')}</div></div>`).join('') + `<p class="hint">ℹ️ ${esc(t.info.tapHint)}</p>`;
     }
     _coll(s, t, st) {
       const steps = (s.pets_cfg || {}).steps || []; const own = Object.entries(st.pets).filter(([, p]) => p.step > 0); const eggs = Object.entries(st.pets).filter(([, p]) => p.step === 0);
@@ -419,7 +524,7 @@
         vals(); this._vt = setInterval(vals, 500);
       }
       const gw = R.querySelector('.gw'); if (gw) this._garden(gw, st);
-      const tw = R.querySelector('.tw2'); if (tw && this._sub && this._sub.tree) { const p = st.pets[this._sub.tree]; L().TREE.render(tw, p.kind, { size: 40, gap: 4, colW: 72, fog: Math.min(p.step, 3) }); }
+      const tw = R.querySelector('.tw2'); if (tw && this._sub && this._sub.tree) { const p = st.pets[this._sub.tree]; const sight = st.sight && Date.parse(st.sight) > Date.now(); L().TREE.render(tw, p.kind, { size: 40, gap: 4, colW: 72, fog: sight ? null : Math.min(p.step, 3) }); }
     }
     _garden(g, st) {
       const mine = Object.values(st.pets).filter((p) => p.step > 0).slice(0, 8);
@@ -461,6 +566,7 @@
         w.innerHTML = `<input maxlength="16" autocomplete="off" enterkeyhint="done" placeholder="${esc(t.nameHint)}" value="${esc(p.nick || '')}"><button class="okb" data-nicksave="${esc(b.dataset.pen)}">${t.save}</button>`;
         const inp = w.querySelector('input'); inp.focus(); inp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') w.querySelector('[data-nicksave]').click(); }); return; }
       if ((b = q('[data-nicksave]'))) { const v = this.shadowRoot.querySelector('.nick input').value; this._hold = 0; this._act('nick', { pet: b.dataset.nicksave, nick: v.slice(0, 16) }); return; }
+      if ((b = q('[data-info]'))) { this._info(b.dataset.info); return; }
       if ((b = q('[data-use]'))) {
         const item = b.dataset.use; const st = this._snap().pets[this._pid]; const id = b.dataset.pet || st.active; const anim = ANIM[item];
         this._act('use', { pet: id, item }, () => { if (anim && this._care) { this._hold = Date.now() + 2600; this._care.run(anim); } else if (item.startsWith('wachs') && this._care) { this._hold = Date.now() + 2400; this._care.run('wachsen'); }

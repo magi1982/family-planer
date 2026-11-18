@@ -26,7 +26,7 @@ from __future__ import annotations
 import random
 import re
 import secrets
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 # ------------------------------------------------------------------ catalogue
 FOOD = {"fuchs": "beeren", "katze": "fisch", "hund": "knochen", "hase": "karotte", "igel": "wurm", "waschbaer": "apfel",
@@ -59,6 +59,9 @@ CARE = {"futter": {"hunger": 35}, "wasser": {"durst": 40}, "keks": {"laune": 20}
 TOYS = {"ball": {"laune": 20, "energie": -10}, "wolle": {"laune": 20, "energie": -10},
         "blasen": {"laune": 20, "energie": -10}, "buerste": {"laune": 15}}
 GROW = {"wachs_s": 15, "wachs_m": 30, "wachs_l": 60}
+# sleeping things stay (like toys) and need no energy: the pillow refills energy, the lantern brings a good mood
+REST = {"kissen": {"energie": 40}, "laterne": {"laune": 15}}
+SIGHT_HOURS = 1         # far-sight crystal: the whole evolution tree is visible for this long
 DEV_PILL = "glitzerpille"
 ARTEFACTS = ("sternenstein", "weitblick", "zauberspiegel", "traumkristall", "regenbogenfeder")
 EXTRAS = ("keks", "energy", "seife", "happy", "ball", "wolle", "blasen", "buerste", "kissen", "laterne")
@@ -293,7 +296,7 @@ def spend(st: dict, pet_id: str, amount: int, speed: str = "normal") -> int:
     return amt
 
 
-def use(st: dict, pet_id: str, item: str, now: datetime, speed: str = "normal") -> dict:
+def use(st: dict, pet_id: str, item: str, now: datetime, speed: str = "normal", wish: str | None = None) -> dict:
     """Use an item on a pet. Nothing is used up when the pet does not need it."""
     pet = _pet(st, pet_id)
     if item not in CAPS:
@@ -317,9 +320,44 @@ def use(st: dict, pet_id: str, item: str, now: datetime, speed: str = "normal") 
         _take(st, item)
         pet["g"] = max(pet["g"], need)
         return {"ready": True}
+    if item == "traumkristall":
+        # wish egg: the child picks which animal comes out of this egg
+        if pet["step"] != 0:
+            raise PetError("not_egg")
+        pool = FABEL if pet.get("fabel") else STARTERS
+        if wish not in pool:
+            raise PetError("bad_wish")
+        _take(st, item)
+        pet["wish"] = wish
+        return {"wish": wish}
+    if item == "weitblick":
+        until = now + timedelta(hours=SIGHT_HOURS)
+        _take(st, item)
+        st["sight"] = _now_iso(until)
+        return {"sight": st["sight"]}
     if pet["step"] == 0:
         raise PetError("egg")
-    if item in CARE:
+    if item == "sternenstein":
+        # a whole step at once: the bar is full right away, and the pet keeps a star aura
+        need = next_need(pet, speed)
+        if need is None:
+            raise PetError("fully_grown")
+        _take(st, item)
+        pet["g"] = max(pet["g"], need)
+        pet["look"] = {**pet.get("look", {}), "aura": "sterne"}
+        return {"ready": True, "look": dict(pet["look"])}
+    if item in ("regenbogenfeder", "zauberspiegel"):
+        skin = "regenbogen" if item == "regenbogenfeder" else "kristall"
+        if (pet.get("look") or {}).get("skin") == skin:
+            raise PetError("not_needed")
+        _take(st, item)
+        pet["look"] = {**pet.get("look", {}), "skin": skin}
+        return {"look": dict(pet["look"])}
+    if item in REST:
+        eff = REST[item]
+        if all(pet["v"].get(n, 0) >= 95 for n in eff):
+            raise PetError("not_needed")
+    elif item in CARE:
         eff = CARE[item]
         if all(pet["v"].get(n, 0) >= 95 for n in eff):
             raise PetError("not_needed")
@@ -354,7 +392,7 @@ def hatch(st: dict, pet_id: str, rng: random.Random, speed: str = "normal") -> s
     pool = FABEL if pet.get("fabel") else STARTERS
     missing = [k for k in pool if k not in have]
     pick = missing or [k for k in pool if have.get(k, 0) < MAX_PER_KIND] or list(pool)
-    pet["kind"] = rng.choice(sorted(pick))
+    pet["kind"] = pet.pop("wish", None) if pet.get("wish") in pool else rng.choice(sorted(pick))
     pet["step"] = 1
     st["stats"]["evos"] += 1
     return pet["kind"]
@@ -523,5 +561,5 @@ def view(st: dict, speed: str = "normal") -> dict:
     for k, p in st["pets"].items():
         pets[k] = {**p, "need": next_need(p, speed), "ready": ready(p, speed),
                    "v": {n: round(p["v"].get(n, 70)) for n in NEEDS}}
-    return {"on": st["on"], "pts": st["pts"], "active": st["active"], "pets": pets, "inv": dict(st["inv"]),
+    return {"on": st["on"], "pts": st["pts"], "active": st["active"], "pets": pets, "inv": dict(st["inv"]), "sight": st.get("sight", ""),
             "spun": bool(st["wheel"]), "wheel_day": st["wheel"], "stats": dict(st["stats"])}

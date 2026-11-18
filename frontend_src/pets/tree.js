@@ -130,7 +130,8 @@
   // compact left-to-right drawing: columns Ei | Baby | Jung | Gross, curved lines, the chosen path is highlighted
   const BADGE = { merkmal: ['⭐', 'gross'], farbe: ['💊', 'Spezialfarbe'], schein: ['✨', 'Schein'], form: ['🪽', 'neue Form'], legende: ['👑', 'Legende'] };
   const COLS = ['Ei', 'Baby', 'Jung', 'Gross', 'Endform', 'Legende'];
-  const COLREQ = ['', '30 Wachstum', '150 Wachstum', '450 Wachstum', '800 Wachstum', '1750 Wachstum'];
+  // short labels: a column is only ~72 px wide, "Wachstum" under every column did not fit
+  const COLREQ = ['', 'ab 30', 'ab 150', 'ab 450', 'ab 800', 'ab 1750'];
   const render = (host, k, opt) => {
     const P4 = window.P4; const o = opt || {}; const NS = o.size || 44, GAP = o.gap || 6, CW = o.colW || 78; const t = tree(k);
     const L = leaves(t); const H = L * (NS + GAP); const nodes = []; const edges = []; let li = 0; let maxCol = 0;
@@ -138,7 +139,7 @@
     lay(t, 0, []);
     let sel = o.sel || (() => { const p = []; let c = t; while (c.kids.length) { p.push(c.kids.length - 1); c = c.kids[c.kids.length - 1]; } return p; })();
     const onPath = (p) => p.length <= sel.length && p.every((v, i) => sel[i] === v);
-    const x = (col) => col * CW + NS / 2; const head = o.small ? 0 : 30;
+    const x = (col) => col * CW + NS / 2; const head = o.small ? 0 : 36;
     // fog: everything after column o.fog is a secret silhouette (the Weitblick-Kristall lifts it for 1 hour)
     const hid = (col) => o.fog != null && col > o.fog; const SIL = 'style="display:block;width:100%;height:100%;filter:brightness(0);opacity:.5"';
     const draw = () => {

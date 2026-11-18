@@ -55,3 +55,21 @@ def test_switching_pages_starts_at_the_top():
     assert "const fpNavigate = (p) => {\n  fpToTop();" in week
     assert "window.fpToTop()" in nav and "document.documentElement.style.overflow = 'hidden'" in nav
     assert "document.documentElement.style.overflow = this._lockOld" in nav  # unlocked again
+
+
+def test_every_inventory_thing_has_an_explanation_in_both_languages():
+    """Tap on a thing in the inventory: what it is, what it does, where it comes from – for every item of pets.py."""
+    import importlib.util
+    import pathlib
+    import re
+    root = pathlib.Path(__file__).parents[1]
+    spec = importlib.util.spec_from_file_location("fp_pets_items", root / "custom_components/family_planer/pets.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    ui = (root / "frontend_src/pets_ui.js").read_text()
+    blocks = re.findall(r"\n        x: \{(.*?)\} \},", ui, re.S)
+    assert len(blocks) == 2  # de + en
+    for block in blocks:
+        keys = set(re.findall(r"^\s+([a-z_]+): \[", block, re.M))
+        assert set(mod.ITEMS) <= keys, set(mod.ITEMS) - keys
+    assert "data-info=" in ui and "_info(k)" in ui

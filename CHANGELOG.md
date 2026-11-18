@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.19.0 – unreleased
+### Added
+- **Inventory explained:** every thing can be tapped – what it is, its effect, three illustrated steps how to use it, a live preview on your own pet, where it comes from; things you have can be used right there.
+- **Special things work:** star pillow and lantern (stay like toys), star stone (whole step + star aura), far-sight crystal (whole tree for 1 hour), magic mirror and rainbow feather (special colours), dream crystal (pick the animal of your egg). Tests cover every effect.
+### Fixed
+- **Evolution tree:** the column labels overlapped the boxes ("Wachstum" was hidden) and the hint on the right was cut off on narrow screens.
+
 ## 0.18.4 – 2026-11-18
 ### Fixed
 - **Banner gone after switching pages:** opening a page (e.g. pets from a scrolled planner) kept the old scroll position, so the banner and the buttons were out of view. Every page change now starts at the top, and a page shown inside a dashboard keeps the dashboard behind it still.

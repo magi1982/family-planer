@@ -914,3 +914,4 @@ Wunsch: im Inventar auf alles tippen können und erklärt bekommen, was es ist u
 - Hat man es und kann es jetzt einsetzen: Knopf „Jetzt einsetzen“ für das aktive Tierchen (gleiche Regeln wie beim Pflegen; Pillen nur, wenn der Balken nicht voll ist).
 - Sonderdinge (Kissen, Laterne, Artefakte): Erklärung, was sie bewirken; bei Artefakten auch, wofür sie im Entwicklungsbaum gebraucht werden.
 - Texte DE/EN, kindgerecht, kurz.
+- **Umgesetzt (18.11., 0.19.0):** Inventar antippbar mit Erklärung, Schritt-Grafik, Vorschau am eigenen Tierchen und „Jetzt einsetzen“; alle Sonderdinge haben eine echte Wirkung.

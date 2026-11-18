@@ -767,7 +767,7 @@ class FamilyPlanner:
         if action == "spend":
             res["grow"] = pets.spend(st, pet_id, args.get("amount", pets.SPEND_MAX), cfg["speed"])
         elif action == "use":
-            res = pets.use(st, pet_id, args.get("item", ""), now, cfg["speed"])
+            res = pets.use(st, pet_id, args.get("item", ""), now, cfg["speed"], args.get("kind"))
         elif action == "hatch":
             res["kind"] = pets.hatch(st, pet_id, self._rng, cfg["speed"])
         elif action == "evolve":

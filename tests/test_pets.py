@@ -413,3 +413,72 @@ def test_grant_gives_only_pet_points_and_never_goes_below_zero():
     assert pets.grant(st, -80) == 0
     with pytest.raises(pets.PetError):
         pets.grant(st, 5000)
+
+
+# ------------------------------------------------------------------ special things (0.19)
+def _hatched(st, kind="fuchs", step=1, g=None):
+    eid = egg_id(st)
+    p = st["pets"][eid]
+    p.update(kind=kind, step=step, g=pets.STEPS[step] if g is None else g)
+    return eid
+
+
+def test_wish_crystal_picks_the_animal_of_an_egg():
+    st = state()
+    eid = egg_id(st)
+    st["inv"]["traumkristall"] = 1
+    with pytest.raises(pets.PetError, match="bad_wish"):
+        pets.use(st, eid, "traumkristall", datetime(2026, 11, 18), wish="pegasus")  # a fable only from a fable egg
+    pets.use(st, eid, "traumkristall", datetime(2026, 11, 18), wish="koala")
+    assert "traumkristall" not in st["inv"]
+    st["pets"][eid]["g"] = 30
+    assert pets.hatch(st, eid, random.Random(1)) == "koala" and "wish" not in st["pets"][eid]
+
+
+def test_wish_crystal_only_on_eggs():
+    st = state()
+    eid = _hatched(st)
+    st["inv"]["traumkristall"] = 1
+    with pytest.raises(pets.PetError, match="not_egg"):
+        pets.use(st, eid, "traumkristall", datetime(2026, 11, 18), wish="koala")
+    assert st["inv"]["traumkristall"] == 1
+
+
+def test_star_stone_fills_the_bar_and_gives_a_star_aura():
+    st = state()
+    eid = _hatched(st, step=2)
+    st["inv"]["sternenstein"] = 1
+    res = pets.use(st, eid, "sternenstein", datetime(2026, 11, 18))
+    assert res["ready"] and pets.ready(st["pets"][eid]) and st["pets"][eid]["look"]["aura"] == "sterne"
+
+
+def test_feather_and_mirror_change_the_colour_once():
+    st = state()
+    eid = _hatched(st)
+    st["inv"].update(regenbogenfeder=1, zauberspiegel=1)
+    pets.use(st, eid, "regenbogenfeder", datetime(2026, 11, 18))
+    assert st["pets"][eid]["look"]["skin"] == "regenbogen"
+    pets.use(st, eid, "zauberspiegel", datetime(2026, 11, 18))
+    assert st["pets"][eid]["look"]["skin"] == "kristall"
+    st["inv"]["zauberspiegel"] = 1
+    with pytest.raises(pets.PetError, match="not_needed"):
+        pets.use(st, eid, "zauberspiegel", datetime(2026, 11, 18))
+
+
+def test_far_sight_shows_the_tree_for_an_hour():
+    st = state()
+    st["inv"]["weitblick"] = 1
+    pets.use(st, egg_id(st), "weitblick", datetime(2026, 11, 18, 19, 0))
+    assert st["sight"] == "2026-11-18T20:00:00" and pets.view(st)["sight"] == st["sight"]
+
+
+def test_pillow_and_lantern_stay_and_help():
+    st = state()
+    eid = _hatched(st)
+    st["inv"].update(kissen=1, laterne=1)
+    st["pets"][eid]["v"]["energie"] = 10
+    pets.use(st, eid, "kissen", datetime(2026, 11, 18))
+    assert st["pets"][eid]["v"]["energie"] == 50 and st["inv"]["kissen"] == 1  # stays
+    st["pets"][eid]["v"]["laune"] = 99
+    with pytest.raises(pets.PetError, match="not_needed"):
+        pets.use(st, eid, "laterne", datetime(2026, 11, 18))
