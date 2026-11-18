@@ -1,6 +1,8 @@
 # Changelog
 
 ## 0.18.0 – unreleased
+### Fixed
+- **Hatching and evolving** now use the same dark stage with a soft light as the pet page (was green), and the animal that comes out of the egg is the one that really hatched.
 ### Added
 - **Black screen when idle** for wall tablets (*Settings → Screen*, off by default): after a set time without a tap and without motion the planner turns black (optionally with a small moving clock). Motion sensors or a tap wake it; the waking tap does nothing else. Tests cover the settings and the logic.
 
