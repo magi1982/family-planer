@@ -35,3 +35,12 @@ def test_missing_dashboard_view_opens_the_panel():
     assert "_inlinePage(key) {" in nav[nav.index("class FamilyPlanerNavCard"):nav.index("class FamilyPlanerPanel")]
     assert "window.__fpViews = this._views" in nav
     assert "if (miss && !this._editing()) return '';" not in nav
+
+
+def test_inline_page_covers_the_planer_below():
+    """The page shown inside a dashboard lies above the planer's pets and wheels (z-index 5-6)."""
+    import pathlib
+    import re
+    nav = (pathlib.Path(__file__).parents[1] / "frontend_src/bridge.js").read_text()
+    z = int(re.search(r"this\._page\.style\.cssText = `position:fixed;z-index:(\d+)", nav).group(1))
+    assert 6 < z < 9000

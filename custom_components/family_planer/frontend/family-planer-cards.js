@@ -8946,7 +8946,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     _placePage() {
       if (!this._page) return;
       const r = this.getBoundingClientRect();
-      this._page.style.cssText = `position:fixed;z-index:5;left:${Math.round(r.left)}px;width:${Math.round(r.width)}px;top:${Math.round(r.bottom + 8)}px;bottom:0;overflow:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box;padding-bottom:8px;background:var(--fp-page,var(--fp-bg0,#141414))`;
+      // above everything of the dashboard below (the planer's pets and wheels use z-index 5–6), below popups (9000+)
+      this._page.style.cssText = `position:fixed;z-index:100;isolation:isolate;left:${Math.round(r.left)}px;width:${Math.round(r.width)}px;top:${Math.round(r.bottom + 8)}px;bottom:0;overflow:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box;padding-bottom:8px;background:var(--fp-page,var(--fp-bg0,#141414))`;
     }
     disconnectedCallback() { if (this._page) { this._page.remove(); this._page = null; this._inline = null; } if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
     // night mode: a soft dark veil over the whole dashboard (no layout change, clicks pass through)
