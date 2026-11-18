@@ -1066,8 +1066,8 @@ class LoxWochenplanerCard extends FpBase {
       @media (prefers-reduced-motion:reduce){.bdx,.take,.lab.bday{animation:none}.bdx i{animation:none;opacity:0}}
       .err{color:#E06B6B;font-size:12px;margin-top:10px}
       .nb.volb{background:#F5C542;color:#3a2a00;border-color:#F5C542;font-weight:600;gap:6px;padding:0 12px;transform-origin:50% 90%;animation:fpwig 3.2s ease-in-out infinite,fpglow 3.2s ease-in-out infinite}.nb.volb .vh{font-size:18px;line-height:1}.nb.volb .tdn{background:#3a2a00;color:#F5C542}
-      @keyframes fpwig{0%,72%,100%{transform:rotate(0) scale(1)}76%{transform:rotate(-9deg) scale(1.06)}80%{transform:rotate(8deg) scale(1.06)}84%{transform:rotate(-6deg)}88%{transform:rotate(4deg)}92%{transform:rotate(0)}}
-      @keyframes fpglow{0%,60%,100%{box-shadow:0 0 0 0 rgba(245,197,66,0)}75%{box-shadow:0 0 0 6px rgba(245,197,66,.35)}90%{box-shadow:0 0 0 12px rgba(245,197,66,0)}}
+      @keyframes fpwig{0%,76%,100%{transform:rotate(0)}80%{transform:rotate(-2.5deg)}84%{transform:rotate(2deg)}88%{transform:rotate(-1deg)}92%{transform:rotate(0)}}
+      @keyframes fpglow{0%,60%,100%{box-shadow:0 0 0 0 rgba(245,197,66,0)}78%{box-shadow:0 0 0 4px rgba(245,197,66,.25)}92%{box-shadow:0 0 0 8px rgba(245,197,66,0)}}
       .vpop{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;animation:fpvin .25s ease-out}
       .vbox{background:#232323;border:1px solid rgba(245,197,66,.5);border-radius:16px;padding:14px;width:min(560px,100%);max-height:calc(100% - 32px);overflow:auto;box-sizing:border-box}
       .vhd{display:flex;align-items:center;gap:8px;margin-bottom:12px}.vhd .vh{font-size:26px}.vhd b{font-size:18px;color:#F5C542}.vhd .vs2{flex:1;color:#aaa;font-size:13px}.vcl{width:40px;height:40px;border-radius:50%;border:none;background:#333;color:#ddd;font-size:16px;cursor:pointer}

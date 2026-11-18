@@ -1,6 +1,9 @@
 # Changelog
 
 ## 0.16.5 – unreleased
+### Changed
+- **Volunteer button wiggles only slightly** (about 2° instead of 9°, no zoom, softer glow).
+
 ### Fixed
 - **"Tap!" sign looked blurry on the tablet:** it sat on half pixels and had a double glow on the text. Now whole pixels, a darker plate and a thin glow – sharp letters.
 
