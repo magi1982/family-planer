@@ -905,3 +905,4 @@ Heute: ein neues Ei gibt es nur, wenn das aktive Tierchen „Gross“ wird (norm
   - Glücksrad neu (24 Felder): Wachstums-Pille 5, Extra/Sonderding 6 (vorher 5), Futter 2 (vorher 4), Punkte 4 mit **+30 statt +20**, Entwicklungs-Pille 2, **Ei 2 (neu)**, nochmal drehen 2, Stern 1.
   - Fundsachen beim Ämtli: Pillen-Chance = Punkte × 1.5 in Prozent (vorher × 1), höchstens 60 % (vorher 50 %); Sonderämtli weiterhin doppelt.
   - Bonus für 7-Tage-Serie: Ei + 1 Extra.
+- **Rechnung (18.11., 200 Durchläufe × 90 Tage, echte pets.py):** Heute schon Ø 7–8 Tiere, davon Ø 3–4 Legende (Entwicklungs-Pillen füllen eine ganze Stufe), dazwischen nur 1–2. **B leicht** (1 Rad-Ei, Punkte-Feld +30, Extras 6 Felder, Futter 2, Serien-Ei + Extra, Pillen unverändert): Ø 11–12 Tiere, Ø 3–4 Legende (min 2), Ø 4 dazwischen (bei gemischter Spielweise). **B voll** (2 Rad-Eier, Pillen ×1.5): Ø 15 Tiere – zu viele Babys. Empfehlung: B leicht.
