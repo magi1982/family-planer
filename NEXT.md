@@ -875,3 +875,7 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - Sammlung card: stage once (top), name, line / special / days together, growth bar without text. No weight/height anywhere.
 - Same building blocks everywhere: frame with season band (Planer, Listen, Belohnungen, **Statistik – band missing today, bug**, Tierchen), tiles = #1c2027, radius 12, colour line `inset 0 3px 0` (planer column look) – rewards person cards (today left border), stats tiles/sections, list sections. Avatar + pet identical everywhere (64/60, right −31, bottom −17), capsule reliability | level identical.
 - Chore tick: no coin flying to the avatar; the earned Münzen/Punkte rise slowly above the chore (≈4 s).
+- Garden (decided): top = the real banner (house small like in the banner, pool, sky, season); below a big front garden (climbing tree, bushes, hedges, flower bed, stone, hill, lamp, bowl) in the banner's ground colour – pets run, climb, hide, swim in the pool and stay in the picture.
+- Pflegen background = same spotlight as the pet view (no garden). "Dieses jetzt pflegen" (green) makes a pet the active one and opens Pflegen.
+- Sammlung card: 4 per row; stage + aktiv on top, pet, name (+ kind), rows Linie / Spezial / Frisst / Mag / Zusammen (no overlap, values cut with …), growth bar.
+- Page button 🐾 = mdi:paw in the planer's button style; while the Tierchen page is open only it is highlighted.
