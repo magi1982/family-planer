@@ -464,7 +464,9 @@ class LoxWochenplanerCard extends FpBase {
   // every task button is built the same: left title + time info (seit / heute fällig / bis Mo), right source + points.
   // Fits on one line → one line; otherwise left: title over time, right: points over source (see _fit()).
   _bi(title, time, src, pts) {
-    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${time || ''}</span><span class="br">${src || ''}${pts > 0 ? `<b class="ptr">${fpCoin(13)}+${pts}</b>` : ''}</span></span>`;
+    // grid: [title + meta chips] [points], both centred like the tick on the left – compact and symmetric
+    const meta = `${time || ''}${src || ''}`;
+    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${meta ? `<span class="bm">${meta}</span>` : ''}</span>${pts > 0 ? `<span class="br"><b class="ptr">${fpCoin(11)}+${pts}</b></span>` : ''}</span>`;
   }
   _fit() {
     const root = this.shadowRoot; if (!root) return;
@@ -999,11 +1001,13 @@ class LoxWochenplanerCard extends FpBase {
       .bg.one{grid-template-columns:minmax(0,1fr)}
 
       .tdmore{background:none;border:1px dashed #3a3a3a;color:#999;border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
-      .bin{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+      .bin{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:6px}
+      .bin .bl{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}.bin .bm{display:flex;flex-wrap:wrap;gap:3px 4px;min-width:0;max-width:100%}
+      .bin .bx{white-space:normal;overflow:visible;display:block;overflow-wrap:break-word;word-break:normal;hyphens:manual;line-height:1.28;max-width:100%}
+      .bin .br{display:flex;align-items:center;margin:0;flex:none}.bin .ptr{padding:0 6px 0 4px;line-height:18px}.bin .ptr .fpcoin{margin:0 2px 0 0}
+      .bin .bm .tag,.bin .bm .due,.bin .bm .age{font-size:10.5px;line-height:16px;padding:0 6px}
       .bl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;flex:1 1 auto}.br{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px;justify-content:flex-end;flex:0 1 auto;min-width:0;margin-left:auto}
       .bx{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
-      .bin.two{align-items:flex-start}.bin.two .bl{flex:1 1 100%}
-      .bin.two .bx{flex:1 1 100%;white-space:normal;overflow:visible;overflow-wrap:break-word;word-break:normal;hyphens:manual;line-height:1.3}
       .c .bg:not(.one) .bin.two .tag .tl,.c .spw .bin.two .tag .tl{display:none}.btn .tag{max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
       .btn .tag,.due,.age,.ptr{display:inline-block;margin:0;font-style:normal;font-size:11px;font-weight:700;line-height:17px;padding:0 8px;border-radius:9px;white-space:nowrap;letter-spacing:.2px}
       .age{color:#aab2bf;border:1px solid #4a505c;line-height:15px;font-weight:600}

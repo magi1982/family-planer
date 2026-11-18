@@ -8,7 +8,7 @@ NAV = (Path(__file__).parents[1] / "frontend_src/bridge.js").read_text()
 def test_task_buttons_do_not_use_display_contents():
     # display:contents in the two-line button overlapped title, tag and points on the tablet
     assert ".bin.two .bl,.bin.two .br{display:contents}" not in SRC
-    assert ".bin{flex:1;min-width:0;display:flex;flex-wrap:wrap" in SRC
+    assert ".bin{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center" in SRC
 
 
 def test_no_syllable_hyphenation_in_titles():
