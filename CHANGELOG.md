@@ -2,7 +2,7 @@
 
 ## 0.16.4 – 2026-11-18
 ### Changed
-- **No more "To-dos" counter button** in the planer toolbar: the count repeated what the columns already show, and with the volunteer button the toolbar got too wide on a tablet (the date was cut off). The "+" button opens the same to-do overview with the input field.
+- **No more "To-dos" counter button** in the planer toolbar: the count repeated what the columns already show, and with the volunteer button the toolbar got too wide on a tablet (the date was cut off). In its place a single to-do icon button opens the to-do overview with the input field.
 
 ## 0.16.3 – 2026-11-18
 ### Fixed
