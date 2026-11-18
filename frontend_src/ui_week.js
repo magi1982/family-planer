@@ -1135,6 +1135,13 @@ const fadeIn = (el) => {
 };
 const fpNavigate = (p) => {
   const parts = location.pathname.split('/').filter(Boolean);
+  // a dashboard without this view (e.g. made before statistics/pets existed): open the page in the planer panel instead
+  const views = window.__fpViews;
+  if (views && !views.has(p)) {
+    const key = Object.entries(window.__fpPaths || {}).find(([, v]) => v === p);
+    history.pushState(null, '', `/family-planer/${encodeURIComponent(key ? key[0] : p)}`);
+    window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } })); return;
+  }
   history.pushState(null, '', `/${parts[0] || 'family-planer'}/${p}${location.search}`);
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };

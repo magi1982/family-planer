@@ -3957,6 +3957,13 @@ const fadeIn = (el) => {
 };
 const fpNavigate = (p) => {
   const parts = location.pathname.split('/').filter(Boolean);
+  // a dashboard without this view (e.g. made before statistics/pets existed): open the page in the planer panel instead
+  const views = window.__fpViews;
+  if (views && !views.has(p)) {
+    const key = Object.entries(window.__fpPaths || {}).find(([, v]) => v === p);
+    history.pushState(null, '', `/family-planer/${encodeURIComponent(key ? key[0] : p)}`);
+    window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } })); return;
+  }
   history.pushState(null, '', `/${parts[0] || 'family-planer'}/${p}${location.search}`);
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
@@ -5397,6 +5404,13 @@ const fadeIn = (el) => {
 };
 const fpNavigate = (p) => {
   const parts = location.pathname.split('/').filter(Boolean);
+  // a dashboard without this view (e.g. made before statistics/pets existed): open the page in the planer panel instead
+  const views = window.__fpViews;
+  if (views && !views.has(p)) {
+    const key = Object.entries(window.__fpPaths || {}).find(([, v]) => v === p);
+    history.pushState(null, '', `/family-planer/${encodeURIComponent(key ? key[0] : p)}`);
+    window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } })); return;
+  }
   history.pushState(null, '', `/${parts[0] || 'family-planer'}/${p}${location.search}`);
   window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
 };
@@ -8743,7 +8757,6 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         this._onClick = (e) => {
           if (e.target.closest('[data-menu]')) { this.dispatchEvent(new Event('hass-toggle-menu', { bubbles: true, composed: true })); return; }
           const b = e.target.closest('[data-go]');
-          if (b && this._views && !this._views.has(b.dataset.go)) { this._flash(NAV_T[this._lang()].miss.replace('{p}', b.dataset.go)); return; }
           if (b && window.FPX) { window.FPX.fpNavigate(b.dataset.go); return; }
           if (e.target.closest('[data-themes]')) { this._open = this._open === 'theme' ? null : 'theme'; this._render(); return; }
           if (this._sceneTap(e)) return;
@@ -8830,11 +8843,13 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     async _loadViews() {
       try {
         const dash = location.pathname.split('/').filter(Boolean)[0];
+        if (dash === 'family-planer') { this._views = null; window.__fpViews = null; return; } // the panel has every page
         const cfg = await this._hass.connection.sendMessagePromise({ type: 'lovelace/config', url_path: dash && dash !== 'lovelace' ? dash : null });
         if (!cfg || !Array.isArray(cfg.views)) return;
         this._views = new Set(cfg.views.map((v, i) => String(v.path != null ? v.path : i)));
+        window.__fpViews = this._views;
         this._render();
-      } catch (e) { this._views = null; }
+      } catch (e) { this._views = null; window.__fpViews = null; }
     }
     disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
     // night mode: a soft dark veil over the whole dashboard (no layout change, clicks pass through)
@@ -9004,7 +9019,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           .sug:focus>span{display:block;position:absolute;top:46px;right:0;width:240px;padding:9px 11px;border-radius:12px;background:var(--fp-pop,var(--fp-bg1));border:1px solid var(--fp-line);box-shadow:0 10px 28px rgba(0,0,0,.45);z-index:6;white-space:normal}.sug:focus>span span{white-space:normal;overflow:visible}}
         button.slab{font:inherit;font-size:12px;cursor:pointer;color:inherit;border:1px solid transparent}.hint.fi{max-width:340px;line-height:1.45}.slab.fun{border-color:var(--fp-acc,#69C350)}.slab.fun ha-icon{--mdc-icon-size:15px;opacity:.8}.slab.fun.on{background:var(--fp-bg3)}@media (max-width:700px){.sug,.wxn span,.slab{display:none}.slab.fun{display:inline-flex}}
       </style><div class="bar${sc.key ? ' sc' : ''}" data-fp-head><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="lft"><span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span>
-        <div class="mid">${btns.filter((k) => k !== 'einstellungen' && (this._editing() || !this._views || this._views.has(this._paths[k]))).map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
+        <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._editing() && this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
         ${this._right(s, lang, review, pending, btns.includes('einstellungen') ? this._navBtn('einstellungen', lang, cur) : '')}</div>`;
       const bar = this.shadowRoot.querySelector('.bar');
       if (sc.key && bar) {
@@ -9034,8 +9049,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     _navBtn(k, lang, cur) {
       const T = NAV_T[lang]; const miss = this._views && !this._views.has(this._paths[k]);
-      if (miss && !this._editing()) return '';
-      return `<button class="sq${this._paths[k] === cur ? ' on' : ''}${miss ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(miss ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon></button>`;
+      return `<button class="sq${this._paths[k] === cur ? ' on' : ''}${miss && this._editing() ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(miss ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon></button>`;
     }
     _seasonLabel(s, lang) {
       const se = s && s.season; if (!se || se.enabled === false || !se.label || !window.FPSEASON) return '';

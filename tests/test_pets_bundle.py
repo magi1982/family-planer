@@ -21,3 +21,14 @@ def test_pet_file_exports_its_parts():
 def test_pet_file_has_no_dangerous_apis():
     for bad in ("eval(", "new Function", "fetch(", "XMLHttpRequest", "localStorage", "document.cookie", "document.write"):
         assert bad not in PETS, bad
+
+
+def test_missing_dashboard_view_opens_the_panel():
+    """Dashboards made before statistics/pets existed: the buttons stay visible and open the page in the panel."""
+    import pathlib
+    src = (pathlib.Path(__file__).parents[1] / "frontend_src")
+    week = (src / "ui_week.js").read_text()
+    nav = (src / "bridge.js").read_text()
+    assert "window.__fpViews" in week and "/family-planer/" in week
+    assert "window.__fpViews = this._views" in nav
+    assert "if (miss && !this._editing()) return '';" not in nav

@@ -2,6 +2,7 @@
 
 ## 0.17.1 – 2026-11-18
 ### Fixed
+- **Statistics and pets missing on older dashboards:** dashboards created before these pages existed have no view for them, so the buttons were hidden and the pet button in the planner led nowhere. The buttons now always show and open the page in the Family Planer panel when the dashboard has no view for it.
 - **To-dos could be pressed several times:** before the server answered, every press counted as "done" again and coins flew up each time. Presses are now ignored while a to-do is being saved, coins rise only once per to-do, and the server ignores a to-do that is already in the requested state. The balance itself was never booked twice.
 - **No eggs after the update to 0.17.0:** pets were only created with the first change in the planner (e.g. ticking off a chore). They are now created right when Home Assistant starts. A test covers it.
 

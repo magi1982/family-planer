@@ -29,9 +29,10 @@ def test_person_columns_wrap_on_small_screens():
     assert "repeat(auto-fit,minmax(min(100%,150px),1fr))" in SRC
 
 
-def test_nav_hides_buttons_without_view_unless_editing():
-    assert "_editing()" in NAV
-    assert "if (miss && !this._editing()) return '';" in NAV
+def test_nav_keeps_buttons_without_view_and_marks_them_only_while_editing():
+    # 0.17.1: a missing view no longer hides the button – it opens the page in the panel
+    assert "if (miss && !this._editing()) return '';" not in NAV
+    assert "miss && this._editing() ? ' miss' : ''" in NAV
 
 
 def test_unicorn_story_always_has_a_rainbow():
