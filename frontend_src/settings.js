@@ -285,7 +285,10 @@
       const asv = t.closest('[data-avsv]'); if (asv) { this._avsv = asv.dataset.avsv; this._render(); return; }
       const avs = t.closest('[data-avs]'); if (avs && window.FPAVS) { const p = this._avPerson(); if (p) { const [v, kind, key] = avs.dataset.avs.split('|'); this._avsv = v; this._avSeason(p, window.FPAVS.toggle(p.season_av, v, kind, key)); } return; }
       if (t.closest('[data-avrnd]')) { const p = this._avPerson(); if (p) { const fx = window.FPAV.parse(this._avCode(p)).fx; this._avSave(p, window.FPAV.set(window.FPAV.random(), 'fx', fx)); } return; }
-      const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); this._avSave(p, window.FPAV.set(this._avCode(p), part, val)); } return; }
+      const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); const code = window.FPAV.set(this._avCode(p), part, val); this._avSave(p, code);
+        // a season extra the child picked that would cover the new choice (e.g. the toadstool hat over a new cap) is taken off
+        const S = window.FPAVS; const v = S && S.active() ? Object.keys(p.season_av || {}).find((k) => k === (window.FPSEASON.cur || {}).vis) : null;
+        if (v && val !== '0') { const own = p.season_av[v]; const keep = (own.x || []).filter((k) => S.fits(k, code)); if (keep.length !== (own.x || []).length) this._avSeason(p, { ...p.season_av, [v]: { ...own, x: keep } }); } } return; }
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
       if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
       if (t.closest('[data-refreshall]')) { this._refreshAll(); return; }
@@ -679,7 +682,8 @@
     }
     async _avSave(p, code) {
       this._avLocal = { ...(this._avLocal || {}), [p.id]: code }; this._render();
-      try { await this._store.ws('family_planer/person/update', { person_id: p.id, image: code }); } catch (er) { this._flash(this._errText(er), true); }
+      // every tap is saved at once – the short "saved" note makes that visible (there is no extra save button)
+      try { await this._store.ws('family_planer/person/update', { person_id: p.id, image: code }); this._flash(this._lang === 'en' ? 'Saved ✓' : 'Gespeichert ✓'); } catch (er) { this._flash(this._errText(er), true); }
     }
     async _avUpload(p, file) {
       // centre crop to a 320 px square JPEG in the browser, then store it in Home Assistant
@@ -701,7 +705,7 @@
       if (!p || !A) return '';
       const pic = (q, size) => { const loc = (this._avLocal || {})[q.id]; const img = loc || q.image || '';
         return FX.avatarHtml ? FX.avatarHtml({ name: q.name, farbe: COLOR(q.color), ...(/^(av2?:|svg:|img:)/.test(img) ? { bild: img } : {}) }, size) : ''; };
-      return `<div class="hint3">${esc(lbl('Jede und jeder darf hier ein Bild zusammenstellen – ohne PIN. Alles andere öffnet die Eltern-PIN oben rechts.', 'Anyone may build a picture here – no PIN needed. Everything else opens with the parent PIN at the top right.'))}</div>
+      return `<div class="hint3">${esc(lbl('Jede und jeder darf hier ein Bild zusammenstellen – ohne PIN. Jede Änderung wird sofort gespeichert. Alles andere öffnet die Eltern-PIN oben rechts.', 'Anyone may build a picture here – no PIN needed. Every change is saved at once. Everything else opens with the parent PIN at the top right.'))}</div>
         <div class="avps">${ps.map((q) => `<button class="avpb${q.id === p.id ? ' on' : ''}" style="--c:${COLOR(q.color)}" data-avp="${esc(q.id)}">${pic(q, 40)}<span>${esc(q.name)}</span></button>`).join('')}</div>
         <div class="avwrap">${A.builder(this._avCode(p), COLOR(p.color), lang, this._avtab, ((s.points || {})[p.id] || {}).unlocked || [], { name: p.name, vis: this._avsv })}</div>
         <div class="upl"><label class="sg">${esc(lbl('Eigenes Foto hochladen', 'Upload own photo'))}<input type="file" accept="image/*" data-avup hidden></label><small>${esc(lbl('Wird quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.', 'Cropped to a square and stored only in your Home Assistant.'))}</small></div>`;

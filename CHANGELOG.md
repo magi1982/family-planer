@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.16.2 – 2026-11-18
+
+### Fixed
+- **Season hat over the own cap:** the automatic season extra (e.g. the toadstool hat in autumn) no longer covers a hat, glasses, scarf or pet the person chose – it takes the next extra that fits. If a child picked a season hat themselves and then chooses a new hat, the season hat is taken off.
+- **Avatar builder:** every change was already saved at once, but nothing showed it – now a short *Saved ✓* appears, and the hint says that changes are saved immediately.
+- **Unicorn story without a rainbow:** at dawn and dusk the scene shows no rainbow, but the unicorn still trotted over it. The story now brings its own rainbow when the scene has none.
+
 ## 0.16.1 – 2026-11-18
 
 ### Fixed

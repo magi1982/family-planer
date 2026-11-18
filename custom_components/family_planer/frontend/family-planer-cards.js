@@ -2758,19 +2758,25 @@
   api.setPersons = (list) => { persons = {}; (list || []).forEach((p) => { persons[p.name] = p; }); };
   const vis = () => { const se = window.FPSEASON && window.FPSEASON.cur; return se && se.vis && D.VIS[se.vis] ? se.vis : null; };
   const year = () => { const n = new Date(); return String(n.getMonth() === 11 ? n.getFullYear() + 1 : n.getFullYear()); };
-  // what a person wears this season: own choice, otherwise one extra picked for them (different per person)
-  api.choice = (name, v) => {
+  // an extra fits a picture when it does not replace something the person chose (hat, glasses, scarf, pet, …)
+  const fits = (k, code) => { const A = window.FPAV; if (!code || !A) return true; const cur = A.parse(code);
+    return Object.entries(D.X[k][3] || {}).every(([part, val]) => !cur[part] || cur[part] === '0' || cur[part] === val); };
+  // what a person wears this season: own choice, otherwise one extra picked for them (different per person) –
+  // the automatic pick never covers the person's own hat or glasses: it takes the next extra that fits
+  api.choice = (name, v, code) => {
     v = v || vis(); if (!v) return null;
     const p = persons[name] || {}; const own = (p.season_av || {})[v];
     if (own) return { x: (own.x || []).filter((k) => D.X[k]), fx: D.FX[own.fx] ? own.fx : '' };
     const g = D.G[D.VIS[v]] || []; if (!g.length) return null;
-    const idx = Object.keys(persons).indexOf(name); const k = g[((idx < 0 ? 0 : idx) * 3 + new Date().getFullYear()) % g.length];
-    return { x: [k], fx: '' };
+    const idx = Object.keys(persons).indexOf(name); const start = ((idx < 0 ? 0 : idx) * 3 + new Date().getFullYear()) % g.length;
+    for (let i = 0; i < g.length; i++) { const k = g[(start + i) % g.length]; if (fits(k, code)) return { x: [k], fx: '' }; }
+    return null;
   };
+  api.fits = fits;
   // av2 code + seasonal extras -> svg (base overrides first, then the overlays on top)
   api.decorate = (code, color, name, sel) => {
     const A = window.FPAV; if (!A) return '';
-    const c = sel || api.choice(name); if (!c || !c.x.length) return A.svg(code, color);
+    const c = sel || api.choice(name, null, code); if (!c || !c.x.length) return A.svg(code, color);
     let cur = code; let ov = '';
     for (const k of c.x) { const [, , , base, svg] = D.X[k]; for (const [part, val] of Object.entries(base || {})) cur = A.set(cur, part, val); ov += svg; }
     ov = ov.replace(/2027/g, year());
@@ -2793,7 +2799,7 @@
   api.builderBody = (code, color, name, lang) => {
     const t = T[lang === 'en' ? 'en' : 'de']; const L = lang === 'en' ? 1 : 0; const A = window.FPAV;
     const v = vis(); if (!v) return { prev: '', html: `<div class="avh">${esc(t.off)}</div>`, vis: null };
-    const own = ((persons[name] || {}).season_av || {})[v]; const c = api.choice(name, v) || { x: [], fx: '' };
+    const own = ((persons[name] || {}).season_av || {})[v]; const c = api.choice(name, v, code) || { x: [], fx: '' };
     const ex = `<button class="avo txt${own && !own.x.length ? ' on' : ''}" data-avs="${v}|x|0">${esc(t.none)}</button><button class="avo txt${!own ? ' on' : ''}" data-avs="${v}|auto|0">${esc(t.auto)}</button>` +
       (D.G[D.VIS[v]] || []).map((k) => `<button class="avo${D.X[k][2] ? ' lvx' : ''}${c.x.includes(k) ? ' on' : ''}" data-avs="${v}|x|${k}" title="${esc(D.X[k][L])}"><span class="avs">${api.decorate(code, color, name, { x: [k], fx: '' })}</span></button>`).join('');
     const fxs = `<button class="avo txt${!c.fx ? ' on' : ''}" data-avs="${v}|fx|0">${esc(t.none)}</button>` + Object.entries(D.FX).filter(([, f]) => f[2] === D.FXVIS[v]).map(([k, f]) =>
@@ -6948,7 +6954,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const asv = t.closest('[data-avsv]'); if (asv) { this._avsv = asv.dataset.avsv; this._render(); return; }
       const avs = t.closest('[data-avs]'); if (avs && window.FPAVS) { const p = this._avPerson(); if (p) { const [v, kind, key] = avs.dataset.avs.split('|'); this._avsv = v; this._avSeason(p, window.FPAVS.toggle(p.season_av, v, kind, key)); } return; }
       if (t.closest('[data-avrnd]')) { const p = this._avPerson(); if (p) { const fx = window.FPAV.parse(this._avCode(p)).fx; this._avSave(p, window.FPAV.set(window.FPAV.random(), 'fx', fx)); } return; }
-      const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); this._avSave(p, window.FPAV.set(this._avCode(p), part, val)); } return; }
+      const avb = t.closest('[data-avb]'); if (avb) { const p = this._avPerson(); if (p) { const [part, val] = avb.dataset.avb.split('|'); const code = window.FPAV.set(this._avCode(p), part, val); this._avSave(p, code);
+        // a season extra the child picked that would cover the new choice (e.g. the toadstool hat over a new cap) is taken off
+        const S = window.FPAVS; const v = S && S.active() ? Object.keys(p.season_av || {}).find((k) => k === (window.FPSEASON.cur || {}).vis) : null;
+        if (v && val !== '0') { const own = p.season_av[v]; const keep = (own.x || []).filter((k) => S.fits(k, code)); if (keep.length !== (own.x || []).length) this._avSeason(p, { ...p.season_av, [v]: { ...own, x: keep } }); } } return; }
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
       if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
       if (t.closest('[data-refreshall]')) { this._refreshAll(); return; }
@@ -7342,7 +7351,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     async _avSave(p, code) {
       this._avLocal = { ...(this._avLocal || {}), [p.id]: code }; this._render();
-      try { await this._store.ws('family_planer/person/update', { person_id: p.id, image: code }); } catch (er) { this._flash(this._errText(er), true); }
+      // every tap is saved at once – the short "saved" note makes that visible (there is no extra save button)
+      try { await this._store.ws('family_planer/person/update', { person_id: p.id, image: code }); this._flash(this._lang === 'en' ? 'Saved ✓' : 'Gespeichert ✓'); } catch (er) { this._flash(this._errText(er), true); }
     }
     async _avUpload(p, file) {
       // centre crop to a 320 px square JPEG in the browser, then store it in Home Assistant
@@ -7364,7 +7374,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!p || !A) return '';
       const pic = (q, size) => { const loc = (this._avLocal || {})[q.id]; const img = loc || q.image || '';
         return FX.avatarHtml ? FX.avatarHtml({ name: q.name, farbe: COLOR(q.color), ...(/^(av2?:|svg:|img:)/.test(img) ? { bild: img } : {}) }, size) : ''; };
-      return `<div class="hint3">${esc(lbl('Jede und jeder darf hier ein Bild zusammenstellen – ohne PIN. Alles andere öffnet die Eltern-PIN oben rechts.', 'Anyone may build a picture here – no PIN needed. Everything else opens with the parent PIN at the top right.'))}</div>
+      return `<div class="hint3">${esc(lbl('Jede und jeder darf hier ein Bild zusammenstellen – ohne PIN. Jede Änderung wird sofort gespeichert. Alles andere öffnet die Eltern-PIN oben rechts.', 'Anyone may build a picture here – no PIN needed. Every change is saved at once. Everything else opens with the parent PIN at the top right.'))}</div>
         <div class="avps">${ps.map((q) => `<button class="avpb${q.id === p.id ? ' on' : ''}" style="--c:${COLOR(q.color)}" data-avp="${esc(q.id)}">${pic(q, 40)}<span>${esc(q.name)}</span></button>`).join('')}</div>
         <div class="avwrap">${A.builder(this._avCode(p), COLOR(p.color), lang, this._avtab, ((s.points || {})[p.id] || {}).unlocked || [], { name: p.name, vis: this._avsv })}</div>
         <div class="upl"><label class="sg">${esc(lbl('Eigenes Foto hochladen', 'Upload own photo'))}<input type="file" accept="image/*" data-avup hidden></label><small>${esc(lbl('Wird quadratisch zugeschnitten und nur in deinem Home Assistant gespeichert.', 'Cropped to a square and stored only in your Home Assistant.'))}</small></div>`;

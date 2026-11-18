@@ -10,19 +10,25 @@
   api.setPersons = (list) => { persons = {}; (list || []).forEach((p) => { persons[p.name] = p; }); };
   const vis = () => { const se = window.FPSEASON && window.FPSEASON.cur; return se && se.vis && D.VIS[se.vis] ? se.vis : null; };
   const year = () => { const n = new Date(); return String(n.getMonth() === 11 ? n.getFullYear() + 1 : n.getFullYear()); };
-  // what a person wears this season: own choice, otherwise one extra picked for them (different per person)
-  api.choice = (name, v) => {
+  // an extra fits a picture when it does not replace something the person chose (hat, glasses, scarf, pet, …)
+  const fits = (k, code) => { const A = window.FPAV; if (!code || !A) return true; const cur = A.parse(code);
+    return Object.entries(D.X[k][3] || {}).every(([part, val]) => !cur[part] || cur[part] === '0' || cur[part] === val); };
+  // what a person wears this season: own choice, otherwise one extra picked for them (different per person) –
+  // the automatic pick never covers the person's own hat or glasses: it takes the next extra that fits
+  api.choice = (name, v, code) => {
     v = v || vis(); if (!v) return null;
     const p = persons[name] || {}; const own = (p.season_av || {})[v];
     if (own) return { x: (own.x || []).filter((k) => D.X[k]), fx: D.FX[own.fx] ? own.fx : '' };
     const g = D.G[D.VIS[v]] || []; if (!g.length) return null;
-    const idx = Object.keys(persons).indexOf(name); const k = g[((idx < 0 ? 0 : idx) * 3 + new Date().getFullYear()) % g.length];
-    return { x: [k], fx: '' };
+    const idx = Object.keys(persons).indexOf(name); const start = ((idx < 0 ? 0 : idx) * 3 + new Date().getFullYear()) % g.length;
+    for (let i = 0; i < g.length; i++) { const k = g[(start + i) % g.length]; if (fits(k, code)) return { x: [k], fx: '' }; }
+    return null;
   };
+  api.fits = fits;
   // av2 code + seasonal extras -> svg (base overrides first, then the overlays on top)
   api.decorate = (code, color, name, sel) => {
     const A = window.FPAV; if (!A) return '';
-    const c = sel || api.choice(name); if (!c || !c.x.length) return A.svg(code, color);
+    const c = sel || api.choice(name, null, code); if (!c || !c.x.length) return A.svg(code, color);
     let cur = code; let ov = '';
     for (const k of c.x) { const [, , , base, svg] = D.X[k]; for (const [part, val] of Object.entries(base || {})) cur = A.set(cur, part, val); ov += svg; }
     ov = ov.replace(/2027/g, year());
@@ -45,7 +51,7 @@
   api.builderBody = (code, color, name, lang) => {
     const t = T[lang === 'en' ? 'en' : 'de']; const L = lang === 'en' ? 1 : 0; const A = window.FPAV;
     const v = vis(); if (!v) return { prev: '', html: `<div class="avh">${esc(t.off)}</div>`, vis: null };
-    const own = ((persons[name] || {}).season_av || {})[v]; const c = api.choice(name, v) || { x: [], fx: '' };
+    const own = ((persons[name] || {}).season_av || {})[v]; const c = api.choice(name, v, code) || { x: [], fx: '' };
     const ex = `<button class="avo txt${own && !own.x.length ? ' on' : ''}" data-avs="${v}|x|0">${esc(t.none)}</button><button class="avo txt${!own ? ' on' : ''}" data-avs="${v}|auto|0">${esc(t.auto)}</button>` +
       (D.G[D.VIS[v]] || []).map((k) => `<button class="avo${D.X[k][2] ? ' lvx' : ''}${c.x.includes(k) ? ' on' : ''}" data-avs="${v}|x|${k}" title="${esc(D.X[k][L])}"><span class="avs">${api.decorate(code, color, name, { x: [k], fx: '' })}</span></button>`).join('');
     const fxs = `<button class="avo txt${!c.fx ? ' on' : ''}" data-avs="${v}|fx|0">${esc(t.none)}</button>` + Object.entries(D.FX).filter(([, f]) => f[2] === D.FXVIS[v]).map(([k, f]) =>
