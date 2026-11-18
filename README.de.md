@@ -416,6 +416,12 @@ Alles, was die Home-Assistant-Dialoge bieten, auf einer übersichtlichen Seite �
 - Tippen auf Ämtli, Knöpfe und Eingabefelder löst es nie aus – so wird nichts aus Versehen abgehakt.
 - Optional: **beim Öffnen automatisch Vollbild** – ideal fürs Wandtablet. Beides unter *Einstellungen → Allgemein*.
 
+## Bildschirm schwarz bei Ruhe (Wandtablet)
+
+- Nach einigen Minuten **ohne Tippen und ohne Bewegung** wird der Planer schwarz (wahlweise mit einer kleinen Uhr, die jede Minute ein Stück wandert, damit sich nichts einbrennt).
+- **Bewegung** der gewählten Melder (Bewegung, Präsenz oder Anwesenheit, z. B. ein Shelly BLU Motion über BTHome) oder ein **Tipp** weckt ihn sofort. Der Weck-Tipp löst nichts aus – so wird nichts aus Versehen abgehakt. Solange ein Melder Bewegung meldet, bleibt der Bildschirm an.
+- Eine Webseite kann ein schlafendes Tablet nicht aufwecken: darum die **Auto-Sperre des Tablets auf „Nie“** stellen und den Planer schlafen lassen. Standardmässig aus; *Einstellungen → Bildschirm*.
+
 ---
 
 ## Installation
@@ -516,6 +522,15 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Glücksrad | an | einmal am Tag pro Person, um Mitternacht wieder frei |
 | Wachstums-Tempo | Normal | Langsam / Normal / Schnell – wie viel Wachstum eine Stufe braucht (normal: Schlüpfen nach etwa 3 Ämtli, Endform nach rund 2 Monaten) |
 | Hunger & Co. sinken | Langsam | Gar nicht / Langsam / Normal – Hunger, Durst, Energie und Laune; nie unter 10 %, in den Ferien pausiert |
+
+**Bildschirm** (*Einstellungen → Bildschirm*)
+
+| Einstellung | Standard | Bedeutung |
+|---|---|---|
+| Bildschirm schwarz bei Ruhe | aus | der Planer wird nach der Zeit unten ohne Tippen und ohne Bewegung schwarz |
+| Schwarz nach | 5 Minuten | 1–120 Minuten |
+| Anzeige | Ganz schwarz | Ganz schwarz / Schwarz mit Uhr |
+| Bewegungsmelder | – | Bewegungs-, Präsenz- oder Anwesenheitsmelder, die den Bildschirm wecken; leer = nur Tippen weckt |
 
 **Wochenplan → Ansagen bei Bewegung**
 

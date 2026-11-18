@@ -416,6 +416,12 @@ Everything that the Home Assistant dialogs offer, in one clear page – also on 
 - Taps on chores, buttons and input fields never trigger it, so nothing is ticked off by accident.
 - Optional: **fullscreen automatically when opened** – ideal for a wall tablet. Both under *Settings → General*.
 
+## Black screen when idle (wall tablet)
+
+- After a few minutes **without a tap and without motion** the planner turns black (optionally with a small clock that moves a little every minute, so nothing burns in).
+- **Motion** from the chosen sensors (motion, presence or occupancy, e.g. a Shelly BLU Motion via BTHome) or a **tap** wakes it right away. The waking tap is swallowed – nothing gets ticked off by accident. While a sensor reports motion the screen stays on.
+- A web page cannot wake a sleeping tablet, so set the tablet's **auto-lock to "Never"** and let the planner do the sleeping. Off by default; *Settings → Screen*.
+
 ---
 
 ## Installation
@@ -516,6 +522,15 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Wheel of fortune | on | once a day per person, free again at midnight |
 | Growth speed | Normal | Slow / Normal / Fast – how much growth each step needs (normal: hatching after about 3 chores, final form after about 2 months) |
 | Needs go down | Slowly | Not at all / Slowly / Normal – hunger, thirst, energy and mood; never below 10 %, paused during holidays |
+
+**Screen** (*Settings → Screen*)
+
+| Setting | Default | Meaning |
+|---|---|---|
+| Black screen when idle | off | the planner turns black after the time below without a tap and without motion |
+| Black after | 5 minutes | 1–120 minutes |
+| Display | Fully black | Fully black / Black with clock |
+| Motion sensors | – | motion, presence or occupancy sensors that wake the screen; empty = only a tap wakes it |
 
 **Week plan → Announcements on motion**
 

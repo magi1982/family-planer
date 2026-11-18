@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.17.2'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.18.0'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
@@ -6979,6 +6979,13 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('decay', 'select', 'Hunger & Co. sinken', 'Needs go down', 'Wie schnell Hunger, Durst, Energie und Laune sinken. Tierchen leiden nie (nie unter 10 %), in den Ferien steht alles still.', 'How fast hunger, thirst, energy and mood go down. Pets never suffer (never below 10 %), during holidays everything pauses.',
         { opts: [['off', { de: 'Gar nicht', en: 'Not at all' }], ['slow', { de: 'Langsam', en: 'Slowly' }], ['normal', { de: 'Normal', en: 'Normal' }]] }),
     ] },
+    { id: 'screen', icon: 'mdi:monitor-shimmer', label: { de: 'Bildschirm', en: 'Screen' }, fields: [
+      F('enabled', 'bool', 'Bildschirm schwarz bei Ruhe', 'Black screen when idle', 'Für das Tablet an der Wand: nach einigen Minuten ohne Tippen und ohne Bewegung wird der Planer schwarz. Bewegung oder ein Tipp weckt ihn sofort – der Weck-Tipp löst nichts aus. Tipp: Auto-Sperre des Tablets auf „Nie“ stellen.', 'For the tablet on the wall: after some minutes without a tap and without motion the planner turns black. Motion or a tap wakes it right away – the waking tap does nothing else. Tip: set the tablet\'s auto-lock to "Never".'),
+      F('minutes', 'num', 'Schwarz nach', 'Black after', 'Minuten ohne Tippen und ohne Bewegung.', 'Minutes without a tap and without motion.', { min: 1, max: 120, unit: { de: 'Minuten', en: 'minutes' } }),
+      F('style', 'select', 'Anzeige', 'Display', 'Ganz schwarz, oder schwarz mit einer kleinen, langsam wandernden Uhr.', 'Fully black, or black with a small, slowly moving clock.',
+        { opts: [['black', { de: 'Ganz schwarz', en: 'Fully black' }], ['clock', { de: 'Schwarz mit Uhr', en: 'Black with clock' }]] }),
+      F('motion', 'entities', 'Bewegungsmelder', 'Motion sensors', 'Meldet einer Bewegung, wird der Bildschirm wieder hell und bleibt es, solange Bewegung da ist. Leer = nur Tippen weckt.', 'When one reports motion, the screen lights up again and stays on while there is motion. Empty = only a tap wakes it.', { domain: 'binary_sensor', classes: ['motion', 'occupancy', 'presence'] }),
+    ] },
     { id: 'lists', icon: 'mdi:cart-outline', label: { de: 'Listen', en: 'Lists' }, fields: [
       F('optimize_time', 'time', 'Tägliche Optimierung um', 'Daily optimisation at', 'Ordnet Unbekanntes unter „Sonstiges“ neu ein.', 'Re-sorts unknown items from "Other".'),
       F('ai_task', 'entity', 'KI-Aufgabe (optional)', 'AI task (optional)', 'Ordnet auch Unbekanntes ein (OpenAI, Google, Ollama …).', 'Also sorts unknown items (OpenAI, Google, Ollama …).', { domain: 'ai_task' }),
@@ -6987,12 +6994,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     { id: 'status', icon: 'mdi:heart-pulse', label: { de: 'Status', en: 'Status' } },
   ];
   // tab order on the page
-  const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'pets', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'status'];
+  const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'pets', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'screen', 'status'];
   const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Münzen & Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', ontime: 'Pünktlich-Profi', volunteer: 'Freiwilligen-Champion', rescue: 'Retter in der Not', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', ontime: 'On-time pro', volunteer: 'Volunteer champion', rescue: 'Rescuer', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
   const AWS = { de: { none: 'Ohne Münzen', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
-  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder', pets: 'pets' };
+  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder', pets: 'pets', screen: 'screen' };
   // season events in the settings (keys from the server's catalogue)
   const SEV = { weihnachten: ['Advent & Weihnachten', 'Advent & Christmas'], samichlaus: ['Samichlaus', 'St. Nicholas'], heiligabend: ['Heiligabend', 'Christmas Eve'], weihnachtstag: ['Weihnachtstag', 'Christmas Day'], stephanstag: ['Stephanstag', 'Boxing Day'], winteranfang: ['Winteranfang', 'First day of winter'],
     silvester: ['Silvester', 'New Year\'s Eve'], neujahr: ['Neujahr', 'New Year'], berchtoldstag: ['Berchtoldstag', 'St. Berchtold\'s Day'], dreikoenig: ['Dreikönigstag', 'Epiphany'], winter: ['Winter', 'Winter'],
@@ -7755,6 +7762,68 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     if (store) store.listen(auto);
   }
   window.FPKIOSK = { attach, set, get on() { return on; } };
+})();
+
+// ---------------------------------------------------------------------------
+// Black screen when idle (wall tablet): after N minutes without a tap and without motion the planner turns black.
+// A motion sensor (Home Assistant state "on") or a tap wakes it at once; the waking tap does nothing else.
+// window.FPSCREEN.update(hass, snap) – called by every planer card on each update; one saver per page.
+// ---------------------------------------------------------------------------
+(() => {
+  if (window.FPSCREEN) return;
+  let cfg = { enabled: false, minutes: 5, style: 'black', motion: [] };
+  let last = Date.now(); let dark = false; let layer = null; let timer = null; let seen = {}; let moving = false;
+
+  const wake = () => { last = Date.now(); if (!dark) return; dark = false; if (layer) { layer.style.opacity = '0'; layer.style.pointerEvents = 'none'; } };
+  const clockHtml = () => { const d = new Date(); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+  const paint = () => {
+    if (!layer) return;
+    const c = layer.firstChild;
+    if (cfg.style === 'clock') {
+      c.textContent = clockHtml(); c.style.display = 'block';
+      // moves a little every minute, so nothing burns in
+      const m = new Date().getMinutes(); c.style.left = `${10 + (m * 37) % 70}%`; c.style.top = `${15 + (m * 23) % 60}%`;
+    } else c.style.display = 'none';
+  };
+  const sleep = () => {
+    if (dark) return; dark = true;
+    if (!layer) {
+      layer = document.createElement('div'); layer.id = 'fp-screen-off'; layer.setAttribute('aria-hidden', 'true');
+      layer.style.cssText = 'position:fixed;inset:0;background:#000;z-index:2147483600;opacity:0;pointer-events:none;transition:opacity 1.2s ease;touch-action:none';
+      const c = document.createElement('div');
+      c.style.cssText = 'position:absolute;transform:translate(-50%,-50%);color:#3a3a3a;font:300 64px/1 system-ui,sans-serif;letter-spacing:2px;transition:left 2s,top 2s';
+      layer.appendChild(c);
+      // the waking tap is swallowed here: nothing under the black layer is touched
+      const stop = (e) => { e.preventDefault(); e.stopPropagation(); wake(); };
+      ['pointerdown', 'touchstart', 'mousedown', 'click'].forEach((t) => layer.addEventListener(t, stop, { passive: false }));
+      document.body.appendChild(layer);
+    }
+    paint(); layer.style.pointerEvents = 'auto'; requestAnimationFrame(() => { layer.style.opacity = '1'; });
+  };
+  const tick = () => {
+    if (!cfg.enabled) { wake(); return; }
+    if (dark) { paint(); return; }
+    if (moving) { last = Date.now(); return; } // someone is there: stay on
+    if (Date.now() - last >= cfg.minutes * 60000) sleep();
+  };
+  // every tap or key counts as activity (capture: also taps inside cards)
+  ['pointerdown', 'keydown', 'wheel'].forEach((t) => window.addEventListener(t, () => { if (!dark) last = Date.now(); }, { capture: true, passive: true }));
+
+  const update = (hass, snap) => {
+    const c = snap && snap.screen_cfg;
+    if (c) cfg = c;
+    if (!cfg.enabled) { wake(); if (timer) { clearInterval(timer); timer = null; } return; }
+    if (!timer) { last = Date.now(); timer = setInterval(tick, 5000); }
+    // motion: a sensor that is "on" (or just switched on) wakes and keeps the screen awake
+    const states = (hass && hass.states) || {}; moving = false;
+    for (const id of cfg.motion || []) {
+      const st = states[id]; if (!st) continue;
+      const sig = `${st.state}|${st.last_changed}`;
+      if (st.state === 'on') { moving = true; if (seen[id] !== sig || !dark) wake(); }
+      seen[id] = sig;
+    }
+  };
+  window.FPSCREEN = { update, wake, _state: () => ({ dark, last, cfg }) };
 })();
 
 // ---------------------------------------------------------------------------
@@ -8604,7 +8673,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!INNER[this._cfg.view]) throw new Error('view: week | plan | lists | rewards | settings');
       this._sig = null; this._inner = null; this.innerHTML = ''; this._attach();
     }
-    set hass(h) { this._hass = h; this._attach(); if (this._inner && this._wrapped) this._inner.hass = STORE_VIEWS.includes(this._cfg.view) ? h : this._wrap(); }
+    set hass(h) { this._hass = h; this._attach(); if (window.FPSCREEN && this._store) window.FPSCREEN.update(h, this._store.snap); if (this._inner && this._wrapped) this._inner.hass = STORE_VIEWS.includes(this._cfg.view) ? h : this._wrap(); }
     // to-do window of the planer (opened from the button in the top bar of the week view)
     _todoWin(lang) {
       if (!this._win || this._win.parentNode !== this) {
@@ -8657,6 +8726,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     _sync() {
       const s = this._store.snap;
+      if (window.FPSCREEN) window.FPSCREEN.update(this._hass, s);
       if (!s) { if (this._store.err) this.innerHTML = `<ha-card style="padding:16px">Family Planer: ${this._store.err}</ha-card>`; return; }
       const lang = LANG(this._hass, this._cfg, this._store); const view = this._cfg.view;
       const mod = view === 'lists' ? 'lists' : view === 'settings' ? null : 'week';

@@ -171,6 +171,13 @@
       F('decay', 'select', 'Hunger & Co. sinken', 'Needs go down', 'Wie schnell Hunger, Durst, Energie und Laune sinken. Tierchen leiden nie (nie unter 10 %), in den Ferien steht alles still.', 'How fast hunger, thirst, energy and mood go down. Pets never suffer (never below 10 %), during holidays everything pauses.',
         { opts: [['off', { de: 'Gar nicht', en: 'Not at all' }], ['slow', { de: 'Langsam', en: 'Slowly' }], ['normal', { de: 'Normal', en: 'Normal' }]] }),
     ] },
+    { id: 'screen', icon: 'mdi:monitor-shimmer', label: { de: 'Bildschirm', en: 'Screen' }, fields: [
+      F('enabled', 'bool', 'Bildschirm schwarz bei Ruhe', 'Black screen when idle', 'Für das Tablet an der Wand: nach einigen Minuten ohne Tippen und ohne Bewegung wird der Planer schwarz. Bewegung oder ein Tipp weckt ihn sofort – der Weck-Tipp löst nichts aus. Tipp: Auto-Sperre des Tablets auf „Nie“ stellen.', 'For the tablet on the wall: after some minutes without a tap and without motion the planner turns black. Motion or a tap wakes it right away – the waking tap does nothing else. Tip: set the tablet\'s auto-lock to "Never".'),
+      F('minutes', 'num', 'Schwarz nach', 'Black after', 'Minuten ohne Tippen und ohne Bewegung.', 'Minutes without a tap and without motion.', { min: 1, max: 120, unit: { de: 'Minuten', en: 'minutes' } }),
+      F('style', 'select', 'Anzeige', 'Display', 'Ganz schwarz, oder schwarz mit einer kleinen, langsam wandernden Uhr.', 'Fully black, or black with a small, slowly moving clock.',
+        { opts: [['black', { de: 'Ganz schwarz', en: 'Fully black' }], ['clock', { de: 'Schwarz mit Uhr', en: 'Black with clock' }]] }),
+      F('motion', 'entities', 'Bewegungsmelder', 'Motion sensors', 'Meldet einer Bewegung, wird der Bildschirm wieder hell und bleibt es, solange Bewegung da ist. Leer = nur Tippen weckt.', 'When one reports motion, the screen lights up again and stays on while there is motion. Empty = only a tap wakes it.', { domain: 'binary_sensor', classes: ['motion', 'occupancy', 'presence'] }),
+    ] },
     { id: 'lists', icon: 'mdi:cart-outline', label: { de: 'Listen', en: 'Lists' }, fields: [
       F('optimize_time', 'time', 'Tägliche Optimierung um', 'Daily optimisation at', 'Ordnet Unbekanntes unter „Sonstiges“ neu ein.', 'Re-sorts unknown items from "Other".'),
       F('ai_task', 'entity', 'KI-Aufgabe (optional)', 'AI task (optional)', 'Ordnet auch Unbekanntes ein (OpenAI, Google, Ollama …).', 'Also sorts unknown items (OpenAI, Google, Ollama …).', { domain: 'ai_task' }),
@@ -179,12 +186,12 @@
     { id: 'status', icon: 'mdi:heart-pulse', label: { de: 'Status', en: 'Status' } },
   ];
   // tab order on the page
-  const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'pets', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'status'];
+  const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'pets', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'screen', 'status'];
   const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Münzen & Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', ontime: 'Pünktlich-Profi', volunteer: 'Freiwilligen-Champion', rescue: 'Retter in der Not', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', ontime: 'On-time pro', volunteer: 'Volunteer champion', rescue: 'Rescuer', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
   const AWS = { de: { none: 'Ohne Münzen', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
-  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder', pets: 'pets' };
+  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder', pets: 'pets', screen: 'screen' };
   // season events in the settings (keys from the server's catalogue)
   const SEV = { weihnachten: ['Advent & Weihnachten', 'Advent & Christmas'], samichlaus: ['Samichlaus', 'St. Nicholas'], heiligabend: ['Heiligabend', 'Christmas Eve'], weihnachtstag: ['Weihnachtstag', 'Christmas Day'], stephanstag: ['Stephanstag', 'Boxing Day'], winteranfang: ['Winteranfang', 'First day of winter'],
     silvester: ['Silvester', 'New Year\'s Eve'], neujahr: ['Neujahr', 'New Year'], berchtoldstag: ['Berchtoldstag', 'St. Berchtold\'s Day'], dreikoenig: ['Dreikönigstag', 'Epiphany'], winter: ['Winter', 'Winter'],

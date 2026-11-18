@@ -116,6 +116,7 @@ body = "\n".join([
     themify((src / "settings.js").read_text()),
     (src / "pin.js").read_text(),
     (src / "kiosk.js").read_text(),
+    (src / "screen.js").read_text(),
     (src / "confetti.js").read_text(),
     (src / "pets_ui.js").read_text(),
     (src / "bridge.js").read_text(),

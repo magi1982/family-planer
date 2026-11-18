@@ -893,3 +893,4 @@ Wunsch: kommt jemand zum Tablet (Bewegungsmelder, z. B. Shelly BLU Motion), geht
 - Einstellungen mit Beschreibung: Schoner an/aus, nach wie vielen Minuten (2/5/10/30), Art (Uhr / ganz schwarz), Bewegungsmelder.
 - Android mit Fully Kiosk: dort kann der Bildschirm wirklich ein- und ausgeschaltet werden (eigene Integration) – optional später: „Fully-Kiosk-Gerät“ wählen.
 - Offen: Shelly BLU Motion ist in Home Assistant noch nicht sichtbar (kein Bluetooth/BTHome eingerichtet).
+- **Umgesetzt (18.11., 0.18.0):** Einstellungen → Bildschirm: an/aus, schwarz nach X Minuten (Standard 5), ganz schwarz oder mit wandernder Uhr, Bewegungsmelder. Weck-Tipp löst nichts aus; solange Bewegung gemeldet wird, bleibt er an. Fully Kiosk (echtes Display aus) bleibt Idee.

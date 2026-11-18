@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.18.0 – unreleased
+### Added
+- **Black screen when idle** for wall tablets (*Settings → Screen*, off by default): after a set time without a tap and without motion the planner turns black (optionally with a small moving clock). Motion sensors or a tap wake it; the waking tap does nothing else. Tests cover the settings and the logic.
+
 ## 0.17.2 – 2026-11-18
 ### Fixed
 - **Pages missing in a dashboard stay inside the dashboard:** statistics and pets open right below the navigation instead of switching to the sidebar panel (0.17.1), so kiosk mode and guided access keep working.

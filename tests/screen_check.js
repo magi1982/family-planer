@@ -1,0 +1,27 @@
+// Node check of frontend_src/screen.js with tiny DOM stubs and a fake clock.
+const fs = require('fs'); const path = require('path');
+let now = 1e12; const intervals = []; const listeners = {};
+const el = () => ({ style: {}, children: [], firstChild: null, ev: {}, setAttribute() {}, appendChild(c) { this.children.push(c); if (!this.firstChild) this.firstChild = c; }, addEventListener(t, f) { this.ev[t] = f; } });
+global.Date = class extends Date { static now() { return now; } constructor(...a) { super(...(a.length ? a : [now])); } };
+global.window = { addEventListener: (t, f) => { listeners[t] = f; } };
+global.document = { createElement: el, body: el() };
+global.setInterval = (f) => { intervals.push(f); return intervals.length; };
+global.clearInterval = () => { intervals.length = 0; };
+global.requestAnimationFrame = (f) => f();
+eval(fs.readFileSync(path.join(__dirname, '../frontend_src/screen.js'), 'utf8'));
+const S = window.FPSCREEN; const run = () => intervals.forEach((f) => f());
+const ok = (c, m) => { if (!c) { console.error('FAIL', m); process.exit(1); } };
+const snap = { screen_cfg: { enabled: true, minutes: 5, style: 'black', motion: ['binary_sensor.m'] } };
+const hass = (st, lc) => ({ states: { 'binary_sensor.m': { state: st, last_changed: lc } } });
+S.update(hass('off', 'a'), snap); now += 4 * 60000; run(); ok(!S._state().dark, 'not dark before 5 min');
+listeners.pointerdown(); now += 4 * 60000; run(); ok(!S._state().dark, 'tap resets the timer');
+now += 2 * 60000; run(); ok(S._state().dark, 'dark after 5 min idle');
+const layer = document.body.children[0]; ok(layer.style.pointerEvents === 'auto', 'black layer catches taps');
+let stopped = false; layer.ev.pointerdown({ preventDefault() {}, stopPropagation() { stopped = true; } });
+ok(!S._state().dark && stopped, 'tap on black wakes and is swallowed');
+now += 6 * 60000; run(); ok(S._state().dark, 'dark again');
+S.update(hass('on', 'b'), snap); ok(!S._state().dark, 'motion wakes');
+now += 30 * 60000; run(); ok(!S._state().dark, 'stays on while motion is on');
+S.update(hass('off', 'c'), snap); now += 6 * 60000; run(); ok(S._state().dark, 'dark after motion ended');
+S.update(hass('off', 'c'), { screen_cfg: { ...snap.screen_cfg, enabled: false } }); ok(!S._state().dark, 'switching off wakes');
+console.log('screen ok');

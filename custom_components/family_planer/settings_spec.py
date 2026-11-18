@@ -35,7 +35,7 @@ LANGUAGES = ("auto", "de", "en")
 MODES = ("fair", "per_chore")
 MODULES = ("week", "lists")
 TODO_SIZES = ("none", "s", "m", "l")
-SECTIONS = ("general", "vacation", "points", "announce", "lists_settings", "todos", "seasons", "sonder", "pets")
+SECTIONS = ("general", "vacation", "points", "announce", "lists_settings", "todos", "seasons", "sonder", "pets", "screen")
 VIEWS = ("today", "week")
 
 
@@ -158,6 +158,27 @@ def clean_pets(raw) -> dict:
 
 def pets(data: dict, cur: dict) -> tuple[dict, set[str]]:
     return {"pets": clean_pets({**cur, **{k: v for k, v in (data or {}).items() if k in PETS_DEFAULT}})}, set()
+
+
+SCREEN_STYLES = ("black", "clock")
+SCREEN_DEFAULT = {"enabled": False, "minutes": 5, "style": "black", "motion": []}
+
+
+def clean_screen(raw) -> dict:
+    """Screen saver: black after some minutes without touch or motion; a motion sensor or a tap wakes it."""
+    raw = raw if isinstance(raw, dict) else {}
+    d = SCREEN_DEFAULT
+    try:
+        minutes = int(raw.get("minutes", d["minutes"]))
+    except (TypeError, ValueError):
+        minutes = d["minutes"]
+    return {"enabled": bool(raw.get("enabled", d["enabled"])), "minutes": max(1, min(120, minutes)),
+            "style": raw.get("style") if raw.get("style") in SCREEN_STYLES else d["style"],
+            "motion": validate.entities(raw.get("motion", d["motion"]), ("binary_sensor",), limit=10)}
+
+
+def screen(data: dict, cur: dict) -> tuple[dict, set[str]]:
+    return {"screen": clean_screen({**cur, **{k: v for k, v in (data or {}).items() if k in SCREEN_DEFAULT}})}, set()
 
 
 def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list,
