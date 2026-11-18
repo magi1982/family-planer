@@ -3828,9 +3828,9 @@ class LoxWochenplanerCard extends FpBase {
       .bin .b2{display:flex;align-items:center;gap:4px;min-width:0}.bin .bm{display:flex;flex-wrap:wrap;gap:3px 4px;min-width:0;flex:1 1 auto}
       .bin .br{display:flex;align-items:center;gap:4px;margin:0 0 0 auto;flex:none}.bin .ptr{padding:0 6px 0 4px;line-height:18px}.bin .ptr .fpcoin{margin:0 2px 0 0}
       .btn > .cb{display:none}.btn{padding:7px 9px}
-      .stt{width:26px;height:18px;border-radius:9px;border:1.5px dashed #6a6a6a;box-sizing:border-box;flex:none;position:relative;display:inline-block}
-      .btn.done .stt{background:#5bbf4a;border:none}.btn.done .stt::after{content:'';position:absolute;left:10px;top:3px;width:5px;height:9px;border:solid #102a0c;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
-      .btn.tdo .stt{border-color:rgba(79,163,224,.8)}.btn.spc .stt{border-color:rgba(245,197,66,.8)}.btn.arm .stt{background:#e0a84f;border:none}
+      .stt{display:none;width:20px;height:20px;border-radius:50%;background:#5bbf4a;box-sizing:border-box;flex:none;position:relative}
+      .btn.done .stt{display:inline-block}.btn.done .stt::after{content:'';position:absolute;left:7px;top:3.5px;width:5px;height:9px;border:solid #102a0c;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+      .btn.arm .stt{display:inline-block;background:#e0a84f}
       .bin .bm .tag,.bin .bm .due,.bin .bm .age{font-size:10.5px;line-height:16px;padding:0 6px}
       .bl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;flex:1 1 auto}.br{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px;justify-content:flex-end;flex:0 1 auto;min-width:0;margin-left:auto}
       .bx{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -5234,9 +5234,9 @@ class LoxWochenplanerCard extends FpBase {
       .bin .b2{display:flex;align-items:center;gap:4px;min-width:0}.bin .bm{display:flex;flex-wrap:wrap;gap:3px 4px;min-width:0;flex:1 1 auto}
       .bin .br{display:flex;align-items:center;gap:4px;margin:0 0 0 auto;flex:none}.bin .ptr{padding:0 6px 0 4px;line-height:18px}.bin .ptr .fpcoin{margin:0 2px 0 0}
       .btn > .cb{display:none}.btn{padding:7px 9px}
-      .stt{width:26px;height:18px;border-radius:9px;border:1.5px dashed #6a6a6a;box-sizing:border-box;flex:none;position:relative;display:inline-block}
-      .btn.done .stt{background:#5bbf4a;border:none}.btn.done .stt::after{content:'';position:absolute;left:10px;top:3px;width:5px;height:9px;border:solid #102a0c;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
-      .btn.tdo .stt{border-color:rgba(79,163,224,.8)}.btn.spc .stt{border-color:rgba(245,197,66,.8)}.btn.arm .stt{background:#e0a84f;border:none}
+      .stt{display:none;width:20px;height:20px;border-radius:50%;background:#5bbf4a;box-sizing:border-box;flex:none;position:relative}
+      .btn.done .stt{display:inline-block}.btn.done .stt::after{content:'';position:absolute;left:7px;top:3.5px;width:5px;height:9px;border:solid #102a0c;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+      .btn.arm .stt{display:inline-block;background:#e0a84f}
       .bin .bm .tag,.bin .bm .due,.bin .bm .age{font-size:10.5px;line-height:16px;padding:0 6px}
       .bl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;flex:1 1 auto}.br{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px;justify-content:flex-end;flex:0 1 auto;min-width:0;margin-left:auto}
       .bx{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
