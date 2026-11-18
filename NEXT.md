@@ -869,3 +869,9 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - Card ribbons: one split capsule – reliability left, level right (tier colour).
 - Currency names (decided): **Münzen** = planner & rewards only (page "Münzen & Belohnungen", chores, statistics, settings). **Punkte** = Tierchen only (Tierchen page shows only ⭐ Punkte, never Münzen). Glücksrad prizes are Punkte. Tree requirements count "Wachstum", never "Taler".
 - Real release: rename the reward currency Punkte → Münzen in rewards.js, stats.js, settings.js, todos.js, special.js, ui_week.js, confetti.js (DE + EN "coins"); coin without letter must not show a star (⭐ belongs to the Tierchen) – use a plain gold core.
+- Tierchen page structure (decided): tabs Garten · Aktuelles Tierchen (Punkte einsetzen, Entwicklungsbaum, **Entwickeln** as main button, pills) · Pflegen (care only, pet stands in the real garden of the banner, same season) · Inventar (own tab) · Sammlung · Tierbuch · Statistik. Sammlung/Tierbuch open the same pet view for any owned pet.
+- Entwicklungs-Pille: always evolves one whole stage right away (any stage, also hatching).
+- Pets get a name from the child: name big, kind small behind it ("Katze · aktiv"); max 16 chars, plain text only.
+- Sammlung card: stage once (top), name, line / special / days together, growth bar without text. No weight/height anywhere.
+- Same building blocks everywhere: frame with season band (Planer, Listen, Belohnungen, **Statistik – band missing today, bug**, Tierchen), tiles = #1c2027, radius 12, colour line `inset 0 3px 0` (planer column look) – rewards person cards (today left border), stats tiles/sections, list sections. Avatar + pet identical everywhere (64/60, right −31, bottom −17), capsule reliability | level identical.
+- Chore tick: no coin flying to the avatar; the earned Münzen/Punkte rise slowly above the chore (≈4 s).
