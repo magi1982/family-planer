@@ -838,3 +838,13 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 ## #67 Symmetric chore buttons + statistics polish (preview on branch preview-cards)
 - Button = grid [tick] [title + chips below] [points], everything vertically centred; points pill compact (coin 11 px). Short titles: one row, ~10 % less height; long titles: full text, a bit taller.
 - Statistik: "1 Tage" → "1 Tag"; hide adult columns without chores in "Welche Ämtli"; "Wer hat was gemacht" card has a big empty area (align heights / put legend at top); "To-dos abgehakt 0" although to-dos were done → check counting; reliability cards: a person without chores → show "keine Ämtli" instead of empty dots; same circle size for all counts in a short period → scale per period.
+
+## #68 Avatar extras: why it's gone + "new" badge (for 0.16.5)
+- Avatar builder: extras that are no longer available stay visible as a greyed tile with a short reason:
+  season extra → "Nur im Herbst – kommt wieder ab 1. Sept."; award extra → "Gehört zum Pokal «Krone der Woche» – zurückholen: Woche mit allen Ämtli".
+  If the child was wearing it, the builder shows once: "Dein Pilzhut ist weg, weil der Herbst vorbei ist."
+- Red round badge (iOS style) on the settings button in the header with the number of new extras since the person last opened the builder (per person; who is "me" = the person tile last opened on this device, else sum over children).
+  New = season extras that just started, extras unlocked by a new award. Opening the person in the builder marks them as seen.
+- Inside the builder: a small red dot on the tab (Kopf, Begleiter, Saison …) and on each new tile.
+- Setting (Einstellungen → Allgemein): "Neu-Hinweis am Einstellungen-Knopf" on/off, default on.
+- Stored server-side per person (seen list), so it works on every tablet and for other installers without setup.
