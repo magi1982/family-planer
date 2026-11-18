@@ -45,4 +45,4 @@ jobs:
         with:
           node-version: "20"
       - run: npm i --no-save eslint@9 eslint-plugin-no-unsanitized@4
-      - run: npx eslint -c frontend_src/eslint.security.mjs custom_components/family_planer/frontend/family-planer-cards.js
+      - run: npx eslint -c frontend_src/eslint.security.mjs custom_components/family_planer/frontend/family-planer-cards.js custom_components/family_planer/frontend/family-planer-pets.js

@@ -10,7 +10,9 @@ export default [{
     globals: { window: "readonly", document: "readonly", customElements: "readonly", HTMLElement: "readonly",
       localStorage: "readonly", location: "readonly", history: "readonly", CustomEvent: "readonly", Event: "readonly",
       URL: "readonly", Image: "readonly", setTimeout: "readonly", clearTimeout: "readonly", setInterval: "readonly",
-      clearInterval: "readonly", getComputedStyle: "readonly", console: "readonly" },
+      clearInterval: "readonly", getComputedStyle: "readonly", console: "readonly",
+      requestAnimationFrame: "readonly", ResizeObserver: "readonly", IntersectionObserver: "readonly", performance: "readonly",
+      MutationObserver: "readonly", XMLSerializer: "readonly", CSSStyleSheet: "readonly", CSS: "readonly" },
   },
   plugins: { "no-unsanitized": nounsanitized },
   rules: {

@@ -88,8 +88,19 @@ for table, name in ((WEEK, "week"), (PLAN, "plan")):
 if missing:
     raise SystemExit("phrases not found:\n" + "\n".join(f"  [{n}] {d[:90]}" for n, d in missing))
 
+VERSION = re.search(r'VERSION = "([^"]+)"', (src.parent / "custom_components/family_planer/const.py").read_text()).group(1)
+PETS_FILE = "family-planer-pets.js"
+PET_LIBS = ("pets4", "motion", "header", "world", "tree", "icons", "care", "wheel")
+# Tierchen graphics live in their own file and are loaded only when pets are switched on (keeps the planer fast)
+PETS_LOADER = (f"window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => {{"
+               f" if (window.FPPETS) {{ res(window.FPPETS); return; }}"
+               f" const s = document.createElement('script'); s.src = '/family_planer_static/{PETS_FILE}?v={VERSION}';"
+               f" s.onload = () => res(window.FPPETS); s.onerror = () => {{ window.__fpPetsP = null; rej(new Error('pets')); }};"
+               f" document.head.appendChild(s); }}));")
+
 body = "\n".join([
     "// Family Planer cards – built by frontend_src/build.py, do not edit",
+    PETS_LOADER,
     (src / "season.js").read_text(),
     (src / "taps.js").read_text(),
     (src / "coin.js").read_text(),
@@ -109,8 +120,14 @@ body = "\n".join([
     (src / "bridge.js").read_text(),
 ])
 out.parent.mkdir(parents=True, exist_ok=True)
+pets_out = out.parent / PETS_FILE
 for old in out.parent.glob("*.js"):
-    if old != out:
+    if old not in (out, pets_out):
         old.unlink()
 out.write_text(body)
-print(out.name, len(body))
+pets_body = "\n".join(["// Family Planer Tierchen graphics – built by frontend_src/build.py, do not edit"]
+                       + [(src / "pets" / f"{n}.js").read_text() for n in PET_LIBS]
+                       + ["window.FPPETS = { P4: window.P4, M: window.FPMOTION, HEADER: window.FPHEADER, WORLD: window.FPWORLD,"
+                          " TREE: window.FPTREE, ICO: window.FPICO, CARE: window.FPCARE, WHEEL: window.FPWHEEL };"])
+pets_out.write_text(pets_body)
+print(out.name, len(body), pets_out.name, len(pets_body))

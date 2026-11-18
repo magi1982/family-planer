@@ -35,3 +35,4 @@ jobs:
           node-version: "20"
       - run: python frontend_src/build.py && git diff --exit-code custom_components/family_planer/frontend
       - run: node --check custom_components/family_planer/frontend/family-planer-cards.js
+      - run: node --check custom_components/family_planer/frontend/family-planer-pets.js
