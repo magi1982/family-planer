@@ -894,3 +894,10 @@ Wunsch: kommt jemand zum Tablet (Bewegungsmelder, z. B. Shelly BLU Motion), geht
 - Android mit Fully Kiosk: dort kann der Bildschirm wirklich ein- und ausgeschaltet werden (eigene Integration) – optional später: „Fully-Kiosk-Gerät“ wählen.
 - Offen: Shelly BLU Motion ist in Home Assistant noch nicht sichtbar (kein Bluetooth/BTHome eingerichtet).
 - **Umgesetzt (18.11., 0.18.0):** Einstellungen → Bildschirm: an/aus, schwarz nach X Minuten (Standard 5), ganz schwarz oder mit wandernder Uhr, Bewegungsmelder. Weck-Tipp löst nichts aus; solange Bewegung gemeldet wird, bleibt er an. Fully Kiosk (echtes Display aus) bleibt Idee.
+
+### 63. Mehr Tierchen: 10 statt 5 nach 3 Monaten (18.11.)
+Heute: ein neues Ei gibt es nur, wenn das aktive Tierchen „Gross“ wird (normal 450 Punkte) → rund alle 450 Punkte ein Tier, im Beispiel 5 in 3 Monaten.
+- **A – Ei schon bei „Jung“** (150 Punkte): ~3× so viele Eier (>10), aber viele bleiben klein, wenn das Kind gleich zum neuen wechselt.
+- **B – Gross bleibt, dazu zwei Extra-Wege (Vorschlag):** Glücksrad-Feld „Ei“ (2 von 24 Feldern, ~1× pro 12 Tage → ~7 in 3 Monaten, Ei nur wenn noch kein ungeschlüpftes Ei wartet) und ein Bonus-Ei für eine 7-Tage-Serie (alle Ämtli 7 Tage am Stück). Zusammen ~10–12 in 3 Monaten, die Tiere wachsen trotzdem gross.
+- **Einstellung „Neue Eier“:** selten (nur Gross) / normal (Gross + Glücksrad) / oft (Gross + Glücksrad + Serie) – mit Beschreibung.
+- Obergrenze bleibt: höchstens 1 wartendes Ei gleichzeitig, Sammlung max. 42 Arten.

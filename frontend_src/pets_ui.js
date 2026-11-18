@@ -21,7 +21,7 @@
       kpi: { pets: 'Tierchen gesammelt', endf: 'Endformen', evos: 'Entwicklungen', days: 'Tage mit {n}', fed: 'Mal gefüttert', spins: 'Mal Glücksrad' },
       wheel: 'Glücksrad', spin: 'Drehen!', spun: 'Heute schon gedreht – wieder ab Mitternacht', won: 'Gewonnen!', inInv: '📦 Liegt jetzt in deinem Inventar.', daily: 'Dazu: Futter und Wasser für deine Tierchen.',
       chooseWay: 'Entwickeln – wähle den Weg', ways: 'Dein Tierchen ist bereit! Wähle einen von {n} Wegen. Das kann man nicht rückgängig machen.', oneWay: 'Dein Tierchen ist bereit! Hier gibt es nur einen Weg.', pick: 'Ja, {n} wählen!',
-      hatching: 'Dein Ei schlüpft!', hatched: 'Es ist ein {n}! Es wohnt jetzt in deinem Garten.', foggy: '🌫️ Was nach {n} kommt, bleibt geheim – grün ist dein Weg bis jetzt.', nowLooks: 'So sieht es jetzt aus',
+      hatching: 'Dein Ei schlüpft!', hatched: '{n}! Es wohnt jetzt in deinem Garten.', foggy: '🌫️ Was nach {n} kommt, bleibt geheim – grün ist dein Weg bis jetzt.', nowLooks: 'So sieht es jetzt aus',
       prize: { grow: ['Wachstumspille', 'Für ein Tierchen deiner Wahl.'], extra: ['Haustier-Extra', 'Leckerli, Spielzeug, Energydrink, Happy-Pille …'], food: ['Futterpaket', '3 Futter und 3 Wasser.'], p20: ['+20 Punkte', 'Direkt zu deinen Tierchen-Punkten.'],
         dev: ['Entwicklungs-Pille', 'Bringt ein Tierchen sofort eine ganze Stufe weiter.'], again: ['Nochmals drehen!', 'Du darfst gleich noch einmal.'], star: ['Sternfeld', 'Fabelwesen-Ei, Artefakt oder Jackpot +100.'],
         fabel_egg: ['Fabelwesen-Ei!', 'Ein ganz besonderes Ei liegt jetzt in deiner Sammlung.'], artefact: ['Artefakt!', 'Etwas Seltenes für deine Tierchen.'], jackpot: ['Jackpot +100 Punkte', 'Direkt zu deinen Tierchen-Punkten.'] },
@@ -44,7 +44,7 @@
       kpi: { pets: 'Pets collected', endf: 'Final forms', evos: 'Evolutions', days: 'Days with {n}', fed: 'Times fed', spins: 'Wheel spins' },
       wheel: 'Wheel', spin: 'Spin!', spun: 'Already spun today – again after midnight', won: 'You won!', inInv: '📦 It is in your inventory now.', daily: 'Plus: food and water for your pets.',
       chooseWay: 'Evolve – choose the way', ways: 'Your pet is ready! Choose one of {n} ways. This cannot be undone.', oneWay: 'Your pet is ready! There is only one way here.', pick: 'Yes, choose {n}!',
-      hatching: 'Your egg hatches!', hatched: 'It is a {n}! It lives in your garden now.', foggy: '🌫️ What comes after {n} stays secret – green is your way so far.', nowLooks: 'This is how it looks now',
+      hatching: 'Your egg hatches!', hatched: 'A {n}! It lives in your garden now.', foggy: '🌫️ What comes after {n} stays secret – green is your way so far.', nowLooks: 'This is how it looks now',
       prize: { grow: ['Growth pill', 'For a pet of your choice.'], extra: ['Pet extra', 'Treat, toy, energy drink, happy pill …'], food: ['Food pack', '3 food and 3 water.'], p20: ['+20 points', 'Straight to your pet points.'],
         dev: ['Evolution pill', 'Takes a pet a whole step further at once.'], again: ['Spin again!', 'You may spin once more.'], star: ['Star field', 'Fable egg, artefact or jackpot +100.'],
         fabel_egg: ['Fable egg!', 'A very special egg is in your collection now.'], artefact: ['Artefact!', 'Something rare for your pets.'], jackpot: ['Jackpot +100 points', 'Straight to your pet points.'] },
@@ -87,7 +87,7 @@
   const toast = (host, text) => { const d = document.createElement('div'); d.className = 'pptoast'; d.textContent = text; host.appendChild(d); setTimeout(() => d.remove(), 2800); };
 
   // ------------------------------------------------------------- a popup (own shadow root on the body, closes on ✕ or outside)
-  const MODAL_CSS = `:host{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(5,7,10,.72);font-family:var(--fp-font,system-ui,sans-serif)}
+  const MODAL_CSS = `/* hatching and evolving: the same dark stage with a soft light as on the pet page */.spot2{background:radial-gradient(ellipse 40% 10% at 50% 93%,color-mix(in srgb,var(--tc) 40%,transparent),transparent 70%),radial-gradient(circle at 50% 52%,color-mix(in srgb,var(--tc) 12%,transparent),transparent 60%)!important}:host{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:rgba(5,7,10,.72);font-family:var(--fp-font,system-ui,sans-serif)}
     .box{position:relative;background:#171a20;color:#eef1f5;border:1px solid #2f3541;border-radius:16px;padding:16px;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
     .box::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--mc,#F5C542)}
     h3{margin:0 40px 10px 0;font-size:17px}.x{position:absolute;right:10px;top:10px;width:34px;height:34px;border-radius:9px;border:1px solid #2f3541;background:#2c323d;color:#eef1f5;font-size:16px;cursor:pointer}
@@ -141,7 +141,7 @@
     modal(t.chooseWay, `<p class="hint">${opts.length > 1 ? fmt(t.ways, { n: opts.length }) : t.oneWay}</p><div class="eopts">${opts.map((o, i) => `<button class="eo" data-i="${i}" style="--tc:${THC[o.theme] || '#FFE27A'}">${L().P4.svg(p.kind, o.st, 'froh', { noShadow: 1, ...TR.look(o) })}<b>${esc(o.name)}</b>${o.theme ? `<small>${esc(TR.THEME_TXT[o.theme] || '')}</small>` : ''}</button>`).join('')}</div><div class="econf"></div>`, (root, close) => {
       root.querySelectorAll('.eo').forEach((b) => b.addEventListener('click', () => {
         const o = opts[+b.dataset.i]; root.querySelectorAll('.eo').forEach((x) => x.classList.toggle('on', x === b));
-        const cf = root.querySelector('.econf'); cf.innerHTML = `<button class="okb go">${esc(fmt(t.pick, { n: o.name }))}</button><div class="cbox3"></div>`;
+        const cf = root.querySelector('.econf'); cf.innerHTML = `<button class="okb go">${esc(fmt(t.pick, { n: o.name }))}</button><div class="cbox3 spot2" style="--tc:${THC[o.theme] || '#FFE27A'}"></div>`;
         cf.querySelector('.okb').addEventListener('click', async () => {
           const look = TR.look(o); cf.querySelector('.okb').remove();
           try { await call(store, pid, 'evolve', { pet: id, look, name: String(o.name || '').slice(0, 24) }); } catch (e) { cf.insertAdjacentText('afterbegin', errMsg(t, e)); return; }
@@ -153,9 +153,11 @@
   };
   const openHatch = async (store, pid, id, after) => {
     await load(); const t = T(store.snap); const p = store.snap.pets[pid].pets[id];
-    modal(t.hatching, '<div class="cbox3" style="margin:auto"></div><p class="hint" style="text-align:center;font-size:14px">…</p>', async (root) => {
-      const cr = new (L().CARE.Care)(root.querySelector('.cbox3'), p.kind || eggKind(id, p), 'baby', { noBars: 1 }); cr.run('schluepfen');
+    const pr = (store.snap.persons || []).find((x) => x.id === pid) || {};
+    modal(t.hatching, `<div class="cbox3 spot2" style="margin:auto;--tc:${pcol(pr)}"></div><p class="hint" style="text-align:center;font-size:14px">…</p>`, async (root) => {
+      // the server decides the animal first, so the right one comes out of the egg
       let res; try { res = await call(store, pid, 'hatch', { pet: id }); } catch (e) { root.querySelector('.hint').textContent = errMsg(t, e); return; }
+      const cr = new (L().CARE.Care)(root.querySelector('.cbox3'), res.kind || p.kind || eggKind(id, p), 'baby', { noBars: 1 }); cr.run('schluepfen');
       setTimeout(() => { root.querySelector('.hint').textContent = fmt(t.hatched, { n: kindName(res.kind) }); if (after) after(); }, 3200);
     });
   };
