@@ -845,6 +845,6 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
   If the child was wearing it, the builder shows once: "Dein Pilzhut ist weg, weil der Herbst vorbei ist."
 - Red round badge (iOS style) on the settings button in the header with the number of new extras since the person last opened the builder (per person; who is "me" = the person tile last opened on this device, else sum over children).
   New = season extras that just started, extras unlocked by a new award. Opening the person in the builder marks them as seen.
-- Inside the builder: a small red dot on the tab (Kopf, Begleiter, Saison …) and on each new tile.
+- Red dots on every level, so no child has to search: settings button in the header (total) → each person tile in the builder (only the children who got something new, with their count) → each tab (Kopf, Kleidung, Begleiter, Effekte, Saison …) → each new item tile.
 - Setting (Einstellungen → Allgemein): "Neu-Hinweis am Einstellungen-Knopf" on/off, default on.
 - Stored server-side per person (seen list), so it works on every tablet and for other installers without setup.
