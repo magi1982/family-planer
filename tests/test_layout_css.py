@@ -32,3 +32,11 @@ def test_person_columns_wrap_on_small_screens():
 def test_nav_hides_buttons_without_view_unless_editing():
     assert "_editing()" in NAV
     assert "if (miss && !this._editing()) return '';" in NAV
+
+
+def test_unicorn_story_always_has_a_rainbow():
+    taps = (Path(__file__).parents[1] / "frontend_src/taps.js").read_text()
+    season = (Path(__file__).parents[1] / "frontend_src/season.js").read_text()
+    # the scene marks its rainbow; story 49 brings its own one and drops it only if the scene shows one
+    assert 'class="rbw"' in season
+    assert 'class="rb49 needrb"' in taps and "querySelectorAll('.needrb')" in taps

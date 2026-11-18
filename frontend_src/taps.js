@@ -344,14 +344,16 @@
     + `<circle cx="33" cy="-26" r="1.4" fill="#1d1d1d"/><circle cx="33.5" cy="-26.5" r=".4" fill="#fff"/><path d="M34 -23.5 q1.6 .6 2.6 -.4" stroke="#1d1d1d" stroke-width=".5" fill="none"/>`
     + `<path d="M24 -30 q-6 4 -8 10 q-2 6 -6 10 M22 -28 q-4 6 -2 12" stroke="#FF7AB6" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M25 -30 q-8 6 -10 14" stroke="#B07CFF" stroke-width="2" fill="none"/><path d="M26 -30 q-6 8 -4 16" stroke="#5CE1E6" stroke-width="1.6" fill="none"/></g>`;
   add({ n: 49, big: true, t: 'Einhorn mit Glitzer-Pups', scene: 'Teilweise bewölkt (mit Regenbogen)', where: 'den Regenbogen', dur: 22,
-    g: `<g class="uc49"><g class="ucr"><g class="ucf"><g transform="scale(.66)">${uni('un49')}</g></g></g></g>`
+    g: `<g class="rb49 needrb">${[['#ff5a5a', 52], ['#ffb23d', 47], ['#ffe94d', 42], ['#55d16b', 37], ['#4aa8ff', 32], ['#8f6bff', 27]].map(([c, rr]) => `<path d="M${222 - rr * 2} 100 A ${rr * 2} ${rr * 1.7} 0 0 1 ${222 + rr * 2} 100" stroke="${c}" stroke-width="5" fill="none" opacity=".45"/>`).join('')}</g>`
+      + `<g class="uc49"><g class="ucr"><g class="ucf"><g transform="scale(.66)">${uni('un49')}</g></g></g></g>`
       + Array.from({ length: 14 }, (_, i) => `<g class="ts49" style="animation-delay:${(1 + i * .45).toFixed(2)}s">${star(0, 0, 3, ['#FFE27A', '#FF7AB6', '#5CE1E6'][i % 3])}</g>`).join('')
       + `<g class="pf49"></g>`
       + `<g class="fc49">${Array.from({ length: 70 }, (_, i) => `<circle class="fp49" style="--tx:${(i * 89) % 1300 - 50}px;--ty:${(i * 37) % 140 - 10}px;--d:${(i % 14) * .06}s" cx="0" cy="0" r="${22 + (i % 5) * 7}" fill="${['#FFB3E0', '#E6C6FF', '#FFE6F4', '#C6F0FF', '#FFF2B3', '#C9FFD8'][i % 6]}"/>`).join('')}</g>`
       + `<g class="gl49">${Array.from({ length: 40 }, (_, i) => `<g class="fs49" style="animation-delay:-${(i * .07).toFixed(2)}s">${star((i * 61) % 1200, 8 + (i * 23) % 104, 2.6, ['#fff', '#FFE27A', '#5CE1E6', '#FF7AB6'][i % 4])}</g>`).join('')}</g>`
       + `<g class="gg49"></g>` });
-  hide(49, ['.uc49', '.ts49', '.pf49', '.fc49', '.gl49', '.gg49']);
+  hide(49, ['.rb49', '.uc49', '.ts49', '.pf49', '.fc49', '.gl49', '.gg49']);
   mv(49, '.uc49', 22, [[0, 'translate(110px,96px)', 0], [4, 'translate(120px,90px)', 1], [12, 'translate(160px,40px)', 1], [20, 'translate(222px,24px)', 1], [28, 'translate(290px,40px)', 1], [36, 'translate(330px,94px)', 1], [46, 'translate(600px,94px)', 1], [84, 'translate(600px,94px)', 1], [98, 'translate(1260px,94px)', 1], [100, 'translate(1260px,94px)', 0]], 'ease-in-out');
+  K('k49rb', '0%{opacity:0}4%,90%{opacity:1}100%{opacity:0}'); css += '.go-49 .rb49{animation:k49rb 22s linear forwards}';
   K('k49r', '0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-3px) rotate(-2deg)}'); css += '.go-49 .ucr{animation:k49r .38s ease-in-out infinite}';
   K('k49l', '0%,100%{transform:rotate(-24deg)}50%{transform:rotate(24deg)}'); css += '.go-49 .ula{animation:k49l .38s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 0}.go-49 .ulb{animation:k49l .38s ease-in-out infinite reverse;transform-box:fill-box;transform-origin:50% 0}';
   K('k49t', '0%{opacity:0;transform:translate(150px,44px) scale(.2)}10%{opacity:1;transform:translate(200px,30px) scale(1)}100%{opacity:0;transform:translate(220px,64px) scale(.4)}'); css += '.go-49 .ts49{animation:k49t 2s ease-out forwards}';
@@ -1337,6 +1339,8 @@
     svg.classList.add('tp-' + n);
     const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g'); layer.setAttribute('class', 'ov');
     layer.innerHTML = tr(typeof o.g === 'function' ? o.g() : o.g, lang); // built only from the story templates above
+    // parts a story needs from the scene (the rainbow): only drawn by the story when the scene does not show them
+    if (svg.querySelector('.rbw')) layer.querySelectorAll('.needrb').forEach((x) => x.remove());
     svg.appendChild(layer);
     // stories that move the whole picture ("pull") get the scene wrapped in one plain group while they play
     let wrap = null; const ov = svg.querySelector(':scope > .ov');
