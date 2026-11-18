@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.18.1 – unreleased
+## 0.18.1 – 2026-11-18
 ### Fixed
 - **Points sensors keep their unit:** 0.17.0 changed the unit of `sensor.<name>_punkte` from points to coins, so Home Assistant stopped the long-term statistics. The unit is points again; a test guards it.
 
