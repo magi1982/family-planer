@@ -848,3 +848,8 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - Red dots on every level, so no child has to search: settings button in the header (total) → each person tile in the builder (only the children who got something new, with their count) → each tab (Kopf, Kleidung, Begleiter, Effekte, Saison …) → each new item tile.
 - Setting (Einstellungen → Allgemein): "Neu-Hinweis am Einstellungen-Knopf" on/off, default on.
 - Stored server-side per person (seen list), so it works on every tablet and for other installers without setup.
+
+## #69 Bug: banner animation restarts when a banner button is pressed (for 0.16.5)
+- Seen live: a story/animation runs in the header, a tap on a header button (page, holidays, settings) starts it again from the beginning.
+- Likely cause: the header re-renders its whole shadow DOM on every change; the scene element is kept but taken out and put back in, and the browser restarts all CSS animations of a re-inserted element.
+- Fix idea: on re-render only update what changed (button states, clock, badges) and never detach the scene; a test that the scene node stays connected across renders.
