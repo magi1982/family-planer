@@ -54,3 +54,30 @@ def match(summary: str, persons: dict) -> tuple[list[str], str, str | None]:
     if clean:
         clean = clean[0].upper() + clean[1:]
     return hits, clean or text, size
+
+
+_EMAIL = re.compile(r"^\s*([^\s@]+)@[^\s@]+\.[^\s@]+\s*(.*)$", re.U)
+
+
+def list_label(friendly_name: str, persons: dict) -> str:
+    """Short label of a to-do list for chips: never an e-mail address.
+
+    Account lists are often named "<e-mail> <list>" (e.g. "lea@example.org To-do-Liste"). The label is then the
+    person the address belongs to (first part matched against names and nicknames), else the list name, else the
+    first part of the address. Other names stay as they are.
+    """
+    name = " ".join(str(friendly_name or "").split())[:80]
+    m = _EMAIL.match(name)
+    if not m:
+        return name
+    local, rest = m.group(1).lower(), m.group(2).strip()
+    parts = [p for p in re.split(r"[._\-+]", local) if p]
+    best = ""
+    for p in persons.values():
+        for n in [p.get("name") or ""] + list(p.get("aliases") or []):
+            k = n.strip().lower()
+            if len(k) >= 2 and (k == local or k in parts) and len(k) > len(best):
+                best, label = k, str(p.get("name") or n).strip()
+    if best:
+        return label
+    return rest or (parts[0].capitalize() if parts else local)

@@ -1163,8 +1163,13 @@ class FamilyPlanner:
         for lst in self.data.get("lists", {}).values():
             if lst.get("entity") == entity and lst.get("name"):
                 return str(lst["name"])
+        return self._list_label(entity)
+
+    def _list_label(self, entity: str) -> str:
+        """Label of a to-do list for chips and statistics: the owner's name instead of an e-mail address."""
         st = self.hass.states.get(entity)
-        return str((st.attributes.get("friendly_name") if st else None) or entity.split(".")[-1])
+        name = str((st.attributes.get("friendly_name") if st else None) or entity.split(".")[-1])
+        return persontodos.list_label(name, self.data.get("persons") or {})
 
     async def async_refresh_all(self) -> bool:
         """Refresh button in the header: pull all calendars and lists now, then recompute away, season and lists.
@@ -1642,6 +1647,7 @@ class FamilyPlanner:
             "todo_points": {tid: self.todo_points(t) for tid, t in self.data["todos"].items()},
             "item_points": self.item_points(),
             "todo_settings": self.todo_settings(),
+            "list_labels": {e: self._list_label(e) for e in self.todo_settings()["name_lists"]},
             "sizes": self.sizes(),
             "pin_default": self.pin_default,
             "persons": [{"id": pid, **p} for pid, p in self.persons_sorted()],

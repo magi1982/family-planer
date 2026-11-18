@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.16.3 – 2026-11-18
+### Fixed
+- **E-mail address on to-do chips:** to-dos from an account list (named "<e-mail> <list>", e.g. Outlook / Microsoft To Do) showed the e-mail address on the tablet. The chip now shows the owner's name (matched against names and nicknames), else the list name – never the address. Statistics use the same label.
+
 ## 0.16.2 – 2026-11-18
 
 ### Fixed

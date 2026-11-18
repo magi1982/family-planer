@@ -474,8 +474,14 @@ class LoxWochenplanerCard extends FpBase {
       if ((x && x.scrollWidth > x.clientWidth + 1) || (r && l && r.offsetTop > l.offsetTop + 2) || b.closest('.tcol.nar')) b.classList.add('two'); });
   }
   _listName(t) {
+    // the server's label (owner name instead of an e-mail address); never show an address on the tablet
     const ent = String(t.src || '').split('|')[0]; const st = ent && this._hass && this._hass.states[ent];
-    return st ? ((st.attributes || {}).friendly_name || ent) : '';
+    const lab = ((this.fpStore && this.fpStore.snap && this.fpStore.snap.list_labels) || {})[ent];
+    if (lab) return lab;
+    if (!st) return '';
+    const fn = String((st.attributes || {}).friendly_name || ent);
+    const m = fn.match(/^\s*([^\s@]+)@\S+\s*(.*)$/);
+    return m ? (m[2] || m[1]) : fn;
   }
   // separate, calm button on the right – far from the tick, so revealing never ticks the job off
   _revealBtn(it, hot) {
