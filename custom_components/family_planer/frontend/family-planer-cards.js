@@ -2288,7 +2288,7 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
   window.FPTAPS = { list: T, css: () => css, pick, play, EN, SEASON, SURPRISE };
 })();
 
-// Points as a coin ("Kerben-Taler"): flat silver disc, gold core, a stamped letter (or a small star) and one notch
+// Coins ("Münzen"): flat silver disc, gold core, a stamped letter (or a small ring) and one notch
 // per family member in the silver ring. No constant shine: every 5–9 s a small star flashes at one spot,
 // each coin in its own rhythm. Pure SVG with SMIL animation (works in every shadow root without extra CSS);
 // with "reduce motion" the flash is left out.
@@ -2305,7 +2305,6 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     const l = String(c.letter || '').slice(0, 1).toUpperCase(); cfg.letter = LETTER.test(l) ? l : '';
     const n = ((snap || {}).persons || []).length; cfg.notches = n >= 1 && n <= 12 ? n : 5;
   };
-  const star = (cx, cy, R, fill) => `<path d="M${Array.from({ length: 10 }, (_, i) => { const r = i % 2 ? R * 0.4 : R; const t = (i * 36 - 90) * Math.PI / 180; return `${(cx + Math.cos(t) * r).toFixed(1)} ${(cy + Math.sin(t) * r).toFixed(1)}`; }).join(' L')}Z" fill="${fill}"/>`;
   const notches = (n) => Array.from({ length: n }, (_, i) => {
     const a = (i * 360) / n - 90; const t = a * Math.PI / 180; const x = 50 + Math.cos(t) * 36; const y = 50 + Math.sin(t) * 36;
     return `<rect x="${(x - 1.2).toFixed(1)}" y="${(y - 4.4).toFixed(1)}" width="2.4" height="8.8" fill="#8f99a6" transform="rotate(${(a + 90).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
@@ -2322,7 +2321,7 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     const id = `fpc${++uid}`; const k = uid; const sz = Number(px) || 16;
     const mark = cfg.letter
       ? `<text x="50" y="62" text-anchor="middle" font-size="34" font-weight="700" font-family="Georgia,'Times New Roman',serif" fill="#9a6f0a">${cfg.letter}</text>`
-      : star(50, 52, 15, '#9a6f0a');
+      : `<circle cx="50" cy="52" r="11" fill="none" stroke="#9a6f0a" stroke-width="3.5"/>`; // no star: ⭐ belongs to the Tierchen points
     return `<svg class="fpcoin${cls ? ' ' + cls : ''}" viewBox="${sz <= 24 ? '3 3 94 94' : '0 0 100 100'}" width="${sz}" height="${sz}" aria-hidden="true" focusable="false" style="flex:none;vertical-align:-.18em;overflow:visible">`
       + `<defs><clipPath id="${id}"><path d="M0 0 H100 L0 100Z"/></clipPath></defs>`
       + `<circle cx="50" cy="50" r="44" fill="#C3CBD4"/><circle cx="50" cy="50" r="44" fill="#E6EBF0" clip-path="url(#${id})"/>`
@@ -2859,7 +2858,7 @@ const SOON_T = ['in {n} Min', 'in {n} Std'];
 const FPL = 'de';
 const TX = {
   de: { fer: 'Ferien', awy: 'Nicht da', today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Nichts geplant – frei!',
+    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} M.', x2: 'Münzen x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Nichts geplant – frei!',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant', tomS: 'Morgen', nextS: 'Als Nächstes',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { fer: 'Holiday', awy: 'Away', today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
@@ -4093,7 +4092,7 @@ customElements.whenDefined('fp-week-inner').then(() => {
       if (el.dataset.f === 'p') {
         const ctx = this._ctx(el); if (!ctx.r) return;
         const n = el.value === '' ? null : Math.max(0, Math.min(1000, Math.round(Number(el.value) || 0)));
-        this._call('todo', 'update_item', { item: ctx.r.uid, points: n }, this._cfg.plan).then(() => this._flash('Punkte gespeichert')).catch((er) => this._flash(`Fehler: ${er.message || er}`, true));
+        this._call('todo', 'update_item', { item: ctx.r.uid, points: n }, this._cfg.plan).then(() => this._flash('Münzen gespeichert')).catch((er) => this._flash(`Fehler: ${er.message || er}`, true));
         return;
       }
       if (el.dataset.f === 't') {
@@ -4164,7 +4163,7 @@ customElements.whenDefined('fp-week-inner').then(() => {
       const shownRows = rows.filter((r) => pass(r, flt)).sort((a, b) => this._ord.indexOf(a.uid) - this._ord.indexOf(b.uid));
       const body = shownRows.map((r) => `
         <div class="row" data-uid="${esc(r.uid)}" data-txt="${esc(r.t.toLowerCase())}"${q && !r.t.toLowerCase().includes(q) ? ' hidden' : ''}>
-          <div class="tcol"><div class="tl"><input class="in" data-f="t" value="${esc(r.t)}"><label class="pts" title="Punkte bzw. Gewicht für dieses Ämtli (im fairen Modus: Anteil am Tageswert)"><input class="in pn" data-f="p" type="number" min="0" max="1000" inputmode="numeric" value="${r.pts == null ? '' : r.pts}" placeholder="${Number(this._cfg.punkte_standard) || 10}"><span>Pkt.</span></label></div><div class="rl">${sum(r.z, r.r, r.f)}</div></div>
+          <div class="tcol"><div class="tl"><input class="in" data-f="t" value="${esc(r.t)}"><label class="pts" title="Münzen bzw. Gewicht für dieses Ämtli (im fairen Modus: Anteil am Tageswert)"><input class="in pn" data-f="p" type="number" min="0" max="1000" inputmode="numeric" value="${r.pts == null ? '' : r.pts}" placeholder="${Number(this._cfg.punkte_standard) || 10}"><span>Pkt.</span></label></div><div class="rl">${sum(r.z, r.r, r.f)}</div></div>
           <div class="asg">${this._asg(r.uid, r.z, r.r, r.f)}</div>
           <button class="del${this._confirm === r.uid ? ' cf' : ''}" data-del>${this._confirm === r.uid ? 'Löschen?' : '<ha-icon icon="mdi:trash-can-outline"></ha-icon>'}</button>
         </div>`).join('');
@@ -4295,7 +4294,7 @@ const SOON_T = ['in {n} min', 'in {n} h'];
 const FPL = 'en';
 const TX = {
   de: { fer: 'Ferien', awy: 'Nicht da', today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Nichts geplant – frei!',
+    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} M.', x2: 'Münzen x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Nichts geplant – frei!',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant', tomS: 'Morgen', nextS: 'Als Nächstes',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { fer: 'Holiday', awy: 'Away', today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',
@@ -5529,7 +5528,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (el.dataset.f === 'p') {
         const ctx = this._ctx(el); if (!ctx.r) return;
         const n = el.value === '' ? null : Math.max(0, Math.min(1000, Math.round(Number(el.value) || 0)));
-        this._call('todo', 'update_item', { item: ctx.r.uid, points: n }, this._cfg.plan).then(() => this._flash('Points saved')).catch((er) => this._flash(`Error: ${er.message || er}`, true));
+        this._call('todo', 'update_item', { item: ctx.r.uid, points: n }, this._cfg.plan).then(() => this._flash('Coins saved')).catch((er) => this._flash(`Error: ${er.message || er}`, true));
         return;
       }
       if (el.dataset.f === 't') {
@@ -5600,7 +5599,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const shownRows = rows.filter((r) => pass(r, flt)).sort((a, b) => this._ord.indexOf(a.uid) - this._ord.indexOf(b.uid));
       const body = shownRows.map((r) => `
         <div class="row" data-uid="${esc(r.uid)}" data-txt="${esc(r.t.toLowerCase())}"${q && !r.t.toLowerCase().includes(q) ? ' hidden' : ''}>
-          <div class="tcol"><div class="tl"><input class="in" data-f="t" value="${esc(r.t)}"><label class="pts" title="Points or weight for this chore (in fair mode: share of the day value)"><input class="in pn" data-f="p" type="number" min="0" max="1000" inputmode="numeric" value="${r.pts == null ? '' : r.pts}" placeholder="${Number(this._cfg.punkte_standard) || 10}"><span>pts</span></label></div><div class="rl">${sum(r.z, r.r, r.f)}</div></div>
+          <div class="tcol"><div class="tl"><input class="in" data-f="t" value="${esc(r.t)}"><label class="pts" title="Coins or weight for this chore (in fair mode: share of the day value)"><input class="in pn" data-f="p" type="number" min="0" max="1000" inputmode="numeric" value="${r.pts == null ? '' : r.pts}" placeholder="${Number(this._cfg.punkte_standard) || 10}"><span>pts</span></label></div><div class="rl">${sum(r.z, r.r, r.f)}</div></div>
           <div class="asg">${this._asg(r.uid, r.z, r.r, r.f)}</div>
           <button class="del${this._confirm === r.uid ? ' cf' : ''}" data-del>${this._confirm === r.uid ? 'Delete?' : '<ha-icon icon="mdi:trash-can-outline"></ha-icon>'}</button>
         </div>`).join('');
@@ -5864,7 +5863,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .addb{width:52px;height:44px;border-radius:10px;border:none;background:${G};color:var(--fp-on-accent,#141414);cursor:pointer}
         .addb ha-icon{--mdc-icon-size:24px}
         .cols{columns:3 250px;column-gap:12px}
-        section{break-inside:avoid;background:var(--fp-bg2,#232323);border:1px solid var(--fp-line,#2c2c2c);border-radius:12px;padding:10px 10px 6px;margin:0 0 12px}
+        section{break-inside:avoid;background:var(--fp-bg2,#232323);border:0;box-shadow:inset 0 3px 0 var(--fp-accent);border-radius:12px;padding:12px 10px 6px;margin:0 0 12px}
         section.pend{border-style:dashed;border-color:var(--fp-line,#4a4a4a)}
         h3{display:flex;align-items:center;gap:8px;margin:0 2px 8px;font-size:12px;font-weight:600;color:var(--fp-text2,#9a9a9a);text-transform:uppercase;letter-spacing:1px}
         h3 ha-icon{color:${G}}h3 span{flex:1}h3 em{font-style:normal;color:var(--fp-text3,#666)}
@@ -5920,27 +5919,27 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const FONT = '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const TXT = {
-    de: { title: 'Punkte & Belohnungen', pts: 'Punkte', lvl: 'Level', next: 'noch {n} bis Level {l}', max: 'Höchstes Level erreicht!',
-      shop: 'Belohnungen für {name}', shopAll: 'Alle Belohnungen', forAll: 'Für alle', pickHint: 'Person antippen, um ihre Belohnungen zu sehen und einzulösen.', forOnly: 'nur für {n}', redeem: 'Einlösen', missing: 'noch {n} Punkte', approval: 'mit Freigabe', noapproval: 'sofort',
+    de: { title: 'Münzen & Belohnungen', pts: 'Münzen', lvl: 'Level', next: 'noch {n} bis Level {l}', max: 'Höchstes Level erreicht!',
+      shop: 'Belohnungen für {name}', shopAll: 'Alle Belohnungen', forAll: 'Für alle', pickHint: 'Person antippen, um ihre Belohnungen zu sehen und einzulösen.', forOnly: 'nur für {n}', redeem: 'Einlösen', missing: 'noch {n} Münzen', approval: 'mit Freigabe', noapproval: 'sofort',
       week: 'max. {n}× pro Woche', none: 'Noch keine Belohnungen. Mit „+ Belohnung“ auf einer Person anlegen (Eltern-PIN); ohne Auswahl im Dialog gilt sie für alle.',
-      pending: 'Wartet auf Freigabe', approve: 'Freigeben', deny: 'Ablehnen', history: 'Verlauf', bonus: 'Punkte geben',
+      pending: 'Wartet auf Freigabe', approve: 'Freigeben', deny: 'Ablehnen', history: 'Verlauf', bonus: 'Münzen geben',
       pin: 'Eltern-PIN', ok: 'OK', cancel: 'Abbrechen', reason: 'Grund (optional)', give: 'Vergeben',
       sent: '„{t}“ angefragt – die Eltern werden benachrichtigt.', done: '„{t}“ eingelöst. Viel Spass!', approved: 'Freigegeben', denied: 'Abgelehnt',
-      reserved: '{n} reserviert', err: { not_enough_points: 'Nicht genug Punkte.', weekly_limit: 'Diese Woche schon so oft eingelöst.', not_allowed: 'Diese Belohnung ist nicht für dich.', unauthorized: 'Falsche PIN oder keine Berechtigung.', pin_wrong: 'Falsche PIN.', pin_locked: 'Zu viele Fehlversuche – bitte 5 Minuten warten.' },
+      reserved: '{n} reserviert', err: { not_enough_points: 'Nicht genug Münzen.', weekly_limit: 'Diese Woche schon so oft eingelöst.', not_allowed: 'Diese Belohnung ist nicht für dich.', unauthorized: 'Falsche PIN oder keine Berechtigung.', pin_wrong: 'Falsche PIN.', pin_locked: 'Zu viele Fehlversuche – bitte 5 Minuten warten.' },
       kinds: { chore: 'Ämtli', bonus: 'Tagesbonus', streak: 'Serienbonus', adjust: 'Bonus', reward: 'Belohnung', carry: 'Übertrag', todo: 'To-do', award: 'Auszeichnung' },
       edit: 'Bearbeiten', editDone: 'Fertig', add: 'Neue Belohnung', changePin: 'PIN ändern', del: 'Löschen', save: 'Speichern',
-      rTitle: 'Belohnung', rIcon: 'Icon', rCost: 'Kosten in Punkten', rApproval: 'Eltern müssen freigeben', rPersons: 'Nur für (leer = alle)', rWeek: 'Höchstens pro Woche (0 = unbegrenzt)',
+      rTitle: 'Belohnung', rIcon: 'Icon', rCost: 'Kosten in Münzen', rApproval: 'Eltern müssen freigeben', rPersons: 'Nur für (leer = alle)', rWeek: 'Höchstens pro Woche (0 = unbegrenzt)',
       delAsk: '„{t}“ wirklich löschen? Offene Anfragen dafür werden abgelehnt.', saved: 'Gespeichert.', pinChanged: 'Eltern-PIN geändert.',
       startPin: 'Die Start-PIN 123456 ist noch aktiv. Bitte jetzt eine eigene Eltern-PIN festlegen – vorher sind Belohnungen und Einstellungen gesperrt.',
-      rCat: 'Kategorie', own: 'Eigene Punkte', approx: 'ca.', minus: 'Abziehen',
+      rCat: 'Kategorie', own: 'Eigene Münzen', approx: 'ca.', minus: 'Abziehen',
       sizes: { s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Mega gross', xxl: 'Riesig' },
-      catHint: 'Gross = so viel, wie man in einem Monat mit allen Ämtli verdient (inkl. Boni). Die Punkte passen sich an, wenn die Punkte-Einstellungen ändern.',
+      catHint: 'Gross = so viel, wie man in einem Monat mit allen Ämtli verdient (inkl. Boni). Die Münzen passen sich an, wenn die Münzen-Einstellungen ändern.',
       open: 'Noch zu gewinnen', fam: 'Familie', per: { week: 'jede Woche', month: 'jeden Monat', reach: 'beim Erreichen', day: 'jeden Tag' }, lead: 'Vorne: {n}', noLead: 'Noch niemand vorne',
-      units: { pct: '{n} %', days: '{n} Tage', chores: '{n} Ämtli' }, worth: '+{n} Punkte', addFor: 'Belohnung', saving: 'Spart für', waiting: 'Wartet auf Freigabe',
+      units: { pct: '{n} %', days: '{n} Tage', chores: '{n} Ämtli' }, worth: '+{n} Münzen', addFor: 'Belohnung', saving: 'Spart für', waiting: 'Wartet auf Freigabe',
       ready: 'Jetzt einlösbar', inDays: 'in ca. {n} Tagen', inDay: 'morgen', noPace: 'noch keine Prognose', nothing: 'Noch nichts am Laufen',
-      fc: 'Prognose', fcFam: 'Familienschnitt ({p} Punkte/Tag): ca. {n} Tage', fcNow: 'jetzt', awards: 'Auszeichnungen', noAw: 'Noch keine – siehe oben, was es zu gewinnen gibt.' },
-    en: { title: 'Points & rewards', pts: 'points', lvl: 'Level', next: '{n} more to level {l}', max: 'Highest level reached!',
-      shop: 'Rewards for {name}', shopAll: 'All rewards', forAll: 'For everyone', pickHint: 'Tap a person to see and redeem their rewards.', forOnly: 'only for {n}', redeem: 'Redeem', missing: '{n} points to go', approval: 'needs approval', noapproval: 'instant',
+      fc: 'Prognose', fcFam: 'Familienschnitt ({p} Münzen/Tag): ca. {n} Tage', fcNow: 'jetzt', awards: 'Auszeichnungen', noAw: 'Noch keine – siehe oben, was es zu gewinnen gibt.' },
+    en: { title: 'Coins & rewards', pts: 'coins', lvl: 'Level', next: '{n} more to level {l}', max: 'Highest level reached!',
+      shop: 'Rewards for {name}', shopAll: 'All rewards', forAll: 'For everyone', pickHint: 'Tap a person to see and redeem their rewards.', forOnly: 'only for {n}', redeem: 'Redeem', missing: '{n} coins to go', approval: 'needs approval', noapproval: 'instant',
       week: 'max. {n}× per week', none: 'No rewards yet. Add one with "+ Reward" on a person (parent PIN); with nobody chosen in the dialog it is for everyone.',
       pending: 'Waiting for approval', approve: 'Approve', deny: 'Decline', history: 'History', bonus: 'Give points',
       pin: 'Parent PIN', ok: 'OK', cancel: 'Cancel', reason: 'Reason (optional)', give: 'Give',
@@ -6141,7 +6140,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .cat b{font-weight:600;color:var(--fp-text,#eee)}.cat span{font-size:11px;color:var(--fp-text2,#999)}.cat.on{border-color:var(--fp-accent);background:var(--fp-bg2,#202820)}.cat.on span{color:var(--fp-accent)}.cat.neg{border-color:#e06b6b;background:#3a2626}
         .hint{display:block;font-size:11px;color:var(--fp-text3,#888);margin-top:2px}
         .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-        .pc{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:14px;border:1px solid var(--fp-line,#2a2a2a);background:var(--fp-bg2,#232323);color:inherit;font:inherit;text-align:left;cursor:pointer;border-left:4px solid var(--c)}
+        .pc{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:12px;border:0;background:var(--fp-bg2,#232323);color:inherit;font:inherit;text-align:left;cursor:pointer;box-shadow:inset 0 3px 0 var(--c)}
         .ph{display:flex;align-items:center;gap:12px}
         .mds{display:flex;flex-wrap:wrap;gap:5px}.md{width:28px!important;height:28px!important}.md ha-icon{--mdc-icon-size:17px!important}.md.big{width:44px!important;height:44px!important}.md.big ha-icon{--mdc-icon-size:26px!important}.mdm{font-size:12px;color:var(--fp-text3,#888);align-self:center}
         .runs{display:flex;flex-direction:column;gap:6px}
@@ -6150,7 +6149,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .run.w{border:1px dashed #e0a84f}.run.w>ha-icon{color:#e0a84f}.run.none{color:var(--fp-text3,#777);font-size:12px;justify-content:center}
         .add1{display:flex;align-items:center;justify-content:center;gap:6px;height:38px;border-radius:10px;border:1px dashed var(--fp-line,#4a4a4a);background:transparent;color:var(--fp-text2,#bbb);font:inherit;font-size:13px;cursor:pointer}
         .oas{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-        .oa{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--fp-bg2,#232323);border:1px solid var(--fp-line,#2a2a2a);border-top:3px solid color-mix(in srgb,var(--mc) 70%,transparent)}
+        .oa{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--fp-bg2,#232323);border:0;box-shadow:inset 0 3px 0 var(--mc)}
         .oa:not(.won) .md{filter:saturate(.75)}.ot{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.ot b{font-size:14px}.ot>span{font-size:12px;color:var(--fp-text2,#aaa);line-height:1.35}
         .om{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}.om em{font-style:normal;font-size:11px;color:var(--fp-text2,#999);background:var(--fp-bg3,#2b2b2b);border-radius:9px;padding:2px 8px;display:inline-flex;align-items:center;gap:5px}.om em.pp{color:${G}}
         .fc{display:flex;flex-direction:column;gap:5px;padding:10px 12px;border-radius:10px;background:var(--fp-bg3,#2b2b2b);font-size:12px;color:var(--fp-text2,#bbb);margin-bottom:6px}.fc b{color:var(--fp-text,#eee);font-size:12px}
@@ -6162,7 +6161,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         .pt{display:flex;flex-direction:column;align-items:flex-end}.pt strong{display:flex;align-items:center;gap:6px;font-size:28px;line-height:1;color:${G}}.fpcoin{margin-right:3px}.pt span{font-size:11px;color:var(--fp-text3,#888)}.pt em{font-style:normal;font-size:10px;color:#e0a84f}
         .sec{font-size:12px;color:${G};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin:18px 0 8px}
         .shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
-        .rw{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--fp-bg3,#262626);border:1px solid var(--fp-line,#2a2a2a)}
+        .rw{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:var(--fp-bg2,#232323);border:0;box-shadow:inset 0 3px 0 var(--fp-accent)}
         .ri{width:48px;height:48px;border-radius:12px;background:color-mix(in srgb,var(--fp-accent) 1600%,transparent);color:${G};display:flex;align-items:center;justify-content:center;flex:none}.ri ha-icon{--mdc-icon-size:26px}
         .rw.lock .ri{background:var(--fp-bg4,#2e2e2e);color:var(--fp-text3,#777)}
         .rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.rt b{font-size:15px}.rt span{font-size:12px;color:var(--fp-text2,#999)}.ms{display:flex;flex-direction:column;gap:3px}
@@ -6241,14 +6240,14 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       praise: ['Jeder Tag ist eine neue Chance.', 'Gut gemacht – da geht noch was!', 'Super zuverlässig!', 'Perfekt! Wirklich alles geschafft.'],
       trend: { 1: 'Besser als im Zeitraum davor', 0: 'Gleich gut wie im Zeitraum davor', '-1': 'Etwas weniger als im Zeitraum davor' },
       tDone: 'Ämtli erledigt', tDoneSub: 'von {n} Ämtli', tVol: 'Freiwillig geholfen', tVolSub: 'Ämtli ohne Auftrag', tTodo: 'To-dos abgehakt', tTodoSub: 'aus Listen und Aufgaben',
-      tOn: 'Rechtzeitig fertig', tOnSub: 'bis {t} Uhr erledigt', tStreak: 'Tage am Stück', tBest: 'Rekord: {n} Tage', tPts: 'Punkte gesammelt', tPtsSub: 'für Belohnungen',
+      tOn: 'Rechtzeitig fertig', tOnSub: 'bis {t} Uhr erledigt', tStreak: 'Tage am Stück', tBest: 'Rekord: {n} Tage', tPts: 'Münzen gesammelt', tPtsSub: 'für Belohnungen',
       week7: 'Meine letzten 7 Tage', block: '1 Klotz = 1 Ämtli', done: 'erledigt', open: 'offen / nicht geschafft', star: 'alles geschafft',
       weeks12: 'Meine letzten 12 Wochen', dot: 'Jeder Punkt ist ein Tag', fullDays: 'An {n} Tagen hast du alles geschafft!',
       did: 'Was ich gemacht habe', things: '{n} Sachen erledigt', nothing: 'Noch nichts',
-      pts: 'Woher meine Punkte kommen', ptsHead: '{e} verdient · {s} eingelöst', earned: 'Punkte verdient', spent: 'Für Belohnungen eingelöst', saving: 'noch nichts eingelöst – du sparst!',
+      pts: 'Woher meine Münzen kommen', ptsHead: '{e} verdient · {s} eingelöst', earned: 'Münzen verdient', spent: 'Für Belohnungen eingelöst', saving: 'noch nichts eingelöst – du sparst!',
       src: { chore: ['Ämtli', 'deine normalen Ämtli'], sonder: ['Freiwillige Ämtli', 'Sonderämtli, die du gemacht hast'], todo: ['To-dos', 'abgehakte Aufgaben'], bonus: ['Tagesbonus', 'an Tagen mit allem geschafft'],
         streak: ['Serien-Bonus', 'für viele Tage am Stück'], award: ['Auszeichnungen', 'Pokale und Auszeichnungen'], level: ['Level-Bonus', 'für ein neues Level'], adjust: ['Extra von Mama/Papa', 'Bonus von den Eltern'] },
-      last: 'Letzte Punkte', today: 'heute', yday: 'gestern', myAw: 'Meine Auszeichnungen', practice: 'Da üben wir noch', missed: '{n}× vergessen', tip: 'Tipp: Erinnerung im Planer einschalten',
+      last: 'Letzte Münzen', today: 'heute', yday: 'gestern', myAw: 'Meine Auszeichnungen', practice: 'Da üben wir noch', missed: '{n}× vergessen', tip: 'Tipp: Erinnerung im Planer einschalten',
       when: 'Wann ich helfe', tod: ['Morgen', 'Nachmittag', 'Abend'], todTxt: ['Du bist ein Morgen-Mensch!', 'Du hilfst am liebsten nach der Schule!', 'Du bist ein Abend-Helfer!'],
       load: 'Statistik wird geladen …', err: 'Statistik konnte nicht geladen werden.', planner: 'Planer', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
     en: { title: 'Statistics', fam: 'Family', back: 'Family', per: { w: 'Week', m: 'Month', q: '3 months' },
@@ -6329,10 +6328,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     _family(persons, byId, d) {
       const T = this.T; const st = d.settings || {}; const aw = this._awMeta();
       const tiles = `<div class="tiles4">
-        <div class="tile"><b style="color:#69C350">${d.done}</b><span>${esc(T.choresDone)}</span>${d.ten != null ? `<small>${esc(fmt(T.ofTen, { n: d.ten }))}</small>` : ''}</div>
-        <div class="tile"><b style="color:#F2A541">${d.vol}</b><span>${esc(T.vol)}</span><small>${esc(T.volSub)}</small></div>
-        <div class="tile"><b style="color:#A88BFA">${d.todos}</b><span>${esc(T.todos)}</span><small>${esc(T.todosSub)}</small></div>
-        <div class="tile"><b style="color:#FF8A5B">${esc(fmt(T.allDoneN, { n: d.all_done }))}</b><span>${esc(T.allDone)}</span><small>${esc(fmt(T.record, { n: d.all_done_best }))}</small></div></div>`;
+        <div class="tile" style="--pc:#69C350"><b style="color:#69C350">${d.done}</b><span>${esc(T.choresDone)}</span>${d.ten != null ? `<small>${esc(fmt(T.ofTen, { n: d.ten }))}</small>` : ''}</div>
+        <div class="tile" style="--pc:#F2A541"><b style="color:#F2A541">${d.vol}</b><span>${esc(T.vol)}</span><small>${esc(T.volSub)}</small></div>
+        <div class="tile" style="--pc:#A88BFA"><b style="color:#A88BFA">${d.todos}</b><span>${esc(T.todos)}</span><small>${esc(T.todosSub)}</small></div>
+        <div class="tile" style="--pc:#FF8A5B"><b style="color:#FF8A5B">${esc(fmt(T.allDoneN, { n: d.all_done }))}</b><span>${esc(T.allDone)}</span><small>${esc(fmt(T.record, { n: d.all_done_best }))}</small></div></div>`;
       const ppl = persons.filter((p) => byId[p.id]);
       const mx = Math.max(1, ...ppl.map((p) => byId[p.id].done + byId[p.id].vol + byId[p.id].todos));
       const seg = (n, c) => (n ? `<span style="width:${(n / mx * 100).toFixed(1)}%;min-width:26px;background:${c}">${n}</span>` : '');
@@ -6414,7 +6413,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
 
   const CSS = `
     :host{display:block}
-    .card{position:relative;background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:16px;color:var(--fp-text,#ececec);font-family:var(--fp-font,system-ui,sans-serif);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
+    .card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}.card{position:relative;background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:16px;color:var(--fp-text,#ececec);font-family:var(--fp-font,system-ui,sans-serif);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
     button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
     h2{margin:0;font-size:17px}small{color:var(--fp-text2,#a9b1bd)}
     .msg{padding:40px;text-align:center;color:var(--fp-text2,#aaa)}
@@ -6426,11 +6425,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     .seg button{height:40px;padding:0 14px;border:0;border-radius:9px;background:transparent;font-size:14px;font-weight:600;color:var(--fp-text2,#a9b1bd)}
     .seg button.on{background:var(--fp-accent,#69C350);color:var(--fp-on-accent,#111)}
     .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;margin-bottom:14px}
-    .sec{background:var(--fp-bg2,#171a20);border:1px solid var(--fp-line,#2f3541);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+    .sec{background:var(--fp-bg2,#171a20);border:0;border-radius:12px;box-shadow:inset 0 3px 0 var(--pc,var(--fp-accent,#69C350));padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
     .w5{grid-column:span 5}.w6{grid-column:span 6}.w7{grid-column:span 7}.w12{grid-column:span 12}
     .hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
     .tiles4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
-    .tile{background:var(--fp-bg2,#171a20);border:1px solid var(--fp-line,#2f3541);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+    .tile{background:var(--fp-bg2,#171a20);border:0;border-radius:12px;box-shadow:inset 0 3px 0 var(--pc,var(--fp-accent,#69C350));padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0}
     .tile b{font-size:32px;line-height:1.1;display:flex;align-items:center;gap:6px}.tile span{font-size:14px;font-weight:600}.tile small{font-size:12px}
     .tiles6{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
     .ti{width:38px;height:38px;border-radius:11px;background:color-mix(in srgb,var(--tc) 18%,transparent);color:var(--tc);display:flex;align-items:center;justify-content:center;margin-bottom:4px}
@@ -6449,7 +6448,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     .ball{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:#111;font-size:12px;font-weight:800}.dash{color:var(--fp-text3,#6f7886)}.tot{color:var(--fp-text2,#a9b1bd);font-weight:600}
     .hd2{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:6px 0 10px}.hd2 h2{font-size:21px}
     .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-    .pc{display:flex;flex-direction:column;gap:12px;text-align:left;padding:16px;border-radius:18px;border:2px solid var(--fp-line,#2f3541);background:var(--fp-bg2,#171a20);box-shadow:inset 0 4px 0 var(--pc)}
+    .pc{display:flex;flex-direction:column;gap:12px;text-align:left;padding:16px;border-radius:12px;border:0;background:var(--fp-bg2,#171a20);box-shadow:inset 0 3px 0 var(--pc)}
     .pch{display:flex;align-items:center;gap:12px}.pch>div{flex:1;min-width:0}.pch b{display:block;font-size:20px}.pch small{color:#a8e08f;font-weight:600}
     .rl{display:flex;justify-content:space-between;font-size:13px;color:var(--fp-text2,#a9b1bd)}.rl b{color:var(--fp-text,#eee)}
     .ten{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px}.ten i{aspect-ratio:1;border-radius:50%;border:2px dashed var(--fp-text3,#6f7886);box-sizing:border-box}.ten i.on{background:#69C350;border:0}.ten.sm{gap:5px}
@@ -6503,7 +6502,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       every: 'alle', units: { days: 'Tage', weeks: 'Wochen', months: 'Monate', years: 'Jahre' }, from: 'ab',
       mdays: 'Monate', onday: 'am Tag', last: 'letzter', onweekday: 'am', nths: { 1: '1.', 2: '2.', 3: '3.', 4: '4.', '-1': 'letzten' },
       wd: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'], wdl: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
-      dates: 'Daten', adddate: 'Datum hinzufügen', persons: 'Wer?', rotate: 'abwechselnd', window: 'Zeit zum Erledigen', days: 'Tage', points: 'Punkte',
+      dates: 'Daten', adddate: 'Datum hinzufügen', persons: 'Wer?', rotate: 'abwechselnd', window: 'Zeit zum Erledigen', days: 'Tage', points: 'Münzen',
       save: 'Speichern', cancel: 'Abbrechen', del: 'Löschen?', next: 'Nächstes Mal', err: 'Bitte Titel, mindestens eine Person und ein Datum/Intervall angeben.',
       sum: { interval: (s, u) => `alle ${s.every} ${u} ab ${s.start.split('-').reverse().join('.')}`, monthly_day: (s) => `${s.every > 1 ? `alle ${s.every} Monate` : 'monatlich'} am ${s.day === -1 ? 'letzten Tag' : s.day + '.'}`,
         monthly_wd: (s, n, w) => `${s.every > 1 ? `alle ${s.every} Monate` : 'monatlich'} am ${n} ${w}`, yearly: (d) => `jährlich am ${d}`, once: (d) => `einmalig am ${d}` },
@@ -6670,8 +6669,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const TXT = {
     de: { title: 'To-dos', sub: 'Ohne Datum – bleiben stehen, bis sie erledigt sind.', none: 'Keine offenen To-dos.', ph: 'Neues To-do …', add: 'Hinzufügen', neu: 'Neues To-do',
       ask: '„{t}“ als erledigt markieren?', reopen: '„{t}“ wieder öffnen?', yes: 'Erledigt', yesOpen: 'Wieder öffnen', cancel: 'Abbrechen', del: 'Löschen',
-      delAsk: '„{t}“ löschen?', pts: 'Punkte', sizeHint: 'Grösse ändern braucht die Eltern-PIN', err: 'Konnte nicht gespeichert werden.',
-      sizes: { none: 'Ohne Punkte', s: 'Klein', m: 'Mittel', l: 'Gross' }, open: 'To-dos', openN: 'To-dos ({n})', close: 'Schliessen' },
+      delAsk: '„{t}“ löschen?', pts: 'Münzen', sizeHint: 'Grösse ändern braucht die Eltern-PIN', err: 'Konnte nicht gespeichert werden.',
+      sizes: { none: 'Ohne Münzen', s: 'Klein', m: 'Mittel', l: 'Gross' }, open: 'To-dos', openN: 'To-dos ({n})', close: 'Schliessen' },
     en: { title: 'To-dos', sub: 'No date – they stay until they are done.', none: 'No open to-dos.', ph: 'New to-do …', add: 'Add', neu: 'New to-do',
       ask: 'Mark "{t}" as done?', reopen: 'Reopen "{t}"?', yes: 'Done', yesOpen: 'Reopen', cancel: 'Cancel', del: 'Delete',
       delAsk: 'Delete "{t}"?', pts: 'points', sizeHint: 'Changing the size needs the parent PIN', err: 'Could not be saved.',
@@ -6812,7 +6811,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const TABS = [
     { id: 'pics', icon: 'mdi:face-man-shimmer-outline', label: { de: 'Bilder', en: 'Pictures' } },
     { id: 'general', icon: 'mdi:tune-variant', label: { de: 'Allgemein', en: 'General' }, fields: [
-      F('mod_week', 'bool', 'Modul Wochenplan', 'Week plan module', 'Ämtli, Termine, Schule, Ferien, Punkte, Belohnungen und Ansagen.', 'Chores, events, school, holidays, points, rewards and announcements.'),
+      F('mod_week', 'bool', 'Modul Wochenplan', 'Week plan module', 'Ämtli, Termine, Schule, Ferien, Münzen, Belohnungen und Ansagen.', 'Chores, events, school, holidays, points, rewards and announcements.'),
       F('mod_lists', 'bool', 'Modul Smarte Listen', 'Smart lists module', 'Einkaufs- und To-do-Listen, die sich selbst sortieren.', 'Shopping and to-do lists that sort themselves.'),
       F('language', 'select', 'Sprache des Family Planers', 'Family Planer language', 'Automatisch wie Profil/Home Assistant, oder fest Deutsch bzw. Englisch – unabhängig von Home Assistant.', 'Automatic like your profile/Home Assistant, or fixed German or English – independent of Home Assistant.',
         { opts: [['auto', { de: 'Automatisch', en: 'Automatic' }], ['de', 'Deutsch'], ['en', 'English']] }),
@@ -6848,20 +6847,20 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('refresh_minutes', 'num', 'Kalender prüfen alle', 'Check calendars every', 'Wie oft auf neue Ferien geprüft wird.', 'How often new holidays are checked.', { min: 15, max: 240, unit: 'min' }),
       F('rescan', 'bool', 'Kalender neu nach Ferien-Wörtern durchsuchen', 'Search calendars for holiday words again', 'Einmalig beim Speichern.', 'Once when saving.'),
     ] },
-    { id: 'points', icon: 'mdi:star-circle-outline', label: { de: 'Punkte', en: 'Points' }, fields: [
-      F('mode', 'select', 'Punkte verteilen', 'How points are given', 'Fair: ein ganz erledigter Tag ist für alle gleich viel wert. Pro Ämtli: mehr Ämtli, mehr Punkte.', 'Fair: a fully completed day is worth the same for everybody. Per chore: more chores, more points.',
+    { id: 'points', icon: 'mdi:star-circle-outline', label: { de: 'Münzen', en: 'Coins' }, fields: [
+      F('mode', 'select', 'Münzen verteilen', 'How coins are given', 'Fair: ein ganz erledigter Tag ist für alle gleich viel wert. Pro Ämtli: mehr Ämtli, mehr Münzen.', 'Fair: a fully completed day is worth the same for everybody. Per chore: more chores, more coins.',
         { opts: [['fair', { de: 'Fair', en: 'Fair' }], ['per_chore', { de: 'Pro Ämtli', en: 'Per chore' }]] }),
-      F('day_points', 'num', 'Punkte für einen ganzen Tag (fair)', 'Points for a full day (fair)', 'Wird auf die Ämtli des Tages verteilt.', 'Split across the day\'s chores.', { min: 0, max: 1000 }),
-      F('default_points', 'num', 'Punkte pro Ämtli (Standard bzw. Gewicht)', 'Points per chore (default or weight)', 'Pro Ämtli im Ämtliplan änderbar.', 'Can be changed per chore in the chore plan.', { min: 0, max: 1000 }),
+      F('day_points', 'num', 'Münzen für einen ganzen Tag (fair)', 'Points for a full day (fair)', 'Wird auf die Ämtli des Tages verteilt.', 'Split across the day\'s chores.', { min: 0, max: 1000 }),
+      F('default_points', 'num', 'Münzen pro Ämtli (Standard bzw. Gewicht)', 'Points per chore (default or weight)', 'Pro Ämtli im Ämtliplan änderbar.', 'Can be changed per chore in the chore plan.', { min: 0, max: 1000 }),
       F('day_bonus', 'num', 'Tagesbonus', 'Day bonus', 'Für einen ganz erledigten Tag.', 'For a fully completed day.', { min: 0, max: 1000 }),
       F('streak_bonus', 'num', 'Serienbonus', 'Streak bonus', 'Für jede 7-Tage-Serie.', 'For every 7-day streak.', { min: 0, max: 1000 }),
       F('reward_value', 'num', 'Gegenwert einer grossen Belohnung', 'Value of a large reward', 'Gross = so viel, wie man in einem Monat mit allen Ämtli inkl. Boni verdient. Klein = ¼, Mittel = ½, Mega = 2×, Riesig = 5×. Nur zur Orientierung.', 'Large = what you earn in a month with every chore done incl. bonuses. Small = ¼, medium = ½, mega = 2×, giant = 5×. Just a guide.', { min: 0, max: 100000, step: 0.5 }),
       F('currency', 'text', 'Währung', 'Currency', 'z. B. CHF oder €.', 'e.g. CHF or €.', { max: 8 }),
-      F('awards', 'awards', 'Pokale & Auszeichnungen', 'Trophies & awards', 'Pro Auszeichnung ein/aus und wie viele Punkte sie bringt (beim Gewinnen, und wieder, wenn man sie neu gewinnt). Klein = ⅓, Mittel = ⅔, Gross = 1×, Riesig = 2× der Punkte für einen ganzen Tag.', 'Per award on/off and how many points it gives (when won, and again when won anew). Small = ⅓, medium = ⅔, large = 1×, giant = 2× the points for a full day.'),
-      F('season_start', 'md', 'Neue Level-Saison ab', 'New level season from', 'Jedes Schuljahr starten alle wieder bei Level 1. Freigeschaltete Extras und Punkte zum Einlösen bleiben, der Bestwert wird als Abzeichen gespeichert.', 'Every school year everybody starts again at level 1. Unlocked extras and points to redeem stay; the best level is kept as a badge.'),
-      F('level_bonus', 'bool', 'Bonuspunkte beim Level-Aufstieg', 'Bonus points on level up', 'Ein voller Tag Punkte pro Level, drei bei einer neuen Stufe (Silber, Gold, Diamant, Rubin).', 'One full day of points per level, three for a new tier (silver, gold, diamond, ruby).'),
-      F('coin_show', 'bool', 'Punkte als Taler zeigen', 'Show points as a coin', 'Punkte erscheinen mit einem kleinen Taler (Silberring, Goldkern) – bei Ämtli, To-dos, Sonderämtli, Belohnungen und in der Statistik. Beim Abhaken fliegt der Taler zum Bild der Person. Aus = nur die Zahl wie bisher.', 'Points appear with a small coin (silver ring, gold core) – on chores, to-dos, special chores, rewards and in the statistics. When ticking off, the coin flies to the person. Off = just the number as before.'),
-      F('coin_letter', 'text', 'Buchstabe auf dem Taler', 'Letter on the coin', 'Ein Buchstabe oder eine Ziffer, die auf den Taler geprägt wird, z. B. der Anfangsbuchstabe eurer Familie. Leer = kleiner Stern.', 'One letter or digit stamped on the coin, e.g. your family initial. Empty = a small star.', { max: 1 }),
+      F('awards', 'awards', 'Pokale & Auszeichnungen', 'Trophies & awards', 'Pro Auszeichnung ein/aus und wie viele Münzen sie bringt (beim Gewinnen, und wieder, wenn man sie neu gewinnt). Klein = ⅓, Mittel = ⅔, Gross = 1×, Riesig = 2× der Münzen für einen ganzen Tag.', 'Per award on/off and how many coins it gives (when won, and again when won anew). Small = ⅓, medium = ⅔, large = 1×, giant = 2× the coins for a full day.'),
+      F('season_start', 'md', 'Neue Level-Saison ab', 'New level season from', 'Jedes Schuljahr starten alle wieder bei Level 1. Freigeschaltete Extras und Münzen zum Einlösen bleiben, der Bestwert wird als Abzeichen gespeichert.', 'Every school year everybody starts again at level 1. Unlocked extras and coins to redeem stay; the best level is kept as a badge.'),
+      F('level_bonus', 'bool', 'Bonus-Münzen beim Level-Aufstieg', 'Bonus coins on level up', 'Ein voller Tag Münzen pro Level, drei bei einer neuen Stufe (Silber, Gold, Diamant, Rubin).', 'One full day of coins per level, three for a new tier (silver, gold, diamond, ruby).'),
+      F('coin_show', 'bool', 'Münzen als Münze zeigen', 'Show coins as a coin', 'Münzen erscheinen mit einem kleinen Münze (Silberring, Goldkern) – bei Ämtli, To-dos, Sonderämtli, Belohnungen und in der Statistik. Beim Abhaken fliegt der Münze zum Bild der Person. Aus = nur die Zahl wie bisher.', 'Coins appear with a small coin (silver ring, gold core) – on chores, to-dos, special chores, rewards and in the statistics. When ticking off, the coin flies to the person. Off = just the number as before.'),
+      F('coin_letter', 'text', 'Buchstabe auf der Münze', 'Letter on the coin', 'Ein Buchstabe oder eine Ziffer, die auf die Münze geprägt wird, z. B. der Anfangsbuchstabe eurer Familie. Leer = kleiner Ring (der Stern gehört den Tierchen-Punkten).', 'One letter or digit stamped on the coin, e.g. your family initial. Empty = a small ring (the star belongs to the pet points).', { max: 1 }),
       F('stats_period', 'select', 'Statistik: Zeitraum beim Öffnen', 'Statistics: period when opening', 'Welcher Zeitraum auf der Statistik-Seite zuerst gezeigt wird; antippen wechselt jederzeit.', 'Which period the statistics page shows first; a tap switches at any time.',
         { opts: [['w', { de: 'Woche', en: 'Week' }], ['m', { de: 'Monat', en: 'Month' }], ['q', { de: '3 Monate', en: '3 months' }]] }),
       F('stats_compare', 'bool', 'Statistik: Personen vergleichen', 'Statistics: compare people', 'Zeigt in der Familien-Ansicht „Wer hat was gemacht?“ und „Welche Ämtli – wer wie oft?“ für alle nebeneinander. Aus = nur die Familien-Summen und die eigenen Karten.', 'Shows "Who did what?" and "Which chores – who how often?" side by side for everybody in the family view. Off = only family totals and the own cards.'),
@@ -6872,8 +6871,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     ] },
     { id: 'todos', icon: 'mdi:checkbox-marked-circle-outline', label: { de: 'To-dos', en: 'To-dos' }, fields: [
       F('confirm', 'bool', 'Erledigen bestätigen', 'Confirm completion', 'To-dos werden erst nach der Frage „Als erledigt markieren?“ abgehakt.', 'To-dos are only ticked off after the question "Mark as done?".'),
-      F('size', 'select', 'Standard-Grösse', 'Default size', 'Gross = Punkte für einen ganzen Tag, Mittel = ⅔, Klein = ⅓ (aufgerundet). Eine andere Grösse beim Anlegen braucht die Eltern-PIN. Zählt nicht zum fairen Tageswert.', 'Large = points for a full day, medium = ⅔, small = ⅓ (rounded up). Another size when adding needs the parent PIN. Does not count towards the fair day value.',
-        { opts: [['none', { de: 'Ohne Punkte', en: 'No points' }], ['s', { de: 'Klein', en: 'Small' }], ['m', { de: 'Mittel', en: 'Medium' }], ['l', { de: 'Gross', en: 'Large' }]] }),
+      F('size', 'select', 'Standard-Grösse', 'Default size', 'Gross = Münzen für einen ganzen Tag, Mittel = ⅔, Klein = ⅓ (aufgerundet). Eine andere Grösse beim Anlegen braucht die Eltern-PIN. Zählt nicht zum fairen Tageswert.', 'Large = coins for a full day, medium = ⅔, small = ⅓ (rounded up). Another size when adding needs the parent PIN. Does not count towards the fair day value.',
+        { opts: [['none', { de: 'Ohne Münzen', en: 'No points' }], ['s', { de: 'Klein', en: 'Small' }], ['m', { de: 'Mittel', en: 'Medium' }], ['l', { de: 'Gross', en: 'Large' }]] }),
       F('name_lists', 'entities', 'To-do-Listen mit Namen', 'To-do lists with names', 'Wie bei den Kalendern: Ein Eintrag mit Name oder Spitzname („Lea Zimmer aufräumen“ → Spitzname unter Personen) wird ein To-do dieser Person. „klein / mittel / gross“ am Schluss bestimmt die Punkte. Abhaken geht in beide Richtungen, z. B. mit der Alexa-To-do-Liste.', 'Like the calendars: an item with a name or nickname ("Sam tidy office" → nickname under People) becomes a to-do of that person. "small / medium / large" at the end sets the points. Ticking off works both ways, e.g. with the Alexa to-do list.', { domain: 'todo' }),
       F('max_shown', 'num', 'To-dos pro Person im Planer', 'To-dos per person in the planner', 'Die ältesten zuerst; weitere erscheinen als „+3 weitere“ und lassen sich aufklappen.', 'Oldest first; more show as "+3 more" and can be expanded.', { min: 1, max: 20 }),
       F('show_age', 'bool', 'Zeigen, seit wann ein To-do offen ist', 'Show how long a to-do has been open', '„seit 3 T.“ unter dem To-do.', '"for 3 d" below the to-do.'),
@@ -6929,7 +6928,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('xmas_snow', 'bool', 'An Weihnachten schneit es immer', 'It always snows at Christmas', 'Das echte Wetter bleibt klein oben rechts.', 'The real weather stays small at the top right.'),
       F('wedding', 'date', 'Hochzeitstag', 'Wedding anniversary', 'Mit Jahr zeigt der Planer „14 Jahre verheiratet“.', 'With the year the planner shows "14 years married".'),
       F('couple', 'date', 'Kennenlerntag', 'Couple anniversary', 'Der Tag, an dem ihr ein Paar wurdet.', 'The day you became a couple.'),
-      F('anim_bday', 'bool', 'Geburtstagskind animieren', 'Animate the birthday child', 'Die Zeile des Geburtstagskinds feiert den ganzen Tag; alle seine Punkte zählen doppelt.', 'The birthday child\'s row celebrates all day; all their points count double.'),
+      F('anim_bday', 'bool', 'Geburtstagskind animieren', 'Animate the birthday child', 'Die Zeile des Geburtstagskinds feiert den ganzen Tag; alle seine Münzen zählen doppelt.', 'The birthday child\'s row celebrates all day; all their coins count double.'),
       F('priority', 'prio', 'Vorrang, wenn mehreres zusammenfällt', 'Priority when several things coincide', 'Oben gewinnt.', 'Top wins.'),
       F('events', 'events', 'Saisons ein- und ausschalten', 'Switch seasons on and off', 'Pro Ereignis. Leer lassen = Standard (rechts daneben, aus den Feldern oben). Eigene Zahl = so viele Tage vorher.', 'Per event. Leave empty = default (shown on the right, from the fields above). Own number = that many days before.'),
       F('sug_enabled', 'bool', 'Vorschläge unter dem Wetter', 'Suggestions below the weather', 'Ab Mittag höchstens ein Vorschlag pro Tag, täglich ein anderer (Pool, Jacuzzi, Spieleabend, Velotour …).', 'From noon at most one suggestion a day, a different one every day (pool, hot tub, games night, bike ride …).'),
@@ -6944,6 +6943,15 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('surprise_per_week', 'num', 'Überraschungs-Ämtli pro Kind', 'Surprise chores per child', 'Pro Woche höchstens so viele zufällig zugeteilte Sonderämtli.', 'At most this many randomly assigned special chores per week.', { min: 0, max: 14 }),
       F('max_open', 'num', 'Höchstens gleichzeitig offen', 'At most open at the same time', 'Im Freiwillig-Feld.', 'In the volunteer tile.', { min: 1, max: 20 }),
     ] },
+    { id: 'pets', icon: 'mdi:paw', label: { de: 'Tierchen', en: 'Pets' }, fields: [
+      F('enabled', 'bool', 'Tierchen', 'Pets', 'Jede Person hat Tierchen, die mit Ämtli wachsen: jedes Ämtli gibt gleich viele Tierchen-Punkte wie Münzen. Ausgeschaltet verschwinden Seite, Tierchen und Glücksrad – gespeichert bleibt alles.', 'Everyone has pets that grow with chores: every chore gives as many pet points as coins. Switched off, the page, pets and wheel disappear – everything stays saved.'),
+      F('adults', 'bool', 'Erwachsene starten mit Tierchen', 'Grown-ups start with pets', 'Für neu angelegte Erwachsene. Jede Person kann ihre Tierchen auf der Tierchen-Seite selbst ein- und ausschalten, ohne etwas zu verlieren.', 'For newly added grown-ups. Everyone can switch their own pets on and off on the pets page without losing anything.'),
+      F('wheel', 'bool', 'Glücksrad', 'Wheel of fortune', 'Einmal am Tag pro Person, um Mitternacht wieder frei. Jeder Dreh bringt Futter und Wasser, dazu Pillen, Punkte oder Extras.', 'Once a day per person, free again at midnight. Every spin brings food and water plus pills, points or extras.'),
+      F('speed', 'select', 'Wachstums-Tempo', 'Growth speed', 'Wie viel Wachstum eine Stufe braucht. Normal: Schlüpfen nach etwa 3 Ämtli, Endform nach rund 2 Monaten.', 'How much growth a step needs. Normal: hatching after about 3 chores, final form after about 2 months.',
+        { opts: [['slow', { de: 'Langsam', en: 'Slow' }], ['normal', { de: 'Normal', en: 'Normal' }], ['fast', { de: 'Schnell', en: 'Fast' }]] }),
+      F('decay', 'select', 'Hunger & Co. sinken', 'Needs go down', 'Wie schnell Hunger, Durst, Energie und Laune sinken. Tierchen leiden nie (nie unter 10 %), in den Ferien steht alles still.', 'How fast hunger, thirst, energy and mood go down. Pets never suffer (never below 10 %), during holidays everything pauses.',
+        { opts: [['off', { de: 'Gar nicht', en: 'Not at all' }], ['slow', { de: 'Langsam', en: 'Slowly' }], ['normal', { de: 'Normal', en: 'Normal' }]] }),
+    ] },
     { id: 'lists', icon: 'mdi:cart-outline', label: { de: 'Listen', en: 'Lists' }, fields: [
       F('optimize_time', 'time', 'Tägliche Optimierung um', 'Daily optimisation at', 'Ordnet Unbekanntes unter „Sonstiges“ neu ein.', 'Re-sorts unknown items from "Other".'),
       F('ai_task', 'entity', 'KI-Aufgabe (optional)', 'AI task (optional)', 'Ordnet auch Unbekanntes ein (OpenAI, Google, Ollama …).', 'Also sorts unknown items (OpenAI, Google, Ollama …).', { domain: 'ai_task' }),
@@ -6952,12 +6960,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     { id: 'status', icon: 'mdi:heart-pulse', label: { de: 'Status', en: 'Status' } },
   ];
   // tab order on the page
-  const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'status'];
-  const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
+  const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'pets', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'status'];
+  const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Münzen & Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', ontime: 'Pünktlich-Profi', volunteer: 'Freiwilligen-Champion', rescue: 'Retter in der Not', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', ontime: 'On-time pro', volunteer: 'Volunteer champion', rescue: 'Rescuer', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
-  const AWS = { de: { none: 'Ohne Punkte', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
-  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder' };
+  const AWS = { de: { none: 'Ohne Münzen', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
+  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder', pets: 'pets' };
   // season events in the settings (keys from the server's catalogue)
   const SEV = { weihnachten: ['Advent & Weihnachten', 'Advent & Christmas'], samichlaus: ['Samichlaus', 'St. Nicholas'], heiligabend: ['Heiligabend', 'Christmas Eve'], weihnachtstag: ['Weihnachtstag', 'Christmas Day'], stephanstag: ['Stephanstag', 'Boxing Day'], winteranfang: ['Winteranfang', 'First day of winter'],
     silvester: ['Silvester', 'New Year\'s Eve'], neujahr: ['Neujahr', 'New Year'], berchtoldstag: ['Berchtoldstag', 'St. Berchtold\'s Day'], dreikoenig: ['Dreikönigstag', 'Epiphany'], winter: ['Winter', 'Winter'],
@@ -7181,7 +7189,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       return `<div class="sform">
         ${row(lbl('Titel', 'Title'), `<input class="in" maxlength="80" data-sf="title" value="${esc(d.title || '')}">`)}
         ${row(lbl('Symbol', 'Symbol'), `<input class="in" style="width:80px" maxlength="8" data-sf="icon" value="${esc(d.icon || '⭐')}">`)}
-        ${row(lbl('Punkte', 'Points'), sel('size', [['s', lbl('Klein', 'Small')], ['m', lbl('Mittel', 'Medium')], ['l', lbl('Gross', 'Large')], ['own', lbl('Eigene Zahl', 'Own number')]], d.size) + (d.size === 'own' ? ` <input class="in n" type="number" min="0" max="1000" data-sf="pts" value="${esc(d.pts || 10)}">` : ''), lbl('Nur Bonuspunkte – zählt nie für die Zuverlässigkeit.', 'Bonus points only – never counts for reliability.'))}
+        ${row(lbl('Münzen', 'Coins'), sel('size', [['s', lbl('Klein', 'Small')], ['m', lbl('Mittel', 'Medium')], ['l', lbl('Gross', 'Large')], ['own', lbl('Eigene Zahl', 'Own number')]], d.size) + (d.size === 'own' ? ` <input class="in n" type="number" min="0" max="1000" data-sf="pts" value="${esc(d.pts || 10)}">` : ''), lbl('Nur Bonus-Münzen – zählt nie für die Zuverlässigkeit.', 'Bonus coins only – never counts for reliability.'))}
         ${row(lbl('Vergabe', 'Assignment'), sel('mode', [['free', lbl('Freiwillig (wer zuerst kommt)', 'Volunteer (first come)')], ['each', lbl('Jedes Kind bekommt eines', 'Every child gets one')], ['surprise', lbl('Überraschung (zufällig)', 'Surprise (random)')], ['fixed', lbl('Fix für die Gewählten', 'Fixed for those chosen')]], d.mode))}
         ${row(lbl('Für', 'For'), `<span class="ents">${persons}</span>`, lbl('Leer = alle Kinder.', 'Empty = all children.'))}
         ${row(lbl('Wann', 'When'), anchorCtl + ' ' + extra)}
@@ -7321,7 +7329,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
             <div class="row"><span class="lt"><b>${lbl('Rolle', 'Role')}</b><small>${lbl('Kinder stehen oben im Planer und zählen für die Prognosen. Erwachsene können trotzdem Ämtli und Pokale haben.', 'Children are listed first in the planner and count for the forecasts. Adults can still have chores and trophies.')}</small></span><span class="ctl"><select class="in" data-pk="role" data-pi="${i}"><option value="kid" ${p.role !== 'adult' ? 'selected' : ''}>${lbl('Kind', 'Child')}</option><option value="adult" ${p.role === 'adult' ? 'selected' : ''}>${lbl('Erwachsen', 'Adult')}</option></select></span></div>
             <div class="row"><span class="lt"><b>${lbl('Farbe', 'Colour')}</b><small>${lbl('Gilt auch für den Kalender der Person.', 'Also used for the person\'s calendar.')}</small></span><span class="ctl"><input class="col" type="color" data-pk="color" data-pi="${i}" value="${esc(COLOR(p.color))}"></span></div>
             <div class="row"><span class="lt"><b>${lbl('Kalender', 'Calendar')}</b><small>${lbl('Termine dieser Person.', 'Events of this person.')}</small></span><span class="ctl">${this._entSelect(`data-pk="calendar" data-pi="${i}"`, 'calendar', null, p.calendar)}</span></div>
-            <div class="row"><span class="lt"><b>${lbl('Geburtstag', 'Birthday')}</b><small>${lbl('Am Geburtstag feiert der Planer: eigene Saison, animierte Zeile, doppelte Punkte. Das Jahr ist freiwillig (für „wird 10“).', 'On the birthday the planner celebrates: own season, animated row, double points. The year is optional (for "turns 10").')}</small></span><span class="ctl"><input class="in" style="width:170px" type="date" data-pk="birthday" data-pi="${i}" value="${esc(/^\d{4}-\d{2}-\d{2}$/.test(p.birthday || '') ? p.birthday : (p.birthday ? '2000-' + p.birthday : ''))}"></span></div>
+            <div class="row"><span class="lt"><b>${lbl('Geburtstag', 'Birthday')}</b><small>${lbl('Am Geburtstag feiert der Planer: eigene Saison, animierte Zeile, doppelte Münzen. Das Jahr ist freiwillig (für „wird 10“).', 'On the birthday the planner celebrates: own season, animated row, double coins. The year is optional (for "turns 10").')}</small></span><span class="ctl"><input class="in" style="width:170px" type="date" data-pk="birthday" data-pi="${i}" value="${esc(/^\d{4}-\d{2}-\d{2}$/.test(p.birthday || '') ? p.birthday : (p.birthday ? '2000-' + p.birthday : ''))}"></span></div>
             <div class="row"><span class="lt"><b>${lbl('Geburtstags-Animation', 'Birthday animation')}</b><small>${lbl('Automatisch = jedes Jahr eine andere, und bei allen verschieden.', 'Automatic = a different one every year, and different for everybody.')}</small></span><span class="ctl"><select class="in" data-pk="bday_anim" data-pi="${i}"><option value="">${lbl('Automatisch', 'Automatic')}</option>${BDA.map((b, n) => `<option value="${n}" ${p.bday_anim === n ? 'selected' : ''}>${esc(b[lang === 'en' ? 1 : 0])}</option>`).join('')}</select></span></div>
             <div class="row"><span class="lt"><b>${lbl('Spitznamen', 'Nicknames')}</b><small>${lbl('Mit Komma getrennt – Termine mit diesem Namen erscheinen bei der Person.', 'Comma separated – events with this name appear at the person.')}</small></span><span class="ctl"><input class="in" maxlength="300" data-pk="aliases" data-pi="${i}" value="${esc((p.aliases || []).join(', '))}"></span></div>
             <div class="sec2">${lbl('Schule & Stundenplan', 'School & timetable')}</div>
@@ -7437,7 +7445,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const d = this._dlg;
       const dlg = d ? `<div class="ov"><div class="dlg"><div class="dh">${esc(T.delAsk.replace('{t}', d.title || ''))}</div><div class="acts"><span class="sp"></span><button class="sg" data-close>${esc(T.cancel)}</button><button class="sg del" data-yes>${esc(T.del)}</button></div></div></div>` : '';
       const mods = this._data.general.modules;
-      const tabs = ORDER.map((id) => TABS.find((x) => x.id === id)).filter((x) => x && !((x.id === 'lists' && !mods.lists) || (['persons', 'chores', 'vacation', 'points', 'todos', 'announce', 'seasons', 'sonder'].includes(x.id) && !mods.week)));
+      const tabs = ORDER.map((id) => TABS.find((x) => x.id === id)).filter((x) => x && !((x.id === 'lists' && !mods.lists) || (['persons', 'chores', 'vacation', 'points', 'pets', 'todos', 'announce', 'seasons', 'sonder'].includes(x.id) && !mods.week)));
       this.shadowRoot.innerHTML = `${style}<div class="card">
         <div class="top"><h2>${esc(T.title)}</h2>${this._rfBtn()}<button class="tb" data-chpin><ha-icon icon="mdi:form-textbox-password"></ha-icon>${esc(T.pin)}</button><button class="tb" data-lock><ha-icon icon="mdi:lock-outline"></ha-icon>${esc(T.lock)}</button></div>
         <div class="tabs">${tabs.map((x) => `<button class="tab${x.id === tab.id ? ' on' : ''}" data-tabsel="${x.id}"><ha-icon icon="${x.icon}"></ha-icon>${esc(L(x.label, lang))}</button>`).join('')}</div>
@@ -7732,7 +7740,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
 (() => {
   if (window.FPCONFETTI) return;
   const TXT = {
-    de: { lvl: '{n} ist jetzt Level {v} – {t}! ⬆️', lvlB: ' +{b} Punkte', unl: ' · Neu: {u}', day: 'Super, {n}! Alle Ämtli erledigt 🎉', team: 'Familien-Teamwork! Alle haben alles erledigt 🤝', won: '{n}: {a}!',
+    de: { lvl: '{n} ist jetzt Level {v} – {t}! ⬆️', lvlB: ' +{b} Münzen', unl: ' · Neu: {u}', day: 'Super, {n}! Alle Ämtli erledigt 🎉', team: 'Familien-Teamwork! Alle haben alles erledigt 🤝', won: '{n}: {a}!',
       a: { trophy: 'Pokal des Monats 🏆', crown: 'Krone der Woche 👑', perfect: 'Perfekte Woche ⭐', bee: 'Fleissbiene 🐝', weekend: 'Wochenend-Held 🦸',
         climber: 'Aufsteiger 📈', ontime: 'Pünktlich-Profi ⏰', volunteer: 'Freiwilligen-Champion 🙋', rescue: 'Retter in der Not 🛟', diamond: 'Diamant-Serie 💎', milestone: 'Meilenstein {v} 🏅', team: 'Familien-Teamwork 🤝' } },
     en: { lvl: '{n} is now level {v} – {t}! ⬆️', lvlB: ' +{b} points', unl: ' · New: {u}', day: 'Well done, {n}! Every chore done 🎉', team: 'Family teamwork! Everybody did everything 🤝', won: '{n}: {a}!',
@@ -8671,7 +8679,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   if (!customElements.get('family-planer-card')) customElements.define('family-planer-card', FamilyPlanerCard);
 
   // Navigation bar: one button per active module view, same place on every page (also in kiosk mode)
-  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
+  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Münzen & Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
   const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:format-list-checks', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', statistik: 'mdi:chart-bar', tierchen: 'mdi:paw', einstellungen: 'mdi:cog-outline' };
   const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', statistik: 'week', tierchen: 'week', einstellungen: null };
   const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', statistik: 'stats', tierchen: 'pets', einstellungen: 'settings' };

@@ -68,7 +68,7 @@
           "person_select": "Person bearbeiten",
           "person_remove": "Person entfernen",
           "week_settings": "Einstellungen",
-          "rewards": "Punkte & Belohnungen",
+          "rewards": "Münzen & Belohnungen",
           "announce": "Ansagen bei Bewegung",
           "school": "Schule & Stundenplan",
           "vacation": "Ferien & Abwesenheit"
@@ -84,7 +84,7 @@
           "reliability_days": "Zuverlässigkeit berechnen über",
           "school_gap": "Heimweg über Mittag ab",
           "todo_confirm": "To-dos: Erledigen bestätigen",
-          "todo_points": "To-dos: Standard-Punkte",
+          "todo_points": "To-dos: Standard-Münzen",
           "todo_keep_days": "To-dos: erledigte anzeigen für",
           "school_window": "Schule nur rund um die Schulzeit zeigen"
         },
@@ -96,7 +96,7 @@
           "reliability_days": "Anzahl Tage für die Prozentzahl bei jeder Person (Standard 30).",
           "school_gap": "Ab so vielen Minuten Pause zwischen zwei Lektionen wird der Schultag in zwei Blöcke geteilt (los/zuhause je Block). 0 = automatisch: mindestens 45 Minuten bzw. doppelter Schulweg plus 15 Minuten.",
           "todo_confirm": "To-dos ohne Datum werden erst nach der Frage „Als erledigt markieren?“ abgehakt (Ämtli weiterhin mit einem Tipp).",
-          "todo_points": "Punkte für ein erledigtes To-do (0 = keine). Eigene Punkte pro To-do nur mit Eltern-PIN. To-dos zählen nicht zum fairen Tageswert.",
+          "todo_points": "Münzen für ein erledigtes To-do (0 = keine). Eigene Münzen pro To-do nur mit Eltern-PIN. To-dos zählen nicht zum fairen Tageswert.",
           "todo_keep_days": "Wie lange erledigte To-dos noch sichtbar bleiben (0 = bis zum nächsten Tageswechsel).",
           "school_window": "So viele Minuten vor dem Losgehen bis nach dem Heimkommen erscheint der Schulblock im Planer (Ansicht „Alles“). Sonst ist er ausgeblendet. 0 = immer anzeigen."
         }
@@ -232,12 +232,12 @@
         }
       },
       "rewards": {
-        "title": "Punkte & Belohnungen",
+        "title": "Münzen & Belohnungen",
         "menu_options": {
           "reward_add": "Belohnung hinzufügen",
           "reward_select": "Belohnung bearbeiten",
           "reward_remove": "Belohnung entfernen",
-          "gamification": "Punkte, Boni & Eltern-PIN"
+          "gamification": "Münzen, Boni & Eltern-PIN"
         }
       },
       "reward_add": {
@@ -245,7 +245,7 @@
         "data": {
           "title": "Belohnung",
           "icon": "Icon",
-          "cost": "Kosten in Punkten",
+          "cost": "Kosten in Münzen",
           "approval": "Muss von Eltern freigegeben werden",
           "persons": "Nur für (leer = alle)",
           "per_week": "Höchstens pro Woche (0 = unbegrenzt)"
@@ -259,7 +259,7 @@
         "data": {
           "title": "Belohnung",
           "icon": "Icon",
-          "cost": "Kosten in Punkten",
+          "cost": "Kosten in Münzen",
           "approval": "Muss von Eltern freigegeben werden",
           "persons": "Nur für (leer = alle)",
           "per_week": "Höchstens pro Woche (0 = unbegrenzt)"
@@ -281,27 +281,27 @@
         }
       },
       "gamification": {
-        "title": "Punkte, Boni & Eltern-PIN",
-        "description": "Eltern-PIN: {pin}. Die PIN schützt Freigaben, Punkte, das Anlegen und Ändern von Belohnungen sowie die Einstellungen im Planer. Admins können Freigaben und Punkte auch ohne PIN erledigen; Belohnungen und Einstellungen im Planer verlangen immer die PIN.",
+        "title": "Münzen, Boni & Eltern-PIN",
+        "description": "Eltern-PIN: {pin}. Die PIN schützt Freigaben, Münzen, das Anlegen und Ändern von Belohnungen sowie die Einstellungen im Planer. Admins können Freigaben und Münzen auch ohne PIN erledigen; Belohnungen und Einstellungen im Planer verlangen immer die PIN.",
         "data": {
-          "default_points": "Punkte pro Ämtli (Standard bzw. Gewicht)",
+          "default_points": "Münzen pro Ämtli (Standard bzw. Gewicht)",
           "day_bonus": "Bonus für einen ganz erledigten Tag",
           "streak_bonus": "Bonus für jede 7-Tage-Serie",
           "pin": "Neue Eltern-PIN (4–8 Ziffern)",
           "remove_pin": "Eltern-PIN auf 123456 zurücksetzen",
           "reward_notify": "Anfragen zusätzlich melden an",
-          "mode": "Punkte verteilen",
-          "day_points": "Punkte für einen ganzen Tag (fair)",
+          "mode": "Münzen verteilen",
+          "day_points": "Münzen für einen ganzen Tag (fair)",
           "reward_value": "Gegenwert einer grossen Belohnung",
           "currency": "Währung"
         },
         "data_description": {
-          "default_points": "Im Modus „Pro Ämtli“ die Punkte je Ämtli, im Modus „Fair“ das Standard-Gewicht. Pro Ämtli im Ämtliplan änderbar.",
+          "default_points": "Im Modus „Pro Ämtli“ die Münzen je Ämtli, im Modus „Fair“ das Standard-Gewicht. Pro Ämtli im Ämtliplan änderbar.",
           "reward_notify": "z. B. die Handy-App der Eltern. Eine Mitteilung in Home Assistant gibt es immer.",
-          "pin": "4–8 Ziffern, nicht 123456. Nach 5 Fehlversuchen ist die PIN 5 Minuten gesperrt. Die PIN schützt Freigaben, Punkte, Belohnungen und die Einstellungen im Planer.",
+          "pin": "4–8 Ziffern, nicht 123456. Nach 5 Fehlversuchen ist die PIN 5 Minuten gesperrt. Die PIN schützt Freigaben, Münzen, Belohnungen und die Einstellungen im Planer.",
           "day_bonus": "Wird beim Tageswechsel gutgeschrieben.",
           "streak_bonus": "Nach 7, 14, 21 … Tagen am Stück alles erledigt.",
-          "mode": "Fair: Wer alle seine Ämtli des Tages erledigt, bekommt gleich viele Punkte – egal ob 2 oder 6 Ämtli. Pro Ämtli: jedes Ämtli bringt seine Punkte, wer mehr Ämtli hat, kann mehr verdienen.",
+          "mode": "Fair: Wer alle seine Ämtli des Tages erledigt, bekommt gleich viele Münzen – egal ob 2 oder 6 Ämtli. Pro Ämtli: jedes Ämtli bringt seine Münzen, wer mehr Ämtli hat, kann mehr verdienen.",
           "day_points": "Wird auf die Ämtli des Tages verteilt; jedes erledigte Ämtli bringt sofort seinen Anteil. Der Wert im Ämtliplan wirkt dabei als Gewicht (z. B. 20 = zählt doppelt so viel wie 10).",
           "remove_pin": "Setzt die PIN auf die Start-PIN 123456 zurück. Sie muss danach im Planer sofort geändert werden.",
           "reward_value": "Geldwert einer grossen Belohnung (so viel verdient jemand in einem Monat, wenn alle Ämtli erledigt sind – inkl. Boni). Klein = ¼, Mittel = ½, Mega = 2×, Riesig = 5×. Dient nur zur Orientierung, z. B. 20.",
@@ -447,7 +447,7 @@
     "points_mode": {
       "options": {
         "fair": "Fair – ganzer Tag zählt, nicht die Anzahl Ämtli",
-        "per_chore": "Pro Ämtli – mehr Ämtli, mehr Punkte"
+        "per_chore": "Pro Ämtli – mehr Ämtli, mehr Münzen"
       }
     },
     "language": {
@@ -476,8 +476,8 @@
         "name": "Zuverlässigkeit"
       },
       "points": {
-        "name": "Punkte",
-        "unit_of_measurement": "Punkte"
+        "name": "Münzen",
+        "unit_of_measurement": "Münzen"
       }
     }
   },
@@ -572,8 +572,8 @@
       }
     },
     "add_points": {
-      "name": "Punkte vergeben",
-      "description": "Bonuspunkte geben oder Punkte abziehen.",
+      "name": "Münzen vergeben",
+      "description": "Bonus-Münzen geben oder Münzen abziehen.",
       "fields": {
         "entry_id": {
           "name": "Family Planer",
@@ -584,7 +584,7 @@
           "description": "Name oder ID der Person."
         },
         "points": {
-          "name": "Punkte",
+          "name": "Münzen",
           "description": "Negativ zum Abziehen."
         },
         "reason": {

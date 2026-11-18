@@ -7,27 +7,27 @@
   const FONT = '-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif';
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const TXT = {
-    de: { title: 'Punkte & Belohnungen', pts: 'Punkte', lvl: 'Level', next: 'noch {n} bis Level {l}', max: 'Höchstes Level erreicht!',
-      shop: 'Belohnungen für {name}', shopAll: 'Alle Belohnungen', forAll: 'Für alle', pickHint: 'Person antippen, um ihre Belohnungen zu sehen und einzulösen.', forOnly: 'nur für {n}', redeem: 'Einlösen', missing: 'noch {n} Punkte', approval: 'mit Freigabe', noapproval: 'sofort',
+    de: { title: 'Münzen & Belohnungen', pts: 'Münzen', lvl: 'Level', next: 'noch {n} bis Level {l}', max: 'Höchstes Level erreicht!',
+      shop: 'Belohnungen für {name}', shopAll: 'Alle Belohnungen', forAll: 'Für alle', pickHint: 'Person antippen, um ihre Belohnungen zu sehen und einzulösen.', forOnly: 'nur für {n}', redeem: 'Einlösen', missing: 'noch {n} Münzen', approval: 'mit Freigabe', noapproval: 'sofort',
       week: 'max. {n}× pro Woche', none: 'Noch keine Belohnungen. Mit „+ Belohnung“ auf einer Person anlegen (Eltern-PIN); ohne Auswahl im Dialog gilt sie für alle.',
-      pending: 'Wartet auf Freigabe', approve: 'Freigeben', deny: 'Ablehnen', history: 'Verlauf', bonus: 'Punkte geben',
+      pending: 'Wartet auf Freigabe', approve: 'Freigeben', deny: 'Ablehnen', history: 'Verlauf', bonus: 'Münzen geben',
       pin: 'Eltern-PIN', ok: 'OK', cancel: 'Abbrechen', reason: 'Grund (optional)', give: 'Vergeben',
       sent: '„{t}“ angefragt – die Eltern werden benachrichtigt.', done: '„{t}“ eingelöst. Viel Spass!', approved: 'Freigegeben', denied: 'Abgelehnt',
-      reserved: '{n} reserviert', err: { not_enough_points: 'Nicht genug Punkte.', weekly_limit: 'Diese Woche schon so oft eingelöst.', not_allowed: 'Diese Belohnung ist nicht für dich.', unauthorized: 'Falsche PIN oder keine Berechtigung.', pin_wrong: 'Falsche PIN.', pin_locked: 'Zu viele Fehlversuche – bitte 5 Minuten warten.' },
+      reserved: '{n} reserviert', err: { not_enough_points: 'Nicht genug Münzen.', weekly_limit: 'Diese Woche schon so oft eingelöst.', not_allowed: 'Diese Belohnung ist nicht für dich.', unauthorized: 'Falsche PIN oder keine Berechtigung.', pin_wrong: 'Falsche PIN.', pin_locked: 'Zu viele Fehlversuche – bitte 5 Minuten warten.' },
       kinds: { chore: 'Ämtli', bonus: 'Tagesbonus', streak: 'Serienbonus', adjust: 'Bonus', reward: 'Belohnung', carry: 'Übertrag', todo: 'To-do', award: 'Auszeichnung' },
       edit: 'Bearbeiten', editDone: 'Fertig', add: 'Neue Belohnung', changePin: 'PIN ändern', del: 'Löschen', save: 'Speichern',
-      rTitle: 'Belohnung', rIcon: 'Icon', rCost: 'Kosten in Punkten', rApproval: 'Eltern müssen freigeben', rPersons: 'Nur für (leer = alle)', rWeek: 'Höchstens pro Woche (0 = unbegrenzt)',
+      rTitle: 'Belohnung', rIcon: 'Icon', rCost: 'Kosten in Münzen', rApproval: 'Eltern müssen freigeben', rPersons: 'Nur für (leer = alle)', rWeek: 'Höchstens pro Woche (0 = unbegrenzt)',
       delAsk: '„{t}“ wirklich löschen? Offene Anfragen dafür werden abgelehnt.', saved: 'Gespeichert.', pinChanged: 'Eltern-PIN geändert.',
       startPin: 'Die Start-PIN 123456 ist noch aktiv. Bitte jetzt eine eigene Eltern-PIN festlegen – vorher sind Belohnungen und Einstellungen gesperrt.',
-      rCat: 'Kategorie', own: 'Eigene Punkte', approx: 'ca.', minus: 'Abziehen',
+      rCat: 'Kategorie', own: 'Eigene Münzen', approx: 'ca.', minus: 'Abziehen',
       sizes: { s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Mega gross', xxl: 'Riesig' },
-      catHint: 'Gross = so viel, wie man in einem Monat mit allen Ämtli verdient (inkl. Boni). Die Punkte passen sich an, wenn die Punkte-Einstellungen ändern.',
+      catHint: 'Gross = so viel, wie man in einem Monat mit allen Ämtli verdient (inkl. Boni). Die Münzen passen sich an, wenn die Münzen-Einstellungen ändern.',
       open: 'Noch zu gewinnen', fam: 'Familie', per: { week: 'jede Woche', month: 'jeden Monat', reach: 'beim Erreichen', day: 'jeden Tag' }, lead: 'Vorne: {n}', noLead: 'Noch niemand vorne',
-      units: { pct: '{n} %', days: '{n} Tage', chores: '{n} Ämtli' }, worth: '+{n} Punkte', addFor: 'Belohnung', saving: 'Spart für', waiting: 'Wartet auf Freigabe',
+      units: { pct: '{n} %', days: '{n} Tage', chores: '{n} Ämtli' }, worth: '+{n} Münzen', addFor: 'Belohnung', saving: 'Spart für', waiting: 'Wartet auf Freigabe',
       ready: 'Jetzt einlösbar', inDays: 'in ca. {n} Tagen', inDay: 'morgen', noPace: 'noch keine Prognose', nothing: 'Noch nichts am Laufen',
-      fc: 'Prognose', fcFam: 'Familienschnitt ({p} Punkte/Tag): ca. {n} Tage', fcNow: 'jetzt', awards: 'Auszeichnungen', noAw: 'Noch keine – siehe oben, was es zu gewinnen gibt.' },
-    en: { title: 'Points & rewards', pts: 'points', lvl: 'Level', next: '{n} more to level {l}', max: 'Highest level reached!',
-      shop: 'Rewards for {name}', shopAll: 'All rewards', forAll: 'For everyone', pickHint: 'Tap a person to see and redeem their rewards.', forOnly: 'only for {n}', redeem: 'Redeem', missing: '{n} points to go', approval: 'needs approval', noapproval: 'instant',
+      fc: 'Prognose', fcFam: 'Familienschnitt ({p} Münzen/Tag): ca. {n} Tage', fcNow: 'jetzt', awards: 'Auszeichnungen', noAw: 'Noch keine – siehe oben, was es zu gewinnen gibt.' },
+    en: { title: 'Coins & rewards', pts: 'coins', lvl: 'Level', next: '{n} more to level {l}', max: 'Highest level reached!',
+      shop: 'Rewards for {name}', shopAll: 'All rewards', forAll: 'For everyone', pickHint: 'Tap a person to see and redeem their rewards.', forOnly: 'only for {n}', redeem: 'Redeem', missing: '{n} coins to go', approval: 'needs approval', noapproval: 'instant',
       week: 'max. {n}× per week', none: 'No rewards yet. Add one with "+ Reward" on a person (parent PIN); with nobody chosen in the dialog it is for everyone.',
       pending: 'Waiting for approval', approve: 'Approve', deny: 'Decline', history: 'History', bonus: 'Give points',
       pin: 'Parent PIN', ok: 'OK', cancel: 'Cancel', reason: 'Reason (optional)', give: 'Give',
@@ -228,7 +228,7 @@
         .cat b{font-weight:600;color:#eee}.cat span{font-size:11px;color:#999}.cat.on{border-color:#69C350;background:#202820}.cat.on span{color:#a7dc93}.cat.neg{border-color:#E06B6B;background:#3a2626}
         .hint{display:block;font-size:11px;color:#888;margin-top:2px}
         .people{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-        .pc{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:14px;border:1px solid #2a2a2a;background:#232323;color:inherit;font:inherit;text-align:left;cursor:pointer;border-left:4px solid var(--c)}
+        .pc{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:12px;border:0;background:#232323;color:inherit;font:inherit;text-align:left;cursor:pointer;box-shadow:inset 0 3px 0 var(--c)}
         .ph{display:flex;align-items:center;gap:12px}
         .mds{display:flex;flex-wrap:wrap;gap:5px}.md{width:28px!important;height:28px!important}.md ha-icon{--mdc-icon-size:17px!important}.md.big{width:44px!important;height:44px!important}.md.big ha-icon{--mdc-icon-size:26px!important}.mdm{font-size:12px;color:#888;align-self:center}
         .runs{display:flex;flex-direction:column;gap:6px}
@@ -237,7 +237,7 @@
         .run.w{border:1px dashed #E0A84F}.run.w>ha-icon{color:#E0A84F}.run.none{color:#777;font-size:12px;justify-content:center}
         .add1{display:flex;align-items:center;justify-content:center;gap:6px;height:38px;border-radius:10px;border:1px dashed #4a4a4a;background:transparent;color:#bbb;font:inherit;font-size:13px;cursor:pointer}
         .oas{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-        .oa{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:12px;background:#232323;border:1px solid #2a2a2a;border-top:3px solid color-mix(in srgb,var(--mc) 70%,transparent)}
+        .oa{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:12px;background:#232323;border:0;box-shadow:inset 0 3px 0 var(--mc)}
         .oa:not(.won) .md{filter:saturate(.75)}.ot{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.ot b{font-size:14px}.ot>span{font-size:12px;color:#aaa;line-height:1.35}
         .om{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}.om em{font-style:normal;font-size:11px;color:#999;background:#2b2b2b;border-radius:9px;padding:2px 8px;display:inline-flex;align-items:center;gap:5px}.om em.pp{color:${G}}
         .fc{display:flex;flex-direction:column;gap:5px;padding:10px 12px;border-radius:10px;background:#2b2b2b;font-size:12px;color:#bbb;margin-bottom:6px}.fc b{color:#eee;font-size:12px}
@@ -249,7 +249,7 @@
         .pt{display:flex;flex-direction:column;align-items:flex-end}.pt strong{display:flex;align-items:center;gap:6px;font-size:28px;line-height:1;color:${G}}.fpcoin{margin-right:3px}.pt span{font-size:11px;color:#888}.pt em{font-style:normal;font-size:10px;color:#E0A84F}
         .sec{font-size:12px;color:${G};text-transform:uppercase;letter-spacing:1px;font-weight:600;margin:18px 0 8px}
         .shop{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
-        .rw{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:#262626;border:1px solid #2a2a2a}
+        .rw{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:#232323;border:0;box-shadow:inset 0 3px 0 #69C350}
         .ri{width:48px;height:48px;border-radius:12px;background:rgba(105,195,80,.16);color:${G};display:flex;align-items:center;justify-content:center;flex:none}.ri ha-icon{--mdc-icon-size:26px}
         .rw.lock .ri{background:#2e2e2e;color:#777}
         .rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.rt b{font-size:15px}.rt span{font-size:12px;color:#999}.ms{display:flex;flex-direction:column;gap:3px}

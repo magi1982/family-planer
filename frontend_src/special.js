@@ -16,7 +16,7 @@
       every: 'alle', units: { days: 'Tage', weeks: 'Wochen', months: 'Monate', years: 'Jahre' }, from: 'ab',
       mdays: 'Monate', onday: 'am Tag', last: 'letzter', onweekday: 'am', nths: { 1: '1.', 2: '2.', 3: '3.', 4: '4.', '-1': 'letzten' },
       wd: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'], wdl: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'],
-      dates: 'Daten', adddate: 'Datum hinzufügen', persons: 'Wer?', rotate: 'abwechselnd', window: 'Zeit zum Erledigen', days: 'Tage', points: 'Punkte',
+      dates: 'Daten', adddate: 'Datum hinzufügen', persons: 'Wer?', rotate: 'abwechselnd', window: 'Zeit zum Erledigen', days: 'Tage', points: 'Münzen',
       save: 'Speichern', cancel: 'Abbrechen', del: 'Löschen?', next: 'Nächstes Mal', err: 'Bitte Titel, mindestens eine Person und ein Datum/Intervall angeben.',
       sum: { interval: (s, u) => `alle ${s.every} ${u} ab ${s.start.split('-').reverse().join('.')}`, monthly_day: (s) => `${s.every > 1 ? `alle ${s.every} Monate` : 'monatlich'} am ${s.day === -1 ? 'letzten Tag' : s.day + '.'}`,
         monthly_wd: (s, n, w) => `${s.every > 1 ? `alle ${s.every} Monate` : 'monatlich'} am ${n} ${w}`, yearly: (d) => `jährlich am ${d}`, once: (d) => `einmalig am ${d}` },

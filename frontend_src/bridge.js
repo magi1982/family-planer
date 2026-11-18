@@ -328,7 +328,7 @@
   if (!customElements.get('family-planer-card')) customElements.define('family-planer-card', FamilyPlanerCard);
 
   // Navigation bar: one button per active module view, same place on every page (also in kiosk mode)
-  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
+  const NAV = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Münzen & Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
   const NAV_ICON = { planer: 'mdi:calendar-week', listen: 'mdi:format-list-checks', aemtliplan: 'mdi:clipboard-text-clock-outline', belohnungen: 'mdi:trophy-outline', statistik: 'mdi:chart-bar', tierchen: 'mdi:paw', einstellungen: 'mdi:cog-outline' };
   const NAV_MOD = { planer: 'week', listen: 'lists', aemtliplan: 'week', belohnungen: 'week', statistik: 'week', tierchen: 'week', einstellungen: null };
   const NAV_VIEW = { planer: 'week', listen: 'lists', aemtliplan: 'plan', belohnungen: 'rewards', statistik: 'stats', tierchen: 'pets', einstellungen: 'settings' };

@@ -34,8 +34,8 @@ def all_done_message(names: list[str], lang: str) -> str:
 
 def reward_request_message(person: str, reward: str, cost: int, lang: str) -> str:
     if lang == "de":
-        return f"{person} möchte „{reward}“ für {cost} Punkte einlösen."
-    return f"{person} would like to redeem \"{reward}\" for {cost} points."
+        return f"{person} möchte „{reward}“ für {cost} Münzen einlösen."
+    return f"{person} would like to redeem \"{reward}\" for {cost} coins."
 
 
 def reward_decided_message(person: str, reward: str, approved: bool, lang: str) -> str:
@@ -64,7 +64,7 @@ PRAISE = {
 }
 BIRTHDAY = {
     "de": ["Achtung, Achtung! Heute hat {n} Geburtstag. Alle bitte einmal laut Hurra rufen!",
-           "{n}, heute zählen alle deine Punkte doppelt. Geburtstagskind-Bonus!",
+           "{n}, heute zählen alle deine Münzen doppelt. Geburtstagskind-Bonus!",
            "Wichtige Durchsage: Das Geburtstagskind {n} darf heute ein Lied wünschen.",
            "{n}, die Kühlschrank-Kommission hat beschlossen: Heute gibt es Kuchen!",
            "Hallo {n}! Wusstest du, dass du heute offiziell ein Jahr cooler bist?",
@@ -72,7 +72,7 @@ BIRTHDAY = {
            "Geburtstags-Alarm! {n}, wir finden dich grossartig.",
            "{n}, die Ämtli-Polizei drückt heute ein Auge zu – aber nur ein kleines!"],
     "en": ["Attention please! Today is {n}'s birthday. Everybody shout hooray!",
-           "{n}, all your points count double today. Birthday bonus!",
+           "{n}, all your coins count double today. Birthday bonus!",
            "Important announcement: birthday star {n} gets to pick a song today.",
            "{n}, the fridge committee has decided: there will be cake today!",
            "Hello {n}! Did you know you're officially one year cooler today?",

@@ -9,7 +9,7 @@ import voluptuous as vol
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant, callback
 
-from .settings_spec import STYLES, THEMES
+from .settings_spec import SECTIONS, STYLES, THEMES
 
 TOKEN = vol.All(str, vol.Length(max=64))
 
@@ -539,7 +539,7 @@ def ws_settings_get(hass: HomeAssistant, connection: websocket_api.ActiveConnect
 
 @websocket_api.websocket_command({vol.Required("type"): "family_planer/settings/save", vol.Optional("entry_id"): str,
                                   vol.Required("token"): TOKEN, vol.Required("section"): vol.In(
-                                      ["general", "vacation", "points", "announce", "lists_settings", "todos", "seasons", "sonder"]),
+                                      list(SECTIONS)),
                                   vol.Required("data"): DATA})
 @websocket_api.async_response
 async def ws_settings_save(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:

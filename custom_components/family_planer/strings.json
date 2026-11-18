@@ -68,7 +68,7 @@
           "person_select": "Edit person",
           "person_remove": "Remove person",
           "week_settings": "Settings",
-          "rewards": "Points & rewards",
+          "rewards": "Coins & rewards",
           "announce": "Announcements on motion",
           "school": "School & timetable",
           "vacation": "Holidays & absence"
@@ -84,7 +84,7 @@
           "reliability_days": "Calculate reliability over",
           "school_gap": "Lunch at home from",
           "todo_confirm": "To-dos: confirm completion",
-          "todo_points": "To-dos: default points",
+          "todo_points": "To-dos: default coins",
           "todo_keep_days": "To-dos: show finished ones for",
           "school_window": "Show school only around school time"
         },
@@ -96,7 +96,7 @@
           "reliability_days": "Number of days for each person's percentage (default 30).",
           "school_gap": "From this many minutes between two lessons the school day is split into two blocks (leave/home per block). 0 = automatic: at least 45 minutes or twice the travel time plus 15 minutes.",
           "todo_confirm": "To-dos without a date are only ticked off after the question \"Mark as done?\" (chores still with one tap).",
-          "todo_points": "Points for a finished to-do (0 = none). Own points per to-do only with the parent PIN. To-dos do not count towards the fair day value.",
+          "todo_points": "Coins for a finished to-do (0 = none). Own coins per to-do only with the parent PIN. To-dos do not count towards the fair day value.",
           "todo_keep_days": "How long finished to-dos stay visible (0 = until the next day change).",
           "school_window": "Minutes before leaving and after being home in which the school block is shown in the planner (\"All\" view). Outside this window it is hidden. 0 = always show."
         }
@@ -232,12 +232,12 @@
         }
       },
       "rewards": {
-        "title": "Points & rewards",
+        "title": "Coins & rewards",
         "menu_options": {
           "reward_add": "Add reward",
           "reward_select": "Edit reward",
           "reward_remove": "Remove reward",
-          "gamification": "Points, bonuses & parent PIN"
+          "gamification": "Coins, bonuses & parent PIN"
         }
       },
       "reward_add": {
@@ -245,7 +245,7 @@
         "data": {
           "title": "Reward",
           "icon": "Icon",
-          "cost": "Cost in points",
+          "cost": "Cost in coins",
           "approval": "Needs parent approval",
           "persons": "Only for (empty = everyone)",
           "per_week": "Max per week (0 = unlimited)"
@@ -259,7 +259,7 @@
         "data": {
           "title": "Reward",
           "icon": "Icon",
-          "cost": "Cost in points",
+          "cost": "Cost in coins",
           "approval": "Needs parent approval",
           "persons": "Only for (empty = everyone)",
           "per_week": "Max per week (0 = unlimited)"
@@ -281,27 +281,27 @@
         }
       },
       "gamification": {
-        "title": "Points, bonuses & parent PIN",
-        "description": "Parent PIN: {pin}. The PIN protects approvals, points, adding and changing rewards and the settings in the planner. Admins can approve and give points without the PIN; rewards and settings in the planner always need the PIN.",
+        "title": "Coins, bonuses & parent PIN",
+        "description": "Parent PIN: {pin}. The PIN protects approvals, coins, adding and changing rewards and the settings in the planner. Admins can approve and give coins without the PIN; rewards and settings in the planner always need the PIN.",
         "data": {
-          "default_points": "Points per chore (default or weight)",
+          "default_points": "Coins per chore (default or weight)",
           "day_bonus": "Bonus for a fully completed day",
           "streak_bonus": "Bonus for every 7-day streak",
           "pin": "New parent PIN (4–8 digits)",
           "remove_pin": "Reset parent PIN to 123456",
           "reward_notify": "Also send requests to",
-          "mode": "How points are given",
-          "day_points": "Points for a full day (fair)",
+          "mode": "How coins are given",
+          "day_points": "Coins for a full day (fair)",
           "reward_value": "Value of a large reward",
           "currency": "Currency"
         },
         "data_description": {
-          "default_points": "In \"per chore\" mode the points per chore, in \"fair\" mode the default weight. Can be changed per chore in the chore plan.",
+          "default_points": "In \"per chore\" mode the coins per chore, in \"fair\" mode the default weight. Can be changed per chore in the chore plan.",
           "reward_notify": "e.g. the parents' phone app. A Home Assistant notification is always created.",
-          "pin": "4–8 digits, not 123456. After 5 wrong entries the PIN is locked for 5 minutes. The PIN protects approvals, points, rewards and the settings in the planner.",
+          "pin": "4–8 digits, not 123456. After 5 wrong entries the PIN is locked for 5 minutes. The PIN protects approvals, coins, rewards and the settings in the planner.",
           "day_bonus": "Credited at the day change.",
           "streak_bonus": "After 7, 14, 21 … days in a row with everything done.",
-          "mode": "Fair: whoever finishes all of their chores of the day gets the same points – whether 2 or 6 chores. Per chore: each chore earns its points, so more chores means more points.",
+          "mode": "Fair: whoever finishes all of their chores of the day gets the same coins – whether 2 or 6 chores. Per chore: each chore earns its coins, so more chores means more coins.",
           "day_points": "Split across the day's chores; each done chore immediately earns its share. The value in the chore plan acts as a weight (e.g. 20 counts twice as much as 10).",
           "remove_pin": "Resets the PIN to the start PIN 123456. It must then be changed in the planner right away.",
           "reward_value": "Money equivalent of a large reward (what a person earns in a month with every chore done, incl. bonuses). Small = ¼, medium = ½, mega = 2×, giant = 5×. Only shown as a guide, e.g. 20.",
@@ -447,7 +447,7 @@
     "points_mode": {
       "options": {
         "fair": "Fair – a full day counts, not the number of chores",
-        "per_chore": "Per chore – more chores, more points"
+        "per_chore": "Per chore – more chores, more coins"
       }
     },
     "language": {
@@ -476,8 +476,8 @@
         "name": "Reliability"
       },
       "points": {
-        "name": "Points",
-        "unit_of_measurement": "points"
+        "name": "Coins",
+        "unit_of_measurement": "coins"
       }
     }
   },
@@ -572,8 +572,8 @@
       }
     },
     "add_points": {
-      "name": "Give points",
-      "description": "Give bonus points or take points away.",
+      "name": "Give coins",
+      "description": "Give bonus coins or take coins away.",
       "fields": {
         "entry_id": {
           "name": "Family Planer",
@@ -584,7 +584,7 @@
           "description": "Name or id of the person."
         },
         "points": {
-          "name": "Points",
+          "name": "Coins",
           "description": "Negative to take away."
         },
         "reason": {

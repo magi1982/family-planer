@@ -130,7 +130,7 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
       if (el.dataset.f === 'p') {
         const ctx = this._ctx(el); if (!ctx.r) return;
         const n = el.value === '' ? null : Math.max(0, Math.min(1000, Math.round(Number(el.value) || 0)));
-        this._call('todo', 'update_item', { item: ctx.r.uid, points: n }, this._cfg.plan).then(() => this._flash('Punkte gespeichert')).catch((er) => this._flash(`Fehler: ${er.message || er}`, true));
+        this._call('todo', 'update_item', { item: ctx.r.uid, points: n }, this._cfg.plan).then(() => this._flash('Münzen gespeichert')).catch((er) => this._flash(`Fehler: ${er.message || er}`, true));
         return;
       }
       if (el.dataset.f === 't') {
@@ -201,7 +201,7 @@ customElements.whenDefined('lox-wochenplaner-card').then(() => {
       const shownRows = rows.filter((r) => pass(r, flt)).sort((a, b) => this._ord.indexOf(a.uid) - this._ord.indexOf(b.uid));
       const body = shownRows.map((r) => `
         <div class="row" data-uid="${esc(r.uid)}" data-txt="${esc(r.t.toLowerCase())}"${q && !r.t.toLowerCase().includes(q) ? ' hidden' : ''}>
-          <div class="tcol"><div class="tl"><input class="in" data-f="t" value="${esc(r.t)}"><label class="pts" title="Punkte bzw. Gewicht für dieses Ämtli (im fairen Modus: Anteil am Tageswert)"><input class="in pn" data-f="p" type="number" min="0" max="1000" inputmode="numeric" value="${r.pts == null ? '' : r.pts}" placeholder="${Number(this._cfg.punkte_standard) || 10}"><span>Pkt.</span></label></div><div class="rl">${sum(r.z, r.r, r.f)}</div></div>
+          <div class="tcol"><div class="tl"><input class="in" data-f="t" value="${esc(r.t)}"><label class="pts" title="Münzen bzw. Gewicht für dieses Ämtli (im fairen Modus: Anteil am Tageswert)"><input class="in pn" data-f="p" type="number" min="0" max="1000" inputmode="numeric" value="${r.pts == null ? '' : r.pts}" placeholder="${Number(this._cfg.punkte_standard) || 10}"><span>Pkt.</span></label></div><div class="rl">${sum(r.z, r.r, r.f)}</div></div>
           <div class="asg">${this._asg(r.uid, r.z, r.r, r.f)}</div>
           <button class="del${this._confirm === r.uid ? ' cf' : ''}" data-del>${this._confirm === r.uid ? 'Löschen?' : '<ha-icon icon="mdi:trash-can-outline"></ha-icon>'}</button>
         </div>`).join('');

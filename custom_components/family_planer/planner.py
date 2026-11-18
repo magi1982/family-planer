@@ -1484,6 +1484,7 @@ class FamilyPlanner:
                         "default_view": st.get("default_view") if st.get("default_view") in settings_spec.VIEWS else "today"},
             "seasons": self.season_settings(),
             "sonder": self.sonder_settings(),
+            "pets": self.pets_settings(),
             "season_upcoming": seasons.upcoming(self.season_settings(), self.today(), self.data.get("ferien"))[:40],
             "vacation": {k: v for k, v in self.vacation_settings().items() if k != "scanned"},
             "points": {**self.gamification(), "mode": self.points_mode(),

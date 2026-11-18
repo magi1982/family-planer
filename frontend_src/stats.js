@@ -22,14 +22,14 @@
       praise: ['Jeder Tag ist eine neue Chance.', 'Gut gemacht – da geht noch was!', 'Super zuverlässig!', 'Perfekt! Wirklich alles geschafft.'],
       trend: { 1: 'Besser als im Zeitraum davor', 0: 'Gleich gut wie im Zeitraum davor', '-1': 'Etwas weniger als im Zeitraum davor' },
       tDone: 'Ämtli erledigt', tDoneSub: 'von {n} Ämtli', tVol: 'Freiwillig geholfen', tVolSub: 'Ämtli ohne Auftrag', tTodo: 'To-dos abgehakt', tTodoSub: 'aus Listen und Aufgaben',
-      tOn: 'Rechtzeitig fertig', tOnSub: 'bis {t} Uhr erledigt', tStreak: 'Tage am Stück', tBest: 'Rekord: {n} Tage', tPts: 'Punkte gesammelt', tPtsSub: 'für Belohnungen',
+      tOn: 'Rechtzeitig fertig', tOnSub: 'bis {t} Uhr erledigt', tStreak: 'Tage am Stück', tBest: 'Rekord: {n} Tage', tPts: 'Münzen gesammelt', tPtsSub: 'für Belohnungen',
       week7: 'Meine letzten 7 Tage', block: '1 Klotz = 1 Ämtli', done: 'erledigt', open: 'offen / nicht geschafft', star: 'alles geschafft',
       weeks12: 'Meine letzten 12 Wochen', dot: 'Jeder Punkt ist ein Tag', fullDays: 'An {n} Tagen hast du alles geschafft!',
       did: 'Was ich gemacht habe', things: '{n} Sachen erledigt', nothing: 'Noch nichts',
-      pts: 'Woher meine Punkte kommen', ptsHead: '{e} verdient · {s} eingelöst', earned: 'Punkte verdient', spent: 'Für Belohnungen eingelöst', saving: 'noch nichts eingelöst – du sparst!',
+      pts: 'Woher meine Münzen kommen', ptsHead: '{e} verdient · {s} eingelöst', earned: 'Münzen verdient', spent: 'Für Belohnungen eingelöst', saving: 'noch nichts eingelöst – du sparst!',
       src: { chore: ['Ämtli', 'deine normalen Ämtli'], sonder: ['Freiwillige Ämtli', 'Sonderämtli, die du gemacht hast'], todo: ['To-dos', 'abgehakte Aufgaben'], bonus: ['Tagesbonus', 'an Tagen mit allem geschafft'],
         streak: ['Serien-Bonus', 'für viele Tage am Stück'], award: ['Auszeichnungen', 'Pokale und Auszeichnungen'], level: ['Level-Bonus', 'für ein neues Level'], adjust: ['Extra von Mama/Papa', 'Bonus von den Eltern'] },
-      last: 'Letzte Punkte', today: 'heute', yday: 'gestern', myAw: 'Meine Auszeichnungen', practice: 'Da üben wir noch', missed: '{n}× vergessen', tip: 'Tipp: Erinnerung im Planer einschalten',
+      last: 'Letzte Münzen', today: 'heute', yday: 'gestern', myAw: 'Meine Auszeichnungen', practice: 'Da üben wir noch', missed: '{n}× vergessen', tip: 'Tipp: Erinnerung im Planer einschalten',
       when: 'Wann ich helfe', tod: ['Morgen', 'Nachmittag', 'Abend'], todTxt: ['Du bist ein Morgen-Mensch!', 'Du hilfst am liebsten nach der Schule!', 'Du bist ein Abend-Helfer!'],
       load: 'Statistik wird geladen …', err: 'Statistik konnte nicht geladen werden.', planner: 'Planer', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
     en: { title: 'Statistics', fam: 'Family', back: 'Family', per: { w: 'Week', m: 'Month', q: '3 months' },
@@ -110,10 +110,10 @@
     _family(persons, byId, d) {
       const T = this.T; const st = d.settings || {}; const aw = this._awMeta();
       const tiles = `<div class="tiles4">
-        <div class="tile"><b style="color:#69C350">${d.done}</b><span>${esc(T.choresDone)}</span>${d.ten != null ? `<small>${esc(fmt(T.ofTen, { n: d.ten }))}</small>` : ''}</div>
-        <div class="tile"><b style="color:#F2A541">${d.vol}</b><span>${esc(T.vol)}</span><small>${esc(T.volSub)}</small></div>
-        <div class="tile"><b style="color:#A88BFA">${d.todos}</b><span>${esc(T.todos)}</span><small>${esc(T.todosSub)}</small></div>
-        <div class="tile"><b style="color:#FF8A5B">${esc(fmt(T.allDoneN, { n: d.all_done }))}</b><span>${esc(T.allDone)}</span><small>${esc(fmt(T.record, { n: d.all_done_best }))}</small></div></div>`;
+        <div class="tile" style="--pc:#69C350"><b style="color:#69C350">${d.done}</b><span>${esc(T.choresDone)}</span>${d.ten != null ? `<small>${esc(fmt(T.ofTen, { n: d.ten }))}</small>` : ''}</div>
+        <div class="tile" style="--pc:#F2A541"><b style="color:#F2A541">${d.vol}</b><span>${esc(T.vol)}</span><small>${esc(T.volSub)}</small></div>
+        <div class="tile" style="--pc:#A88BFA"><b style="color:#A88BFA">${d.todos}</b><span>${esc(T.todos)}</span><small>${esc(T.todosSub)}</small></div>
+        <div class="tile" style="--pc:#FF8A5B"><b style="color:#FF8A5B">${esc(fmt(T.allDoneN, { n: d.all_done }))}</b><span>${esc(T.allDone)}</span><small>${esc(fmt(T.record, { n: d.all_done_best }))}</small></div></div>`;
       const ppl = persons.filter((p) => byId[p.id]);
       const mx = Math.max(1, ...ppl.map((p) => byId[p.id].done + byId[p.id].vol + byId[p.id].todos));
       const seg = (n, c) => (n ? `<span style="width:${(n / mx * 100).toFixed(1)}%;min-width:26px;background:${c}">${n}</span>` : '');
@@ -195,7 +195,7 @@
 
   const CSS = `
     :host{display:block}
-    .card{position:relative;background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:16px;color:var(--fp-text,#ececec);font-family:var(--fp-font,system-ui,sans-serif);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
+    .card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}.card{position:relative;background:var(--fp-bg1,#1e1e1e);border:1px solid var(--fp-line,#2a2a2a);border-radius:var(--fp-radius,16px);padding:16px;color:var(--fp-text,#ececec);font-family:var(--fp-font,system-ui,sans-serif);-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}
     button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
     h2{margin:0;font-size:17px}small{color:var(--fp-text2,#a9b1bd)}
     .msg{padding:40px;text-align:center;color:var(--fp-text2,#aaa)}
@@ -207,11 +207,11 @@
     .seg button{height:40px;padding:0 14px;border:0;border-radius:9px;background:transparent;font-size:14px;font-weight:600;color:var(--fp-text2,#a9b1bd)}
     .seg button.on{background:var(--fp-accent,#69C350);color:var(--fp-on-accent,#111)}
     .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;margin-bottom:14px}
-    .sec{background:var(--fp-bg2,#171a20);border:1px solid var(--fp-line,#2f3541);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+    .sec{background:var(--fp-bg2,#171a20);border:0;border-radius:12px;box-shadow:inset 0 3px 0 var(--pc,var(--fp-accent,#69C350));padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
     .w5{grid-column:span 5}.w6{grid-column:span 6}.w7{grid-column:span 7}.w12{grid-column:span 12}
     .hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
     .tiles4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
-    .tile{background:var(--fp-bg2,#171a20);border:1px solid var(--fp-line,#2f3541);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+    .tile{background:var(--fp-bg2,#171a20);border:0;border-radius:12px;box-shadow:inset 0 3px 0 var(--pc,var(--fp-accent,#69C350));padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0}
     .tile b{font-size:32px;line-height:1.1;display:flex;align-items:center;gap:6px}.tile span{font-size:14px;font-weight:600}.tile small{font-size:12px}
     .tiles6{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
     .ti{width:38px;height:38px;border-radius:11px;background:color-mix(in srgb,var(--tc) 18%,transparent);color:var(--tc);display:flex;align-items:center;justify-content:center;margin-bottom:4px}
@@ -230,7 +230,7 @@
     .ball{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:#111;font-size:12px;font-weight:800}.dash{color:var(--fp-text3,#6f7886)}.tot{color:var(--fp-text2,#a9b1bd);font-weight:600}
     .hd2{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:6px 0 10px}.hd2 h2{font-size:21px}
     .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-    .pc{display:flex;flex-direction:column;gap:12px;text-align:left;padding:16px;border-radius:18px;border:2px solid var(--fp-line,#2f3541);background:var(--fp-bg2,#171a20);box-shadow:inset 0 4px 0 var(--pc)}
+    .pc{display:flex;flex-direction:column;gap:12px;text-align:left;padding:16px;border-radius:12px;border:0;background:var(--fp-bg2,#171a20);box-shadow:inset 0 3px 0 var(--pc)}
     .pch{display:flex;align-items:center;gap:12px}.pch>div{flex:1;min-width:0}.pch b{display:block;font-size:20px}.pch small{color:#a8e08f;font-weight:600}
     .rl{display:flex;justify-content:space-between;font-size:13px;color:var(--fp-text2,#a9b1bd)}.rl b{color:var(--fp-text,#eee)}
     .ten{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px}.ten i{aspect-ratio:1;border-radius:50%;border:2px dashed var(--fp-text3,#6f7886);box-sizing:border-box}.ten i.on{background:#69C350;border:0}.ten.sm{gap:5px}

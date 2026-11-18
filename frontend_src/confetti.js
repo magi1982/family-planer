@@ -8,7 +8,7 @@
 (() => {
   if (window.FPCONFETTI) return;
   const TXT = {
-    de: { lvl: '{n} ist jetzt Level {v} – {t}! ⬆️', lvlB: ' +{b} Punkte', unl: ' · Neu: {u}', day: 'Super, {n}! Alle Ämtli erledigt 🎉', team: 'Familien-Teamwork! Alle haben alles erledigt 🤝', won: '{n}: {a}!',
+    de: { lvl: '{n} ist jetzt Level {v} – {t}! ⬆️', lvlB: ' +{b} Münzen', unl: ' · Neu: {u}', day: 'Super, {n}! Alle Ämtli erledigt 🎉', team: 'Familien-Teamwork! Alle haben alles erledigt 🤝', won: '{n}: {a}!',
       a: { trophy: 'Pokal des Monats 🏆', crown: 'Krone der Woche 👑', perfect: 'Perfekte Woche ⭐', bee: 'Fleissbiene 🐝', weekend: 'Wochenend-Held 🦸',
         climber: 'Aufsteiger 📈', ontime: 'Pünktlich-Profi ⏰', volunteer: 'Freiwilligen-Champion 🙋', rescue: 'Retter in der Not 🛟', diamond: 'Diamant-Serie 💎', milestone: 'Meilenstein {v} 🏅', team: 'Familien-Teamwork 🤝' } },
     en: { lvl: '{n} is now level {v} – {t}! ⬆️', lvlB: ' +{b} points', unl: ' · New: {u}', day: 'Well done, {n}! Every chore done 🎉', team: 'Family teamwork! Everybody did everything 🤝', won: '{n}: {a}!',

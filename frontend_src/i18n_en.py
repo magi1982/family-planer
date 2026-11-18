@@ -117,9 +117,9 @@ WEEK = [
 
 PLAN = [
     ('<ha-icon icon="mdi:plus"></ha-icon>Besonderes Ämtli</button>', '<ha-icon icon="mdi:plus"></ha-icon>Special chore</button>'),
-    ('title="Punkte bzw. Gewicht für dieses Ämtli (im fairen Modus: Anteil am Tageswert)"', 'title="Points or weight for this chore (in fair mode: share of the day value)"'),
+    ('title="Münzen bzw. Gewicht für dieses Ämtli (im fairen Modus: Anteil am Tageswert)"', 'title="Coins or weight for this chore (in fair mode: share of the day value)"'),
     ("<span>Pkt.</span>", "<span>pts</span>"),
-    ("this._flash('Punkte gespeichert')", "this._flash('Points saved')"),
+    ("this._flash('Münzen gespeichert')", "this._flash('Coins saved')"),
     ("ex.push(`bis ${WD", "ex.push(`until ${WD"),
     ("ex.push(`alle ${x[0]} Wo., nächste KW ${nextKw(x[0], x[1])}`)", "ex.push(`every ${x[0]} wks, next week ${nextKw(x[0], x[1])}`)"),
     ("return 'täglich'; if (j === '1,2,3,4,5') return 'werktags'; if (j === '6,7') return 'Wochenende';",

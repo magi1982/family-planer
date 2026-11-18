@@ -36,7 +36,7 @@ const SOON_T = ['in {n} Min', 'in {n} Std'];
 const FPL = 'de';
 const TX = {
   de: { fer: 'Ferien', awy: 'Nicht da', today: 'Heute', week: 'Woche', since: 'seit {n} T.', more: '+{n} weitere', less: 'weniger', vol: 'Freiwillig', volSub: 'Wer zuerst kommt …', take: 'Ich nehm\'s!', who: 'Wer nimmt es?',
-    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} P.', x2: 'Punkte x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Nichts geplant – frei!',
+    secret: '🤫 Geheim-Ämtli', reveal: 'Anzeigen', pts: '{n} M.', x2: 'Münzen x2', bday: 'Geburtstag', spc: 'Sonder', spcH: 'Sonderämtli', open: '{n} offen', rel: 'Zuverlässigkeit', cancel: 'Abbrechen', none: 'Nichts geplant – frei!',
     school: 'Schule', events: 'Termine', chores: 'Ämtli', todos: 'To-dos', allDone: 'Alles erledigt!', of: '{a} von {b}', plan: 'Geplant', tomS: 'Morgen', nextS: 'Als Nächstes',
     awNow: 'weg bis {d}', awToday: 'heute weg', awTom: 'ab morgen weg', awTomAt: 'morgen ab {t} weg', awAt: 'ab {t} weg', wd: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'] },
   en: { fer: 'Holiday', awy: 'Away', today: 'Today', week: 'Week', since: 'for {n} d', more: '+{n} more', less: 'less', vol: 'Volunteer', volSub: 'First come, first served …', take: 'I\'ll take it!', who: 'Who takes it?',

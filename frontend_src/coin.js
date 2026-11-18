@@ -1,4 +1,4 @@
-// Points as a coin ("Kerben-Taler"): flat silver disc, gold core, a stamped letter (or a small star) and one notch
+// Coins ("Münzen"): flat silver disc, gold core, a stamped letter (or a small ring) and one notch
 // per family member in the silver ring. No constant shine: every 5–9 s a small star flashes at one spot,
 // each coin in its own rhythm. Pure SVG with SMIL animation (works in every shadow root without extra CSS);
 // with "reduce motion" the flash is left out.
@@ -15,7 +15,6 @@
     const l = String(c.letter || '').slice(0, 1).toUpperCase(); cfg.letter = LETTER.test(l) ? l : '';
     const n = ((snap || {}).persons || []).length; cfg.notches = n >= 1 && n <= 12 ? n : 5;
   };
-  const star = (cx, cy, R, fill) => `<path d="M${Array.from({ length: 10 }, (_, i) => { const r = i % 2 ? R * 0.4 : R; const t = (i * 36 - 90) * Math.PI / 180; return `${(cx + Math.cos(t) * r).toFixed(1)} ${(cy + Math.sin(t) * r).toFixed(1)}`; }).join(' L')}Z" fill="${fill}"/>`;
   const notches = (n) => Array.from({ length: n }, (_, i) => {
     const a = (i * 360) / n - 90; const t = a * Math.PI / 180; const x = 50 + Math.cos(t) * 36; const y = 50 + Math.sin(t) * 36;
     return `<rect x="${(x - 1.2).toFixed(1)}" y="${(y - 4.4).toFixed(1)}" width="2.4" height="8.8" fill="#8f99a6" transform="rotate(${(a + 90).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
@@ -32,7 +31,7 @@
     const id = `fpc${++uid}`; const k = uid; const sz = Number(px) || 16;
     const mark = cfg.letter
       ? `<text x="50" y="62" text-anchor="middle" font-size="34" font-weight="700" font-family="Georgia,'Times New Roman',serif" fill="#9a6f0a">${cfg.letter}</text>`
-      : star(50, 52, 15, '#9a6f0a');
+      : `<circle cx="50" cy="52" r="11" fill="none" stroke="#9a6f0a" stroke-width="3.5"/>`; // no star: ⭐ belongs to the Tierchen points
     return `<svg class="fpcoin${cls ? ' ' + cls : ''}" viewBox="${sz <= 24 ? '3 3 94 94' : '0 0 100 100'}" width="${sz}" height="${sz}" aria-hidden="true" focusable="false" style="flex:none;vertical-align:-.18em;overflow:visible">`
       + `<defs><clipPath id="${id}"><path d="M0 0 H100 L0 100Z"/></clipPath></defs>`
       + `<circle cx="50" cy="50" r="44" fill="#C3CBD4"/><circle cx="50" cy="50" r="44" fill="#E6EBF0" clip-path="url(#${id})"/>`

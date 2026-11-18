@@ -170,7 +170,7 @@
         .addb{width:52px;height:44px;border-radius:10px;border:none;background:${G};color:#141414;cursor:pointer}
         .addb ha-icon{--mdc-icon-size:24px}
         .cols{columns:3 250px;column-gap:12px}
-        section{break-inside:avoid;background:#232323;border:1px solid #2c2c2c;border-radius:12px;padding:10px 10px 6px;margin:0 0 12px}
+        section{break-inside:avoid;background:#232323;border:0;box-shadow:inset 0 3px 0 #69C350;border-radius:12px;padding:12px 10px 6px;margin:0 0 12px}
         section.pend{border-style:dashed;border-color:#4a4a4a}
         h3{display:flex;align-items:center;gap:8px;margin:0 2px 8px;font-size:12px;font-weight:600;color:#9a9a9a;text-transform:uppercase;letter-spacing:1px}
         h3 ha-icon{color:${G}}h3 span{flex:1}h3 em{font-style:normal;color:#666}
