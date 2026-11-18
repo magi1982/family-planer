@@ -824,3 +824,13 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - Decision (user): variant B – yellow "🙋 Freiwillig" button in the toolbar that moves (wiggle/pulse), opens a popup with the cards and "Ich nehm's!"; no 6th column.
 - Rename filter "To-dos & Spezial" to something short (proposal: "Extras"; alternatives "Aufgaben", "Jobs").
 - Stundenplan already shows every school block of the day (Alles only shows the current block, setting "Schulfenster"). Today (Wed) has only a morning block, so it looked the same.
+
+## #66 GUI walk-through 0.16.2 (tablet size) – proposals
+- Woche: person column very wide and mostly empty (avatar centred in a tall row) → narrow label column (avatar + name on top), more room for days.
+- Woche: words broken mid-word in narrow cells ("kommuniziere-n") → hyphens:auto with lang="de" or allow 3 lines.
+- Woche: KW date range cut at the right; FR/SA/SO show "6 Ämtl".
+- Belohnungen: "Jetzt einlösbar" is only text → big "Einlösen" button on the card.
+- Belohnungen: kids with points but "Noch nichts am Laufen" → suggest the nearest reward ("Kinderbueno in 3 Tagen").
+- Header: icons without labels (calendar, list, trophy, chart) → small labels under them or a tooltip on long-press.
+- Statistik: no empty state – when there is no data yet, explain why ("Ab morgen siehst du hier …").
+- Einstellungen: avatar parts row overflows to 2 lines on tablet; could scroll horizontally.
