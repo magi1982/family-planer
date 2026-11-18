@@ -3,6 +3,7 @@
 ## 0.16.4 – 2026-11-18
 ### Changed
 - **New chore buttons:** no tick circle any more. The title runs over the full width; below it the hints (*until Fri*, *To-do*, *Special*) sit on the left and the coins on the right. A done chore gets a green tick of the same height next to the coins and a green border. In the week view the coin rows of neighbouring buttons line up. Buttons are about 10 % lower.
+- **Secret chores as one split tile:** chore and eye share one border, divided by a line – left half ticks the chore, right half reveals it. Also in narrow columns (no extra row for the eye any more).
 - **No more "To-dos" counter button** in the planer toolbar: the count repeated what the columns already show, and with the volunteer button the toolbar got too wide on a tablet (the date was cut off). In its place a single to-do icon button opens the to-do overview with the input field.
 
 ## 0.16.3 – 2026-11-18
