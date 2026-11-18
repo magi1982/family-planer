@@ -805,3 +805,11 @@ Status: Frage beantwortet, Idee wartet auf Entscheid.
 - Wer den Planer über HACS installiert, muss nichts von Hand anlegen – keine Dashboard-Ansichten, keine Helfer, keine Automationen, kein Claude/MCP.
 - Jede Seite (Statistik, Belohnungen, Listen, Tierchen …) muss auch ohne eigene Dashboard-Ansicht erreichbar sein: fehlt die Ansicht, öffnet der Navigationsknopf die Seite als Fenster über dem Planer (wie die To-dos).
 - Prüfen: frische Installation mit Beispieldaten → alle Knöpfe funktionieren, keine Fehlermeldung, keine leeren Seiten.
+
+## #64 Tablet check 0.16.2 (iPad landscape, planner area 1080×810)
+Seen in the live app (Chrome, same CSS size as the tablet):
+- Heute: person headers have different heights (leader avatar is bigger, badges get their own row) → SCHULE/TERMINE/ÄMTLI rows don't line up across columns. Idea: fixed header height, badges as small overlay on the avatar.
+- Heute: in narrow columns (~190 px) the points chip always drops to its own line → every chore card is 2 lines even for short titles; fewer chores fit on screen. Idea: points stay right of the title when the title fits.
+- Woche: the date range under "KW" is cut off at the right edge ("16. – 22. Novem…"); FR/SA/SO columns cut "Ämtli" to "Ämtl".
+- Woche: today's column takes most of the width, the other days are very narrow.
+- Long event titles in the Termine list are cut quite early ("Gamb…") next to the "in 12 Min" chip.
