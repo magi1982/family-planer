@@ -40,3 +40,11 @@ def test_unicorn_story_always_has_a_rainbow():
     # the scene marks its rainbow; story 49 brings its own one and drops it only if the scene shows one
     assert 'class="rbw"' in season
     assert 'class="rb49 needrb"' in taps and "querySelectorAll('.needrb')" in taps
+
+
+def test_volunteer_is_a_toolbar_button_not_a_column():
+    """Free special chores: yellow toolbar button + popup, the family columns keep their width."""
+    js = (Path(__file__).parents[1] / "frontend_src/ui_week.js").read_text(encoding="utf-8")
+    assert "data-volopen" in js and 'class="vpop"' in js
+    assert 'class="tcol volc"' not in js
+    assert "['extra', 'Extras']" in js

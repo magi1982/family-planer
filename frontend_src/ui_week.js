@@ -612,9 +612,11 @@ class LoxWochenplanerCard extends FpBase {
     const tm = e.target.closest('[data-tdmore]'); if (tm) { this._tdMore = this._tdMore === tm.dataset.tdmore ? null : tm.dataset.tdmore; this._render(); return; }
     const rv = e.target.closest('[data-reveal]'); if (rv && this._reveal === rv.dataset.reveal) { this._reveal = null; clearTimeout(this._rvT); this._render(); return; }
     if (rv) { this._reveal = rv.dataset.reveal; try { const b = rv.getBoundingClientRect(); if (window.FPCONFETTI && window.FPCONFETTI.burst) window.FPCONFETTI.burst(b.left + b.width / 2, b.top + b.height / 2, 'silver', '#F5C542', 0.45); } catch (err) { /* no effect */ } clearTimeout(this._rvT); this._rvT = setTimeout(() => { this._reveal = null; this._render(); }, 5000); this._render(); return; }
+    if (e.target.closest('[data-volopen]')) { this._volOpen = true; this._render(); return; }
+    const vcx = e.target.closest('[data-volclose]'); if (vcx && (e.target === vcx || vcx.tagName === 'BUTTON')) { this._volOpen = false; this._claim = null; this._render(); return; }
     const cl = e.target.closest('[data-claim]'); if (cl) { this._claim = this._claim === cl.dataset.claim ? null : cl.dataset.claim; this._render(); return; }
     const cp = e.target.closest('[data-claimp]');
-    if (cp && this.fpStore) { const [iid, pid] = cp.dataset.claimp.split('|'); this._claim = null; this.fpStore.ws('family_planer/sonder/claim', { inst_id: iid, person_id: pid }).catch(() => this._render()); return; }
+    if (cp && this.fpStore) { const [iid, pid] = cp.dataset.claimp.split('|'); this._claim = null; this._volOpen = false; this.fpStore.ws('family_planer/sonder/claim', { inst_id: iid, person_id: pid }).catch(() => this._render()); return; }
     const sb = e.target.closest('[data-sonder]');
     if (sb && this.fpStore) {
       const it = ((this.fpStore.snap || {}).sonder || []).find((x) => x.id === sb.dataset.sonder); if (!it) return;
@@ -816,11 +818,12 @@ class LoxWochenplanerCard extends FpBase {
     }).join('');
 
     const empty = !kids.length ? `<div class="emptyk">Noch keine Ämtli geplant – im Tab „Ämtliplan“ anlegen.</div>` : '';
-    // volunteer tile: only while a special chore is waiting for the fastest child
+    // volunteer cards: only while a special chore is waiting for the fastest child
     const kidsP = kids.map((k) => ({ ...k, id: pidOf[k.name] }));
     const volHtml = this._volCards(snapX, tStr, kidsP);
-    const volRow = !volHtml || !days.some((d) => ymd(d) === tStr) || ['termine', 'schule'].includes(modeX) ? '' : `<div class="lab vol"><div class="ring vr" style="width:${phone ? 56 : 72}px;height:${phone ? 56 : 72}px"><span>🙋</span></div><div class="lt"><div class="nm vl1">${TX.vol} <span class="vs2">${TX.volSub}</span></div></div></div>`
-      + days.map((d) => (ymd(d) === tStr ? `<div class="c t vc2">${volHtml}</div>` : `<div class="c f${T[ymd(d)] === 's' ? ' sm' : ''}"></div>`)).join('');
+    const volCount = (volHtml.match(/class="vcard"/g) || []).length;
+    if (!volCount) this._volOpen = false;
+    const volRow = ''; // the volunteer cards live in the yellow toolbar button and its popup (no extra column)
     const viewNow = this._view || (snapX.settings || {}).default_view || 'today';
     let todayGrid = '';
     if (viewNow === 'today') {
@@ -866,7 +869,6 @@ class LoxWochenplanerCard extends FpBase {
           <span class="flg" style="--rc:${lv.c}" title="${TX.rel}">${st.pct}%</span><div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
-      if (volHtml && isT && !['termine', 'schule'].includes(modeX)) cols.push(`<div class="tcol volc"><div class="lab th vol"><div class="ring vr" style="width:64px;height:64px"><span>🙋</span></div><div class="lt"><div class="nm vl1">${TX.vol} <span class="vs2">${TX.volSub}</span></div></div></div><div class="tbody">${volHtml}</div></div>`);
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(auto-fit,minmax(min(100%,150px),1fr))`}">${cols.join('')}</div>`;
     }
 
@@ -1048,11 +1050,20 @@ class LoxWochenplanerCard extends FpBase {
       @keyframes fpst{0%{transform:rotate(var(--a)) translateY(0) scale(.3);opacity:0}20%{opacity:1}100%{transform:rotate(var(--a)) translateY(-70px) scale(1.1);opacity:0}}
       @media (prefers-reduced-motion:reduce){.bdx,.take,.lab.bday{animation:none}.bdx i{animation:none;opacity:0}}
       .err{color:#E06B6B;font-size:12px;margin-top:10px}
+      .nb.volb{background:#F5C542;color:#3a2a00;border-color:#F5C542;font-weight:600;gap:6px;padding:0 12px;transform-origin:50% 90%;animation:fpwig 3.2s ease-in-out infinite,fpglow 3.2s ease-in-out infinite}.nb.volb .vh{font-size:18px;line-height:1}.nb.volb .tdn{background:#3a2a00;color:#F5C542}
+      @keyframes fpwig{0%,72%,100%{transform:rotate(0) scale(1)}76%{transform:rotate(-9deg) scale(1.06)}80%{transform:rotate(8deg) scale(1.06)}84%{transform:rotate(-6deg)}88%{transform:rotate(4deg)}92%{transform:rotate(0)}}
+      @keyframes fpglow{0%,60%,100%{box-shadow:0 0 0 0 rgba(245,197,66,0)}75%{box-shadow:0 0 0 6px rgba(245,197,66,.35)}90%{box-shadow:0 0 0 12px rgba(245,197,66,0)}}
+      .vpop{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;animation:fpvin .25s ease-out}
+      .vbox{background:#232323;border:1px solid rgba(245,197,66,.5);border-radius:16px;padding:14px;width:min(560px,100%);max-height:calc(100% - 32px);overflow:auto;box-sizing:border-box}
+      .vhd{display:flex;align-items:center;gap:8px;margin-bottom:12px}.vhd .vh{font-size:26px}.vhd b{font-size:18px;color:#F5C542}.vhd .vs2{flex:1;color:#aaa;font-size:13px}.vcl{width:40px;height:40px;border-radius:50%;border:none;background:#333;color:#ddd;font-size:16px;cursor:pointer}
+      .vlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;align-items:start}.vlist .vcard{align-content:start}
+      @media (prefers-reduced-motion:reduce){.nb.volb{animation:none}}
     </style>
     <div class="card${phone ? ' phone' : ''}">
       <div class="top">
         <div class="seg vw">${[['today', TX.today], ['week', TX.week]].map(([v, l]) => `<button class="${viewNow === v ? 'on' : ''}" data-view="${v}">${l}</button>`).join('')}</div>
-        <div class="seg">${[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['extra', 'To-dos & Spezial'], ['termine', 'Termine'], ['schule', 'Stundenplan']].filter(([v]) => v !== 'schule' || Object.keys(this._cfg.schule || {}).length).map(([v, l]) => `<button class="${(this._mode || 'alle') === v ? 'on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
+        <div class="seg">${[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['extra', 'Extras'], ['termine', 'Termine'], ['schule', 'Stundenplan']].filter(([v]) => v !== 'schule' || Object.keys(this._cfg.schule || {}).length).map(([v, l]) => `<button class="${(this._mode || 'alle') === v ? 'on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
+        ${volCount ? `<button class="nb volb" data-volopen title="${TX.vol}" aria-label="${TX.vol}"><span class="vh">🙋</span>${phone ? '' : TX.vol}<b class="tdn">${volCount}</b></button>` : ''}
         ${this._cfg.todos_knopf ? `<div class="tdg"><button class="nb td${this._cfg.todos_offen ? ' g' : ''}" data-todos title="To-dos"><ha-icon icon="mdi:checkbox-marked-circle-outline"></ha-icon>${phone ? '' : 'To-dos'}${this._cfg.todos_offen ? ` <b class="tdn">${Number(this._cfg.todos_offen)}</b>` : ''}</button><button class="nb" data-todoadd title="To-do hinzufügen"><ha-icon icon="mdi:plus"></ha-icon></button></div>` : ''}
         <div class="nav">
           ${(phone || viewNow === 'today' ? (this._dayOff || 0) !== 0 : this._week !== 0) ? `<button class="nb g" data-nav="0">Heute</button>` : ''}
@@ -1063,6 +1074,7 @@ class LoxWochenplanerCard extends FpBase {
           <button class="nb" data-nav="1"><ha-icon icon="mdi:chevron-right"></ha-icon></button>
         </div>
       </div>
+      ${this._volOpen && volCount ? `<div class="vpop" data-volclose><div class="vbox" role="dialog" aria-label="${TX.vol}"><div class="vhd"><span class="vh">🙋</span><b>${TX.vol}</b><span class="vs2">${TX.volSub}</span><button class="vcl" data-volclose aria-label="${TX.cancel}">✕</button></div><div class="vlist">${volHtml}</div></div></div>` : ''}
       ${todayGrid || `<div class="grid">${head}${(!cals.length || cals.some((c) => !c.person)) ? termine : ''}${rows}${volRow}${empty}</div>`}
       ${this._err ? `<div class="err">${esc(this._err)}</div>` : ''}
       ${this._detail ? this._detailHtml(kids, pre, awards, frames) : ''}

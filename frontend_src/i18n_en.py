@@ -109,7 +109,7 @@ WEEK = [
     ("<b>${pl.length}</b>Ämtli</div>", "<b>${pl.length}</b>chores</div>"),
     ("${opl.length} offen</div>", "${opl.length} open</div>"),
     ("Noch keine Ämtli geplant – im Tab „Ämtliplan“ anlegen.", "No chores planned yet – add them under \"Chore plan\"."),
-    ("[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['extra', 'To-dos & Spezial'], ['termine', 'Termine'], ['schule', 'Stundenplan']]", "[['alle', 'All'], ['aemtli', 'Chores'], ['extra', 'To-dos & special'], ['termine', 'Events'], ['schule', 'Timetable']]"),
+    ("[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['extra', 'Extras'], ['termine', 'Termine'], ['schule', 'Stundenplan']]", "[['alle', 'All'], ['aemtli', 'Chores'], ['extra', 'Extras'], ['termine', 'Events'], ['schule', 'Timetable']]"),
     ("const schoolC = { farbe: k.farbe, name: 'Schule', schule: true };", "const schoolC = { farbe: k.farbe, name: 'School', schule: true };"),
     ("lessons = spans.map((z) => ({ title: 'Schule', s:", "lessons = spans.map((z) => ({ title: 'School', s:"),
     ("`🎒 los ${hm(new Date(bk.s - wg * 60000))} · zuhause ${hm(new Date(+bk.e + wg * 60000))}` : '🎒 Schule'", "`🎒 leave ${hm(new Date(bk.s - wg * 60000))} · home ${hm(new Date(+bk.e + wg * 60000))}` : '🎒 School'"),
