@@ -919,6 +919,8 @@ class LoxWochenplanerCard extends FpBase {
       .ev.one{display:flex;align-items:center;gap:6px;white-space:nowrap}.ev.one .et{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;display:block}
       .ev.one .tm{flex:none;color:#9a9a9a;font-size:.9em;font-variant-numeric:tabular-nums}.ev.one .src{flex:none;margin:0}
       .pev.mid .ev.one{white-space:nowrap;gap:4px}.pev.mid .ev.one .tm{font-size:10px}
+      /* today columns: event title on its own line(s), time and badge below – nothing important gets cut */
+      .tcol .ev.one{flex-wrap:wrap;white-space:normal;row-gap:1px}.tcol .ev.one .et{flex:1 1 100%;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:break-word}
       .lgi{display:flex;align-items:center;gap:6px;font-size:13px;color:#ccc}.lgi i{width:10px;height:10px;border-radius:3px;display:inline-block}.ev.w{white-space:normal;line-height:1.35}.ev.w .du{margin-left:6px}@keyframes fpspin{to{transform:rotate(360deg)}}
       .lab{background:#232323;border-radius:10px;padding:8px 8px 8px 12px;display:flex;align-items:center;gap:10px;min-width:0;box-sizing:border-box}
       .lv2{display:flex;align-items:center;gap:4px;margin-top:5px;flex-wrap:wrap}
@@ -1022,7 +1024,7 @@ class LoxWochenplanerCard extends FpBase {
       /* secret chore: one tile with one border, split by a line – chore left (tap = done), eye right (tap = show) */
       .spw{gap:0;border:1px solid rgba(245,197,66,.55);border-radius:10px;overflow:hidden}.spw:has(> .btn.done){border-color:rgba(91,191,74,.6)}
       .spw > .btn,.spw > .btn.spc2{border:none;border-radius:0}.tcol.nar .spw{flex-direction:row}
-      .spw > .rvb,.tcol .spw > .rvb,.tcol.nar .spw > .rvb,.c .spw > .rvb{border:none;border-left:1px solid rgba(245,197,66,.4);border-radius:0;width:38px;min-width:38px;height:auto;padding:0;background:rgba(245,197,66,.06)}
+      .spw > .rvb,.tcol .spw > .rvb,.tcol.nar .spw > .rvb,.c .spw > .rvb{border:none;border-left:1px solid rgba(245,197,66,.4);border-radius:0;width:46px;min-width:46px;height:auto;padding:0;background:rgba(245,197,66,.06)}.spw > .rvb svg{width:27px;height:20px}
       .spw > .rvb.on{background:rgba(245,197,66,.2)}
       .ptp{display:inline-block;margin-left:6px;padding:0 7px;border-radius:9px;background:rgba(245,197,66,.16);color:#F5C542;font-size:11px;font-weight:700;line-height:17px;vertical-align:middle;white-space:nowrap;font-style:normal}.done .ptp{opacity:.6}
       .lab.vol{background:linear-gradient(135deg,rgba(245,197,66,.16),#232323 70%)}.ring.vr{display:flex;align-items:center;justify-content:center;border-radius:50%;background:#2b2b2b;font-size:30px;box-shadow:0 0 0 2px rgba(245,197,66,.55)}
