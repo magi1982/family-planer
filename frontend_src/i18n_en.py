@@ -60,8 +60,6 @@ WEEK = [
      "'Family teamwork', 'On one day the whole family does everything.'],"),
     ('${lv.t} · Zuverlässigkeit ${s.pct} %',
      '${lv.t} · Reliability ${s.pct} %'),
-    ('title="To-do hinzufügen"',
-     'title="Add to-do"'),
     ("${ymd(dd) === tStr ? 'Heute' : WDL[isoWd(dd) - 1]}",
      "${ymd(dd) === tStr ? 'Today' : WDL[isoWd(dd) - 1]}"),
     ("return short ? 'ganzt.' : 'ganztägig';", "return short ? 'all day' : 'all day';"),

@@ -3886,7 +3886,7 @@ class LoxWochenplanerCard extends FpBase {
         <div class="seg vw">${[['today', TX.today], ['week', TX.week]].map(([v, l]) => `<button class="${viewNow === v ? 'on' : ''}" data-view="${v}">${l}</button>`).join('')}</div>
         <div class="seg">${[['alle', 'Alles'], ['aemtli', 'Ämtli'], ['extra', 'Extras'], ['termine', 'Termine'], ['schule', 'Stundenplan']].filter(([v]) => v !== 'schule' || Object.keys(this._cfg.schule || {}).length).map(([v, l]) => `<button class="${(this._mode || 'alle') === v ? 'on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
         ${volCount ? `<button class="nb volb" data-volopen title="${TX.vol}" aria-label="${TX.vol}"><span class="vh">🙋</span>${phone ? '' : TX.vol}<b class="tdn">${volCount}</b></button>` : ''}
-        ${this._cfg.todos_knopf ? `<div class="tdg"><button class="nb" data-todoadd title="To-do hinzufügen"><ha-icon icon="mdi:plus"></ha-icon></button></div>` : ''}
+        ${this._cfg.todos_knopf ? `<div class="tdg"><button class="nb" data-todoadd title="To-dos" aria-label="To-dos"><ha-icon icon="mdi:checkbox-marked-circle-outline"></ha-icon></button></div>` : ''}
         <div class="nav">
           ${(phone || viewNow === 'today' ? (this._dayOff || 0) !== 0 : this._week !== 0) ? `<button class="nb g" data-nav="0">Heute</button>` : ''}
           ${cals.length && !phone ? `<button class="nb${this._syncing ? ' spin2' : ''}" data-sync title="Kalender synchronisieren"><ha-icon icon="mdi:calendar-sync-outline"></ha-icon></button>` : ''}
@@ -5284,7 +5284,7 @@ class LoxWochenplanerCard extends FpBase {
         <div class="seg vw">${[['today', TX.today], ['week', TX.week]].map(([v, l]) => `<button class="${viewNow === v ? 'on' : ''}" data-view="${v}">${l}</button>`).join('')}</div>
         <div class="seg">${[['alle', 'All'], ['aemtli', 'Chores'], ['extra', 'Extras'], ['termine', 'Events'], ['schule', 'Timetable']].filter(([v]) => v !== 'schule' || Object.keys(this._cfg.schule || {}).length).map(([v, l]) => `<button class="${(this._mode || 'alle') === v ? 'on' : ''}" data-mode="${v}">${l}</button>`).join('')}</div>
         ${volCount ? `<button class="nb volb" data-volopen title="${TX.vol}" aria-label="${TX.vol}"><span class="vh">🙋</span>${phone ? '' : TX.vol}<b class="tdn">${volCount}</b></button>` : ''}
-        ${this._cfg.todos_knopf ? `<div class="tdg"><button class="nb" data-todoadd title="Add to-do"><ha-icon icon="mdi:plus"></ha-icon></button></div>` : ''}
+        ${this._cfg.todos_knopf ? `<div class="tdg"><button class="nb" data-todoadd title="To-dos" aria-label="To-dos"><ha-icon icon="mdi:checkbox-marked-circle-outline"></ha-icon></button></div>` : ''}
         <div class="nav">
           ${(phone || viewNow === 'today' ? (this._dayOff || 0) !== 0 : this._week !== 0) ? `<button class="nb g" data-nav="0">Today</button>` : ''}
           ${cals.length && !phone ? `<button class="nb${this._syncing ? ' spin2' : ''}" data-sync title="Sync calendars"><ha-icon icon="mdi:calendar-sync-outline"></ha-icon></button>` : ''}
