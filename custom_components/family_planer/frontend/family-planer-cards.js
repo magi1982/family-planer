@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.18.3'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.18.4'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
@@ -3960,7 +3960,20 @@ const fadeIn = (el) => {
     el.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' });
   } catch (e) { /* ignore */ }
 };
+// every page starts at the top: the banner and the buttons are always visible after switching
+const fpToTop = () => {
+  try {
+    window.scrollTo(0, 0);
+    const ha = document.querySelector('home-assistant'); const main = ha && ha.shadowRoot && ha.shadowRoot.querySelector('home-assistant-main');
+    const ppr = main && main.shadowRoot && main.shadowRoot.querySelector('partial-panel-resolver');
+    const lov = ppr && ppr.querySelector('ha-panel-lovelace'); const root = lov && lov.shadowRoot && lov.shadowRoot.querySelector('hui-root');
+    const view = root && root.shadowRoot && root.shadowRoot.querySelector('#view, hui-view-container');
+    if (view) view.scrollTop = 0;
+  } catch (e) { /* layout of Home Assistant changed */ }
+};
+window.fpToTop = fpToTop;
 const fpNavigate = (p) => {
+  fpToTop();
   const parts = location.pathname.split('/').filter(Boolean);
   // a dashboard without this view (e.g. made before statistics/pets existed): the nav card shows the page right here, below
   // itself – the dashboard is never left (kiosk mode, iPad guided access)
@@ -5412,7 +5425,20 @@ const fadeIn = (el) => {
     el.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' });
   } catch (e) { /* ignore */ }
 };
+// every page starts at the top: the banner and the buttons are always visible after switching
+const fpToTop = () => {
+  try {
+    window.scrollTo(0, 0);
+    const ha = document.querySelector('home-assistant'); const main = ha && ha.shadowRoot && ha.shadowRoot.querySelector('home-assistant-main');
+    const ppr = main && main.shadowRoot && main.shadowRoot.querySelector('partial-panel-resolver');
+    const lov = ppr && ppr.querySelector('ha-panel-lovelace'); const root = lov && lov.shadowRoot && lov.shadowRoot.querySelector('hui-root');
+    const view = root && root.shadowRoot && root.shadowRoot.querySelector('#view, hui-view-container');
+    if (view) view.scrollTop = 0;
+  } catch (e) { /* layout of Home Assistant changed */ }
+};
+window.fpToTop = fpToTop;
 const fpNavigate = (p) => {
+  fpToTop();
   const parts = location.pathname.split('/').filter(Boolean);
   // a dashboard without this view (e.g. made before statistics/pets existed): the nav card shows the page right here, below
   // itself – the dashboard is never left (kiosk mode, iPad guided access)
@@ -8874,6 +8900,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         window.addEventListener('location-changed', () => { this._inlinePage(null); this._render(); });
         window.addEventListener('fp-inline-page', (e) => { if (this.isConnected) this._inlinePage(e.detail && e.detail.key); });
         this._tick = setInterval(() => this._clock(), 15000);
+        window.addEventListener('scroll', () => { if (this._page) this._placePage(); }, { passive: true });
         window.addEventListener('resize', () => { this._placeHint(); this._placePage(); if (this._narrowNow() !== this._wasNarrow || this._topNow() !== this._wasTop) { this._wasNarrow = this._narrowNow(); this._wasTop = this._topNow(); this._render(); } });
       }
       this._render();
@@ -8945,16 +8972,20 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const view = key && NAV_VIEW[key];
       if (!view || view === 'week' && key === 'planer') {
         if (this._page) { this._page.remove(); this._page = null; }
+        if (this._lockOld != null) { document.documentElement.style.overflow = this._lockOld; this._lockOld = null; }
         if (this._inline) { this._inline = null; this._render(); }
         return;
       }
       if (this._inline === key && this._page) return;
       if (this._page) this._page.remove();
       this._inline = key;
+      // start at the top and keep the dashboard behind still: the banner and the buttons stay visible
+      if (window.fpToTop) window.fpToTop();
+      if (this._lockOld == null) { this._lockOld = document.documentElement.style.overflow || ''; document.documentElement.style.overflow = 'hidden'; }
       const pg = document.createElement('div'); const card = document.createElement('family-planer-card');
       card.setConfig({ view, entry_id: this._cfg.entry_id }); pg.appendChild(card);
       const s = this._store && this._store.snap; if (s) applyTheme(pg, this._cfg.theme || s.theme, this._cfg.style || s.style);
-      document.body.appendChild(pg); this._page = pg; this._placePage();
+      document.body.appendChild(pg); this._page = pg; this._placePage(); requestAnimationFrame(() => this._placePage());
       if (this._hass) card.hass = this._hass;
       this._render();
     }
@@ -8964,7 +8995,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       // above everything of the dashboard below (the planer's pets and wheels use z-index 5–6), below popups (9000+)
       this._page.style.cssText = `position:fixed;z-index:100;isolation:isolate;left:${Math.round(r.left)}px;width:${Math.round(r.width)}px;top:${Math.round(r.bottom + 8)}px;bottom:0;overflow:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box;padding-bottom:8px;background:var(--fp-page,var(--fp-bg0,#141414))`;
     }
-    disconnectedCallback() { if (this._page) { this._page.remove(); this._page = null; this._inline = null; } if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
+    disconnectedCallback() { if (this._page) { this._page.remove(); this._page = null; this._inline = null; } if (this._lockOld != null) { document.documentElement.style.overflow = this._lockOld; this._lockOld = null; } if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
     // night mode: a soft dark veil over the whole dashboard (no layout change, clicks pass through)
     _night(on) {
       let v = document.getElementById('fp-night');
@@ -9235,6 +9266,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (force || this._navNarrow !== this._narrow) { this._navNarrow = this._narrow; this._nav.setConfig({ entry_id: cfg.entry_id, menu: this._narrow }); }
       this._nav.hass = this._hass;
       if (this._view !== view) {
+        if (this._view && window.fpToTop) window.fpToTop(); // a new page starts at the top
         this._view = view; if (this._card) this._card.remove();
         this._card = document.createElement('family-planer-card'); this._card.setConfig({ view, entry_id: cfg.entry_id }); this.appendChild(this._card);
       }

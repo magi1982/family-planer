@@ -44,3 +44,14 @@ def test_inline_page_covers_the_planer_below():
     nav = (pathlib.Path(__file__).parents[1] / "frontend_src/bridge.js").read_text()
     z = int(re.search(r"this\._page\.style\.cssText = `position:fixed;z-index:(\d+)", nav).group(1))
     assert 6 < z < 9000
+
+
+def test_switching_pages_starts_at_the_top():
+    """Banner and buttons stay visible: every page change scrolls to the top, the inline page locks the dashboard."""
+    import pathlib
+    src = pathlib.Path(__file__).parents[1] / "frontend_src"
+    week = (src / "ui_week.js").read_text()
+    nav = (src / "bridge.js").read_text()
+    assert "const fpNavigate = (p) => {\n  fpToTop();" in week
+    assert "window.fpToTop()" in nav and "document.documentElement.style.overflow = 'hidden'" in nav
+    assert "document.documentElement.style.overflow = this._lockOld" in nav  # unlocked again

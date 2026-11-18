@@ -410,6 +410,7 @@
         window.addEventListener('location-changed', () => { this._inlinePage(null); this._render(); });
         window.addEventListener('fp-inline-page', (e) => { if (this.isConnected) this._inlinePage(e.detail && e.detail.key); });
         this._tick = setInterval(() => this._clock(), 15000);
+        window.addEventListener('scroll', () => { if (this._page) this._placePage(); }, { passive: true });
         window.addEventListener('resize', () => { this._placeHint(); this._placePage(); if (this._narrowNow() !== this._wasNarrow || this._topNow() !== this._wasTop) { this._wasNarrow = this._narrowNow(); this._wasTop = this._topNow(); this._render(); } });
       }
       this._render();
@@ -481,16 +482,20 @@
       const view = key && NAV_VIEW[key];
       if (!view || view === 'week' && key === 'planer') {
         if (this._page) { this._page.remove(); this._page = null; }
+        if (this._lockOld != null) { document.documentElement.style.overflow = this._lockOld; this._lockOld = null; }
         if (this._inline) { this._inline = null; this._render(); }
         return;
       }
       if (this._inline === key && this._page) return;
       if (this._page) this._page.remove();
       this._inline = key;
+      // start at the top and keep the dashboard behind still: the banner and the buttons stay visible
+      if (window.fpToTop) window.fpToTop();
+      if (this._lockOld == null) { this._lockOld = document.documentElement.style.overflow || ''; document.documentElement.style.overflow = 'hidden'; }
       const pg = document.createElement('div'); const card = document.createElement('family-planer-card');
       card.setConfig({ view, entry_id: this._cfg.entry_id }); pg.appendChild(card);
       const s = this._store && this._store.snap; if (s) applyTheme(pg, this._cfg.theme || s.theme, this._cfg.style || s.style);
-      document.body.appendChild(pg); this._page = pg; this._placePage();
+      document.body.appendChild(pg); this._page = pg; this._placePage(); requestAnimationFrame(() => this._placePage());
       if (this._hass) card.hass = this._hass;
       this._render();
     }
@@ -500,7 +505,7 @@
       // above everything of the dashboard below (the planer's pets and wheels use z-index 5–6), below popups (9000+)
       this._page.style.cssText = `position:fixed;z-index:100;isolation:isolate;left:${Math.round(r.left)}px;width:${Math.round(r.width)}px;top:${Math.round(r.bottom + 8)}px;bottom:0;overflow:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box;padding-bottom:8px;background:var(--fp-page,var(--fp-bg0,#141414))`;
     }
-    disconnectedCallback() { if (this._page) { this._page.remove(); this._page = null; this._inline = null; } if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
+    disconnectedCallback() { if (this._page) { this._page.remove(); this._page = null; this._inline = null; } if (this._lockOld != null) { document.documentElement.style.overflow = this._lockOld; this._lockOld = null; } if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
     // night mode: a soft dark veil over the whole dashboard (no layout change, clicks pass through)
     _night(on) {
       let v = document.getElementById('fp-night');
@@ -771,6 +776,7 @@
       if (force || this._navNarrow !== this._narrow) { this._navNarrow = this._narrow; this._nav.setConfig({ entry_id: cfg.entry_id, menu: this._narrow }); }
       this._nav.hass = this._hass;
       if (this._view !== view) {
+        if (this._view && window.fpToTop) window.fpToTop(); // a new page starts at the top
         this._view = view; if (this._card) this._card.remove();
         this._card = document.createElement('family-planer-card'); this._card.setConfig({ view, entry_id: cfg.entry_id }); this.appendChild(this._card);
       }

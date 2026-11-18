@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.18.4 – unreleased
+### Fixed
+- **Banner gone after switching pages:** opening a page (e.g. pets from a scrolled planner) kept the old scroll position, so the banner and the buttons were out of view. Every page change now starts at the top, and a page shown inside a dashboard keeps the dashboard behind it still.
+
 ## 0.18.3 – 2026-11-18
 ### Added
 - **Action `family_planer.add_pet_points`** (admins only): give or take pet points – no coins.

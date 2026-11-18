@@ -1138,7 +1138,20 @@ const fadeIn = (el) => {
     el.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'ease-out' });
   } catch (e) { /* ignore */ }
 };
+// every page starts at the top: the banner and the buttons are always visible after switching
+const fpToTop = () => {
+  try {
+    window.scrollTo(0, 0);
+    const ha = document.querySelector('home-assistant'); const main = ha && ha.shadowRoot && ha.shadowRoot.querySelector('home-assistant-main');
+    const ppr = main && main.shadowRoot && main.shadowRoot.querySelector('partial-panel-resolver');
+    const lov = ppr && ppr.querySelector('ha-panel-lovelace'); const root = lov && lov.shadowRoot && lov.shadowRoot.querySelector('hui-root');
+    const view = root && root.shadowRoot && root.shadowRoot.querySelector('#view, hui-view-container');
+    if (view) view.scrollTop = 0;
+  } catch (e) { /* layout of Home Assistant changed */ }
+};
+window.fpToTop = fpToTop;
 const fpNavigate = (p) => {
+  fpToTop();
   const parts = location.pathname.split('/').filter(Boolean);
   // a dashboard without this view (e.g. made before statistics/pets existed): the nav card shows the page right here, below
   // itself – the dashboard is never left (kiosk mode, iPad guided access)
