@@ -884,3 +884,12 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - Tierchen on/off: not in the head any more – behind ⚙️ (Tierchen-Einstellungen) with explanation and a second confirmation ("Wirklich ausschalten? Abbrechen / Ja, ausschalten"). Off page has a green "Tierchen wieder einschalten".
 - Points button: neutral grey "Punkte einsetzen" with "50 ⭐ → +50 Wachstum"; only "Entwickeln" turns yellow. Tree button reads "🌿 Entwicklungsbaum".
 - Redesign "Aktuelles Tierchen" (after "sieht scheisse aus"): one slim head bar (avatar + pet, name ▾ to switch person, tabs as plain text, ⭐ points, cog for settings); pet directly on the tile (no box in a box), name + pencil, 4 values as round gauges; right: thick progress bar with numbers inside, two buttons (Entwickeln = only yellow when ready, Punkte einsetzen), tree button top right, pills as one row of chips; "Pflegen & spielen" shows only things you have, effect as small tag in the colour of the value. Fits one tablet screen.
+
+### 62. Bildschirm wecken bei Bewegung (18.11.)
+Wunsch: kommt jemand zum Tablet (Bewegungsmelder, z. B. Shelly BLU Motion), geht das Display an.
+- **Was ein Browser kann:** ein schlafendes iPad (Auto-Sperre) kann keine Webseite aufwecken – das kann nur das Gerät selbst. Darum: iPad-Auto-Sperre auf „Nie“, und der Planer macht den „Schlaf“ selbst.
+- **Vorschlag:** neue Einstellung *Bildschirmschoner* (Bereich Ansagen/Kiosk): nach X Minuten ohne Bewegung und ohne Tippen wird der Planer schwarz (Uhr klein in der Ecke, optional ganz schwarz, nachts automatisch). Bewegungsmelder meldet Bewegung oder jemand tippt → sofort wieder an. Der erste Tipp weckt nur, löst nichts aus.
+- Bewegungsmelder: derselbe wie bei den Ansagen (#38), mehrere möglich; ohne Melder nur „Tippen weckt“.
+- Einstellungen mit Beschreibung: Schoner an/aus, nach wie vielen Minuten (2/5/10/30), Art (Uhr / ganz schwarz), Bewegungsmelder.
+- Android mit Fully Kiosk: dort kann der Bildschirm wirklich ein- und ausgeschaltet werden (eigene Integration) – optional später: „Fully-Kiosk-Gerät“ wählen.
+- Offen: Shelly BLU Motion ist in Home Assistant noch nicht sichtbar (kein Bluetooth/BTHome eingerichtet).
