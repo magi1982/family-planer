@@ -879,3 +879,4 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - Pflegen background = same spotlight as the pet view (no garden). "Dieses jetzt pflegen" (green) makes a pet the active one and opens Pflegen.
 - Sammlung card: 4 per row; stage + aktiv on top, pet, name (+ kind), rows Linie / Spezial / Frisst / Mag / Zusammen (no overlap, values cut with …), growth bar.
 - Page button 🐾 = mdi:paw in the planer's button style; while the Tierchen page is open only it is highlighted.
+- Tierchen page (picker + head): no reliability, no level – only avatar + pet, name, pet and Punkte. The capsule stays on the planer card.
