@@ -380,7 +380,9 @@ Every family member can raise little pets that grow with the chores – like a s
 - **Evolving** opens the evolution tree: up to three ways (colour, look, theme line such as fire, water, night). The tree shows the way so far; what comes next stays secret.
 - **Care:** hunger, thirst, energy and mood go down slowly and never below 10 % – pets never suffer, and during holidays everything pauses. Food, drinks, treats and pills are only used when the pet needs them; toys stay.
 - **Pills:** growth pills S/M/L add growth, the **evolution pill** takes a pet a whole step further at once (also an egg).
-- **Wheel of fortune:** once a day per person, free again at midnight. Every spin brings food and water plus a prize: growth pill, pet extra, food pack, +20 points, evolution pill, spin again or the star field (fable egg, artefact or jackpot). The server chooses the field; the wheel only shows it. A fable egg comes at the latest after 60 spins.
+- **Wheel of fortune:** once a day per person, free again at midnight. Every spin brings food and water plus a prize: growth pill, pet extra, food pack, +30 points, evolution pill, a new egg, spin again or the star field (fable egg, artefact or jackpot). The server chooses the field; the wheel only shows it. A fable egg comes at the latest after 60 spins, an evolution pill after 24. Never more than one egg waits – if one is already there, the egg field gives a big growth pill.
+- **Garden growth:** the other pets in the garden (babies and young ones) grow a little by themselves every day, so there are always some pets in between – not on holiday, at most a week at once.
+- **Balance:** about 10 pets after 3 months, about 3 of them at the top (Legende) and some in between – checked by a simulation test (`tests/test_pets_balance.py`).
 - **Pets page** (🐾 in the navigation): *Garden* (the same house, pool and season as the header, with a big front garden where the pets run, climb, hide and swim), *Current pet* (develop and care in one screen), *Inventory*, *Collection* (cards with line, special ability, food, favourite places and days together; unknown kinds as silhouettes) and *Statistics*.
 - **Names:** every pet can get its own name (up to 16 characters); the name shows big, the kind small beside it.
 - **In the header** up to 8 pets of the family walk around the house and pool; when a header story plays, they step back behind it.
@@ -520,6 +522,7 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Pets | on | pets page, pets on the cards and in the header, wheel of fortune; off hides everything, nothing is lost |
 | Grown-ups start with pets | off | for newly added grown-ups; everyone can switch their own pets on and off on the pets page |
 | Wheel of fortune | on | once a day per person, free again at midnight |
+| New eggs | Normal | Rare (only when a pet grows big) / Normal (plus 1 egg field on the wheel) / Often (2 egg fields) |
 | Growth speed | Normal | Slow / Normal / Fast – how much growth each step needs (normal: hatching after about 3 chores, final form after about 2 months) |
 | Needs go down | Slowly | Not at all / Slowly / Normal – hunger, thirst, energy and mood; never below 10 %, paused during holidays |
 

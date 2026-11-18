@@ -143,17 +143,19 @@ def clean_coin(raw) -> dict:
 
 PET_SPEEDS = ("slow", "normal", "fast")
 PET_DECAY = ("off", "slow", "normal")
-PETS_DEFAULT = {"enabled": True, "adults": False, "wheel": True, "speed": "normal", "decay": "slow"}
+PET_EGGS = ("rare", "normal", "often")
+PETS_DEFAULT = {"enabled": True, "adults": False, "wheel": True, "speed": "normal", "decay": "slow", "eggs": "normal"}
 
 
 def clean_pets(raw) -> dict:
-    """Tierchen: on/off for the family, start state for grown-ups, daily wheel, growth speed, how fast needs sink."""
+    """Tierchen: on/off for the family, start state for grown-ups, daily wheel, growth speed, how fast needs sink, new eggs."""
     raw = raw if isinstance(raw, dict) else {}
     d = PETS_DEFAULT
     return {"enabled": bool(raw.get("enabled", d["enabled"])), "adults": bool(raw.get("adults", d["adults"])),
             "wheel": bool(raw.get("wheel", d["wheel"])),
             "speed": raw.get("speed") if raw.get("speed") in PET_SPEEDS else d["speed"],
-            "decay": raw.get("decay") if raw.get("decay") in PET_DECAY else d["decay"]}
+            "decay": raw.get("decay") if raw.get("decay") in PET_DECAY else d["decay"],
+            "eggs": raw.get("eggs") if raw.get("eggs") in PET_EGGS else d["eggs"]}
 
 
 def pets(data: dict, cur: dict) -> tuple[dict, set[str]]:

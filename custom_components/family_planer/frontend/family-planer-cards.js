@@ -6976,6 +6976,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('wheel', 'bool', 'Glücksrad', 'Wheel of fortune', 'Einmal am Tag pro Person, um Mitternacht wieder frei. Jeder Dreh bringt Futter und Wasser, dazu Pillen, Punkte oder Extras.', 'Once a day per person, free again at midnight. Every spin brings food and water plus pills, points or extras.'),
       F('speed', 'select', 'Wachstums-Tempo', 'Growth speed', 'Wie viel Wachstum eine Stufe braucht. Normal: Schlüpfen nach etwa 3 Ämtli, Endform nach rund 2 Monaten.', 'How much growth a step needs. Normal: hatching after about 3 chores, final form after about 2 months.',
         { opts: [['slow', { de: 'Langsam', en: 'Slow' }], ['normal', { de: 'Normal', en: 'Normal' }], ['fast', { de: 'Schnell', en: 'Fast' }]] }),
+      F('eggs', 'select', 'Neue Eier', 'New eggs', 'Ein neues Ei gibt es immer, wenn ein Tierchen gross wird. Normal: zusätzlich ein Ei-Feld auf dem Glücksrad – so hat ein Kind nach 3 Monaten etwa 10 Tierchen. Es wartet nie mehr als ein Ei; liegt schon eins da, gibt das Ei-Feld eine grosse Wachstumspille.', 'A new egg always comes when a pet grows big. Normal: an extra egg field on the wheel – so a child has about 10 pets after 3 months. Never more than one egg waits; if one is already there, the egg field gives a big growth pill.',
+        { opts: [['rare', { de: 'Selten (nur beim Grosswerden)', en: 'Rare (only when growing big)' }], ['normal', { de: 'Normal (1 Ei-Feld)', en: 'Normal (1 egg field)' }], ['often', { de: 'Oft (2 Ei-Felder)', en: 'Often (2 egg fields)' }]] }),
       F('decay', 'select', 'Hunger & Co. sinken', 'Needs go down', 'Wie schnell Hunger, Durst, Energie und Laune sinken. Tierchen leiden nie (nie unter 10 %), in den Ferien steht alles still.', 'How fast hunger, thirst, energy and mood go down. Pets never suffer (never below 10 %), during holidays everything pauses.',
         { opts: [['off', { de: 'Gar nicht', en: 'Not at all' }], ['slow', { de: 'Langsam', en: 'Slowly' }], ['normal', { de: 'Normal', en: 'Normal' }]] }),
     ] },
@@ -8000,7 +8002,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       wheel: 'Glücksrad', spin: 'Drehen!', spun: 'Heute schon gedreht – wieder ab Mitternacht', won: 'Gewonnen!', inInv: '📦 Liegt jetzt in deinem Inventar.', daily: 'Dazu: Futter und Wasser für deine Tierchen.',
       chooseWay: 'Entwickeln – wähle den Weg', ways: 'Dein Tierchen ist bereit! Wähle einen von {n} Wegen. Das kann man nicht rückgängig machen.', oneWay: 'Dein Tierchen ist bereit! Hier gibt es nur einen Weg.', pick: 'Ja, {n} wählen!',
       hatching: 'Dein Ei schlüpft!', hatched: '{n}! Es wohnt jetzt in deinem Garten.', foggy: '🌫️ Was nach {n} kommt, bleibt geheim – grün ist dein Weg bis jetzt.', nowLooks: 'So sieht es jetzt aus',
-      prize: { grow: ['Wachstumspille', 'Für ein Tierchen deiner Wahl.'], extra: ['Haustier-Extra', 'Leckerli, Spielzeug, Energydrink, Happy-Pille …'], food: ['Futterpaket', '3 Futter und 3 Wasser.'], p20: ['+20 Punkte', 'Direkt zu deinen Tierchen-Punkten.'],
+      prize: { grow: ['Wachstumspille', 'Für ein Tierchen deiner Wahl.'], extra: ['Haustier-Extra', 'Leckerli, Spielzeug, Energydrink, Happy-Pille …'], food: ['Futterpaket', '3 Futter und 3 Wasser.'], pts: ['+30 Punkte', 'Direkt zu deinen Tierchen-Punkten.'], egg: ['Ein neues Ei!', 'Es liegt jetzt in deiner Sammlung – setze Punkte ein, dann schlüpft es.'], eggPill: ['Grosse Wachstumspille', 'Ein Ei wartet schon – darum gibt es diesmal eine grosse Wachstumspille.'],
         dev: ['Entwicklungs-Pille', 'Bringt ein Tierchen sofort eine ganze Stufe weiter.'], again: ['Nochmals drehen!', 'Du darfst gleich noch einmal.'], star: ['Sternfeld', 'Fabelwesen-Ei, Artefakt oder Jackpot +100.'],
         fabel_egg: ['Fabelwesen-Ei!', 'Ein ganz besonderes Ei liegt jetzt in deiner Sammlung.'], artefact: ['Artefakt!', 'Etwas Seltenes für deine Tierchen.'], jackpot: ['Jackpot +100 Punkte', 'Direkt zu deinen Tierchen-Punkten.'] },
       err: { not_needed: 'Das braucht dein Tierchen gerade nicht – es bleibt in deinem Inventar.', no_item: 'Davon hast du gerade nichts.', too_tired: 'Zu müde zum Spielen – gib zuerst einen Energydrink.', bar_full: 'Der Balken ist schon voll – jetzt entwickeln!',
@@ -8023,7 +8025,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       wheel: 'Wheel', spin: 'Spin!', spun: 'Already spun today – again after midnight', won: 'You won!', inInv: '📦 It is in your inventory now.', daily: 'Plus: food and water for your pets.',
       chooseWay: 'Evolve – choose the way', ways: 'Your pet is ready! Choose one of {n} ways. This cannot be undone.', oneWay: 'Your pet is ready! There is only one way here.', pick: 'Yes, choose {n}!',
       hatching: 'Your egg hatches!', hatched: 'A {n}! It lives in your garden now.', foggy: '🌫️ What comes after {n} stays secret – green is your way so far.', nowLooks: 'This is how it looks now',
-      prize: { grow: ['Growth pill', 'For a pet of your choice.'], extra: ['Pet extra', 'Treat, toy, energy drink, happy pill …'], food: ['Food pack', '3 food and 3 water.'], p20: ['+20 points', 'Straight to your pet points.'],
+      prize: { grow: ['Growth pill', 'For a pet of your choice.'], extra: ['Pet extra', 'Treat, toy, energy drink, happy pill …'], food: ['Food pack', '3 food and 3 water.'], pts: ['+30 points', 'Straight to your pet points.'], egg: ['A new egg!', 'It is in your collection now – put points in and it hatches.'], eggPill: ['Big growth pill', 'An egg is already waiting – so this time you get a big growth pill.'],
         dev: ['Evolution pill', 'Takes a pet a whole step further at once.'], again: ['Spin again!', 'You may spin once more.'], star: ['Star field', 'Fable egg, artefact or jackpot +100.'],
         fabel_egg: ['Fable egg!', 'A very special egg is in your collection now.'], artefact: ['Artefact!', 'Something rare for your pets.'], jackpot: ['Jackpot +100 points', 'Straight to your pet points.'] },
       err: { not_needed: 'Your pet does not need that right now – it stays in your inventory.', no_item: 'You have none of that right now.', too_tired: 'Too tired to play – give an energy drink first.', bar_full: 'The bar is full – evolve now!',
@@ -8043,7 +8045,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const PILLS = [['wachs_s', 15], ['wachs_m', 30], ['wachs_l', 60]];
   const DEV = 'glitzerpille';
   const THC = { feuer: '#FF8A3D', schnee: '#9fe6ff', nacht: '#B58CFF', wald: '#7CD06A', suess: '#FF8FC8', himmel: '#FFE27A', wasser: '#5ec3ec' };
-  const FIELD_LOOK = { grow: ['grow', '#69C350'], extra: ['pet', '#3FA66B'], food: ['futter', '#E0A84F'], p20: ['coin', '#F5C542'], dev: ['devpill', '#8C5CE0'], again: ['again', '#4FA3E0'], star: ['star', '#FFC21A'] };
+  const FIELD_LOOK = { grow: ['grow', '#69C350'], extra: ['pet', '#3FA66B'], food: ['food', '#E0A84F'], pts: ['coin', '#F5C542'], egg: ['egg', '#E8C77A'], dev: ['devpill', '#8C5CE0'], again: ['again', '#4FA3E0'], star: ['star', '#FFC21A'] };
 
   // ------------------------------------------------------------- helpers (need the graphics file)
   const hash = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
@@ -8098,7 +8100,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         b.disabled = true; let res;
         try { res = await call(store, pid, 'spin'); } catch (e) { root.querySelector('.res').textContent = errMsg(t, e); return; }
         await W.spin(root.querySelector('.wwrap'), fields.length, res.field);
-        const key = res.star || res.prize; const [title, what] = t.prize[key] || [key, '']; const it = (res.items || [])[0];
+        const key = res.star || (res.instead ? 'eggPill' : res.prize); const [title, what] = t.prize[key] || [key, '']; const it = (res.items || [])[0];
         const pic = it ? L().ICO.icoB(it, 96) : `<svg viewBox="0 0 24 24" width="96" height="96" style="color:#fff;background:${(FIELD_LOOK[res.prize] || ['', '#888'])[1]};border-radius:24px;padding:14px">${W.WICON[(FIELD_LOOK[res.prize] || ['star'])[0]] || ''}</svg>`;
         root.querySelector('.res').innerHTML = `<div class="pz" style="--zc:${(FIELD_LOOK[res.prize] || ['', '#F5C542'])[1]}"><div class="pzp">${pic}</div><div><small>${t.won}</small><b>${esc(it ? t.it[it] || title : title)}</b><p>${esc(what)}</p><p class="hint">${it ? t.inInv + ' ' : ''}${t.daily}</p></div></div>`;
         if (res.prize === 'again') { b.disabled = false; b.textContent = t.spin; } else b.textContent = t.spun;

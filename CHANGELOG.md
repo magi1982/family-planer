@@ -2,9 +2,11 @@
 
 ## 0.18.0 – unreleased
 ### Fixed
+- **Wheel:** the food fields showed no icon.
 - **Pages shown inside a dashboard** (0.17.2) lay too low: the planner's pets and wheels below shone through. The page now covers them.
 - **Hatching and evolving** now use the same dark stage with a soft light as the pet page (was green), and the animal that comes out of the egg is the one that really hatched.
 ### Added
+- **More pets (balance):** the wheel has an egg field (setting *New eggs*: rare / normal / often; never more than one waiting egg), the points field gives +30 instead of +20, extras are on 6 fields instead of 5. Pets in the garden (babies and young ones) grow +3 a day by themselves. An evolution pill comes at the latest after 24 spins (was 10). Result of a 90-day simulation (now a test): about 10 pets after 3 months, about 3 at the top, 2–3 or more in between.
 - **Black screen when idle** for wall tablets (*Settings → Screen*, off by default): after a set time without a tap and without motion the planner turns black (optionally with a small moving clock). Motion sensors or a tap wake it; the waking tap does nothing else. Tests cover the settings and the logic.
 
 ## 0.17.2 – 2026-11-18

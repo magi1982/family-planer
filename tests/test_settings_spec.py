@@ -151,8 +151,9 @@ def test_coin_settings():
 
 
 def test_pet_settings_are_cleaned():
-    out = S.clean_pets({"enabled": 0, "adults": "yes", "wheel": True, "speed": "warp", "decay": "off", "evil": "<x>"})
-    assert out == {"enabled": False, "adults": True, "wheel": True, "speed": "normal", "decay": "off"}
+    out = S.clean_pets({"enabled": 0, "adults": "yes", "wheel": True, "speed": "warp", "decay": "off", "eggs": "lots", "evil": "<x>"})
+    assert out == {"enabled": False, "adults": True, "wheel": True, "speed": "normal", "decay": "off", "eggs": "normal"}
+    assert S.clean_pets({"eggs": "often"})["eggs"] == "often"
     assert S.clean_pets(None) == S.PETS_DEFAULT
     patch, flags = S.pets({"speed": "fast", "evil": 1}, S.PETS_DEFAULT)
     assert patch == {"pets": {**S.PETS_DEFAULT, "speed": "fast"}} and flags == set()

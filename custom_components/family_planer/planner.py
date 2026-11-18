@@ -733,6 +733,7 @@ class FamilyPlanner:
             pets.drops(st, new, self._rng)
             for pet in st["pets"].values():
                 pets.decay(pet, now, cfg["decay"], paused=pid in away)
+            pets.garden_grow(st, now.date(), paused=pid in away, speed=cfg["speed"])
 
     def pets_view(self) -> dict[str, Any]:
         cfg = self.pets_settings()
@@ -769,7 +770,7 @@ class FamilyPlanner:
         elif action == "spin":
             if not cfg["wheel"]:
                 raise pets.PetError("wheel_off")
-            res = pets.spin(st, self.today(), self._rng)
+            res = pets.spin(st, self.today(), self._rng, cfg["eggs"])
         else:
             raise pets.PetError("unknown_action")
         self._changed()
@@ -1718,7 +1719,7 @@ class FamilyPlanner:
             "busy": self.busy,
             "pets": self.pets_view(),
             "screen_cfg": self.screen_settings(),
-            "pets_cfg": {**self.pets_settings(), "fields": list(pets.FIELDS), "steps": list(pets.thresholds(self.pets_settings()["speed"])), "spend": pets.SPEND_MAX},
+            "pets_cfg": {**self.pets_settings(), "fields": list(pets.FIELDS_BY_MODE[self.pets_settings()["eggs"]]), "steps": list(pets.thresholds(self.pets_settings()["speed"])), "spend": pets.SPEND_MAX},
             "away_kind": self.away_kind,
             "away_badge": {pid: b for pid, spans in self.away_spans.items() if (b := vacation.badge_at(spans, dt_util.now()))},
             "sonder": sonder.view(self.data["sonder_inst"], self.data["sonder"], self.lang),

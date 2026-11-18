@@ -380,7 +380,9 @@ Jede Person in der Familie kann kleine Tierchen aufziehen, die mit den Ämtli wa
 - **Entwickeln** öffnet den Entwicklungsbaum: bis zu drei Wege (Farbe, Aussehen, Themen-Linie wie Feuer, Wasser, Nacht). Der Baum zeigt den Weg bis jetzt; was danach kommt, bleibt geheim.
 - **Pflegen:** Hunger, Durst, Energie und Laune sinken langsam und nie unter 10 % – Tierchen leiden nie, in den Ferien steht alles still. Futter, Getränke, Leckerli und Pillen werden nur verbraucht, wenn das Tierchen sie braucht; Spielsachen bleiben.
 - **Pillen:** Wachstums-Pillen S/M/L geben Wachstum, die **Entwicklungs-Pille** bringt ein Tierchen sofort eine ganze Stufe weiter (auch ein Ei).
-- **Glücksrad:** einmal am Tag pro Person, um Mitternacht wieder frei. Jeder Dreh bringt Futter und Wasser und dazu einen Gewinn: Wachstums-Pille, Haustier-Extra, Futterpaket, +20 Punkte, Entwicklungs-Pille, nochmals drehen oder das Sternfeld (Fabelwesen-Ei, Artefakt oder Jackpot). Das Feld bestimmt der Server, das Rad zeigt es nur. Ein Fabelwesen-Ei kommt spätestens nach 60 Drehs.
+- **Glücksrad:** einmal am Tag pro Person, um Mitternacht wieder frei. Jeder Dreh bringt Futter und Wasser und dazu einen Gewinn: Wachstums-Pille, Haustier-Extra, Futterpaket, +30 Punkte, Entwicklungs-Pille, ein neues Ei, nochmals drehen oder das Sternfeld (Fabelwesen-Ei, Artefakt oder Jackpot). Das Feld bestimmt der Server, das Rad zeigt es nur. Ein Fabelwesen-Ei kommt spätestens nach 60 Drehs, eine Entwicklungs-Pille nach 24. Es wartet nie mehr als ein Ei – liegt schon eins da, gibt das Ei-Feld eine grosse Wachstums-Pille.
+- **Garten-Wachstum:** Die anderen Tierchen im Garten (Babys und Jungtiere) wachsen jeden Tag ein wenig von selbst – so gibt es immer auch Tierchen dazwischen. Nicht in den Ferien, höchstens eine Woche auf einmal.
+- **Balance:** nach 3 Monaten etwa 10 Tierchen, davon etwa 3 ganz oben (Legende) und einige dazwischen – geprüft mit einem Simulations-Test (`tests/test_pets_balance.py`).
 - **Tierchen-Seite** (🐾 in der Navigation): *Garten* (dasselbe Haus, derselbe Pool und dieselbe Saison wie oben, mit grossem Vorgarten, in dem die Tierchen laufen, klettern, sich verstecken und baden), *Aktuelles Tierchen* (entwickeln und pflegen auf einem Bildschirm), *Inventar*, *Sammlung* (Karten mit Linie, Spezial-Fähigkeit, Futter, Lieblingsplätzen und Tagen zusammen; unbekannte Arten als Silhouette) und *Statistik*.
 - **Namen:** Jedes Tierchen kann einen eigenen Namen bekommen (bis 16 Zeichen); gross steht der Name, klein daneben die Art.
 - **Oben im Kopfbild** laufen bis zu 8 Tierchen der Familie um Haus und Pool; läuft eine Kopfbild-Geschichte, treten sie dahinter zurück.
@@ -520,6 +522,7 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Tierchen | an | Tierchen-Seite, Tierchen auf den Karten und im Kopfbild, Glücksrad; aus blendet alles aus, nichts geht verloren |
 | Erwachsene starten mit Tierchen | aus | für neu angelegte Erwachsene; jede Person kann ihre Tierchen auf der Tierchen-Seite selbst ein- und ausschalten |
 | Glücksrad | an | einmal am Tag pro Person, um Mitternacht wieder frei |
+| Neue Eier | Normal | Selten (nur beim Grosswerden) / Normal (dazu 1 Ei-Feld auf dem Glücksrad) / Oft (2 Ei-Felder) |
 | Wachstums-Tempo | Normal | Langsam / Normal / Schnell – wie viel Wachstum eine Stufe braucht (normal: Schlüpfen nach etwa 3 Ämtli, Endform nach rund 2 Monaten) |
 | Hunger & Co. sinken | Langsam | Gar nicht / Langsam / Normal – Hunger, Durst, Energie und Laune; nie unter 10 %, in den Ferien pausiert |
 

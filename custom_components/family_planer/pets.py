@@ -68,15 +68,38 @@ CAPS = {"futter": 30, "wasser": 30, "keks": 20, "energy": 10, "seife": 10, "happ
 ITEMS = tuple(CAPS)
 
 # the daily wheel: 24 equal fields (same order is used by the planer to draw the wheel)
-PRIZES = (("grow", 6), ("extra", 5), ("food", 4), ("p20", 4), ("dev", 2), ("again", 2), ("star", 1))
+# "pts" gives PRIZE_PTS points; "egg" a new egg (only when none is waiting, otherwise a big growth pill).
+# How many egg fields depends on the setting "new eggs": rare 0 / normal 1 / often 2 (taken from food).
+PRIZES = (("grow", 6), ("extra", 6), ("food", 4), ("pts", 4), ("dev", 1), ("egg", 1), ("again", 1), ("star", 1))
+PRIZE_PTS = 30
+EGG_MODES = {"rare": 0, "normal": 1, "often": 2}
+# pets in the garden (not the active one) grow a little by themselves every day – only babies and young ones,
+# so there are always some pets "in between"; checked by tests/test_pets_balance.py (10 pets after 3 months)
+GARDEN_GROW = 3
+GARDEN_UNTIL = 3        # step below which garden growth works (Baby, Jungtier)
+GARDEN_MAX_DAYS = 7     # a long pause does not pay out all at once
 STAR = ("fabel_egg", "artefact", "jackpot")
 FABEL_PITY_DAYS = 60    # a fable egg at the latest after this many spins without one
-DEV_PITY_SPINS = 10     # an evolution pill at the latest after this many spins without one
+DEV_PITY_SPINS = 24     # an evolution pill at the latest after this many spins without one (balance: tests/test_pets_balance.py)
 
 
-def wheel_fields() -> list[str]:
+def prizes(eggs: str = "normal") -> tuple:
+    """The 24 fields for an egg setting: egg fields are taken from (or given back to) the food fields."""
+    want = EGG_MODES.get(eggs, 1)
+    out = []
+    for k, n in PRIZES:
+        if k == "egg":
+            n = want
+        elif k == "food":
+            n = n + 1 - want
+        if n > 0:
+            out.append((k, n))
+    return tuple(out)
+
+
+def wheel_fields(eggs: str = "normal") -> list[str]:
     """24 fields, the big prizes spread around the wheel (never two equal fields next to each other)."""
-    left = {k: n for k, n in PRIZES}
+    left = {k: n for k, n in prizes(eggs)}
     out: list[str] = []
     last = None
     for _ in range(sum(left.values())):
@@ -90,6 +113,7 @@ def wheel_fields() -> list[str]:
 
 
 FIELDS = tuple(wheel_fields())
+FIELDS_BY_MODE = {m: tuple(wheel_fields(m)) for m in EGG_MODES}
 
 
 class PetError(ValueError):
@@ -385,8 +409,35 @@ def set_on(st: dict, on: bool) -> None:
     st["on"] = bool(on)
 
 
+# ------------------------------------------------------------------ the garden
+def garden_grow(st: dict, today: date, paused: bool = False, speed: str = "normal") -> int:
+    """Once a day the other pets in the garden grow a little by themselves (babies and young ones only).
+
+    Never past a full bar (the child still evolves them), at most GARDEN_MAX_DAYS at once, nothing while off or
+    on holiday (the day still moves on). Returns the growth added.
+    """
+    last = st.get("garden")
+    st["garden"] = today.isoformat()
+    if not last or not st["on"] or paused:
+        return 0
+    try:
+        days = (today - date.fromisoformat(last)).days
+    except ValueError:
+        return 0
+    days = max(0, min(GARDEN_MAX_DAYS, days))
+    added = 0
+    for k, pet in st["pets"].items():
+        need = next_need(pet, speed)
+        if k == st["active"] or not 0 < pet["step"] < GARDEN_UNTIL or need is None or pet["g"] >= need:
+            continue
+        add = min(GARDEN_GROW * days, need - pet["g"])
+        pet["g"] += add
+        added += add
+    return added
+
+
 # ------------------------------------------------------------------ the daily wheel
-def spin(st: dict, today: date, rng: random.Random) -> dict:
+def spin(st: dict, today: date, rng: random.Random, eggs: str = "normal") -> dict:
     """One spin per day (reset at midnight). Every spin brings food and a drink for the day plus the field's prize."""
     if not st["on"]:
         raise PetError("off")
@@ -398,12 +449,13 @@ def spin(st: dict, today: date, rng: random.Random) -> dict:
     st["luck"]["dev"] += 1
     add_item(st, "futter", 2)
     add_item(st, "wasser", 2)
-    idx = rng.randrange(len(FIELDS))
+    fields = FIELDS_BY_MODE.get(eggs, FIELDS)
+    idx = rng.randrange(len(fields))
     if st["luck"]["fabel"] >= FABEL_PITY_DAYS:
-        idx = FIELDS.index("star")
-    elif st["luck"]["dev"] >= DEV_PITY_SPINS and FIELDS[idx] not in ("dev", "star"):
-        idx = FIELDS.index("dev")
-    field = FIELDS[idx]
+        idx = fields.index("star")
+    elif st["luck"]["dev"] >= DEV_PITY_SPINS and fields[idx] not in ("dev", "star"):
+        idx = fields.index("dev")
+    field = fields[idx]
     res: dict = {"field": idx, "prize": field, "items": []}
     if field == "grow":
         it = rng.choice(("wachs_s", "wachs_s", "wachs_m", "wachs_m", "wachs_l"))
@@ -417,9 +469,18 @@ def spin(st: dict, today: date, rng: random.Random) -> dict:
         add_item(st, "futter", 3)
         add_item(st, "wasser", 3)
         res["items"] += ["futter", "wasser"]
-    elif field == "p20":
-        st["pts"] += 20
-        res["pts"] = 20
+    elif field == "pts":
+        st["pts"] += PRIZE_PTS
+        res["pts"] = PRIZE_PTS
+    elif field == "egg":
+        if any(p["step"] == 0 for p in st["pets"].values()):
+            if add_item(st, "wachs_l"):  # an egg is already waiting: a big growth pill instead
+                res["items"].append("wachs_l")
+            res["instead"] = True
+        else:
+            eid = new_id()
+            st["pets"][eid] = new_egg(datetime.combine(today, datetime.min.time()))
+            res["egg"] = eid
     elif field == "dev":
         st["luck"]["dev"] = 0
         if add_item(st, DEV_PILL):

@@ -343,6 +343,60 @@ def test_wheel_pity_counters():
     assert pets.spin(st2, date(2026, 11, 18), rng)["prize"] == "dev"
 
 
+def test_wheel_fields_per_egg_setting():
+    for mode, eggs in (("rare", 0), ("normal", 1), ("often", 2)):
+        f = pets.FIELDS_BY_MODE[mode]
+        assert len(f) == 24 and f.count("egg") == eggs and f.count("food") == 5 - eggs
+        assert all(f[i] != f[i + 1] for i in range(23))
+    assert pets.FIELDS_BY_MODE["normal"] == pets.FIELDS
+
+
+def _fixed(field, mode="normal"):
+    rng = random.Random(1)
+    rng.randrange = lambda n: pets.FIELDS_BY_MODE[mode].index(field)
+    return rng
+
+
+def test_wheel_points_field_gives_30():
+    st = state()
+    res = pets.spin(st, date(2026, 11, 18), _fixed("pts"))
+    assert res["pts"] == 30 and st["pts"] == 30
+
+
+def test_wheel_egg_field_gives_an_egg_only_when_none_waits():
+    st = state()
+    eid = egg_id(st)
+    st["pets"][eid]["g"] = 30
+    pets.hatch(st, eid, random.Random(2))
+    res = pets.spin(st, date(2026, 11, 18), _fixed("egg"))
+    assert res["egg"] in st["pets"] and st["pets"][res["egg"]]["step"] == 0
+    # the next day an egg is still waiting: a big growth pill instead, no second egg
+    res2 = pets.spin(st, date(2026, 11, 19), _fixed("egg"))
+    assert "egg" not in res2 and res2["instead"] and st["inv"]["wachs_l"] == 1
+    assert sum(1 for p in st["pets"].values() if p["step"] == 0) == 1
+
+
+def test_garden_growth_babies_and_young_ones_only():
+    st = state()
+    day = date(2026, 11, 18)
+    st["pets"] = {"a": {**pets.new_egg(datetime(2026, 11, 1)), "step": 4, "g": 800},
+                  "b": {**pets.new_egg(datetime(2026, 11, 1)), "step": 1, "g": 40},
+                  "c": {**pets.new_egg(datetime(2026, 11, 1)), "step": 3, "g": 460},
+                  "d": {**pets.new_egg(datetime(2026, 11, 1)), "step": 2, "g": 448},
+                  "e": pets.new_egg(datetime(2026, 11, 1))}
+    st["active"] = "a"
+    assert pets.garden_grow(st, day) == 0  # first day only remembers the date
+    assert pets.garden_grow(st, day + timedelta(days=2)) == 2 * pets.GARDEN_GROW + 2
+    assert st["pets"]["b"]["g"] == 46 and st["pets"]["d"]["g"] == 450  # never past a full bar
+    assert st["pets"]["a"]["g"] == 800 and st["pets"]["c"]["g"] == 460 and st["pets"]["e"]["g"] == 0
+    # a long break pays out at most a week, holidays and switched-off pets pay nothing
+    assert pets.garden_grow(st, day + timedelta(days=60)) == pets.GARDEN_MAX_DAYS * pets.GARDEN_GROW
+    assert pets.garden_grow(st, day + timedelta(days=61), paused=True) == 0
+    st["on"] = False
+    assert pets.garden_grow(st, day + timedelta(days=62)) == 0
+    assert st["garden"] == (day + timedelta(days=62)).isoformat()  # the day moves on, nothing is saved up
+
+
 def test_view_tells_need_and_ready():
     st = state()
     eid = egg_id(st)
