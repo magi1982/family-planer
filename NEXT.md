@@ -867,3 +867,5 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - Adults: same card design; Tierchen per person on/off (Tierchen page, top). Off = still Münzen, no Punkte; nothing is lost (pets, inventory, Punkte stay). Off = no pet, no wheel on the card, no pets in the banner.
 - Glücksrad: the prize is shown big (picture, name, what it does) and lands in the inventory.
 - Card ribbons: one split capsule – reliability left, level right (tier colour).
+- Currency names (decided): **Münzen** = planner & rewards only (page "Münzen & Belohnungen", chores, statistics, settings). **Punkte** = Tierchen only (Tierchen page shows only ⭐ Punkte, never Münzen). Glücksrad prizes are Punkte. Tree requirements count "Wachstum", never "Taler".
+- Real release: rename the reward currency Punkte → Münzen in rewards.js, stats.js, settings.js, todos.js, special.js, ui_week.js, confetti.js (DE + EN "coins"); coin without letter must not show a star (⭐ belongs to the Tierchen) – use a plain gold core.
