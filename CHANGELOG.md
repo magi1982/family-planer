@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.16.5 – unreleased
+### Fixed
+- **"Tap!" sign looked blurry on the tablet:** it sat on half pixels and had a double glow on the text. Now whole pixels, a darker plate and a thin glow – sharp letters.
+
 ## 0.16.4 – 2026-11-18
 ### Changed
 - **New chore buttons:** no tick circle any more. The title runs over the full width; below it the hints (*until Fri*, *To-do*, *Special*) sit on the left and the coins on the right. A done chore gets a green tick of the same height next to the coins and a green border. In the week view the coin rows of neighbouring buttons line up. Buttons are about 10 % lower.

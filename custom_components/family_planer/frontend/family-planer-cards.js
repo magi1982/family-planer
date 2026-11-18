@@ -8391,7 +8391,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!h || !svg || !svg.getScreenCTM) return;
       const m = svg.getScreenCTM(); if (!m) return; const pt = svg.createSVGPoint(); pt.x = 654; pt.y = 3; const p = pt.matrixTransform(m);
       const r = scn.getBoundingClientRect(); if (!r.width) return;
-      h.style.left = `${Math.max(40, Math.min(r.width - 40, p.x - r.left))}px`; h.style.top = `${Math.max(2, Math.min(r.height - 30, p.y - r.top))}px`;
+      // whole pixels: a sign on half pixels looks blurry on the tablet
+      h.style.left = `${Math.round(Math.max(40, Math.min(r.width - 40, p.x - r.left)))}px`; h.style.top = `${Math.round(Math.max(2, Math.min(r.height - 30, p.y - r.top)))}px`;
     }
     // after activity (any tap on the planer, or a motion sensor of the announcements) the sign shows every 10 s for
     // a few minutes, then rests; "always" shows it every 30 s; never while a tap story plays
@@ -8447,7 +8448,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         @media (max-width:700px){.clk .dt{display:none}.wxn{padding:0 8px}}
         .fphint{position:absolute;left:50%;top:2px;width:72px;height:26px;margin-left:-36px;pointer-events:none;z-index:2;opacity:0;--nc:#8CFF6A}
         .fphint .hang{position:absolute;inset:0;transform-origin:36px -4px}.fphint .w{position:absolute;top:-30px;width:1.5px;height:34px;background:#3b4048}.fphint .w1{left:12px}.fphint .w2{right:12px}
-        .fphint b{position:absolute;left:0;top:3px;width:72px;height:21px;box-sizing:border-box;border:2px solid var(--nc);border-radius:8px;background:rgba(20,12,30,.6);color:#fff;font:900 11.5px/17px system-ui,sans-serif;letter-spacing:2.5px;text-align:center;box-shadow:0 0 6px var(--nc),inset 0 0 6px var(--nc);text-shadow:0 0 4px var(--nc),0 0 8px var(--nc)}
+        .fphint b{position:absolute;left:0;top:3px;width:72px;height:21px;box-sizing:border-box;border:2px solid var(--nc);border-radius:8px;background:rgba(20,12,30,.88);color:#fff;font:900 12px/17px system-ui,sans-serif;letter-spacing:2px;text-align:center;box-shadow:0 0 7px var(--nc);text-shadow:0 0 2px var(--nc);-webkit-font-smoothing:antialiased}
         .fphint.go{opacity:1}.fphint.go .hang{animation:fphang 2s ease-out forwards}.fphint.go b{animation:fpflk 2s steps(1) forwards}
         @keyframes fphang{0%{opacity:0;transform:translateY(-40px)}10%{opacity:1;transform:translateY(3px)}16%{transform:translateY(-1px) rotate(4deg)}30%{transform:rotate(-3deg)}44%{transform:rotate(2deg)}56%{transform:rotate(-1deg)}70%{opacity:1;transform:rotate(0)}84%,100%{opacity:0;transform:translateY(-40px)}}
         @keyframes fpflk{0%{opacity:0}3%{opacity:1}6%{opacity:.2}9%{opacity:1}12%{opacity:.35}15%{opacity:1}62%{opacity:1}65%{opacity:.4}68%{opacity:1}74%{opacity:.2}78%,100%{opacity:0}}
