@@ -192,6 +192,8 @@ class FamilyPlanner:
             settings["pin_hash"] = await self.hass.async_add_executor_job(rewards.hash_pin, settings_spec.DEFAULT_PIN)
             settings["pin_default"] = True
 
+        # Tierchen: every person gets their state (an egg) right at start, not only after the first change
+        self._pets_sync()
         # the day change waits until calendars are loaded, so holidays are known before anything counts as missed
         await self._store.async_save(self.data)
         self._unsubs.append(async_at_started(self.hass, self._handle_started))

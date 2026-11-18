@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.17.0 – unreleased
+## 0.17.1 – 2026-11-18
+### Fixed
+- **No eggs after the update to 0.17.0:** pets were only created with the first change in the planner (e.g. ticking off a chore). They are now created right when Home Assistant starts. A test covers it.
+
+## 0.17.0 – 2026-11-18
 ### Added
 - **Pets (Tierchen):** every family member can raise little pets that grow with the chores. Every chore gives coins (rewards) and, with pets on, the same number of pet points. Points are put into a pet's growth; hatching and evolving are always the child's own action (choice of up to three ways in the evolution tree). Reaching *grown* brings a new egg with a kind the child does not have yet. Care (hunger, thirst, energy, mood) goes down slowly, never below 10 % and pauses during holidays; things are only used when needed, toys stay.
 - **Pets page** (new 🐾 navigation button): garden with the header's house, pool and season, *current pet* (develop and care in one screen), inventory, collection cards, pet statistics. Pets can get their own name.
