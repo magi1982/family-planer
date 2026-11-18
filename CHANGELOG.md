@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.18.3 – unreleased
+## 0.18.3 – 2026-11-18
 ### Added
 - **Action `family_planer.add_pet_points`** (admins only): give or take pet points – no coins.
 ### Changed
