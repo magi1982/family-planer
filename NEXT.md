@@ -907,3 +907,10 @@ Heute: ein neues Ei gibt es nur, wenn das aktive Tierchen „Gross“ wird (norm
   - Bonus für 7-Tage-Serie: Ei + 1 Extra.
 - **Rechnung (18.11., 200 Durchläufe × 90 Tage, echte pets.py):** Heute schon Ø 7–8 Tiere, davon Ø 3–4 Legende (Entwicklungs-Pillen füllen eine ganze Stufe), dazwischen nur 1–2. **B leicht** (1 Rad-Ei, Punkte-Feld +30, Extras 6 Felder, Futter 2, Serien-Ei + Extra, Pillen unverändert): Ø 11–12 Tiere, Ø 3–4 Legende (min 2), Ø 4 dazwischen (bei gemischter Spielweise). **B voll** (2 Rad-Eier, Pillen ×1.5): Ø 15 Tiere – zu viele Babys. Empfehlung: B leicht.
 - **Umgesetzt (18.11., 0.18.0):** Rad-Ei (Einstellung Neue Eier selten/normal/oft), Punkte-Feld +30, Extras 6, Futter 4, Entwicklungs-Pille 1 Feld + spätestens nach 24 Drehs, nochmal 1; Garten-Wachstum +3/Tag für Babys/Jungtiere. Test tests/test_pets_balance.py: Ø 10.6 Tiere, Ø 3.2–3.4 Legende (min 2), dazwischen 2.4 (Liebling) bis 4.7 (gemischt).
+
+### 64. Inventar: jedes Ding antippbar mit Erklärung (18.11.)
+Wunsch: im Inventar auf alles tippen können und erklärt bekommen, was es ist und wie man es einsetzt.
+- Tipp auf ein Ding (auch auf graue, die man noch nicht hat) → kleines Fenster: grosses Bild, Name, „Was ist das?“ (1–2 Sätze), „Wirkung“ (Hunger +35, Laune voll, +30 Wachstum, ganze Stufe …), „So setzt du es ein“ (z. B. Aktuelles Tierchen → Pflegen & spielen antippen), „Woher bekommst du es?“ (Ämtli, Glücksrad, Serie …), Anzahl und Höchstmenge.
+- Hat man es und kann es jetzt einsetzen: Knopf „Jetzt einsetzen“ für das aktive Tierchen (gleiche Regeln wie beim Pflegen; Pillen nur, wenn der Balken nicht voll ist).
+- Sonderdinge (Kissen, Laterne, Artefakte): Erklärung, was sie bewirken; bei Artefakten auch, wofür sie im Entwicklungsbaum gebraucht werden.
+- Texte DE/EN, kindgerecht, kurz.
