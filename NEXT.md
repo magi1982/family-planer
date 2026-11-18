@@ -834,3 +834,7 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - Header: icons without labels (calendar, list, trophy, chart) → small labels under them or a tooltip on long-press.
 - Statistik: no empty state – when there is no data yet, explain why ("Ab morgen siehst du hier …").
 - Einstellungen: avatar parts row overflows to 2 lines on tablet; could scroll horizontally.
+
+## #67 Symmetric chore buttons + statistics polish (preview on branch preview-cards)
+- Button = grid [tick] [title + chips below] [points], everything vertically centred; points pill compact (coin 11 px). Short titles: one row, ~10 % less height; long titles: full text, a bit taller.
+- Statistik: "1 Tage" → "1 Tag"; hide adult columns without chores in "Welche Ämtli"; "Wer hat was gemacht" card has a big empty area (align heights / put legend at top); "To-dos abgehakt 0" although to-dos were done → check counting; reliability cards: Michelle has no chores → show "keine Ämtli" instead of empty dots; same circle size for all counts in a short period → scale per period.
