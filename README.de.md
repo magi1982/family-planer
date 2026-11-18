@@ -246,6 +246,7 @@ Im Planer stehen pro Person höchstens die **4 ältesten** offenen To-dos (einst
 - **Bewegungsmelder** wählen (Bewegung, Präsenz, Anwesenheit) und eine **Ansage** über
   - Alexa: Benachrichtigungs-Entität *Ankündigen* oder *Sprechen* (Integration *Alexa Devices*), oder
   - eine **TTS-Entität** (z. B. Google Translate, Piper) mit Lautsprechern.
+  - ein **eigenes Skript**: Es bekommt den Text als Variable `message` (z. B. Lautstärke hoch, kurzer Ton, dann sprechen). Hilft, wenn ein Echo „Sprechen“ allein nicht vorliest („Schwierigkeiten mit dem Simon-Says-Skill“).
 - **Zeitfenster** (z. B. 15–20 Uhr) und **Pause** zwischen Ansagen.
 - Ansage, wer noch was offen hat: *„Hallo! Noch offen: Lea: Tisch decken und Abfall leeren. Mia: Ratten füttern.“*
 - Optional einmal pro Tag: *„Super gemacht! Alle Ämtli für heute sind erledigt.“*
@@ -542,6 +543,7 @@ Beschreibung. Die Ämtli selbst werden direkt in der Ansicht **Ämtliplan** bear
 | Ansagen einschalten | aus | |
 | Bewegungsmelder | – | Bewegung, Präsenz, Anwesenheit |
 | Ansage über / TTS + Lautsprecher | – | Alexa-Benachrichtigung („Ankündigen“/„Sprechen“) oder TTS |
+| Ansage über Skript | – | eigene Skripte, die den Text als `message` bekommen |
 | Von / Bis | 15:00 / 20:00 | Zeitfenster für Ämtli-Erinnerungen |
 | Höchstens alle | 60 min | Pause zwischen Erinnerungen |
 | Auch ansagen, wenn alles erledigt ist | ein | einmal pro Tag |

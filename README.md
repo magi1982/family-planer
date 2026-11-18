@@ -247,6 +247,7 @@ At most the **4 oldest** open to-dos per person are shown in the planner (adjust
 - Choose **motion sensors** (motion, presence, occupancy) and an **announcement** via
   - Alexa: notify entity *Announce* or *Speak* (*Alexa Devices* integration), or
   - a **TTS entity** (e.g. Google Translate, Piper) with speakers.
+  - your **own script**: it gets the text as the variable `message` (e.g. volume up, a short sound, then speak). Useful when an Echo does not read out "Speak" on its own ("trouble accessing the Simon Says skill").
 - **Time window** (e.g. 15:00–20:00) and **pause** between announcements.
 - Announces who still has something open: *"Hello! Still open: Lea: set the table and empty the bin. Mia: feed the rats."*
 - Optionally once a day: *"Well done! All chores for today are finished."*
@@ -542,6 +543,7 @@ description. The chores themselves are edited directly in the **Chore plan** vie
 | Enable announcements | off | |
 | Motion sensors | – | motion, presence, occupancy |
 | Announce via (notify) / TTS + speakers | – | Alexa notify entity ("Announce"/"Speak") or TTS |
+| Announce via script | – | own scripts that get the text as `message` |
 | From / Until | 15:00 / 20:00 | time window for chore reminders |
 | At most every | 60 min | pause between reminders |
 | Also announce when everything is done | on | once a day |

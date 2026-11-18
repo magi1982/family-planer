@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.18.2 – unreleased
+### Added
+- **Announce via script** (*Settings → Announcements*): own scripts get the text as the variable `message` – e.g. volume up, a short sound, then speak. Helps when an Echo answers "trouble accessing the Simon Says skill" to a plain "Speak".
+
 ## 0.18.1 – 2026-11-18
 ### Fixed
 - **Points sensors keep their unit:** 0.17.0 changed the unit of `sensor.<name>_punkte` from points to coins, so Home Assistant stopped the long-term statistics. The unit is points again; a test guards it.

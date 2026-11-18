@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_ANNOUNCE: dict[str, Any] = {
-    "enabled": False, "motion": [], "notify": [], "tts": None, "media_players": [],
+    "enabled": False, "motion": [], "notify": [], "scripts": [], "tts": None, "media_players": [],
     "start": "15:00", "end": "20:00", "cooldown": 60, "all_done": True, "persons": [],
     # queue: one-off messages wait for the next motion (within quiet-hours limits) until they expire
     "queue": True, "queue_start": "07:00", "queue_end": "21:00", "queue_rewards": True, "queue_special": True,
@@ -61,7 +61,7 @@ class Announcer:
     def start(self) -> None:
         self.stop()
         cfg = self.cfg
-        if not (cfg["enabled"] and (cfg["notify"] or (cfg["tts"] and cfg["media_players"]))):
+        if not (cfg["enabled"] and (cfg["notify"] or cfg["scripts"] or (cfg["tts"] and cfg["media_players"]))):
             return
         if cfg["motion"]:
             self._unsub = async_track_state_change_event(self.hass, cfg["motion"], self._motion)
@@ -225,6 +225,9 @@ class Announcer:
         cfg = self.cfg
         for ent in cfg["notify"]:
             await self._call("notify", "send_message", {"entity_id": ent, "message": message})
+        # own scripts (e.g. volume up, a short sound, then speak) get the text as the variable "message"
+        for ent in cfg["scripts"]:
+            await self._call("script", "turn_on", {"entity_id": ent, "variables": {"message": message}})
         if cfg["tts"] and cfg["media_players"]:
             await self._call("tts", "speak", {"entity_id": cfg["tts"], "media_player_entity_id": cfg["media_players"],
                                               "message": message, "cache": False})

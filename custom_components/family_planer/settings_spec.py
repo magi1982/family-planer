@@ -223,6 +223,7 @@ def announce(data: dict, cur: dict, persons: dict) -> tuple[dict, set[str]]:
         "enabled": _bool(data, "enabled", cur.get("enabled")),
         "motion": validate.entities(data.get("motion", cur.get("motion")), ("binary_sensor",)),
         "notify": validate.entities(data.get("notify", cur.get("notify")), ("notify",)),
+        "scripts": validate.entities(data.get("scripts", cur.get("scripts")), ("script",), limit=5),
         "tts": validate.entity(data.get("tts", cur.get("tts")), ("tts",)),
         "media_players": validate.entities(data.get("media_players", cur.get("media_players")), ("media_player",)),
         "start": validate.hhmm(data.get("start"), cur.get("start") or "15:00"),
@@ -246,7 +247,7 @@ def announce(data: dict, cur: dict, persons: dict) -> tuple[dict, set[str]]:
     }
     if new["enabled"] and not new["motion"] and not new["fixed"]:
         raise SettingsError("motion", "no_motion")
-    if new["enabled"] and not (new["notify"] or (new["tts"] and new["media_players"])):
+    if new["enabled"] and not (new["notify"] or new["scripts"] or (new["tts"] and new["media_players"])):
         raise SettingsError("notify", "no_target")
     return {"announce": new}, {"reload"}
 

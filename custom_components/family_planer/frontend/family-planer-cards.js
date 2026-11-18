@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.18.1'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.18.2'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
@@ -6915,6 +6915,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('birthday', 'bool', 'Lustige Geburtstags-Ansagen', 'Funny birthday announcements', 'Fünf verschiedene Sprüche fürs Geburtstagskind, über den Tag verteilt.', 'Five different lines for the birthday child, spread over the day.'),
       F('motion', 'entities', 'Bewegungsmelder', 'Motion sensors', 'Bewegung, Präsenz oder Anwesenheit.', 'Motion, presence or occupancy.', { domain: 'binary_sensor', classes: ['motion', 'occupancy', 'presence'] }),
       F('notify', 'entities', 'Ansage über (Alexa)', 'Announce via (Alexa)', 'Benachrichtigungs-Entität „Ankündigen“ oder „Sprechen“ der Integration Alexa Devices.', 'Notify entity "Announce" or "Speak" of the Alexa Devices integration.', { domain: 'notify' }),
+      F('scripts', 'entities', 'Ansage über Skript', 'Announce via script', 'Eigenes Skript, das den Text als Variable „message“ bekommt – z. B. Lautstärke hoch, kurzer Ton, dann sprechen. Hilft, wenn Alexa „Sprechen“ allein nicht vorliest.', 'Own script that gets the text as the variable "message" – e.g. volume up, a short sound, then speak. Helps when Alexa does not read out "Speak" on its own.', { domain: 'script' }),
       F('tts', 'entity', 'Sprachausgabe (TTS)', 'Text-to-speech (TTS)', 'Alternativ zu Alexa, zusammen mit Lautsprechern.', 'Alternative to Alexa, together with speakers.', { domain: 'tts' }),
       F('media_players', 'entities', 'Lautsprecher für TTS', 'Speakers for TTS', '', '', { domain: 'media_player' }),
       F('start', 'time', 'Von', 'From', 'Zeitfenster für Ämtli-Erinnerungen.', 'Time window for chore reminders.'),

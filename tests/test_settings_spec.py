@@ -166,3 +166,15 @@ def test_points_sensor_unit_stays_points():
     for f, unit in (("strings.json", "points"), ("translations/en.json", "points"), ("translations/de.json", "Punkte")):
         data = json.loads((base / f).read_text())
         assert data["entity"]["sensor"]["points"]["unit_of_measurement"] == unit, f
+
+
+def test_announce_via_script_is_a_target_and_only_scripts_pass():
+    patch, _ = S.announce({"enabled": True, "motion": ["binary_sensor.hall"],
+                           "scripts": ["script.say_living", "notify.x", "script.bad id", "light.y"]}, {}, {})
+    assert patch["announce"]["scripts"] == ["script.say_living"]
+
+
+def test_announcer_hands_the_text_to_scripts_as_message():
+    src = (pathlib.Path(__file__).parents[1] / "custom_components/family_planer/announce.py").read_text()
+    assert '"script", "turn_on", {"entity_id": ent, "variables": {"message": message}}' in src
+    assert 'cfg["notify"] or cfg["scripts"]' in src
