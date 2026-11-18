@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.18.0 – unreleased
+## 0.18.0 – 2026-11-18
 ### Fixed
 - **Wheel:** the food fields showed no icon.
 - **Pages shown inside a dashboard** (0.17.2) lay too low: the planner's pets and wheels below shone through. The page now covers them.
