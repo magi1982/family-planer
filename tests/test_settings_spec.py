@@ -157,3 +157,12 @@ def test_pet_settings_are_cleaned():
     assert S.clean_pets(None) == S.PETS_DEFAULT
     patch, flags = S.pets({"speed": "fast", "evil": 1}, S.PETS_DEFAULT)
     assert patch == {"pets": {**S.PETS_DEFAULT, "speed": "fast"}} and flags == set()
+
+
+def test_points_sensor_unit_stays_points():
+    """The unit must not change (0.17.0 changed it to coins and HA stopped the long-term statistics)."""
+    import json
+    base = pathlib.Path(__file__).parents[1] / "custom_components/family_planer"
+    for f, unit in (("strings.json", "points"), ("translations/en.json", "points"), ("translations/de.json", "Punkte")):
+        data = json.loads((base / f).read_text())
+        assert data["entity"]["sensor"]["points"]["unit_of_measurement"] == unit, f

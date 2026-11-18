@@ -477,7 +477,7 @@
       },
       "points": {
         "name": "Coins",
-        "unit_of_measurement": "coins"
+        "unit_of_measurement": "points"
       }
     }
   },
