@@ -26,3 +26,15 @@ def test_pets_are_created_when_the_planner_loads():
 
 def test_pets_follow_every_change():
     assert "_pets_sync" in _calls(_method("_changed"))
+
+
+def test_setting_a_todo_twice_books_nothing_new():
+    src = ast.get_source_segment(SRC, _method("async_set_todo"))
+    guard = src.index('bool(todo.get("done")) == bool(done)')
+    assert guard < src.index("_book_todo")
+
+
+def test_frontend_ignores_presses_while_a_todo_is_saving():
+    root = pathlib.Path(__file__).parents[1] / "frontend_src"
+    assert "_tdBusy" in (root / "ui_week.js").read_text()
+    assert "_busy" in (root / "todos.js").read_text()

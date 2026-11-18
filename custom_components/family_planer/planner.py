@@ -1436,6 +1436,8 @@ class FamilyPlanner:
 
     async def async_set_todo(self, todo_id: str, done: bool) -> None:
         todo = self.data["todos"][todo_id]
+        if bool(todo.get("done")) == bool(done):
+            return  # pressed twice: already in that state – nothing is booked again
         self._book_todo(todo_id, todo, done)
         self._changed()
         await self._store.async_save(self.data)

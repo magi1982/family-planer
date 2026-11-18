@@ -68,7 +68,12 @@
     focusAdd() { const i = this.shadowRoot && this.shadowRoot.querySelector('[data-new]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center' }); } }
     _defSize(s) { const v = s && s.todo_settings && s.todo_settings.size; return ['none', 's', 'm', 'l'].includes(v) ? v : 's'; }
     _pts(s, it) { const sz = (s.sizes && s.sizes.todo) || {}; return it.size ? (sz[it.size] || 0) : (it.points || 0); }
-    async _set(it, done) { try { await this._store.ws('family_planer/todo/set', { todo_id: it.id, done }); } catch (e) { this._flash(this.T.err); } }
+    async _set(it, done) {
+      // one press at a time per to-do: further presses are ignored until the server answered
+      this._busy = this._busy || new Set(); if (this._busy.has(it.id)) return; this._busy.add(it.id);
+      try { await this._store.ws('family_planer/todo/set', { todo_id: it.id, done }); } catch (e) { this._flash(this.T.err); }
+      finally { setTimeout(() => this._busy.delete(it.id), 600); }
+    }
     _render() {
       if (!this.shadowRoot || !this._cfg) return;
       const s = this._snap(); const T = this.T; if (!s) { this.shadowRoot.innerHTML = ''; return; }

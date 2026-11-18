@@ -3439,8 +3439,12 @@ class LoxWochenplanerCard extends FpBase {
       const s = this.fpStore.snap || {}; const t = (s.todos || []).find((x) => x.id === tdb.dataset.todoid); if (!t) return;
       const confirm = !s.todo_settings || s.todo_settings.confirm !== false;
       if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
-      this._tdArm = null; if (!t.done) { this._coinFly(tdb); this._pop = { uid: t.id, t: Date.now() }; }
-      this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).catch(() => this._render()); return;
+      // one press at a time: until the server answered, further presses on this to-do are ignored (no double coins)
+      this._tdBusy = this._tdBusy || new Set(); if (this._tdBusy.has(t.id)) return;
+      this._tdFlown = this._tdFlown || new Set();
+      this._tdArm = null; if (!t.done) { if (!this._tdFlown.has(t.id)) { this._tdFlown.add(t.id); this._coinFly(tdb); } this._pop = { uid: t.id, t: Date.now() }; }
+      this._tdBusy.add(t.id); const free = () => setTimeout(() => this._tdBusy.delete(t.id), 600);
+      this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).then(free, () => { free(); this._render(); }); return;
     }
     const vw = e.target.closest('[data-view]');
     if (vw) { const chg = this._view !== vw.dataset.view; this._view = vw.dataset.view; this._dayOff = 0; this._week = 0; this._go(0); if (chg) fadeIn(this.shadowRoot && this.shadowRoot.querySelector('.grid, .tgrid') || this); return; }
@@ -4875,8 +4879,12 @@ class LoxWochenplanerCard extends FpBase {
       const s = this.fpStore.snap || {}; const t = (s.todos || []).find((x) => x.id === tdb.dataset.todoid); if (!t) return;
       const confirm = !s.todo_settings || s.todo_settings.confirm !== false;
       if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
-      this._tdArm = null; if (!t.done) { this._coinFly(tdb); this._pop = { uid: t.id, t: Date.now() }; }
-      this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).catch(() => this._render()); return;
+      // one press at a time: until the server answered, further presses on this to-do are ignored (no double coins)
+      this._tdBusy = this._tdBusy || new Set(); if (this._tdBusy.has(t.id)) return;
+      this._tdFlown = this._tdFlown || new Set();
+      this._tdArm = null; if (!t.done) { if (!this._tdFlown.has(t.id)) { this._tdFlown.add(t.id); this._coinFly(tdb); } this._pop = { uid: t.id, t: Date.now() }; }
+      this._tdBusy.add(t.id); const free = () => setTimeout(() => this._tdBusy.delete(t.id), 600);
+      this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).then(free, () => { free(); this._render(); }); return;
     }
     const vw = e.target.closest('[data-view]');
     if (vw) { const chg = this._view !== vw.dataset.view; this._view = vw.dataset.view; this._dayOff = 0; this._week = 0; this._go(0); if (chg) fadeIn(this.shadowRoot && this.shadowRoot.querySelector('.grid, .tgrid') || this); return; }
@@ -6727,7 +6735,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     focusAdd() { const i = this.shadowRoot && this.shadowRoot.querySelector('[data-new]'); if (i) { i.focus(); i.scrollIntoView({ block: 'center' }); } }
     _defSize(s) { const v = s && s.todo_settings && s.todo_settings.size; return ['none', 's', 'm', 'l'].includes(v) ? v : 's'; }
     _pts(s, it) { const sz = (s.sizes && s.sizes.todo) || {}; return it.size ? (sz[it.size] || 0) : (it.points || 0); }
-    async _set(it, done) { try { await this._store.ws('family_planer/todo/set', { todo_id: it.id, done }); } catch (e) { this._flash(this.T.err); } }
+    async _set(it, done) {
+      // one press at a time per to-do: further presses are ignored until the server answered
+      this._busy = this._busy || new Set(); if (this._busy.has(it.id)) return; this._busy.add(it.id);
+      try { await this._store.ws('family_planer/todo/set', { todo_id: it.id, done }); } catch (e) { this._flash(this.T.err); }
+      finally { setTimeout(() => this._busy.delete(it.id), 600); }
+    }
     _render() {
       if (!this.shadowRoot || !this._cfg) return;
       const s = this._snap(); const T = this.T; if (!s) { this.shadowRoot.innerHTML = ''; return; }

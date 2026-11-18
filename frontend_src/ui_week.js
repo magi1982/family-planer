@@ -617,8 +617,12 @@ class LoxWochenplanerCard extends FpBase {
       const s = this.fpStore.snap || {}; const t = (s.todos || []).find((x) => x.id === tdb.dataset.todoid); if (!t) return;
       const confirm = !s.todo_settings || s.todo_settings.confirm !== false;
       if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
-      this._tdArm = null; if (!t.done) { this._coinFly(tdb); this._pop = { uid: t.id, t: Date.now() }; }
-      this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).catch(() => this._render()); return;
+      // one press at a time: until the server answered, further presses on this to-do are ignored (no double coins)
+      this._tdBusy = this._tdBusy || new Set(); if (this._tdBusy.has(t.id)) return;
+      this._tdFlown = this._tdFlown || new Set();
+      this._tdArm = null; if (!t.done) { if (!this._tdFlown.has(t.id)) { this._tdFlown.add(t.id); this._coinFly(tdb); } this._pop = { uid: t.id, t: Date.now() }; }
+      this._tdBusy.add(t.id); const free = () => setTimeout(() => this._tdBusy.delete(t.id), 600);
+      this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).then(free, () => { free(); this._render(); }); return;
     }
     const vw = e.target.closest('[data-view]');
     if (vw) { const chg = this._view !== vw.dataset.view; this._view = vw.dataset.view; this._dayOff = 0; this._week = 0; this._go(0); if (chg) fadeIn(this.shadowRoot && this.shadowRoot.querySelector('.grid, .tgrid') || this); return; }
