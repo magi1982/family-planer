@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.18.4 – unreleased
+## 0.18.4 – 2026-11-18
 ### Fixed
 - **Banner gone after switching pages:** opening a page (e.g. pets from a scrolled planner) kept the old scroll position, so the banner and the buttons were out of view. Every page change now starts at the top, and a page shown inside a dashboard keeps the dashboard behind it still.
 
