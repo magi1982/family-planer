@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.18.2'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.18.3'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
@@ -3337,9 +3337,15 @@ class LoxWochenplanerCard extends FpBase {
     return `<div class="none2"><ha-icon icon="mdi:balloon"></ha-icon><div><b>${esc(TX.none)}</b>${sub}</div></div>`;
   }
   // what a chore brings rises slowly above it: coins (rewards) and, with pets on, the same number of Tierchen points
-  _coinFly(btn) {
+  _coinFly(btn, key) {
     try {
       if (!btn || !window.FPPET) return;
+      // coins rise only the first time a chore is ticked off today – ticking off again (after un-ticking) shows nothing
+      // (remembered for the day on this device, also across a page reload)
+      const day = new Date().toDateString();
+      let fl = window.__fpFlown;
+      if (!fl || fl.day !== day) { fl = { day, keys: new Set() }; try { const o = JSON.parse(localStorage.getItem('fpFlown') || 'null'); if (o && o.day === day && Array.isArray(o.keys)) fl.keys = new Set(o.keys.slice(-300)); } catch (e) { /* no storage */ } window.__fpFlown = fl; }
+      if (key) { if (fl.keys.has(key)) return; fl.keys.add(key); try { localStorage.setItem('fpFlown', JSON.stringify({ day, keys: [...fl.keys].slice(-300) })); } catch (e) { /* no storage */ } }
       const ptr = btn.querySelector('.ptr'); const col = btn.closest('.tcol'); const lab = col && col.querySelector('.lab.th');
       const pts = Number(((ptr && ptr.textContent) || '').replace(/[^0-9]/g, '')) || 0; if (!pts || !lab) return;
       const snap = (this.fpStore && this.fpStore.snap) || {}; const pr = (snap.persons || []).find((x) => x.name === lab.dataset.person); if (!pr) return;
@@ -3441,8 +3447,7 @@ class LoxWochenplanerCard extends FpBase {
       if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
       // one press at a time: until the server answered, further presses on this to-do are ignored (no double coins)
       this._tdBusy = this._tdBusy || new Set(); if (this._tdBusy.has(t.id)) return;
-      this._tdFlown = this._tdFlown || new Set();
-      this._tdArm = null; if (!t.done) { if (!this._tdFlown.has(t.id)) { this._tdFlown.add(t.id); this._coinFly(tdb); } this._pop = { uid: t.id, t: Date.now() }; }
+      this._tdArm = null; if (!t.done) { this._coinFly(tdb, `t:${t.id}`); this._pop = { uid: t.id, t: Date.now() }; }
       this._tdBusy.add(t.id); const free = () => setTimeout(() => this._tdBusy.delete(t.id), 600);
       this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).then(free, () => { free(); this._render(); }); return;
     }
@@ -3459,7 +3464,7 @@ class LoxWochenplanerCard extends FpBase {
     const sb = e.target.closest('[data-sonder]');
     if (sb && this.fpStore) {
       const it = ((this.fpStore.snap || {}).sonder || []).find((x) => x.id === sb.dataset.sonder); if (!it) return;
-      if (!it.done) { this._coinFly(sb); this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!it.done) { this._coinFly(sb, `s:${it.id}`); this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this.fpStore.ws('family_planer/sonder/set', { inst_id: it.id, done: !it.done }).catch(() => this._render()); return;
     }
     const lt = e.target.closest('[data-lvtap]'); if (lt) { this._lvTap(lt.dataset.lvtap, lt); return; }
@@ -3470,7 +3475,7 @@ class LoxWochenplanerCard extends FpBase {
       const done = b.classList.contains('done');
       b.classList.toggle('done');
       // little check animation only for the chore that was just ticked off
-      if (!done) { this._coinFly(b); this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!done) { this._coinFly(b, `c:${b.dataset.uid}`); this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this._call('todo', 'update_item', { item: b.dataset.uid, status: done ? 'needs_action' : 'completed' }, this._cfg.heute).catch(() => this._render());
       return;
     }
@@ -4784,9 +4789,15 @@ class LoxWochenplanerCard extends FpBase {
     return `<div class="none2"><ha-icon icon="mdi:balloon"></ha-icon><div><b>${esc(TX.none)}</b>${sub}</div></div>`;
   }
   // what a chore brings rises slowly above it: coins (rewards) and, with pets on, the same number of Tierchen points
-  _coinFly(btn) {
+  _coinFly(btn, key) {
     try {
       if (!btn || !window.FPPET) return;
+      // coins rise only the first time a chore is ticked off today – ticking off again (after un-ticking) shows nothing
+      // (remembered for the day on this device, also across a page reload)
+      const day = new Date().toDateString();
+      let fl = window.__fpFlown;
+      if (!fl || fl.day !== day) { fl = { day, keys: new Set() }; try { const o = JSON.parse(localStorage.getItem('fpFlown') || 'null'); if (o && o.day === day && Array.isArray(o.keys)) fl.keys = new Set(o.keys.slice(-300)); } catch (e) { /* no storage */ } window.__fpFlown = fl; }
+      if (key) { if (fl.keys.has(key)) return; fl.keys.add(key); try { localStorage.setItem('fpFlown', JSON.stringify({ day, keys: [...fl.keys].slice(-300) })); } catch (e) { /* no storage */ } }
       const ptr = btn.querySelector('.ptr'); const col = btn.closest('.tcol'); const lab = col && col.querySelector('.lab.th');
       const pts = Number(((ptr && ptr.textContent) || '').replace(/[^0-9]/g, '')) || 0; if (!pts || !lab) return;
       const snap = (this.fpStore && this.fpStore.snap) || {}; const pr = (snap.persons || []).find((x) => x.name === lab.dataset.person); if (!pr) return;
@@ -4888,8 +4899,7 @@ class LoxWochenplanerCard extends FpBase {
       if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
       // one press at a time: until the server answered, further presses on this to-do are ignored (no double coins)
       this._tdBusy = this._tdBusy || new Set(); if (this._tdBusy.has(t.id)) return;
-      this._tdFlown = this._tdFlown || new Set();
-      this._tdArm = null; if (!t.done) { if (!this._tdFlown.has(t.id)) { this._tdFlown.add(t.id); this._coinFly(tdb); } this._pop = { uid: t.id, t: Date.now() }; }
+      this._tdArm = null; if (!t.done) { this._coinFly(tdb, `t:${t.id}`); this._pop = { uid: t.id, t: Date.now() }; }
       this._tdBusy.add(t.id); const free = () => setTimeout(() => this._tdBusy.delete(t.id), 600);
       this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).then(free, () => { free(); this._render(); }); return;
     }
@@ -4906,7 +4916,7 @@ class LoxWochenplanerCard extends FpBase {
     const sb = e.target.closest('[data-sonder]');
     if (sb && this.fpStore) {
       const it = ((this.fpStore.snap || {}).sonder || []).find((x) => x.id === sb.dataset.sonder); if (!it) return;
-      if (!it.done) { this._coinFly(sb); this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!it.done) { this._coinFly(sb, `s:${it.id}`); this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this.fpStore.ws('family_planer/sonder/set', { inst_id: it.id, done: !it.done }).catch(() => this._render()); return;
     }
     const lt = e.target.closest('[data-lvtap]'); if (lt) { this._lvTap(lt.dataset.lvtap, lt); return; }
@@ -4917,7 +4927,7 @@ class LoxWochenplanerCard extends FpBase {
       const done = b.classList.contains('done');
       b.classList.toggle('done');
       // little check animation only for the chore that was just ticked off
-      if (!done) { this._coinFly(b); this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!done) { this._coinFly(b, `c:${b.dataset.uid}`); this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this._call('todo', 'update_item', { item: b.dataset.uid, status: done ? 'needs_action' : 'completed' }, this._cfg.heute).catch(() => this._render());
       return;
     }
@@ -8169,8 +8179,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const d = document.createElement('div'); d.className = 'fprise'; d.style.left = `${x}px`; d.style.top = `${y}px`;
       d.innerHTML = `${ic.startsWith('<') ? ic : `<span class="em">${esc(ic)}</span>`}<b>${esc(text)}</b>`; document.body.appendChild(d);
       if (reduce || !d.animate) { setTimeout(() => d.remove(), 2000); return; }
-      d.animate([{ transform: 'translate(-50%,0) scale(.6)', opacity: 0 }, { transform: 'translate(-50%,-10px) scale(1.08)', opacity: 1, offset: 0.1 }, { transform: 'translate(-50%,-16px) scale(1)', opacity: 1, offset: 0.2 },
-        { transform: 'translate(-50%,-70px)', opacity: 1, offset: 0.85 }, { transform: 'translate(-50%,-84px)', opacity: 0 }], { duration: 4200, easing: 'linear' }).onfinish = () => d.remove();
+      // rises quickly (first ~40 %), then stays readable and drifts a little before it fades – same 4.2 s in total
+      d.animate([{ transform: 'translate(-50%,0) scale(.6)', opacity: 0 }, { transform: 'translate(-50%,-14px) scale(1.08)', opacity: 1, offset: 0.08 },
+        { transform: 'translate(-50%,-62px) scale(1)', opacity: 1, offset: 0.4, easing: 'ease-out' }, { transform: 'translate(-50%,-72px)', opacity: 1, offset: 0.85 },
+        { transform: 'translate(-50%,-84px)', opacity: 0 }], { duration: 4200, easing: 'linear' }).onfinish = () => d.remove();
     }, n * 900));
   };
   const lastTick = {}; const lastInv = {};

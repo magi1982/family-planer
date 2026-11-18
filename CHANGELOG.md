@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.18.3 – unreleased
+### Added
+- **Action `family_planer.add_pet_points`** (admins only): give or take pet points – no coins.
+### Changed
+- The coins and points rising above a ticked chore move up faster and then stay readable; the total time is the same.
+### Fixed
+- **Ticking a chore off again** (after un-ticking) no longer shows rising coins again – only the first time per chore and day, also after a page reload. The server ignores a chore that is already in the requested state; coins and pet points were never booked twice.
+
 ## 0.18.2 – 2026-11-18
 ### Added
 - **Announce via script** (*Settings → Announcements*): own scripts get the text as the variable `message` – e.g. volume up, a short sound, then speak. Helps when an Echo answers "trouble accessing the Simon Says skill" to a plain "Speak".

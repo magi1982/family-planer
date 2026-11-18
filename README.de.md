@@ -636,6 +636,7 @@ Die Entitäten-IDs richten sich nach der HA-Sprache und dem Personennamen.
 | `family_planer.rollover` | Tag sofort neu berechnen |
 | `family_planer.set_item` | Ämtli per ID abhaken oder öffnen |
 | `family_planer.add_points` | Punkte geben oder abziehen (Person, Punkte, Grund) |
+| `family_planer.add_pet_points` | Tierchen-Punkte schenken oder abziehen, ohne Münzen (Personen, Punkte; nur Admins) |
 | `family_planer.announce` | Ansage sofort auslösen (ohne Zeitfenster/Pause), gibt den Text zurück |
 | `family_planer.queue_announcement` | Einmalige Meldung für die nächste Bewegung vormerken |
 | `family_planer.clear_announcement` | Vorgemerkte Meldung per Schlüssel löschen |

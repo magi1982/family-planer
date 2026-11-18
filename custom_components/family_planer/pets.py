@@ -215,6 +215,15 @@ def sync_points(st: dict, lifetime_coins: int) -> int:
     return delta
 
 
+def grant(st: dict, points: int) -> int:
+    """Pet points given by a parent (service add_pet_points): only pet points, no coins. Returns the new total."""
+    points = int(points)
+    if not -1000 <= points <= 1000:
+        raise PetError("bad_amount")
+    st["pts"] = max(0, st["pts"] + points) if points < 0 else st["pts"] + points
+    return st["pts"]
+
+
 def _grow_pill(pts: int) -> str:
     return "wachs_s" if pts < 10 else "wachs_m" if pts < 20 else "wachs_l"
 

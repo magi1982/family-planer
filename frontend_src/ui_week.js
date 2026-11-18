@@ -515,9 +515,15 @@ class LoxWochenplanerCard extends FpBase {
     return `<div class="none2"><ha-icon icon="mdi:balloon"></ha-icon><div><b>${esc(TX.none)}</b>${sub}</div></div>`;
   }
   // what a chore brings rises slowly above it: coins (rewards) and, with pets on, the same number of Tierchen points
-  _coinFly(btn) {
+  _coinFly(btn, key) {
     try {
       if (!btn || !window.FPPET) return;
+      // coins rise only the first time a chore is ticked off today – ticking off again (after un-ticking) shows nothing
+      // (remembered for the day on this device, also across a page reload)
+      const day = new Date().toDateString();
+      let fl = window.__fpFlown;
+      if (!fl || fl.day !== day) { fl = { day, keys: new Set() }; try { const o = JSON.parse(localStorage.getItem('fpFlown') || 'null'); if (o && o.day === day && Array.isArray(o.keys)) fl.keys = new Set(o.keys.slice(-300)); } catch (e) { /* no storage */ } window.__fpFlown = fl; }
+      if (key) { if (fl.keys.has(key)) return; fl.keys.add(key); try { localStorage.setItem('fpFlown', JSON.stringify({ day, keys: [...fl.keys].slice(-300) })); } catch (e) { /* no storage */ } }
       const ptr = btn.querySelector('.ptr'); const col = btn.closest('.tcol'); const lab = col && col.querySelector('.lab.th');
       const pts = Number(((ptr && ptr.textContent) || '').replace(/[^0-9]/g, '')) || 0; if (!pts || !lab) return;
       const snap = (this.fpStore && this.fpStore.snap) || {}; const pr = (snap.persons || []).find((x) => x.name === lab.dataset.person); if (!pr) return;
@@ -619,8 +625,7 @@ class LoxWochenplanerCard extends FpBase {
       if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
       // one press at a time: until the server answered, further presses on this to-do are ignored (no double coins)
       this._tdBusy = this._tdBusy || new Set(); if (this._tdBusy.has(t.id)) return;
-      this._tdFlown = this._tdFlown || new Set();
-      this._tdArm = null; if (!t.done) { if (!this._tdFlown.has(t.id)) { this._tdFlown.add(t.id); this._coinFly(tdb); } this._pop = { uid: t.id, t: Date.now() }; }
+      this._tdArm = null; if (!t.done) { this._coinFly(tdb, `t:${t.id}`); this._pop = { uid: t.id, t: Date.now() }; }
       this._tdBusy.add(t.id); const free = () => setTimeout(() => this._tdBusy.delete(t.id), 600);
       this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).then(free, () => { free(); this._render(); }); return;
     }
@@ -637,7 +642,7 @@ class LoxWochenplanerCard extends FpBase {
     const sb = e.target.closest('[data-sonder]');
     if (sb && this.fpStore) {
       const it = ((this.fpStore.snap || {}).sonder || []).find((x) => x.id === sb.dataset.sonder); if (!it) return;
-      if (!it.done) { this._coinFly(sb); this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!it.done) { this._coinFly(sb, `s:${it.id}`); this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this.fpStore.ws('family_planer/sonder/set', { inst_id: it.id, done: !it.done }).catch(() => this._render()); return;
     }
     const lt = e.target.closest('[data-lvtap]'); if (lt) { this._lvTap(lt.dataset.lvtap, lt); return; }
@@ -648,7 +653,7 @@ class LoxWochenplanerCard extends FpBase {
       const done = b.classList.contains('done');
       b.classList.toggle('done');
       // little check animation only for the chore that was just ticked off
-      if (!done) { this._coinFly(b); this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!done) { this._coinFly(b, `c:${b.dataset.uid}`); this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this._call('todo', 'update_item', { item: b.dataset.uid, status: done ? 'needs_action' : 'completed' }, this._cfg.heute).catch(() => this._render());
       return;
     }

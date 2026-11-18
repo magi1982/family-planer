@@ -38,3 +38,20 @@ def test_frontend_ignores_presses_while_a_todo_is_saving():
     root = pathlib.Path(__file__).parents[1] / "frontend_src"
     assert "_tdBusy" in (root / "ui_week.js").read_text()
     assert "_busy" in (root / "todos.js").read_text()
+
+
+def test_ticking_a_chore_twice_books_nothing_new():
+    src = ast.get_source_segment(SRC, _method("async_set_item"))
+    assert src.index('bool(item.get("done")) == bool(done)') < src.index("book_points")
+
+
+def test_pet_points_service_is_admin_only():
+    init = (pathlib.Path(__file__).parents[1] / "custom_components/family_planer/__init__.py").read_text()
+    assert 'async_register_admin_service(hass, DOMAIN, "add_pet_points"' in init
+
+
+def test_coins_rise_only_the_first_time_a_chore_is_ticked():
+    week = (pathlib.Path(__file__).parents[1] / "frontend_src/ui_week.js").read_text()
+    assert "if (fl.keys.has(key)) return;" in week
+    for key in ("`c:${b.dataset.uid}`", "`t:${t.id}`", "`s:${it.id}`"):
+        assert key in week

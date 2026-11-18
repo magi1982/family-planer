@@ -632,6 +632,24 @@
           "description": "Key of the message."
         }
       }
+    },
+    "add_pet_points": {
+      "name": "Give pet points",
+      "description": "Give pet points (Tierchen) – no coins. Admins only.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional if there are several."
+        },
+        "person": {
+          "name": "Person",
+          "description": "Names or ids of the persons."
+        },
+        "points": {
+          "name": "Pet points",
+          "description": "Negative to take away."
+        }
+      }
     }
   },
   "issues": {

@@ -735,6 +735,17 @@ class FamilyPlanner:
                 pets.decay(pet, now, cfg["decay"], paused=pid in away)
             pets.garden_grow(st, now.date(), paused=pid in away, speed=cfg["speed"])
 
+    async def async_add_pet_points(self, person_id: str, points: int) -> int:
+        """Give (or take) pet points to one person – no coins, nothing else changes."""
+        self._pets_sync()
+        st = (self.data.get("pets") or {}).get(person_id)
+        if st is None:
+            raise KeyError(person_id)
+        total = pets.grant(st, points)
+        self._changed()
+        await self._store.async_save(self.data)
+        return total
+
     def pets_view(self) -> dict[str, Any]:
         cfg = self.pets_settings()
         if not cfg["enabled"]:
@@ -877,6 +888,8 @@ class FamilyPlanner:
         item = self.data["items"].get(item_id)
         if item is None:
             raise KeyError(item_id)
+        if bool(item.get("done")) == bool(done):
+            return  # pressed twice: already in that state – nothing is booked again
         item["done"] = bool(done)
         item["done_at"] = dt_util.now().isoformat() if done else None
         if self.points_mode() == "fair":

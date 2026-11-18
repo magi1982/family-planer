@@ -632,6 +632,24 @@
           "description": "Schlüssel der Meldung."
         }
       }
+    },
+    "add_pet_points": {
+      "name": "Tierchen-Punkte schenken",
+      "description": "Schenkt Tierchen-Punkte – keine Münzen. Nur für Admins.",
+      "fields": {
+        "entry_id": {
+          "name": "Family Planer",
+          "description": "Optional, wenn es mehrere gibt."
+        },
+        "person": {
+          "name": "Person",
+          "description": "Namen oder IDs der Personen."
+        },
+        "points": {
+          "name": "Tierchen-Punkte",
+          "description": "Negativ zum Abziehen."
+        }
+      }
     }
   },
   "issues": {

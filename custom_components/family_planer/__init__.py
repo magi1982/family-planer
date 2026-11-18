@@ -14,6 +14,7 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.service import async_register_admin_service
 from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.typing import ConfigType
 
@@ -85,6 +86,21 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         except KeyError as err:
             raise ServiceValidationError(translation_domain=DOMAIN, translation_key="unknown_person") from err
 
+    async def handle_pet_points(call: ServiceCall) -> ServiceResponse:
+        planner = _planner(call)
+        names = call.data["person"] if isinstance(call.data["person"], list) else [call.data["person"]]
+        out = {}
+        for name in names:
+            try:
+                pid = name if name in planner.data["persons"] else planner.person_by_name(name)
+                if not pid:
+                    raise KeyError(name)
+                total = await planner.async_add_pet_points(pid, call.data["points"])
+                out[planner.data["persons"][pid]["name"]] = total
+            except KeyError as err:
+                raise ServiceValidationError(translation_domain=DOMAIN, translation_key="unknown_person") from err
+        return {"points": out}
+
     async def handle_import(call: ServiceCall) -> ServiceResponse:
         return await _planner(call).async_import_legacy(
             call.data.get("plan"), call.data.get("today"), call.data.get("history"), call.data.get("settings"))
@@ -108,6 +124,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         **base, vol.Required("person"): cv.string,
         vol.Required("points"): vol.All(vol.Coerce(int), vol.Range(min=-10000, max=10000)),
         vol.Optional("reason", default=""): vol.All(cv.string, vol.Length(max=80))}))
+    # admins only: pet points are a gift from the parents
+    async_register_admin_service(hass, DOMAIN, "add_pet_points", handle_pet_points, schema=vol.Schema({
+        **base, vol.Required("person"): vol.All(cv.ensure_list, [vol.All(cv.string, vol.Length(max=40))], vol.Length(min=1, max=20)),
+        vol.Required("points"): vol.All(vol.Coerce(int), vol.Range(min=-1000, max=1000))}),
+        supports_response=SupportsResponse.OPTIONAL)
     hass.services.async_register(DOMAIN, "import_legacy", handle_import, schema=vol.Schema({
         **base,
         vol.Optional("plan"): cv.entity_id, vol.Optional("today"): cv.entity_id,

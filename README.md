@@ -636,6 +636,7 @@ The entity IDs follow the Home Assistant language and the person's name (German:
 | `family_planer.rollover` | recalculate the day immediately |
 | `family_planer.set_item` | tick off or reopen a chore by ID |
 | `family_planer.add_points` | give or deduct points (person, points, reason) |
+| `family_planer.add_pet_points` | Give or take pet points, no coins (persons, points; admins only) |
 | `family_planer.announce` | trigger an announcement immediately (ignores time window/pause), returns the text |
 | `family_planer.queue_announcement` | queue a one-off message for the next motion |
 | `family_planer.clear_announcement` | delete a queued message by key |

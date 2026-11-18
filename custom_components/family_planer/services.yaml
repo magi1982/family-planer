@@ -76,6 +76,24 @@ add_points:
     reason:
       selector:
         text:
+add_pet_points:
+  fields:
+    entry_id:
+      selector:
+        config_entry:
+          integration: family_planer
+    person:
+      required: true
+      selector:
+        text:
+          multiple: true
+    points:
+      required: true
+      selector:
+        number:
+          min: -1000
+          max: 1000
+          mode: box
 queue_announcement:
   fields:
     entry_id:

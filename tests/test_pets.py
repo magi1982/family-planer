@@ -405,3 +405,11 @@ def test_view_tells_need_and_ready():
     assert v["pets"][eid]["need"] == 30 and v["pets"][eid]["ready"] is True
     assert v["spun"] is False
 
+
+
+def test_grant_gives_only_pet_points_and_never_goes_below_zero():
+    st = state()
+    assert pets.grant(st, 50) == 50 and st["pts"] == 50
+    assert pets.grant(st, -80) == 0
+    with pytest.raises(pets.PetError):
+        pets.grant(st, 5000)

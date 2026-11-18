@@ -188,8 +188,10 @@
       const d = document.createElement('div'); d.className = 'fprise'; d.style.left = `${x}px`; d.style.top = `${y}px`;
       d.innerHTML = `${ic.startsWith('<') ? ic : `<span class="em">${esc(ic)}</span>`}<b>${esc(text)}</b>`; document.body.appendChild(d);
       if (reduce || !d.animate) { setTimeout(() => d.remove(), 2000); return; }
-      d.animate([{ transform: 'translate(-50%,0) scale(.6)', opacity: 0 }, { transform: 'translate(-50%,-10px) scale(1.08)', opacity: 1, offset: 0.1 }, { transform: 'translate(-50%,-16px) scale(1)', opacity: 1, offset: 0.2 },
-        { transform: 'translate(-50%,-70px)', opacity: 1, offset: 0.85 }, { transform: 'translate(-50%,-84px)', opacity: 0 }], { duration: 4200, easing: 'linear' }).onfinish = () => d.remove();
+      // rises quickly (first ~40 %), then stays readable and drifts a little before it fades – same 4.2 s in total
+      d.animate([{ transform: 'translate(-50%,0) scale(.6)', opacity: 0 }, { transform: 'translate(-50%,-14px) scale(1.08)', opacity: 1, offset: 0.08 },
+        { transform: 'translate(-50%,-62px) scale(1)', opacity: 1, offset: 0.4, easing: 'ease-out' }, { transform: 'translate(-50%,-72px)', opacity: 1, offset: 0.85 },
+        { transform: 'translate(-50%,-84px)', opacity: 0 }], { duration: 4200, easing: 'linear' }).onfinish = () => d.remove();
     }, n * 900));
   };
   const lastTick = {}; const lastInv = {};
