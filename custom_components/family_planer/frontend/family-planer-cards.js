@@ -3355,7 +3355,10 @@ class LoxWochenplanerCard extends FpBase {
     return open.map((it) => {
       // who takes it: big avatar tiles for the whole family (easy to hit on the tablet), cancel as a small link
       const who = this._claim === it.id ? `<div class="vpick"><span class="vq">${TX.who}</span><div class="vps">${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="vp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 46)}<b>${esc(p.name)}</b></button>`).join('')}</div><button class="vx" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">${fpCoin(13)}+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
+      // secret chore: one tile with one border, split by a line – chore left, eye right (same as in the columns)
+      const rv = this._revealBtn(it, true);
+      const main = `<span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">${fpCoin(13)}+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button></div>${who}`;
+      return rv ? `<div class="vcard vsplit"><div class="vmain">${main}</div>${rv}</div>` : `<div class="vcard">${main}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -3894,6 +3897,8 @@ class LoxWochenplanerCard extends FpBase {
       .vbox{background:var(--fp-bg2,#232323);border:1px solid rgba(245,197,66,.5);border-radius:var(--fp-radius,16px);padding:14px;width:min(560px,100%);max-height:calc(100% - 32px);overflow:auto;box-sizing:border-box}
       .vhd{display:flex;align-items:center;gap:8px;margin-bottom:12px}.vhd .vh{font-size:26px}.vhd b{font-size:18px;color:#f5c542}.vhd .vs2{flex:1;color:var(--fp-text2,#aaa);font-size:13px}.vcl{width:40px;height:40px;border-radius:50%;border:none;background:var(--fp-bg4,#333);color:var(--fp-text,#ddd);font-size:16px;cursor:pointer}
       .vlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;align-items:start}.vlist .vcard{align-content:start}
+      .vcard.vsplit{display:flex;padding:0;gap:0;align-items:stretch;overflow:hidden}.vcard.vsplit .vmain{flex:1;min-width:0;display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;gap:8px;padding:10px}.vcard.vsplit .vmain .vbtn,.vcard.vsplit .vmain .vpick{grid-column:1 / -1}.vcard.vsplit .vmain > .ptr{grid-column:2;justify-self:start}
+      .vcard.vsplit > .rvb{flex:none;width:46px;min-width:46px;height:auto;padding:0;border:none;border-left:1px solid rgba(245,197,66,.4);border-radius:0;background:rgba(245,197,66,.06)}.vcard.vsplit > .rvb.on{background:rgba(245,197,66,.2)}.vcard.vsplit > .rvb svg{width:27px;height:20px}
       @media (prefers-reduced-motion:reduce){.nb.volb{animation:none}}
     .card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style>
     <div class="card${phone ? ' phone' : ''}">
@@ -4768,7 +4773,10 @@ class LoxWochenplanerCard extends FpBase {
     return open.map((it) => {
       // who takes it: big avatar tiles for the whole family (easy to hit on the tablet), cancel as a small link
       const who = this._claim === it.id ? `<div class="vpick"><span class="vq">${TX.who}</span><div class="vps">${persons.filter((p) => (it.elig || []).includes(p.id)).map((p) => `<button class="vp" data-claimp="${esc(it.id)}|${esc(p.id)}" style="--c:${p.farbe}">${avatarHtml(p, 46)}<b>${esc(p.name)}</b></button>`).join('')}</div><button class="vx" data-claim="${esc(it.id)}">${TX.cancel}</button></div>` : '';
-      return `<div class="vcard"><span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">${fpCoin(13)}+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button>${this._revealBtn(it, true)}</div>${who}</div>`;
+      // secret chore: one tile with one border, split by a line – chore left, eye right (same as in the columns)
+      const rv = this._revealBtn(it, true);
+      const main = `<span class="vi">${esc(it.icon)}</span><span class="vt">${this._sonderTitle(it)}<small>${it.until && it.end === tStr ? ` · ⏰ ${esc(it.until)}` : it.end > tStr ? ` · ⏳ ${esc(it.end.slice(8, 10))}.${esc(it.end.slice(5, 7))}.` : ''}</small></span>${pts[it.id] ? `<b class="ptr">${fpCoin(13)}+${Number(pts[it.id])}</b>` : ''}<div class="vbtn"><button class="take" data-claim="${esc(it.id)}">🙋 ${TX.take}</button></div>${who}`;
+      return rv ? `<div class="vcard vsplit"><div class="vmain">${main}</div>${rv}</div>` : `<div class="vcard">${main}</div>`;
     }).join('');
   }
   // badge "away" next to the person: the day before and while away (same detection as pausing chores)
@@ -5307,6 +5315,8 @@ class LoxWochenplanerCard extends FpBase {
       .vbox{background:var(--fp-bg2,#232323);border:1px solid rgba(245,197,66,.5);border-radius:var(--fp-radius,16px);padding:14px;width:min(560px,100%);max-height:calc(100% - 32px);overflow:auto;box-sizing:border-box}
       .vhd{display:flex;align-items:center;gap:8px;margin-bottom:12px}.vhd .vh{font-size:26px}.vhd b{font-size:18px;color:#f5c542}.vhd .vs2{flex:1;color:var(--fp-text2,#aaa);font-size:13px}.vcl{width:40px;height:40px;border-radius:50%;border:none;background:var(--fp-bg4,#333);color:var(--fp-text,#ddd);font-size:16px;cursor:pointer}
       .vlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;align-items:start}.vlist .vcard{align-content:start}
+      .vcard.vsplit{display:flex;padding:0;gap:0;align-items:stretch;overflow:hidden}.vcard.vsplit .vmain{flex:1;min-width:0;display:grid;grid-template-columns:32px minmax(0,1fr);align-items:center;gap:8px;padding:10px}.vcard.vsplit .vmain .vbtn,.vcard.vsplit .vmain .vpick{grid-column:1 / -1}.vcard.vsplit .vmain > .ptr{grid-column:2;justify-self:start}
+      .vcard.vsplit > .rvb{flex:none;width:46px;min-width:46px;height:auto;padding:0;border:none;border-left:1px solid rgba(245,197,66,.4);border-radius:0;background:rgba(245,197,66,.06)}.vcard.vsplit > .rvb.on{background:rgba(245,197,66,.2)}.vcard.vsplit > .rvb svg{width:27px;height:20px}
       @media (prefers-reduced-motion:reduce){.nb.volb{animation:none}}
     .card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style>
     <div class="card${phone ? ' phone' : ''}">
