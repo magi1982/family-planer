@@ -853,3 +853,14 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - Seen live: a story/animation runs in the header, a tap on a header button (page, holidays, settings) starts it again from the beginning.
 - Likely cause: the header re-renders its whole shadow DOM on every change; the scene element is kept but taken out and put back in, and the browser restarts all CSS animations of a re-inserted element.
 - Fix idea: on re-render only update what changed (button states, clock, badges) and never detach the scene; a test that the scene node stays connected across renders.
+
+## #70 Tierchen – decisions from the preview round (18.11.)
+- Every chore gives the same amount of **Münzen** (only for rewards) and **Punkte** (only for the pets).
+- Punkte are put into the active pet with a button (up to 50 per tap) → growth bar. Hatching and "Entwickeln" stay actions; "Entwicklungsbaum" is the button that only shows the tree.
+- Planer card: no pet progress; pet bottom-right at the avatar (~60 px); reliability and level as two ribbons in the same style; wheel = plain coloured wheel when free, grey when used, not touching the edge.
+- Tierchen page in the main area (not a popup): "Wessen Tierchen?" first, then the child's header in its colour + "Anderes Kind".
+- Pflege: "Aktuelles Tierchen pflegen: <name>", growth bar with numbers, every item shows what it does (Hunger +35 …), nothing is used when not needed (stays in the inventory), toys stay, full inventory below; no hover (tablet).
+- Sammlung like Pokémon GO: growth on top, animal left, facts right (Spezial, Grösse, Gewicht, Futter, Lieblingsplatz, Tage); owned first, unknown below. Tierbuch: owned first with "Entwicklungsbaum", hidden ones below; the tree shows the current look, only the future is hidden.
+- Garden = the planer's banner scene (same house, pool, season), only this child's pets, swimmers go bathing; pets step back while a banner story plays.
+- Statistik on the Tierchen page: pet numbers only.
+- Design everywhere: the planer's tiles (dark tile, colour on top), the planer's buttons.
