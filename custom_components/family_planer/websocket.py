@@ -111,7 +111,7 @@ def async_register_websocket(hass: HomeAssistant) -> None:
                     ws_list_save, ws_list_remove, ws_reward_save, ws_reward_remove,
                     ws_todo_save, ws_todo_set, ws_todo_delete, ws_theme_set, ws_vacation_decide, ws_person_order,
                     ws_sonder_claim, ws_sonder_set, ws_sonder_release, ws_sonder_list, ws_sonder_save,
-                    ws_sonder_delete, ws_sonder_template):
+                    ws_sonder_delete, ws_sonder_template, ws_pet):
         websocket_api.async_register_command(hass, handler)
 
 
@@ -367,6 +367,37 @@ async def ws_list_assign(hass: HomeAssistant, connection: websocket_api.ActiveCo
         connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Unknown list or category")
         return
     connection.send_result(msg["id"])
+
+
+PET_ACTIONS = ("spend", "use", "hatch", "evolve", "active", "nick", "onoff", "spin")
+
+
+@websocket_api.websocket_command({
+    vol.Required("type"): "family_planer/pet", vol.Optional("entry_id"): str,
+    vol.Required("person_id"): vol.All(str, vol.Length(max=80)), vol.Required("action"): vol.In(PET_ACTIONS),
+    vol.Optional("pet"): vol.All(str, vol.Length(max=20)), vol.Optional("item"): vol.All(str, vol.Length(max=24)),
+    vol.Optional("amount"): vol.All(int, vol.Range(min=1, max=50)), vol.Optional("nick"): vol.All(str, vol.Length(max=40)),
+    vol.Optional("name"): vol.All(str, vol.Length(max=40)), vol.Optional("look"): vol.All(dict, vol.Length(max=16)),
+    vol.Optional("on"): bool,
+})
+@websocket_api.async_response
+async def ws_pet(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+    """A child plays with its Tierchen (like ticking off chores: no PIN; the planer checks every action)."""
+    from .pets import PetError
+    planner = _planner(hass, msg)
+    if planner is None:
+        _not_found(connection, msg)
+        return
+    args = {k: msg[k] for k in ("pet", "item", "amount", "nick", "name", "look", "on") if k in msg}
+    try:
+        res = await planner.async_pet(msg["person_id"], msg["action"], args)
+    except KeyError:
+        connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Unknown person")
+        return
+    except PetError as err:
+        connection.send_error(msg["id"], "pet_" + str(err.args[0]), str(err.args[0]))
+        return
+    connection.send_result(msg["id"], res)
 
 
 @websocket_api.websocket_command({

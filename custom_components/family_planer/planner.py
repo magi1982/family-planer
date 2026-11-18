@@ -6,6 +6,7 @@ import base64
 import copy
 import json
 import logging
+import random
 import secrets
 from collections.abc import Callable
 from datetime import date, datetime, timedelta
@@ -35,6 +36,7 @@ from . import (
     lists,
     msgqueue,
     persontodos,
+    pets,
     rewards,
     schedule,
     seasons,
@@ -131,6 +133,7 @@ class FamilyPlanner:
         self.owns_panel = False
         self.away: dict[str, set[str]] = {}
         self.away_kind: dict[str, dict[str, str]] = {}
+        self._rng = random.SystemRandom()
         self.away_spans: dict[str, list[dict]] = {}
         self._away_timer = None
         self.vacation_review: list[dict] = []  # holidays found in the calendars, waiting for "away / at home"
@@ -621,6 +624,7 @@ class FamilyPlanner:
         if save:
             self._eval_levels()
             self._birthday_bonus()
+            self._pets_sync()
             self._store.async_delay_save(lambda: self.data, 1)
         async_dispatcher_send(self.hass, SIGNAL_UPDATE.format(self.entry.entry_id))
         for cb in list(self._listeners):
@@ -704,6 +708,67 @@ class FamilyPlanner:
 
     def level_settings(self) -> dict[str, Any]:
         return settings_spec.clean_levels(self.settings.get("levels"))
+
+    def pets_settings(self) -> dict[str, Any]:
+        return settings_spec.clean_pets(self.settings.get("pets"))
+
+    # ------------------------------------------------------------------ Tierchen
+    def _pets_sync(self) -> None:
+        """Earned coins become Tierchen-Punkte, chores drop food and pills, needs sink (paused while away)."""
+        cfg = self.pets_settings()
+        if not cfg["enabled"] or not self.data.get("persons"):
+            return
+        now = dt_util.now()
+        pets.ensure(self.data, self.data["persons"], now, cfg["adults"])
+        since = (now - timedelta(days=2)).isoformat()
+        away = self.away_now()
+        for pid, st in self.data["pets"].items():
+            pets.sync_points(st, rewards.lifetime(self.data["ledger"], pid))
+            new = [e for e in self.data["ledger"] if e["pid"] == pid and e["ts"] >= since]
+            pets.drops(st, new, self._rng)
+            for pet in st["pets"].values():
+                pets.decay(pet, now, cfg["decay"], paused=pid in away)
+
+    def pets_view(self) -> dict[str, Any]:
+        cfg = self.pets_settings()
+        if not cfg["enabled"]:
+            return {}
+        return {pid: pets.view(st, cfg["speed"]) for pid, st in (self.data.get("pets") or {}).items()}
+
+    async def async_pet(self, person_id: str, action: str, args: dict[str, Any]) -> dict[str, Any]:
+        """One action of a child on its pets. Raises pets.PetError (reason code) or KeyError (unknown person)."""
+        cfg = self.pets_settings()
+        if not cfg["enabled"]:
+            raise pets.PetError("disabled")
+        self._pets_sync()
+        st = self.data["pets"][person_id]
+        now = dt_util.now()
+        pet_id = args.get("pet") or st["active"]
+        if action != "onoff" and not st["on"]:
+            raise pets.PetError("off")
+        res: dict[str, Any] = {}
+        if action == "spend":
+            res["grow"] = pets.spend(st, pet_id, args.get("amount", pets.SPEND_MAX), cfg["speed"])
+        elif action == "use":
+            res = pets.use(st, pet_id, args.get("item", ""), now, cfg["speed"])
+        elif action == "hatch":
+            res["kind"] = pets.hatch(st, pet_id, self._rng, cfg["speed"])
+        elif action == "evolve":
+            res = pets.evolve(st, pet_id, args.get("look"), args.get("name"), now, cfg["speed"])
+        elif action == "active":
+            pets.set_active(st, pet_id)
+        elif action == "nick":
+            res["nick"] = pets.set_nick(st, pet_id, args.get("nick"))
+        elif action == "onoff":
+            pets.set_on(st, bool(args.get("on")))
+        elif action == "spin":
+            if not cfg["wheel"]:
+                raise pets.PetError("wheel_off")
+            res = pets.spin(st, self.today(), self._rng)
+        else:
+            raise pets.PetError("unknown_action")
+        self._changed()
+        return res
 
     def coin_settings(self) -> dict[str, Any]:
         return settings_spec.clean_coin(self.settings.get("coin"))
@@ -1465,6 +1530,8 @@ class FamilyPlanner:
             patch, flags = settings_spec.seasons(data, self.season_settings())
         elif section == "sonder":
             patch, flags = settings_spec.sonder(data, self.sonder_settings())
+        elif section == "pets":
+            patch, flags = settings_spec.pets(data, self.pets_settings())
         else:
             raise settings_spec.SettingsError("section", "unknown_section")
         if "gamification" in patch:
@@ -1638,6 +1705,8 @@ class FamilyPlanner:
             # the motion sensors of the announcements also wake the "Tap!" sign (nothing else of them is sent)
             "hint_motion": validate.entities((st.get("announce") or {}).get("motion"), ("binary_sensor",)),
             "busy": self.busy,
+            "pets": self.pets_view(),
+            "pets_cfg": {**self.pets_settings(), "fields": list(pets.FIELDS), "steps": list(pets.thresholds(self.pets_settings()["speed"])), "spend": pets.SPEND_MAX},
             "away_kind": self.away_kind,
             "away_badge": {pid: b for pid, spans in self.away_spans.items() if (b := vacation.badge_at(spans, dt_util.now()))},
             "sonder": sonder.view(self.data["sonder_inst"], self.data["sonder"], self.lang),
