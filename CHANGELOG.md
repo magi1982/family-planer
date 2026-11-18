@@ -10,6 +10,9 @@
 ### Changed
 - **Avatar builder without companions:** every person has real pets now, so the companion tab is gone and companions are no longer drawn on avatars (saved avatars keep working).
 ### Fixed
+- **Growth pills** showed a different, next form with a white flash (on the care page too) – they now show the pet growing.
+- **Pets in windows** (inventory, hatching, evolving) are never bigger than on the care page.
+- **Food** explains the favourite food of each of your pets; toys say they need 20 % energy; the dream crystal is marked as used up.
 - **Hatching showed the animal too early:** the page behind the hatching window already showed the new pet. The page and the banner now wait until the window is closed, and the window has a solid background.
 - **Evolution tree:** the column labels overlapped the boxes ("Wachstum" was hidden) and the hint on the right was cut off on narrow screens.
 

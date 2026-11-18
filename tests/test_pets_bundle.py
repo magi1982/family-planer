@@ -90,3 +90,11 @@ def test_artefacts_pick_a_pet_with_a_second_confirmation_and_hatching_has_no_spo
     assert "window.__fpHatching = true" in ui and "if (window.__fpHatching)" in ui  # page waits while hatching
     assert "data-gotoegg" in ui and "eggdot" in ui and "t.newEgg" in ui  # a new egg is seen
     assert "const lookOf = (p)" in ui
+
+
+def test_pets_in_windows_are_never_bigger_than_on_the_care_page():
+    import pathlib
+    ui = (pathlib.Path(__file__).parents[1] / "frontend_src/pets_ui.js").read_text()
+    assert ".care .pet{max-width:var(--petmax,200px)}" in ui and "window.__fpPetW = w" in ui
+    # growth pills grow, they do not show a strange next form
+    assert "wachs_s: 'wachs_s', wachs_m: 'wachs_m', wachs_l: 'wachs_l'" in ui and "run('wachsen')" not in ui
