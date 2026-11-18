@@ -48,3 +48,4 @@ def test_volunteer_is_a_toolbar_button_not_a_column():
     assert "data-volopen" in js and 'class="vpop"' in js
     assert 'class="tcol volc"' not in js
     assert "['extra', 'Extras']" in js
+    assert "data-todos " not in js  # the To-dos counter button is gone; "+" opens the to-do overview
