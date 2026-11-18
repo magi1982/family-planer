@@ -813,3 +813,11 @@ Seen in the live app (Chrome, same CSS size as the tablet):
 - Woche: the date range under "KW" is cut off at the right edge ("16. – 22. Novem…"); FR/SA/SO columns cut "Ämtli" to "Ämtl".
 - Woche: today's column takes most of the width, the other days are very narrow.
 - Long event titles in the Termine list are cut quite early ("Gamb…") next to the "in 12 Min" chip.
+
+## #65 Freiwillig ohne eigene Spalte, Werkzeugleiste entschlacken
+Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte → alle Familienspalten 197 → 163 px, Termine/Schule werden auf "G…" / "los 07:…" gekürzt.
+- A: Freiwillig als flache gelbe Leiste über den Spalten (nur wenn etwas frei ist), Karten nebeneinander mit "Ich nehm's!". (empfohlen)
+- B: gelber Knopf "🙋 2 frei" in der Werkzeugleiste (an Stelle von "To-dos 14"), öffnet ein Fenster.
+- C: Schild im Banner (wie "Tipp!"), öffnet ein Fenster.
+- "To-dos 14": die Zahl doppelt die To-dos in den Spalten. Idee: Knopf weg, Übersicht/Neu über "+" (Menü: Ämtli · To-do · Sonderämtli) und das Haken-Symbol im Banner.
+- Setting? "Freiwillig anzeigen als: Leiste / Knopf / Schild" (Default Leiste).
