@@ -821,3 +821,6 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - C: Schild im Banner (wie "Tipp!"), öffnet ein Fenster.
 - "To-dos 14": die Zahl doppelt die To-dos in den Spalten. Idee: Knopf weg, Übersicht/Neu über "+" (Menü: Ämtli · To-do · Sonderämtli) und das Haken-Symbol im Banner.
 - Setting? "Freiwillig anzeigen als: Leiste / Knopf / Schild" (Default Leiste).
+- Decision (user): variant B – yellow "🙋 Freiwillig" button in the toolbar that moves (wiggle/pulse), opens a popup with the cards and "Ich nehm's!"; no 6th column.
+- Rename filter "To-dos & Spezial" to something short (proposal: "Extras"; alternatives "Aufgaben", "Jobs").
+- Stundenplan already shows every school block of the day (Alles only shows the current block, setting "Schulfenster"). Today (Wed) has only a morning block, so it looked the same.
