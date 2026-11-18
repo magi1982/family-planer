@@ -864,3 +864,6 @@ Live (1080×810): sobald ein freies Sonderämtli offen ist, kommt eine 6. Spalte
 - Garden = the planer's banner scene (same house, pool, season), only this child's pets, swimmers go bathing; pets step back while a banner story plays.
 - Statistik on the Tierchen page: pet numbers only.
 - Design everywhere: the planer's tiles (dark tile, colour on top), the planer's buttons.
+- Adults: same card design; Tierchen per person on/off (Tierchen page, top). Off = still Münzen, no Punkte; nothing is lost (pets, inventory, Punkte stay). Off = no pet, no wheel on the card, no pets in the banner.
+- Glücksrad: the prize is shown big (picture, name, what it does) and lands in the inventory.
+- Card ribbons: one split capsule – reliability left, level right (tier colour).
