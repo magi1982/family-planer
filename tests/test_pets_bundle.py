@@ -80,3 +80,13 @@ def test_avatar_builder_has_no_companions_any_more():
     av = (pathlib.Path(__file__).parents[1] / "frontend_src/avatar.js").read_text()
     assert "const TABS = ['head', 'face', 'cloth', 'bg', 'cost', 'fx', 'season'];" in av
     assert "${petArt[o.pet]()}" not in av
+
+
+def test_artefacts_pick_a_pet_with_a_second_confirmation_and_hatching_has_no_spoiler():
+    import pathlib
+    ui = (pathlib.Path(__file__).parents[1] / "frontend_src/pets_ui.js").read_text()
+    assert "data-whom=" in ui and "data-wish=" in ui and "confirmRow(" in ui and "data-yes" in ui  # pick, then confirm
+    assert "data-artskin" in ui and "data-artaura" in ui  # switch effects in the tree
+    assert "window.__fpHatching = true" in ui and "if (window.__fpHatching)" in ui  # page waits while hatching
+    assert "data-gotoegg" in ui and "eggdot" in ui and "t.newEgg" in ui  # a new egg is seen
+    assert "const lookOf = (p)" in ui

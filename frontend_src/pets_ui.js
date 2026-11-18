@@ -21,12 +21,13 @@
       kpi: { pets: 'Tierchen gesammelt', endf: 'Endformen', evos: 'Entwicklungen', days: 'Tage mit {n}', fed: 'Mal gefüttert', spins: 'Mal Glücksrad' },
       wheel: 'Glücksrad', spin: 'Drehen!', spun: 'Heute schon gedreht – wieder ab Mitternacht', won: 'Gewonnen!', inInv: '📦 Liegt jetzt in deinem Inventar.', daily: 'Dazu: Futter und Wasser für deine Tierchen.',
       chooseWay: 'Entwickeln – wähle den Weg', ways: 'Dein Tierchen ist bereit! Wähle einen von {n} Wegen. Das kann man nicht rückgängig machen.', oneWay: 'Dein Tierchen ist bereit! Hier gibt es nur einen Weg.', pick: 'Ja, {n} wählen!',
-      hatching: 'Dein Ei schlüpft!', hatched: '{n}! Es wohnt jetzt in deinem Garten.', foggy: '🌫️ Was nach {n} kommt, bleibt geheim – grün ist dein Weg bis jetzt.', nowLooks: 'So sieht es jetzt aus',
+      hatching: 'Dein Ei schlüpft!', hatchOk: 'Super!', newEgg: 'Neues Ei!', eggWaits: 'Du hast ein Ei – jetzt ausbrüten', newThing: 'Neu:', hatched: '{n}! Es wohnt jetzt in deinem Garten.', foggy: '🌫️ Was nach {n} kommt, bleibt geheim – grün ist dein Weg bis jetzt.', nowLooks: 'So sieht es jetzt aus',
       prize: { grow: ['Wachstumspille', 'Für ein Tierchen deiner Wahl.'], extra: ['Haustier-Extra', 'Leckerli, Spielzeug, Energydrink, Happy-Pille …'], food: ['Futterpaket', '3 Futter und 3 Wasser.'], pts: ['+30 Punkte', 'Direkt zu deinen Tierchen-Punkten.'], egg: ['Ein neues Ei!', 'Es liegt jetzt in deiner Sammlung – setze Punkte ein, dann schlüpft es.'], eggPill: ['Grosse Wachstumspille', 'Ein Ei wartet schon – darum gibt es diesmal eine grosse Wachstumspille.'],
         dev: ['Entwicklungs-Pille', 'Bringt ein Tierchen sofort eine ganze Stufe weiter.'], again: ['Nochmals drehen!', 'Du darfst gleich noch einmal.'], star: ['Sternfeld', 'Fabelwesen-Ei, Artefakt oder Jackpot +100.'],
         fabel_egg: ['Fabelwesen-Ei!', 'Ein ganz besonderes Ei liegt jetzt in deiner Sammlung.'], artefact: ['Artefakt!', 'Etwas Seltenes für deine Tierchen.'], jackpot: ['Jackpot +100 Punkte', 'Direkt zu deinen Tierchen-Punkten.'] },
-      info: { what: 'Was ist das?', eff: 'Wirkung', how: 'So setzt du es ein', from: 'Woher bekommst du es?', have: 'Du hast', of: 'von höchstens', demo: '▶ Vorschau', useNow: 'Jetzt einsetzen', pick: 'Welches Tier soll aus deinem Ei schlüpfen?', wished: 'Gewünscht: {n} – es schlüpft beim nächsten Schlüpfen.', sightOn: 'Weitblick aktiv: Der ganze Entwicklungsbaum ist bis {n} Uhr sichtbar.', noEgg: 'Dafür brauchst du ein Ei, das noch nicht geschlüpft ist.', noPet: 'Dafür brauchst du ein geschlüpftes Tierchen.', tapHint: 'Tippe auf ein Ding für eine Erklärung.',
-        s1: 'Tierchen-Seite', s2: 'Aktuelles Tierchen', s3care: 'Pflegen & spielen: antippen', s3pill: 'Entwicklung: Pille antippen', s3art: 'Jetzt einsetzen', s3wish: 'Jetzt einsetzen und Tier aussuchen', tapIt: 'Ding antippen',
+      artfx: { colour: 'Farbe:', normal: 'Normal', regenbogen: '🌈 Regenbogen', kristall: '💎 Kristall', aura: 'Sternen-Aura:', on: 'an', off: 'aus', sight: 'Weitblick: Der ganze Baum ist sichtbar – für immer.' },
+      info: { what: 'Was ist das?', eff: 'Wirkung', how: 'So setzt du es ein', from: 'Woher bekommst du es?', have: 'Du hast', of: 'von höchstens', demo: '▶ Vorschau', useNow: 'Jetzt einsetzen', pick: 'Welches Tier soll aus deinem Ei schlüpfen?', wished: 'Dein Ei mit {n} liegt bereit – setze Punkte ein, dann schlüpft es.', sightOn: 'Weitblick aktiv: Der ganze Entwicklungsbaum ist bis {n} Uhr sichtbar.', noEgg: 'Dafür brauchst du ein Ei, das noch nicht geschlüpft ist.', yes: 'Ja, einsetzen', forWhom: 'Für welches Tierchen?', sure: 'Wirklich für {n} einsetzen?', sureWish: 'Wirklich ein Ei mit {n}?', noFit: 'Keines deiner Tierchen kann das gerade brauchen.', pv: { star: 'Balken voll + Sternen-Aura!', colour: 'Neue Farbe – für immer!', sight: 'Ganzer Baum sichtbar – für immer!', wish: 'Wunsch-Ei!' }, noPet: 'Dafür brauchst du ein geschlüpftes Tierchen.', tapHint: 'Tippe auf ein Ding für eine Erklärung.',
+        s1: 'Tierchen-Seite', s2: 'Aktuelles Tierchen', s3care: 'Pflegen & spielen: antippen', s3pill: 'Entwicklung: Pille antippen', s3art: 'Tierchen wählen & bestätigen', s3wish: 'Tier wählen & bestätigen', tapIt: 'Ding antippen',
         x: {
           futter: ['Das Lieblingsessen deines Tierchens – jedes Tier hat sein eigenes.', 'Hunger +35', 'Bei Ämtli (abwechselnd mit Wasser), jeden Tag 2 vom Glücksrad, Futterpaket'],
           wasser: ['Frisches Wasser zum Trinken.', 'Durst +40', 'Bei Ämtli (abwechselnd mit Futter), jeden Tag 2 vom Glücksrad, Futterpaket'],
@@ -44,11 +45,11 @@
           glitzerpille: ['Die Entwicklungs-Pille füllt den Balken sofort – danach tippst du auf Entwickeln.', 'Ganze Stufe', 'Glücksrad (spätestens nach 24 Drehs), selten bei Ämtli'],
           kissen: ['Ein Sternkissen zum Ausruhen. Bleibt in deinem Inventar.', 'Energie +40', 'Glücksrad: Haustier-Extra'],
           laterne: ['Eine Laterne für gemütliches Licht. Bleibt in deinem Inventar.', 'Laune +15', 'Glücksrad: Haustier-Extra'],
-          sternenstein: ['Ein Stein voller Sternenstaub: Der Balken ist sofort voll, und dein Tierchen bekommt eine Sternen-Aura.', 'Ganze Stufe + Sternen-Aura', 'Glücksrad: Sternfeld (Artefakt)'],
-          weitblick: ['Mit dem Weitblick-Kristall siehst du eine Stunde lang den ganzen Entwicklungsbaum – auch die geheimen Formen.', 'Ganzer Baum 1 Stunde', 'Glücksrad: Sternfeld (Artefakt)'],
-          zauberspiegel: ['Ein Zauberspiegel verwandelt dein Tierchen in eine glitzernde Kristall-Farbe.', 'Kristall-Farbe', 'Glücksrad: Sternfeld (Artefakt)'],
-          traumkristall: ['Der Traumkristall erfüllt einen Wunsch: Du suchst aus, welches Tier aus deinem Ei schlüpft.', 'Wunsch-Tier', 'Glücksrad: Sternfeld (Artefakt)'],
-          regenbogenfeder: ['Eine Regenbogenfeder färbt dein Tierchen in Regenbogenfarben.', 'Regenbogen-Farbe', 'Glücksrad: Sternfeld (Artefakt)'] } },
+          sternenstein: ['Ein Stein voller Sternenstaub: Der Balken ist sofort voll, und dein Tierchen bekommt für immer eine Sternen-Aura (im Entwicklungsbaum ein- und ausschaltbar).', 'Ganze Stufe + Sternen-Aura', 'Glücksrad: Sternfeld (Artefakt), manche Level'],
+          weitblick: ['Mit dem Weitblick-Kristall siehst du den ganzen Entwicklungsbaum eines Tierchens – für immer, auch die geheimen Formen.', 'Ganzer Baum, für immer', 'Glücksrad: Sternfeld (Artefakt), manche Level'],
+          zauberspiegel: ['Ein Zauberspiegel schenkt deinem Tierchen für immer die glitzernde Kristall-Farbe – im Entwicklungsbaum ein- und ausschaltbar.', 'Kristall-Farbe', 'Glücksrad: Sternfeld (Artefakt), manche Level'],
+          traumkristall: ['Der Traumkristall erfüllt einen Wunsch: Du suchst ein Tier aus und bekommst sofort sein Ei.', 'Wunsch-Ei', 'Glücksrad: Sternfeld (Artefakt), manche Level'],
+          regenbogenfeder: ['Eine Regenbogenfeder schenkt deinem Tierchen für immer die Regenbogen-Farbe – im Entwicklungsbaum ein- und ausschaltbar.', 'Regenbogen-Farbe', 'Glücksrad: Sternfeld (Artefakt), manche Level'] } },
       err: { not_needed: 'Das braucht dein Tierchen gerade nicht – es bleibt in deinem Inventar.', no_item: 'Davon hast du gerade nichts.', too_tired: 'Zu müde zum Spielen – gib zuerst einen Energydrink.', not_egg: 'Das geht nur mit einem Ei, das noch nicht geschlüpft ist.', bad_wish: 'Dieses Tier geht hier nicht – wähle ein anderes.', fully_grown: 'Dein Tierchen ist schon ganz gross.', egg: 'Zuerst muss dein Ei schlüpfen.', bar_full: 'Der Balken ist schon voll – jetzt entwickeln!',
         fully_grown: 'Schon ganz ausgewachsen.', no_points: 'Keine Punkte – erledige Ämtli.', not_ready: 'Noch nicht bereit.', egg: 'Ein Ei braucht noch keine Pflege.', spun: 'Heute schon gedreht.', off: 'Tierchen sind ausgeschaltet.', x: 'Hat nicht geklappt.' },
       it: { futter: 'Futter', wasser: 'Wasser', keks: 'Leckerli', energy: 'Energydrink', seife: 'Seife', happy: 'Happy-Pille', ball: 'Ball', wolle: 'Wollknäuel', blasen: 'Seifenblasen', buerste: 'Bürste', wachs_s: 'Pille S', wachs_m: 'Pille M', wachs_l: 'Pille L',
@@ -68,12 +69,13 @@
       kpi: { pets: 'Pets collected', endf: 'Final forms', evos: 'Evolutions', days: 'Days with {n}', fed: 'Times fed', spins: 'Wheel spins' },
       wheel: 'Wheel', spin: 'Spin!', spun: 'Already spun today – again after midnight', won: 'You won!', inInv: '📦 It is in your inventory now.', daily: 'Plus: food and water for your pets.',
       chooseWay: 'Evolve – choose the way', ways: 'Your pet is ready! Choose one of {n} ways. This cannot be undone.', oneWay: 'Your pet is ready! There is only one way here.', pick: 'Yes, choose {n}!',
-      hatching: 'Your egg hatches!', hatched: 'A {n}! It lives in your garden now.', foggy: '🌫️ What comes after {n} stays secret – green is your way so far.', nowLooks: 'This is how it looks now',
+      hatching: 'Your egg hatches!', hatchOk: 'Great!', newEgg: 'New egg!', eggWaits: 'You have an egg – hatch it now', newThing: 'New:', hatched: 'A {n}! It lives in your garden now.', foggy: '🌫️ What comes after {n} stays secret – green is your way so far.', nowLooks: 'This is how it looks now',
       prize: { grow: ['Growth pill', 'For a pet of your choice.'], extra: ['Pet extra', 'Treat, toy, energy drink, happy pill …'], food: ['Food pack', '3 food and 3 water.'], pts: ['+30 points', 'Straight to your pet points.'], egg: ['A new egg!', 'It is in your collection now – put points in and it hatches.'], eggPill: ['Big growth pill', 'An egg is already waiting – so this time you get a big growth pill.'],
         dev: ['Evolution pill', 'Takes a pet a whole step further at once.'], again: ['Spin again!', 'You may spin once more.'], star: ['Star field', 'Fable egg, artefact or jackpot +100.'],
         fabel_egg: ['Fable egg!', 'A very special egg is in your collection now.'], artefact: ['Artefact!', 'Something rare for your pets.'], jackpot: ['Jackpot +100 points', 'Straight to your pet points.'] },
-      info: { what: 'What is it?', eff: 'Effect', how: 'How to use it', from: 'Where do you get it?', have: 'You have', of: 'of at most', demo: '▶ Preview', useNow: 'Use now', pick: 'Which animal should hatch from your egg?', wished: 'Wished: {n} – it hatches next time.', sightOn: 'Far-sight active: the whole evolution tree is visible until {n}.', noEgg: 'You need an egg that has not hatched yet.', noPet: 'You need a hatched pet for this.', tapHint: 'Tap a thing for an explanation.',
-        s1: 'Pets page', s2: 'Current pet', s3care: 'Care & play: tap it', s3pill: 'Growth: tap the pill', s3art: 'Use now', s3wish: 'Use now and pick an animal', tapIt: 'Tap the thing',
+      artfx: { colour: 'Colour:', normal: 'Normal', regenbogen: '🌈 Rainbow', kristall: '💎 Crystal', aura: 'Star aura:', on: 'on', off: 'off', sight: 'Far-sight: the whole tree is visible – for good.' },
+      info: { what: 'What is it?', eff: 'Effect', how: 'How to use it', from: 'Where do you get it?', have: 'You have', of: 'of at most', demo: '▶ Preview', useNow: 'Use now', pick: 'Which animal should hatch from your egg?', wished: 'Your egg with {n} is ready – put points in and it hatches.', sightOn: 'Far-sight active: the whole evolution tree is visible until {n}.', noEgg: 'You need an egg that has not hatched yet.', yes: 'Yes, use it', forWhom: 'For which pet?', sure: 'Really use it for {n}?', sureWish: 'Really an egg with {n}?', noFit: 'None of your pets can use that right now.', pv: { star: 'Bar full + star aura!', colour: 'New colour – for good!', sight: 'Whole tree visible – for good!', wish: 'Wish egg!' }, noPet: 'You need a hatched pet for this.', tapHint: 'Tap a thing for an explanation.',
+        s1: 'Pets page', s2: 'Current pet', s3care: 'Care & play: tap it', s3pill: 'Growth: tap the pill', s3art: 'Pick a pet & confirm', s3wish: 'Pick an animal & confirm', tapIt: 'Tap the thing',
         x: {
           futter: ['Your pet\'s favourite food – every animal has its own.', 'Hunger +35', 'With chores (taking turns with water), 2 a day from the wheel, food pack'],
           wasser: ['Fresh water to drink.', 'Thirst +40', 'With chores (taking turns with food), 2 a day from the wheel, food pack'],
@@ -91,11 +93,11 @@
           glitzerpille: ['The evolution pill fills the bar at once – then tap Evolve.', 'Whole step', 'Wheel (after 24 spins at the latest), rarely with chores'],
           kissen: ['A star pillow to rest on. It stays in your inventory.', 'Energy +40', 'Wheel: pet extra'],
           laterne: ['A lantern for a cosy light. It stays in your inventory.', 'Mood +15', 'Wheel: pet extra'],
-          sternenstein: ['A stone full of stardust: the bar is full at once and your pet gets a star aura.', 'Whole step + star aura', 'Wheel: star field (artefact)'],
-          weitblick: ['With the far-sight crystal you see the whole evolution tree for one hour – even the secret forms.', 'Whole tree for 1 hour', 'Wheel: star field (artefact)'],
-          zauberspiegel: ['A magic mirror turns your pet into a sparkling crystal colour.', 'Crystal colour', 'Wheel: star field (artefact)'],
-          traumkristall: ['The dream crystal grants a wish: you pick which animal hatches from your egg.', 'Wished animal', 'Wheel: star field (artefact)'],
-          regenbogenfeder: ['A rainbow feather paints your pet in rainbow colours.', 'Rainbow colour', 'Wheel: star field (artefact)'] } },
+          sternenstein: ['A stone full of stardust: the bar is full at once and your pet gets a star aura for good (switch it on and off in the evolution tree).', 'Whole step + star aura', 'Wheel: star field (artefact), some levels'],
+          weitblick: ['With the far-sight crystal you see the whole evolution tree of one pet – for good, even the secret forms.', 'Whole tree, for good', 'Wheel: star field (artefact), some levels'],
+          zauberspiegel: ['A magic mirror gives your pet the sparkling crystal colour for good – switch it on and off in the evolution tree.', 'Crystal colour', 'Wheel: star field (artefact), some levels'],
+          traumkristall: ['The dream crystal grants a wish: pick an animal and get its egg right away.', 'Wish egg', 'Wheel: star field (artefact), some levels'],
+          regenbogenfeder: ['A rainbow feather gives your pet the rainbow colour for good – switch it on and off in the evolution tree.', 'Rainbow colour', 'Wheel: star field (artefact), some levels'] } },
       err: { not_needed: 'Your pet does not need that right now – it stays in your inventory.', no_item: 'You have none of that right now.', too_tired: 'Too tired to play – give an energy drink first.', not_egg: 'This only works with an egg that has not hatched yet.', bad_wish: 'This animal does not work here – pick another one.', fully_grown: 'Your pet is fully grown.', egg: 'Your egg has to hatch first.', bar_full: 'The bar is full – evolve now!',
         fully_grown: 'Already fully grown.', no_points: 'No points – do chores.', not_ready: 'Not ready yet.', egg: 'An egg needs no care yet.', spun: 'Already spun today.', off: 'Pets are switched off.', x: 'That did not work.' },
       it: { futter: 'Food', wasser: 'Water', keks: 'Treat', energy: 'Energy drink', seife: 'Soap', happy: 'Happy pill', ball: 'Ball', wolle: 'Wool ball', blasen: 'Bubbles', buerste: 'Brush', wachs_s: 'Pill S', wachs_m: 'Pill M', wachs_l: 'Pill L',
@@ -125,7 +127,9 @@
   const kindName = (k) => (L().P4.LIST.find((x) => x[0] === k) || [])[1] || k || '';
   const kindOf = (p) => (p.step >= 4 && p.name ? p.name : kindName(p.kind));
   const titleOf = (p, t) => (p.step === 0 ? t.egg : p.nick || kindOf(p));
-  const svgOf = (id, p, mood) => (p.step === 0 ? L().P4.egg(p.kind || eggKind(id, p)) : L().P4.svg(p.kind, ST[p.step], mood || 'froh', { noShadow: 1, ...(p.look || {}) }));
+  // what is drawn: the look from the tree plus the artefact effects that are switched on (they survive every evolution)
+  const lookOf = (p) => { const a = (p && p.art) || {}; return { ...((p && p.look) || {}), ...(a.skin ? { skin: a.skin } : {}), ...(a.aura_on ? { aura: 'sterne' } : {}) }; };
+  const svgOf = (id, p, mood) => (p.step === 0 ? L().P4.egg(p.kind || eggKind(id, p)) : L().P4.svg(p.kind, ST[p.step], mood || 'froh', { noShadow: 1, ...lookOf(p) }));
   const themeOf = (p) => (p.look && p.look.theme) || L().TREE.TH[p.kind] || 'wald';
   const colOf = (p, fb) => (p.step ? THC[themeOf(p)] || '#FFE27A' : fb);
   const pctOf = (p, steps) => { if (p.need == null) return 100; const base = steps[p.step] || 0; return Math.max(0, Math.min(100, Math.round((p.g - base) / Math.max(1, p.need - base) * 100))); };
@@ -138,8 +142,8 @@
   const toast = (host, text) => { const d = document.createElement('div'); d.className = 'pptoast'; d.textContent = text; host.appendChild(d); setTimeout(() => d.remove(), 2800); };
 
   // ------------------------------------------------------------- a popup (own shadow root on the body, closes on ✕ or outside)
-  const MODAL_CSS = `/* info window of an inventory thing */.ib{display:flex;gap:14px;align-items:center;margin:2px 0 10px}.ib .ic{flex:none;width:76px;height:76px;border-radius:18px;background:color-mix(in srgb,var(--ic,#69C350) 18%,#1b1f27);display:flex;align-items:center;justify-content:center}.ib b{font:700 18px system-ui;display:block}.ib small{color:#9aa3b2;font-size:13px}
-.isec{margin:10px 0 0}.isec h4{margin:0 0 4px;font:700 10.5px system-ui;letter-spacing:.08em;text-transform:uppercase;color:#9aa3b2}.isec p{margin:0;font-size:14px;line-height:1.4;color:#eef1f5}.effp{display:inline-block;background:color-mix(in srgb,var(--ic,#69C350) 22%,transparent);color:#eef1f5;border-radius:8px;padding:3px 9px;font:700 13px system-ui}
+  const MODAL_CSS = `/* info window of an inventory thing */.box:has(.info2){max-width:880px;width:94vw}.info2{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;align-items:start}.info2 .il .isec:first-of-type{margin-top:4px}@media (max-width:700px){.info2{grid-template-columns:1fr}}.ir{display:flex;flex-direction:column;gap:8px}.ir .demo{margin-top:0;height:210px}.ir .demo .cbox3{height:210px}.pick h4{margin:2px 0 6px;font:700 10.5px system-ui;letter-spacing:.08em;text-transform:uppercase;color:#9aa3b2}.whom{display:flex;flex-wrap:wrap;gap:6px}.whom button,.wish button{background:#232833;border:2px solid #2f3541;border-radius:10px;padding:4px 6px;color:#eef1f5;font:600 11px system-ui;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:74px}.whom button svg{width:52px;height:52px}.whom button.on,.wish button.on{border-color:var(--ic,#69C350);background:color-mix(in srgb,var(--ic,#69C350) 18%,#232833)}.wish{max-height:180px}.conf{margin-top:8px;background:#232833;border:1px solid var(--ic,#69C350);border-radius:10px;padding:8px 10px}.conf p{margin:0 0 6px;font:600 14px system-ui;color:#eef1f5}.conf .irow{margin-top:0}.ib{display:flex;gap:14px;align-items:center;margin:2px 0 10px}.ib .ic{flex:none;width:76px;height:76px;border-radius:18px;background:color-mix(in srgb,var(--ic,#69C350) 18%,#1b1f27);display:flex;align-items:center;justify-content:center}.ib b{font:700 18px system-ui;display:block}.ib small{color:#9aa3b2;font-size:13px}
+.isec{margin:8px 0 0}.isec h4{margin:0 0 4px;font:700 10.5px system-ui;letter-spacing:.08em;text-transform:uppercase;color:#9aa3b2}.isec p{margin:0;font-size:14px;line-height:1.4;color:#eef1f5}.effp{display:inline-block;background:color-mix(in srgb,var(--ic,#69C350) 22%,transparent);color:#eef1f5;border-radius:8px;padding:3px 9px;font:700 13px system-ui}
 .steps{display:flex;align-items:stretch;gap:6px;margin-top:4px}.steps .st{flex:1;background:#232833;border:1px solid #2f3541;border-radius:10px;padding:8px 6px;text-align:center;font-size:12px;color:#cfd6df;display:flex;flex-direction:column;align-items:center;gap:5px}.steps .st .n{font:700 11px system-ui;color:#10200c;background:var(--ic,#69C350);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center}.steps .st .g{font-size:20px;height:26px;display:flex;align-items:center}.steps .ar{align-self:center;color:#5c6575;font-size:16px}
 .demo{position:relative;margin-top:10px;height:240px;border-radius:12px;overflow:hidden}.demo .cbox3{width:100%;max-width:none;height:240px}.okb.green{background:#69C350;border-color:#69C350;color:#10200c}.dbtn{position:absolute;right:8px;bottom:8px;z-index:3}.irow{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}.ierr{color:#F5A3A3;font-size:13px;margin-top:8px;min-height:1em}
 .wish{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;max-height:260px;overflow:auto;margin-top:8px}.wish button{background:#232833;border:1px solid #2f3541;border-radius:10px;padding:6px 2px;color:#eef1f5;font:600 11px system-ui;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}.wish button svg{width:48px;height:48px}
@@ -154,10 +158,11 @@
     .pz{display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:center;background:#1c2027;border-radius:12px;padding:14px;box-shadow:inset 0 3px 0 var(--zc)}.pzp{display:flex;justify-content:center}
     .pz small{color:#F5C542;font:800 12px system-ui;text-transform:uppercase;letter-spacing:.08em}.pz b{display:block;font-size:20px;margin:2px 0}.pz p{margin:4px 0;font-size:13px;color:#c9ced6}
     .wheelbox{margin:0;background:none;padding:6px 0}.fogbar{font-size:12.5px;color:#cfd6df;margin-bottom:8px}`;
-  const modal = (title, html, setup, color) => {
-    const host = document.createElement('div'); const root = host.attachShadow({ mode: 'open' });
+  const modal = (title, html, setup, color, opts) => {
+    const o = opts || {}; const host = document.createElement('div'); const root = host.attachShadow({ mode: 'open' });
+    if (o.solid) host.style.background = 'rgba(5,7,10,.97)';
     root.innerHTML = `<style>${MODAL_CSS}${L() ? L().P4.CSS + L().CARE.CSS + L().CSS : ''}</style><div class="box" style="--mc:${color || '#F5C542'}"><button class="x" aria-label="✕">✕</button><h3>${esc(title)}</h3>${html}</div>`;
-    const close = () => host.remove();
+    let shut = false; const close = () => { if (shut) return; shut = true; host.remove(); if (o.onClose) o.onClose(); };
     root.querySelector('.x').addEventListener('click', close);
     host.addEventListener('click', (e) => { if (e.composedPath()[0] === host) close(); });
     document.body.appendChild(host); if (setup) setup(root, close);
@@ -210,17 +215,22 @@
   const openHatch = async (store, pid, id, after) => {
     await load(); const t = T(store.snap); const p = store.snap.pets[pid].pets[id];
     const pr = (store.snap.persons || []).find((x) => x.id === pid) || {};
-    modal(t.hatching, `<div class="cbox3 spot2" style="margin:auto;--tc:${pcol(pr)}"></div><p class="hint" style="text-align:center;font-size:14px">…</p>`, async (root) => {
+    // the page and the banner behind wait until the window is closed – nobody sees the animal before it hatches
+    window.__fpHatching = true;
+    modal(t.hatching, `<div class="cbox3 spot2" style="margin:auto;--tc:${pcol(pr)}"></div><p class="hint" style="text-align:center;font-size:14px">…</p><div class="irow" style="justify-content:center"><button class="okb green" data-ok hidden>${esc(t.hatchOk)}</button></div>`, async (root, close) => {
+      const box = root.querySelector('.cbox3'); new (L().CARE.Care)(box, p.kind || eggKind(id, p), 'ei', { noBars: 1 });
       // the server decides the animal first, so the right one comes out of the egg
       let res; try { res = await call(store, pid, 'hatch', { pet: id }); } catch (e) { root.querySelector('.hint').textContent = errMsg(t, e); return; }
-      const cr = new (L().CARE.Care)(root.querySelector('.cbox3'), res.kind || p.kind || eggKind(id, p), 'baby', { noBars: 1 }); cr.run('schluepfen');
-      setTimeout(() => { root.querySelector('.hint').textContent = fmt(t.hatched, { n: kindName(res.kind) }); if (after) after(); }, 3200);
-    });
+      const cr = new (L().CARE.Care)(box, res.kind || p.kind || eggKind(id, p), 'ei', { noBars: 1 }); cr.run('schluepfen');
+      root.querySelector('[data-ok]').addEventListener('click', close);
+      setTimeout(() => { root.querySelector('.hint').textContent = fmt(t.hatched, { n: kindName(res.kind) }); root.querySelector('[data-ok]').hidden = false; }, 3200);
+    }, null, { solid: true, onClose: () => { window.__fpHatching = false; if (after) after(); window.dispatchEvent(new Event('fp-hatched')); } });
   };
 
   // ------------------------------------------------------------- person card: pet bottom-right at the avatar (60 px), the plain wheel top-right
   const CARD_CSS = `.ring{overflow:visible}.fppet{position:absolute;right:-31px;bottom:-17px;width:60px;height:60px;padding:0;border:0;background:none;cursor:pointer;z-index:5}.fppet svg{width:100%;height:100%;overflow:visible}
     .fppet.egg svg{animation:fpwob 2.2s ease-in-out infinite;transform-origin:50% 90%}@keyframes fpwob{0%,70%,100%{transform:rotate(0)}76%{transform:rotate(-8deg)}84%{transform:rotate(7deg)}92%{transform:rotate(-3deg)}}
+    .fppet .eggdot{position:absolute;left:-8px;top:-8px;font-style:normal;font-size:15px;animation:fpwob 2.2s ease-in-out infinite}
     .fppet .need{position:absolute;right:-6px;top:-6px;font-style:normal;font-size:12px;background:#fff;border-radius:10px;padding:1px 3px}
     .fpwh{position:absolute;right:12px;top:12px;width:34px;height:34px;padding:0;border:0;background:none;cursor:pointer;z-index:6}.fpwh svg{width:100%;height:100%}.fpwh.used svg{filter:grayscale(1) brightness(.75);opacity:.55}
     .lab.th.fphas .nm{padding-right:42px}@media (prefers-reduced-motion:reduce){.fppet.egg svg{animation:none}}`;
@@ -231,7 +241,8 @@
     const st = snap.pets[pid]; const p = st.pets[st.active]; const t = T(snap);
     if (!wheelIcon) { const d = document.createElement('div'); d.innerHTML = L().WHEEL.knob('#888', true); const s = d.querySelector('svg'); wheelIcon = s ? s.outerHTML : '🎡'; }
     const hungry = p && p.step > 0 && p.v && p.v.hunger < 30;
-    return [p ? `<button class="fppet${p.step === 0 ? ' egg' : ''}" data-fppet="${esc(pid)}" aria-label="${esc(titleOf(p, t))}">${svgOf(st.active, p)}${hungry ? '<i class="need">🍎</i>' : ''}</button>` : '',
+    const waits = p && p.step > 0 && Object.values(st.pets).some((x) => x.step === 0);
+    return [p ? `<button class="fppet${p.step === 0 ? ' egg' : ''}" data-fppet="${esc(pid)}" aria-label="${esc(titleOf(p, t))}">${svgOf(st.active, p)}${hungry ? '<i class="need">🍎</i>' : ''}${waits ? '<i class="eggdot">🥚</i>' : ''}</button>` : '',
       (snap.pets_cfg || {}).wheel ? `<button class="fpwh${st.spun ? ' used' : ''}" data-fpwheel="${esc(pid)}" aria-label="${t.wheel}">${wheelIcon}</button>` : ''];
   };
 
@@ -257,9 +268,18 @@
     rise(x, y, [[coinHtml || '🪙', `+${pts} ${t.coins}`], ...(on ? [['⭐', `+${pts} ${t.pts}`]] : [])]);
   };
   // found things (food, pills) arrive with the next update: shown at the chore that brought them
+  const lastEggs = {}; const lastArts = {};
   const onSnap = (snap) => {
     if (!snap || !snap.pets) return; const t = T(snap);
     Object.entries(snap.pets).forEach(([pid, st]) => {
+      // a new egg or a new artefact (wheel, level): say so, wherever the child is
+      const eggs = Object.keys(st.pets).filter((k) => st.pets[k].step === 0); const arts = ARTS.filter((k) => st.inv[k]);
+      const eb = lastEggs[pid]; const ab = lastArts[pid]; lastEggs[pid] = eggs; lastArts[pid] = arts;
+      if (eb && ab && st.on && L() && !window.__fpHatching) {
+        const news = [...eggs.filter((k) => !eb.includes(k)).map(() => ['🥚', t.newEgg]), ...arts.filter((k) => !ab.includes(k)).map((k) => [L().ICO.icoB(k, 24), `${t.newThing} ${t.it[k] || k}`])];
+        const pr = (snap.persons || []).find((x) => x.id === pid);
+        if (news.length) rise(window.innerWidth / 2, window.innerHeight * 0.4, news.map(([i, x]) => [i, pr ? `${pr.name}: ${x}` : x]));
+      }
       const before = lastInv[pid]; lastInv[pid] = { ...st.inv }; const tk = lastTick[pid];
       if (!before || !tk || Date.now() - tk.at > 6000 || !L()) return;
       const got = Object.entries(st.inv).filter(([k, n]) => n > (before[k] || 0)).map(([k, n]) => [L().ICO.icoB(k, 24), `+${n - (before[k] || 0)} ${t.it[k] || k}`]);
@@ -273,11 +293,11 @@
   const bannerState = new WeakMap(); let bannerSheet = null;
   const bannerPets = (snap) => { const out = []; if (!enabled(snap) || !snap.pets) return out;
     (snap.persons || []).forEach((pr) => { const st = snap.pets[pr.id]; if (!st || !st.on) return; const order = [st.active, ...Object.keys(st.pets).filter((k) => k !== st.active)];
-      order.forEach((id) => { const p = st.pets[id]; if (p && p.step > 0) out.push([p.kind, ST[p.step], p.look || {}]); }); });
+      order.forEach((id) => { const p = st.pets[id]; if (p && p.step > 0) out.push([p.kind, ST[p.step], lookOf(p)]); }); });
     return out.slice(0, 8); };
   // owner = the navigation card: the pet layer belongs to it and survives every redraw of the banner (pets keep walking)
   const banner = (bar, snap, owner) => {
-    if (!bar || !owner) return; if (!enabled(snap)) { const old = bannerState.get(owner); if (old) { old.host.remove(); bannerState.delete(owner); } return; }
+    if (!bar || !owner || window.__fpHatching) return; if (!enabled(snap)) { const old = bannerState.get(owner); if (old) { old.host.remove(); bannerState.delete(owner); } return; }
     if (!L()) { load().then(() => banner(bar, snap, owner)).catch(() => {}); return; }
     const svg = bar.querySelector('.scn svg'); if (!svg || !svg.getScreenCTM()) return; const sr = svg.getBoundingClientRect(); if (!sr.width) return;
     const root = bar.getRootNode(); if (!bannerSheet) { bannerSheet = new CSSStyleSheet(); bannerSheet.replaceSync(L().P4.CSS + L().M.CSS + SCN_CSS); }
@@ -313,6 +333,8 @@
     h2{margin:2px 0 12px;font:700 19px system-ui}
     .av{position:relative;display:inline-block;width:64px;height:64px;flex:none}.av .ava{display:block;width:64px;height:64px;border-radius:50%;overflow:hidden}.av .ava>*{width:100%!important;height:100%!important}
     .av .pet{position:absolute;right:-31px;bottom:-17px;width:60px;height:60px}.av .pet svg{width:100%;height:100%;overflow:visible}
+    .eggwait{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 10px;padding:8px 14px;background:color-mix(in srgb,#F5C542 16%,var(--fp-bg2,#1b1f27));border:2px solid #F5C542;border-radius:14px;color:var(--fp-text,#eef1f5);font:700 15px system-ui;cursor:pointer;text-align:left}.eggwait .ew{width:44px;height:44px;flex:none}.eggwait .ew svg{width:100%;height:100%}.eggwait b{flex:1}.eggwait .go{font-size:22px;color:#F5C542}
+    .axbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 10px;padding:8px 10px;background:var(--fp-bg2,#1b1f27);border:1px solid var(--fp-line,#2f3541);border-radius:12px}.axl{font:700 11px system-ui;color:var(--fp-text2,#9aa3b2);margin-left:6px}.axc{background:var(--fp-bg3,#2c323d);border:1px solid var(--fp-line,#2f3541);color:var(--fp-text,#eef1f5);border-radius:9px;padding:6px 10px;font:600 13px system-ui;cursor:pointer}.axc.on{background:#B58CFF;border-color:#B58CFF;color:#160c26}
     .who{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
     .kid{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:12px 10px 10px;margin:0;cursor:pointer;border:0;color:inherit;font:inherit}
     .kid .nm{font:600 15px system-ui;margin-top:8px}.kid small{color:var(--fp-text2,#9aa3b2);font-size:12px;margin:2px 0 8px}
@@ -383,6 +405,8 @@
       if (!this.shadowRoot) return;
       if (!L()) { this.shadowRoot.innerHTML = `<style>${PAGE_CSS}</style><div class="card"><p class="hint">…</p></div>`; load().then(() => this.update()).catch(() => {}); return; }
       if (window.__fpPetPerson) { this._pid = window.__fpPetPerson; this._tab = window.__fpPetTab || 'tier'; window.__fpPetPerson = null; window.__fpPetTab = null; this._sub = null; }
+      if (this._store && this._store.snap) onSnap(this._store.snap);
+      if (window.__fpHatching) { clearTimeout(this._ht); this._ht = setTimeout(() => this.update(), 400); return; }
       // busy with a care animation or a typed name: the next update waits
       if (this._hold && Date.now() < this._hold) { clearTimeout(this._ht); this._ht = setTimeout(() => this.update(), this._hold - Date.now() + 50); return; }
       this._render();
@@ -422,7 +446,9 @@
       const col = colOf(p, pcol(pr)); const nx = p.need; const amt = nx != null ? Math.min((s.pets_cfg || {}).spend || 50, st.pts, Math.max(0, nx - p.g)) : 0; const can = nx != null && !p.ready && amt > 0;
       const pills = [...PILLS.map(([k, v]) => [k, `+${v}`]), [DEV, t.it[DEV] && (s.lang === 'en' ? 'whole step' : 'ganze Stufe')]].filter(([k]) => (st.inv[k] || 0) > 0);
       const have = [...CARE_ITEMS, ...TOYS, 'kissen', 'laterne'].filter((k) => (st.inv[k] || 0) > 0);
-      return `<div class="dev${cares ? ' two' : ''}">
+      const waiting = !egg && Object.entries(st.pets).find(([, q]) => q.step === 0);
+      const eggCard = waiting ? `<button class="eggwait" data-gotoegg="${esc(waiting[0])}"><span class="ew">${svgOf(waiting[0], waiting[1])}</span><b>🥚 ${esc(t.eggWaits)}</b><span class="go">›</span></button>` : '';
+      return `${eggCard}<div class="dev${cares ? ' two' : ''}">
         <div class="tile big" style="--pc:${col}"><div class="top"><span class="stg">${esc(t.steps[p.step])}</span>${act ? `<em class="act">${t.active}</em>` : ''}</div>
           ${cares ? `<div class="cbox" data-cbox="${esc(id)}"></div>` : `<div class="spot" style="--tc:${col}">${svgOf(id, p)}</div>`}
           <div class="nrow"><b>${esc(titleOf(p, t))}</b>${!egg && p.nick ? `<small>${esc(kindOf(p))}</small>` : ''}${egg ? '' : `<button class="pen" data-pen="${esc(id)}" aria-label="${t.name}"><ha-icon icon="mdi:pencil"></ha-icon></button>`}</div><div class="nick"></div>
@@ -433,52 +459,98 @@
           ${pills.length ? `<div class="pills">${pills.map(([k, v]) => `<button class="pill" data-use="${k}" data-pet="${esc(id)}">${L().ICO.icoB(k, 22)}<b>${esc(t.it[k])}</b><span class="tag" style="--nc:#B58CFF">${esc(v)}</span><i>${st.inv[k]}×</i></button>`).join('')}</div>` : ''}</div>
           ${cares ? `<div class="tile" style="--pc:${col}"><div class="gl"><b>${t.care}</b><span>${t.careH}</span></div>${have.length ? `<div class="things">${have.map((k) => this._thing(t, st, k)).join('')}</div>` : `<p class="hint">${t.nothing}</p>`}</div>` : ''}</div></div>`;
     }
-    // tap on a thing: what it is, what it does, how to use it (steps + a preview on your own pet), where it comes from
+    // tap on a thing: what it is, what it does, how to use it (steps + a preview on your own pet), where it comes from.
+    // Artefacts: pick the pet (or the animal of the wish egg) and confirm a second time – nothing happens by a stray tap.
     _info(k) {
       const t = this._t(); const I = t.info; const st = this._snap().pets[this._pid]; const x = I.x[k] || ['', '', ''];
-      const col = { care: '#69C350', pill: '#E36BD2', art: '#B58CFF' }[KIND_OF(k)]; const have = st.inv[k] || 0; const kind = KIND_OF(k);
-      const pet = st.pets[st.active]; const hatched = Object.entries(st.pets).find(([id, p]) => id === st.active && p.step > 0) || Object.entries(st.pets).find(([, p]) => p.step > 0);
-      const egg = Object.entries(st.pets).find(([, p]) => p.step === 0);
+      const kind = KIND_OF(k); const col = { care: '#69C350', pill: '#E36BD2', art: '#B58CFF' }[kind]; const have = st.inv[k] || 0;
+      const pets = Object.entries(st.pets); const active = st.pets[st.active];
+      const hatchedFirst = pets.find(([id, p]) => id === st.active && p.step > 0) || pets.find(([, p]) => p.step > 0);
+      const ico = (n) => L().ICO.icoB(k === 'futter' ? (L().ICO.FOOD[(active || {}).kind] || 'apfel') : k, n);
       const s3 = kind === 'care' ? I.s3care : kind === 'pill' ? I.s3pill : k === 'traumkristall' ? I.s3wish : I.s3art;
-      const ico = (n) => L().ICO.icoB(k === 'futter' ? (L().ICO.FOOD[(pet || {}).kind] || 'apfel') : k, n);
-      const steps = (kind === 'art' ? [['🎒', t.tabs.inv], [ico(24), I.tapIt], [k === 'traumkristall' ? '🥚' : '✨', s3]] : [['🐾', I.s1], ['⭐', I.s2], [ico(24), s3]])
+      const steps = (kind === 'art' ? [['🎒', t.tabs.inv], [ico(22), I.tapIt], [k === 'traumkristall' ? '🥚' : '✨', s3]] : [['🐾', I.s1], ['⭐', I.s2], [ico(22), s3]])
         .map(([g, l], n) => `<div class="st"><span class="n">${n + 1}</span><span class="g">${g}</span>${esc(l)}</div>`).join('<span class="ar">›</span>');
-      const demoPet = k === 'traumkristall' ? null : hatched;
-      const html = `<div style="--ic:${col}"><div class="ib"><div class="ic">${ico(56)}</div><div><b>${esc(t.it[k] || k)}</b><small>${esc(I.have)} ${have}×${CAPS[k] ? ` ${esc(I.of)} ${CAPS[k]}` : ''}</small></div></div>
-        <div class="isec"><h4>${esc(I.what)}</h4><p>${esc(x[0])}</p></div>
-        <div class="isec"><h4>${esc(I.eff)}</h4><span class="effp">${esc(x[1])}</span></div>
-        <div class="isec"><h4>${esc(I.how)}</h4><div class="steps">${steps}</div></div>
-        ${demoPet || k === 'traumkristall' ? `<div class="demo"><div class="cbox3 spot2" style="--tc:${col}"></div><button class="okb dbtn" data-demo>${esc(I.demo)}</button></div>` : ''}
-        <div class="isec"><h4>${esc(I.from)}</h4><p>${esc(x[2])}</p></div>
-        <div class="ierr"></div>
-        ${have ? `<div class="irow"><button class="okb green" data-now>${esc(I.useNow)}</button></div>` : ''}</div>`;
+      // which pets can take this artefact
+      const fits = (p) => { if (p.step === 0) return false; const a = p.art || {};
+        if (k === 'weitblick') return !a.sight; if (k === 'sternenstein') return p.need != null || !a.aura;
+        if (k === 'regenbogenfeder') return !(a.skins || []).includes('regenbogen'); if (k === 'zauberspiegel') return !(a.skins || []).includes('kristall'); return true; };
+      const html = `<div class="info2" style="--ic:${col}"><div class="il">
+          <div class="ib"><div class="ic">${ico(48)}</div><div><b>${esc(t.it[k] || k)}</b><small>${esc(I.have)} ${have}×${CAPS[k] ? ` ${esc(I.of)} ${CAPS[k]}` : ''}</small></div></div>
+          <div class="isec"><h4>${esc(I.what)}</h4><p>${esc(x[0])}</p></div>
+          <div class="isec"><h4>${esc(I.eff)}</h4><span class="effp">${esc(x[1])}</span></div>
+          <div class="isec"><h4>${esc(I.how)}</h4><div class="steps">${steps}</div></div>
+          <div class="isec"><h4>${esc(I.from)}</h4><p>${esc(x[2])}</p></div></div>
+        <div class="ir"><div class="demo"><div class="cbox3 spot2" style="--tc:${col}"></div><button class="okb dbtn" data-demo>${esc(I.demo)}</button></div>
+          <div class="pick"></div><div class="ierr"></div>
+          ${have ? `<div class="irow"><button class="okb green" data-now>${esc(I.useNow)}</button></div>` : ''}</div></div>`;
       modal(t.it[k] || k, html, (root, close) => {
-        const box = root.querySelector('.cbox3'); let care = null;
-        if (box) care = k === 'traumkristall' ? new (L().CARE.Care)(box, (egg && egg[1].kind) || 'koala', 'ei', { noBars: 1, wish: 'koala' }) : new (L().CARE.Care)(box, demoPet[1].kind, ST[demoPet[1].step], { look: demoPet[1].look || {}, noBars: 1 });
-        const playDemo = () => { if (care && ANIM[k]) { care.busy = false; care.run(ANIM[k]); } };
-        const dm = root.querySelector('[data-demo]'); if (dm) dm.addEventListener('click', playDemo);
-        setTimeout(playDemo, 500); // the preview plays once by itself – nothing is used up
-        const err = (e) => { root.querySelector('.ierr').textContent = errMsg(t, e); };
-        const now = root.querySelector('[data-now]');
-        if (now) now.addEventListener('click', async () => {
+        const box = root.querySelector('.cbox3'); const pick = root.querySelector('.pick'); const errEl = root.querySelector('.ierr');
+        let care = null; let target = null; let wish = null;
+        // the preview: the real effect on the chosen pet (or the wished egg) – nothing is used up
+        const stage = (pid, kd) => {
+          if (k === 'traumkristall') { care = new (L().CARE.Care)(box, kd || wish || 'koala', 'ei', { noBars: 1 }); return; }
+          const pe = pid ? st.pets[pid] : (hatchedFirst && hatchedFirst[1]);
+          if (!pe) { box.innerHTML = `<p class="hint" style="padding:20px;text-align:center">${esc(I.noPet)}</p>`; care = null; return; }
+          care = new (L().CARE.Care)(box, pe.kind, ST[pe.step], { look: lookOf(pe), noBars: 1 });
+        };
+        const play = async () => {
+          if (!care) return; care.busy = false;
+          if (kind !== 'art' && ANIM[k]) { care.run(ANIM[k]); return; }
+          const sp = (ch) => care.sparkle(10, ch);
+          try { await care.item(k, [50, 35]); } catch (e) { /* no item animation */ }
+          if (k === 'sternenstein') { sp('✦'); care.look = { ...care.look, aura: 'sterne' }; care.draw('freut'); care.msg(I.pv.star); }
+          else if (k === 'regenbogenfeder' || k === 'zauberspiegel') { sp(k === 'zauberspiegel' ? '💎' : '🌈'); care.look = { ...care.look, skin: k === 'zauberspiegel' ? 'kristall' : 'regenbogen' }; care.draw('freut'); care.msg(I.pv.colour); }
+          else if (k === 'weitblick') { sp('👁'); care.draw('freut'); care.msg(I.pv.sight); }
+          else if (k === 'traumkristall') { for (let n = 0; n < 8; n++) setTimeout(() => care.fx('💗', 25 + Math.random() * 50, 25 + Math.random() * 40, { dy: -40 }), n * 120); care.msg(I.pv.wish); }
+        };
+        stage(null); setTimeout(play, 500);
+        root.querySelector('[data-demo]').addEventListener('click', () => { stage(target, wish); play(); });
+        const err = (e) => { errEl.textContent = typeof e === 'string' ? e : errMsg(t, e); };
+        const now = root.querySelector('[data-now]'); if (!now) return;
+        const confirmRow = (q, go) => { pick.insertAdjacentHTML('beforeend', `<div class="conf"><p>${esc(q)}</p><div class="irow"><button class="okb" data-no>${esc(t.cancel || 'Abbrechen')}</button><button class="okb green" data-yes>${esc(I.yes)}</button></div></div>`);
+          pick.querySelector('[data-no]').addEventListener('click', () => { const c = pick.querySelector('.conf'); if (c) c.remove(); });
+          pick.querySelector('[data-yes]').addEventListener('click', go); };
+        const done = (after) => { setTimeout(() => { close(); after(); }, 2400); };
+        now.addEventListener('click', async () => {
+          errEl.textContent = '';
+          // care things and pills: straight away on the current pet (as in "Pflegen & spielen")
+          if (kind !== 'art') {
+            const tg = kind === 'pill' ? st.active : (hatchedFirst && hatchedFirst[0]); if (!tg) { err(I.noPet); return; }
+            try { await call(this._store, this._pid, 'use', { pet: tg, item: k }); } catch (e) { err(e); return; }
+            now.disabled = true; stage(tg); play(); done(() => { this.update(); const p = this._snap().pets[this._pid].pets[tg]; if (k === DEV && p && p.ready) (p.step === 0 ? openHatch : openEvolve)(this._store, this._pid, tg, () => this.update()); });
+            return;
+          }
+          now.parentElement.remove();
           if (k === 'traumkristall') {
-            if (!egg) { root.querySelector('.ierr').textContent = I.noEgg; return; }
-            const pool = egg[1].fabel ? L().TREE.FABEL : starters();
-            now.parentElement.outerHTML = `<div class="isec"><h4>${esc(I.pick)}</h4><div class="wish">${pool.map((a) => `<button data-wish="${a}">${L().P4.svg(a, 'baby', 'froh', { noShadow: 1 })}${esc(kindName(a))}</button>`).join('')}</div></div>`;
-            root.querySelectorAll('[data-wish]').forEach((b) => b.addEventListener('click', async () => {
-              try { await call(this._store, this._pid, 'use', { pet: egg[0], item: k, kind: b.dataset.wish }); } catch (e) { err(e); return; }
-              root.querySelector('.wish').outerHTML = `<p class="hint">💗 ${esc(fmt(I.wished, { n: kindName(b.dataset.wish) }))}</p>`;
-              if (care) { care.o.wish = b.dataset.wish; care.busy = false; care.run('traumkristall'); }
-              setTimeout(() => { close(); this.update(); }, 3600);
+            // every animal; tap one, then confirm – the egg of exactly this animal comes right away
+            pick.innerHTML = `<h4>${esc(I.pick)}</h4><div class="wish">${L().P4.LIST.map(([a, nm]) => `<button data-wish="${a}">${L().P4.svg(a, 'baby', 'froh', { noShadow: 1 })}<span>${esc(nm)}</span></button>`).join('')}</div>`;
+            pick.querySelectorAll('[data-wish]').forEach((b) => b.addEventListener('click', () => {
+              wish = b.dataset.wish; pick.querySelectorAll('[data-wish]').forEach((x) => x.classList.toggle('on', x === b)); stage(null, wish);
+              const c = pick.querySelector('.conf'); if (c) c.remove();
+              confirmRow(fmt(I.sureWish, { n: kindName(wish) }), async () => {
+                let res; try { res = await call(this._store, this._pid, 'use', { pet: st.active, item: k, kind: wish }); } catch (e) { err(e); return; }
+                pick.innerHTML = `<p class="hint">🥚 ${esc(fmt(I.wished, { n: kindName(wish) }))}</p>`; play();
+                done(() => { if (res && res.egg) call(this._store, this._pid, 'active', { pet: res.egg }).catch(() => {}); this._tab = 'tier'; this._sub = null; this.update(); });
+              });
             }));
             return;
           }
-          const target = k === 'weitblick' ? st.active : kind === 'pill' ? st.active : (hatched && hatched[0]);
-          if (!target) { root.querySelector('.ierr').textContent = I.noPet; return; }
-          let res; try { res = await call(this._store, this._pid, 'use', { pet: target, item: k }); } catch (e) { err(e); return; }
-          now.disabled = true; playDemo();
-          if (k === 'weitblick' && res && res.sight) { const d = new Date(res.sight); root.querySelector('.ierr').textContent = fmt(I.sightOn, { n: `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` }); }
-          setTimeout(() => { close(); this.update(); if ((k === DEV || k === 'sternenstein')) { const p = this._snap().pets[this._pid].pets[target]; if (p && p.ready) (p.step === 0 ? openHatch : openEvolve)(this._store, this._pid, target, () => this.update()); } }, 2600);
+          const ok = pets.filter(([, p]) => fits(p));
+          if (!ok.length) { err(I.noFit); return; }
+          pick.innerHTML = `<h4>${esc(I.forWhom)}</h4><div class="whom">${ok.map(([id, p]) => `<button data-whom="${esc(id)}">${svgOf(id, p)}<span>${esc(p.nick || kindOf(p))}</span></button>`).join('')}</div>`;
+          pick.querySelectorAll('[data-whom]').forEach((b) => b.addEventListener('click', () => {
+            target = b.dataset.whom; pick.querySelectorAll('[data-whom]').forEach((x) => x.classList.toggle('on', x === b)); stage(target);
+            const c = pick.querySelector('.conf'); if (c) c.remove(); const p = st.pets[target];
+            confirmRow(fmt(I.sure, { n: p.nick || kindOf(p) }), async () => {
+              try { await call(this._store, this._pid, 'use', { pet: target, item: k }); } catch (e) { err(e); return; }
+              pick.innerHTML = ''; play();
+              done(() => {
+                if (k === 'weitblick') { this._tab = 'tier'; this._sub = { tree: target }; this.update(); return; }
+                this.update(); const q = this._snap().pets[this._pid].pets[target];
+                if (k === 'sternenstein' && q && q.ready) openEvolve(this._store, this._pid, target, () => this.update());
+              });
+            });
+          }));
         });
       }, col);
     }
@@ -509,22 +581,29 @@
     }
     _tree(s, t, st, id) {
       const p = st.pets[id];
-      return `<div class="back"><button class="okb" data-back>‹ ${t.back}</button><b>${t.tree} · ${esc(titleOf(p, t))}</b></div><div class="tile" style="--pc:#69C350"><div class="fogbar hint">${esc(fmt(t.foggy, { n: t.steps[Math.min(p.step, 3)] }))}</div><div class="tw2"></div></div>`;
+      const a = p.art || {}; const A = t.artfx;
+      // artefact effects of this pet: switch them on and off freely (they stay unlocked for good)
+      const chip = (on, attr, label) => `<button class="axc${on ? ' on' : ''}" ${attr}>${label}</button>`;
+      const skins = (a.skins || []).length ? `<span class="axl">${esc(A.colour)}</span>${chip(!a.skin, `data-artskin="" data-artpet="${esc(id)}"`, esc(A.normal))}${(a.skins || []).map((k) => chip(a.skin === k, `data-artskin="${k}" data-artpet="${esc(id)}"`, esc(A[k] || k))).join('')}` : '';
+      const aura = a.aura ? `<span class="axl">${esc(A.aura)}</span>${chip(a.aura_on, `data-artaura="1" data-artpet="${esc(id)}"`, '✦ ' + esc(A.on))}${chip(!a.aura_on, `data-artaura="0" data-artpet="${esc(id)}"`, esc(A.off))}` : '';
+      const fx = skins || aura ? `<div class="axbar">${skins}${aura}</div>` : '';
+      const top = a.sight ? `<div class="fogbar hint">👁 ${esc(A.sight)}</div>` : `<div class="fogbar hint">${esc(fmt(t.foggy, { n: t.steps[Math.min(p.step, 3)] }))}</div>`;
+      return `<div class="back"><button class="okb" data-back>‹ ${t.back}</button><b>${t.tree} · ${esc(titleOf(p, t))}</b></div>${fx}<div class="tile" style="--pc:#69C350">${top}<div class="tw2"></div></div>`;
     }
     // after the HTML is in place: care box, values, garden, tree
     _after(s, t, pr, st) {
       const R = this.shadowRoot;
       const cb = R.querySelector('[data-cbox]');
       if (cb) {
-        const id = cb.dataset.cbox; const p = st.pets[id]; const key = this._pid + id + p.step + JSON.stringify(p.look || {});
-        this._care = new (L().CARE.Care)(cb, p.kind, ST[p.step], { look: p.look || {}, mood: p.v.hunger < 30 ? 'hungrig' : 'froh', noBars: 1 }); this._care.v = { ...this._care.v, ...p.v }; this._care.bars(); this._careKey = key;
+        const id = cb.dataset.cbox; const p = st.pets[id]; const key = this._pid + id + p.step + JSON.stringify(lookOf(p));
+        this._care = new (L().CARE.Care)(cb, p.kind, ST[p.step], { look: lookOf(p), mood: p.v.hunger < 30 ? 'hungrig' : 'froh', noBars: 1 }); this._care.v = { ...this._care.v, ...p.v }; this._care.bars(); this._careKey = key;
         cb.classList.add('spot2'); cb.style.setProperty('--tc', colOf(p, pcol(pr)));
         const vals = () => { const el = R.querySelector('.vals'); if (!el || !this._care) return; el.innerHTML = Object.keys(NEED).map((n) => { const v = Math.round(Math.max(0, Math.min(100, this._care.v[n]))); const r = 19; const C = 2 * Math.PI * r;
           return `<div class="ring"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="${r}" fill="none" stroke="#2c323d" stroke-width="5"/><circle cx="24" cy="24" r="${r}" fill="none" stroke="${NEED[n][1]}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(C * v / 100).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 24 24)"/><text x="24" y="29" text-anchor="middle" font-size="15">${NEED[n][0]}</text></svg><b>${v}%</b><small>${esc({ hunger: 'Hunger', durst: s.lang === 'en' ? 'Thirst' : 'Durst', energie: s.lang === 'en' ? 'Energy' : 'Energie', laune: s.lang === 'en' ? 'Mood' : 'Laune' }[n])}</small></div>`; }).join(''); };
         vals(); this._vt = setInterval(vals, 500);
       }
       const gw = R.querySelector('.gw'); if (gw) this._garden(gw, st);
-      const tw = R.querySelector('.tw2'); if (tw && this._sub && this._sub.tree) { const p = st.pets[this._sub.tree]; const sight = st.sight && Date.parse(st.sight) > Date.now(); L().TREE.render(tw, p.kind, { size: 40, gap: 4, colW: 72, fog: sight ? null : Math.min(p.step, 3) }); }
+      const tw = R.querySelector('.tw2'); if (tw && this._sub && this._sub.tree) { const p = st.pets[this._sub.tree]; L().TREE.render(tw, p.kind, { size: 40, gap: 4, colW: 72, fog: (p.art || {}).sight ? null : Math.min(p.step, 3) }); }
     }
     _garden(g, st) {
       const mine = Object.values(st.pets).filter((p) => p.step > 0).slice(0, 8);
@@ -539,7 +618,7 @@
         Pt.svgL(1000, 520, 404, Pt.gLamp()), Pt.svgL(1000, 520, 470, Pt.gBush(pal, 820, 470, 24)), Pt.svgL(1000, 520, 480, Pt.gFlowers(pal)), Pt.svgL(1000, 520, 506, Pt.gBush(pal, 70, 512, 34) + Pt.gBush(pal, 960, 512, 30))].join('');
       const host = document.createElement('div'); g.appendChild(host);
       const sc = new (L().M.Scene)(host, { geo: GD, labels: false }); sc.social = 0.4; try { sc.setPool(true); } catch (e) { /* no pool */ }
-      mine.forEach((p, n) => { const a = sc.add(p.kind, ST[p.step], 120 + ((n * 137) % 760), 300 + ((n * 71) % 180)); if (p.look && Object.keys(p.look).length) { a.var = { ...p.look }; a.deco = [...(p.look.deco || [])]; a.key = ''; a.setView('front'); } });
+      mine.forEach((p, n) => { const a = sc.add(p.kind, ST[p.step], 120 + ((n * 137) % 760), 300 + ((n * 71) % 180)); { const lk = lookOf(p); if (Object.keys(lk).length) { a.var = { ...lk }; a.deco = [...(lk.deco || [])]; a.key = ''; a.setView('front'); } } });
     }
     async _act(action, extra, okFn) {
       const t = this._t(); try { const r = await call(this._store, this._pid, action, extra); if (okFn) okFn(r); return r; } catch (e) { toast(this.shadowRoot.querySelector('.card') || this.shadowRoot, errMsg(t, e)); return null; }
@@ -567,6 +646,9 @@
         const inp = w.querySelector('input'); inp.focus(); inp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') w.querySelector('[data-nicksave]').click(); }); return; }
       if ((b = q('[data-nicksave]'))) { const v = this.shadowRoot.querySelector('.nick input').value; this._hold = 0; this._act('nick', { pet: b.dataset.nicksave, nick: v.slice(0, 16) }); return; }
       if ((b = q('[data-info]'))) { this._info(b.dataset.info); return; }
+      if ((b = q('[data-gotoegg]'))) { this._act('active', { pet: b.dataset.gotoegg }, () => { this._tab = 'tier'; this._sub = null; this.update(); }); return; }
+      if ((b = q('[data-artskin]'))) { this._act('artfx', { pet: b.dataset.artpet, skin: b.dataset.artskin }); return; }
+      if ((b = q('[data-artaura]'))) { this._act('artfx', { pet: b.dataset.artpet, aura: b.dataset.artaura === '1' }); return; }
       if ((b = q('[data-use]'))) {
         const item = b.dataset.use; const st = this._snap().pets[this._pid]; const id = b.dataset.pet || st.active; const anim = ANIM[item];
         this._act('use', { pet: id, item }, () => { if (anim && this._care) { this._hold = Date.now() + 2600; this._care.run(anim); } else if (item.startsWith('wachs') && this._care) { this._hold = Date.now() + 2400; this._care.run('wachsen'); }

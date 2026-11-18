@@ -39,7 +39,7 @@ def test_level_up_bonus_unlocks_and_reset():
     assert L.evaluate(data, date(2026, 9, 1), GAME, "08-01", "t0", _add) == []      # first run: only records
     _earn(data, "lea", L.threshold(5, GAME))
     ups = L.evaluate(data, date(2026, 9, 2), GAME, "08-01", "t1", _add)
-    assert ups[0]["level"] == 5 and set(ups[0]["unlocks"]) == {"levelcap", "goldbrille", "hamster", "funkelsprossen", "sternchen"}
+    assert ups[0]["level"] == 5 and set(ups[0]["unlocks"]) == {"levelcap", "goldbrille", "funkelsprossen", "sternchen"}
     bonus = [e for e in data["ledger"] if e["kind"] == "level"]
     assert len(bonus) == 4 and ups[0]["bonus"] == 4 * round(L.full_day(GAME))
     # bonus points do not count for the level, and nothing is booked twice
@@ -48,7 +48,7 @@ def test_level_up_bonus_unlocks_and_reset():
     # new school year: back to level 1, best level and unlocks stay
     L.evaluate(data, date(2027, 8, 2), GAME, "08-01", "t3", _add)
     st = data["levels"]["lea"]
-    assert st["level"] == 1 and st["best"]["2026-08-01"] == 5 and "hamster" in st["unlocked"]
+    assert st["level"] == 1 and st["best"]["2026-08-01"] == 5 and "goldbrille" in st["unlocked"]
     assert L.view(data, "lea", GAME, date(2027, 8, 2), "08-01", "de")["level"] == 1
 
 

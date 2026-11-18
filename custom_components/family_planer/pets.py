@@ -61,7 +61,6 @@ TOYS = {"ball": {"laune": 20, "energie": -10}, "wolle": {"laune": 20, "energie":
 GROW = {"wachs_s": 15, "wachs_m": 30, "wachs_l": 60}
 # sleeping things stay (like toys) and need no energy: the pillow refills energy, the lantern brings a good mood
 REST = {"kissen": {"energie": 40}, "laterne": {"laune": 15}}
-SIGHT_HOURS = 1         # far-sight crystal: the whole evolution tree is visible for this long
 DEV_PILL = "glitzerpille"
 ARTEFACTS = ("sternenstein", "weitblick", "zauberspiegel", "traumkristall", "regenbogenfeder")
 EXTRAS = ("keks", "energy", "seife", "happy", "ball", "wolle", "blasen", "buerste", "kissen", "laterne")
@@ -320,39 +319,10 @@ def use(st: dict, pet_id: str, item: str, now: datetime, speed: str = "normal", 
         _take(st, item)
         pet["g"] = max(pet["g"], need)
         return {"ready": True}
-    if item == "traumkristall":
-        # wish egg: the child picks which animal comes out of this egg
-        if pet["step"] != 0:
-            raise PetError("not_egg")
-        pool = FABEL if pet.get("fabel") else STARTERS
-        if wish not in pool:
-            raise PetError("bad_wish")
-        _take(st, item)
-        pet["wish"] = wish
-        return {"wish": wish}
-    if item == "weitblick":
-        until = now + timedelta(hours=SIGHT_HOURS)
-        _take(st, item)
-        st["sight"] = _now_iso(until)
-        return {"sight": st["sight"]}
+    if item in ARTEFACTS:
+        return _use_artefact(st, pet, item, now, speed, wish)
     if pet["step"] == 0:
         raise PetError("egg")
-    if item == "sternenstein":
-        # a whole step at once: the bar is full right away, and the pet keeps a star aura
-        need = next_need(pet, speed)
-        if need is None:
-            raise PetError("fully_grown")
-        _take(st, item)
-        pet["g"] = max(pet["g"], need)
-        pet["look"] = {**pet.get("look", {}), "aura": "sterne"}
-        return {"ready": True, "look": dict(pet["look"])}
-    if item in ("regenbogenfeder", "zauberspiegel"):
-        skin = "regenbogen" if item == "regenbogenfeder" else "kristall"
-        if (pet.get("look") or {}).get("skin") == skin:
-            raise PetError("not_needed")
-        _take(st, item)
-        pet["look"] = {**pet.get("look", {}), "skin": skin}
-        return {"look": dict(pet["look"])}
     if item in REST:
         eff = REST[item]
         if all(pet["v"].get(n, 0) >= 95 for n in eff):
@@ -378,6 +348,91 @@ def use(st: dict, pet_id: str, item: str, now: datetime, speed: str = "normal", 
     return {"v": dict(pet["v"])}
 
 
+# ------------------------------------------------------------------ artefacts: their effect stays with the pet for good
+ART_SKINS = {"regenbogenfeder": "regenbogen", "zauberspiegel": "kristall"}
+# levels that used to unlock an avatar companion give an artefact instead (once per level and school year)
+LEVEL_ARTEFACTS = {4: "sternenstein", 8: "regenbogenfeder", 13: "weitblick", 18: "zauberspiegel", 22: "traumkristall",
+                   27: "sternenstein"}
+
+
+def art(pet: dict) -> dict:
+    """What artefacts did to this pet: unlocked colours, star aura, far-sight – and what is switched on."""
+    a = pet.setdefault("art", {})
+    a.setdefault("skins", [])
+    a.setdefault("aura", False)
+    a.setdefault("sight", False)
+    a.setdefault("skin", "")
+    a.setdefault("aura_on", False)
+    return a
+
+
+def _use_artefact(st: dict, pet: dict, item: str, now: datetime, speed: str, wish: str | None) -> dict:
+    if item == "traumkristall":
+        # the child picks an animal and gets the egg of exactly that animal right away
+        if wish not in KINDS:
+            raise PetError("bad_wish")
+        _take(st, item)
+        eid = new_id()
+        egg = new_egg(now, fabel=wish in FABEL)
+        egg["wish"] = wish
+        st["pets"][eid] = egg
+        return {"egg": eid, "wish": wish}
+    if pet["step"] == 0:
+        raise PetError("egg")
+    a = art(pet)
+    if item == "weitblick":
+        if a["sight"]:
+            raise PetError("not_needed")
+        _take(st, item)
+        a["sight"] = True
+        return {"sight": True}
+    if item == "sternenstein":
+        need = next_need(pet, speed)
+        if need is None and a["aura"]:
+            raise PetError("fully_grown")
+        _take(st, item)
+        if need is not None:
+            pet["g"] = max(pet["g"], need)
+        a["aura"] = a["aura_on"] = True
+        return {"ready": need is not None, "art": dict(a)}
+    skin = ART_SKINS[item]
+    if skin in a["skins"]:
+        raise PetError("not_needed")
+    _take(st, item)
+    a["skins"].append(skin)
+    a["skin"] = skin
+    return {"art": dict(a)}
+
+
+def set_art(st: dict, pet_id: str, skin: str | None, aura: bool | None) -> dict:
+    """The child switches unlocked artefact effects on or off (in the evolution tree)."""
+    pet = _pet(st, pet_id)
+    a = art(pet)
+    if skin is not None:
+        if skin and skin not in a["skins"]:
+            raise PetError("locked")
+        a["skin"] = skin
+    if aura is not None:
+        if aura and not a["aura"]:
+            raise PetError("locked")
+        a["aura_on"] = bool(aura)
+    return {"art": dict(a)}
+
+
+def level_gifts(st: dict, levels_reached: list[int], season: str) -> list[str]:
+    """Artefacts for levels reached (once per level and season); returns the items given."""
+    got = []
+    done = st.setdefault("level_gifts", [])
+    for lvl in levels_reached:
+        item = LEVEL_ARTEFACTS.get(lvl)
+        key = f"{season}:{lvl}"
+        if item and key not in done and add_item(st, item):  # a full slot (artefacts: 1) waits until it is used
+            done.append(key)
+            got.append(item)
+    st["level_gifts"] = done[-60:]
+    return got
+
+
 def hatch(st: dict, pet_id: str, rng: random.Random, speed: str = "normal") -> str:
     """The egg hatches (growth full): the kind is a missing one (fable eggs: a missing fable)."""
     pet = _pet(st, pet_id)
@@ -392,7 +447,7 @@ def hatch(st: dict, pet_id: str, rng: random.Random, speed: str = "normal") -> s
     pool = FABEL if pet.get("fabel") else STARTERS
     missing = [k for k in pool if k not in have]
     pick = missing or [k for k in pool if have.get(k, 0) < MAX_PER_KIND] or list(pool)
-    pet["kind"] = pet.pop("wish", None) if pet.get("wish") in pool else rng.choice(sorted(pick))
+    pet["kind"] = pet.pop("wish") if pet.get("wish") in KINDS else rng.choice(sorted(pick))
     pet["step"] = 1
     st["stats"]["evos"] += 1
     return pet["kind"]
@@ -559,7 +614,7 @@ def view(st: dict, speed: str = "normal") -> dict:
     """A copy for the browser: with the growth needed for the next step and whether the bar is full."""
     pets = {}
     for k, p in st["pets"].items():
-        pets[k] = {**p, "need": next_need(p, speed), "ready": ready(p, speed),
+        pets[k] = {**p, "art": dict(art(dict(p))), "need": next_need(p, speed), "ready": ready(p, speed),
                    "v": {n: round(p["v"].get(n, 70)) for n in NEEDS}}
-    return {"on": st["on"], "pts": st["pts"], "active": st["active"], "pets": pets, "inv": dict(st["inv"]), "sight": st.get("sight", ""),
+    return {"on": st["on"], "pts": st["pts"], "active": st["active"], "pets": pets, "inv": dict(st["inv"]),
             "spun": bool(st["wheel"]), "wheel_day": st["wheel"], "stats": dict(st["stats"])}

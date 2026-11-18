@@ -24,14 +24,15 @@ NAMES = {
            "Grandmaster", "Most Epic Epicness Ever", "Ultra-Mega-Giga Boss", "Galactic Supreme Awesomator",
            "Unbelievablest Super-Duper Champion"],
 }
-# avatar extras unlocked per level (only the person who reached it can use them; they stay after the season reset)
+# avatar extras unlocked per level (only the person who reached it can use them; they stay after the season reset).
+# Levels 4, 8, 13, 18, 22 and 27 used to unlock a companion – they give a pet artefact now (pets.LEVEL_ARTEFACTS).
 UNLOCKS = {
-    2: ["levelcap"], 3: ["goldbrille"], 4: ["hamster"], 5: ["funkelsprossen", "sternchen"],
-    6: ["comic"], 7: ["skaterhelm"], 8: ["babydrache"], 9: ["rennfahrer"], 10: ["silberaura", "gluehwuermchen"],
-    11: ["sonnenuntergang"], 12: ["edelkrone"], 13: ["phoenix"], 14: ["goldritter"], 15: ["leuchtaugen", "goldglanz"],
-    16: ["diamantbrille"], 17: ["kristallhoehle"], 18: ["kristallfuchs"], 19: ["eiskoenig"], 20: ["goldfluegel", "goldregen"],
-    21: ["rubinkrone"], 22: ["rubindrache"], 23: ["lavagalaxie"], 24: ["feuertitan"], 25: ["rubinsplitter", "feuerfunken"],
-    26: ["rubinumhang"], 27: ["szepter"], 28: ["rubinmaske"], 29: ["rubinglanz"], 30: ["flammenaura", "komet"],
+    2: ["levelcap"], 3: ["goldbrille"], 4: [], 5: ["funkelsprossen", "sternchen"],
+    6: ["comic"], 7: ["skaterhelm"], 8: [], 9: ["rennfahrer"], 10: ["silberaura", "gluehwuermchen"],
+    11: ["sonnenuntergang"], 12: ["edelkrone"], 13: [], 14: ["goldritter"], 15: ["leuchtaugen", "goldglanz"],
+    16: ["diamantbrille"], 17: ["kristallhoehle"], 18: [], 19: ["eiskoenig"], 20: ["goldfluegel", "goldregen"],
+    21: ["rubinkrone"], 22: [], 23: ["lavagalaxie"], 24: ["feuertitan"], 25: ["rubinsplitter", "feuerfunken"],
+    26: ["rubinumhang"], 27: [], 28: ["rubinmaske"], 29: ["rubinglanz"], 30: ["flammenaura", "komet"],
     35: ["herzfunken", "schneeflocken"], 40: ["blitzgewitter", "galaxie"],
 }
 UNLOCK_IDS = {x for v in UNLOCKS.values() for x in v}

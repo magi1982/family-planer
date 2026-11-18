@@ -925,3 +925,4 @@ Michaels Vorgaben: im Entwicklungsbaum selbst wählen, ob ein Artefakt-Effekt ak
 - **Weitblick bleibt für immer – für ein Tierchen** (ultra-seltenes Artefakt): auf ein Tierchen eingesetzt, ist dessen Entwicklungsbaum für immer ganz sichtbar; andere Tierchen bleiben geheim. Im Baum steht dann „👁 Weitblick“. Öffnet nach dem Einsetzen direkt diesen Baum.
 - **Vorschau** zeigt die echte Wirkung am gewählten Tierchen; **Fenster** zweispaltig und kompakt.
 - **Level-Belohnungen statt Begleiter** (Level 4, 8, 13, 18, 22, 27) – Vorschlag Traumkristall, Sternenstein, Fabelwesen-Ei, Regenbogenfeder, Fabelwesen-Ei, Zauberspiegel.
+- **Umgesetzt (18.11., 0.19.0):** #65 komplett – Zielwahl mit Rückfrage, Effekte dauerhaft und im Baum schaltbar, Weitblick pro Tierchen für immer, Traumkristall gibt Wunsch-Ei, Ei-Hinweise, Schlüpfen ohne Vorwegnahme, Level-Artefakte statt Begleiter (alle Kinder aktuell ≤ Level 3).

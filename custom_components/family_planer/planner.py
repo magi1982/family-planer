@@ -734,6 +734,10 @@ class FamilyPlanner:
             for pet in st["pets"].values():
                 pets.decay(pet, now, cfg["decay"], paused=pid in away)
             pets.garden_grow(st, now.date(), paused=pid in away, speed=cfg["speed"])
+            # levels that used to unlock an avatar companion give an artefact instead (once per level and school year)
+            lv = (self.data.get("levels") or {}).get(pid) or {}
+            if st["on"] and lv.get("season"):
+                pets.level_gifts(st, list(range(2, int(lv.get("level", 1)) + 1)), str(lv["season"]))
 
     async def async_add_pet_points(self, person_id: str, points: int) -> int:
         """Give (or take) pet points to one person – no coins, nothing else changes."""
@@ -776,6 +780,8 @@ class FamilyPlanner:
             pets.set_active(st, pet_id)
         elif action == "nick":
             res["nick"] = pets.set_nick(st, pet_id, args.get("nick"))
+        elif action == "artfx":
+            res = pets.set_art(st, pet_id, args.get("skin"), args.get("aura"))
         elif action == "onoff":
             pets.set_on(st, bool(args.get("on")))
         elif action == "spin":

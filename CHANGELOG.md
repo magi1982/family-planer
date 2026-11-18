@@ -2,11 +2,15 @@
 
 ## 0.19.0 – unreleased
 ### Added
-- **Inventory explained:** every thing can be tapped – what it is, its effect, three illustrated steps how to use it, a live preview on your own pet, where it comes from; things you have can be used right there.
-- **Special things work:** star pillow and lantern (stay like toys), star stone (whole step + star aura), far-sight crystal (whole tree for 1 hour), magic mirror and rainbow feather (special colours), dream crystal (pick the animal of your egg). Tests cover every effect.
+- **Inventory explained:** every thing can be tapped – what it is, its effect, three illustrated steps how to use it, a live preview on your own pet, where it comes from; things you have can be used right there. Compact two-column window.
+- **Artefacts work for good, on one pet:** the child picks the pet and confirms a second time. Star stone (bar full + star aura), far-sight crystal (that pet's whole tree visible for good), magic mirror and rainbow feather (colours). Colours and aura stay through every evolution and are switched on and off in the evolution tree. The dream crystal gives the egg of an animal the child picks (with a second confirmation).
+- **Star pillow and lantern** work (energy +40 / mood +15) and stay like toys.
+- **New eggs are seen:** a notice "New egg!" (also for new artefacts), a card "You have an egg – hatch it now" on the current pet and a small egg on the planer card.
+- **Level rewards:** levels 4, 8, 13, 18, 22 and 27 give an artefact (once per level and school year) instead of an avatar companion.
 ### Changed
 - **Avatar builder without companions:** every person has real pets now, so the companion tab is gone and companions are no longer drawn on avatars (saved avatars keep working).
 ### Fixed
+- **Hatching showed the animal too early:** the page behind the hatching window already showed the new pet. The page and the banner now wait until the window is closed, and the window has a solid background.
 - **Evolution tree:** the column labels overlapped the boxes ("Wachstum" was hidden) and the hint on the right was cut off on narrow screens.
 
 ## 0.18.4 – 2026-11-18

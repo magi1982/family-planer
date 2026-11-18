@@ -27,9 +27,9 @@
   const BG = ['comic', 'sonnenuntergang', 'kristallhoehle', 'lavagalaxie', 'sterne', 'regenbogen', 'herzen', 'konfetti', 'weltall', 'wolken', 'blasen', 'blitze'];
   const FX = ['sternchen', 'leuchtaugen', 'goldglanz', 'rubinsplitter', 'feuerfunken', 'rubinglanz', 'herzfunken', 'schneeflocken'];
   const FXB = ['silberaura', 'gluehwuermchen', 'goldfluegel', 'goldregen', 'flammenaura', 'komet', 'blitzgewitter', 'galaxie'];
-  const LOCKED = ['levelcap', 'goldbrille', 'funkelsprossen', 'hamster', 'comic', 'skaterhelm', 'babydrache', 'rennfahrer', 'sonnenuntergang', 'edelkrone',
-    'phoenix', 'goldritter', 'diamantbrille', 'kristallhoehle', 'kristallfuchs', 'eiskoenig', 'rubinkrone', 'rubindrache', 'lavagalaxie', 'feuertitan',
-    'rubinumhang', 'szepter', 'rubinmaske', ...FX, ...FXB];
+  const LOCKED = ['levelcap', 'goldbrille', 'funkelsprossen', 'comic', 'skaterhelm', 'rennfahrer', 'sonnenuntergang', 'edelkrone',
+    'goldritter', 'diamantbrille', 'kristallhoehle', 'eiskoenig', 'rubinkrone', 'lavagalaxie', 'feuertitan',
+    'rubinumhang', 'rubinmaske', ...FX, ...FXB];
   const COST = ['rennfahrer', 'goldritter', 'eiskoenig', 'feuertitan', 'astro', 'mars', 'sternenkraft', 'funkenflug', 'mondfee', 'turbo', 'sternschnuppe', 'ninja', 'ritter', 'pirat', 'zauberer', 'prinzessin', 'prinz', 'dino', 'feuerwehr'];
   // costumes with something on the head hide the head slot; masks hide glasses; full suits hide neck and motif
   const COST_HAT = ['rennfahrer', 'goldritter', 'eiskoenig', 'feuertitan', 'astro', 'mars', 'ninja', 'ritter', 'pirat', 'zauberer', 'prinzessin', 'prinz', 'dino', 'feuerwehr'];

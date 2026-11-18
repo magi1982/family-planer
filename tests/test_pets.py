@@ -423,53 +423,76 @@ def _hatched(st, kind="fuchs", step=1, g=None):
     return eid
 
 
-def test_wish_crystal_picks_the_animal_of_an_egg():
+def test_wish_crystal_gives_the_egg_of_the_chosen_animal():
     st = state()
-    eid = egg_id(st)
     st["inv"]["traumkristall"] = 1
     with pytest.raises(pets.PetError, match="bad_wish"):
-        pets.use(st, eid, "traumkristall", datetime(2026, 11, 18), wish="pegasus")  # a fable only from a fable egg
-    pets.use(st, eid, "traumkristall", datetime(2026, 11, 18), wish="koala")
-    assert "traumkristall" not in st["inv"]
-    st["pets"][eid]["g"] = 30
-    assert pets.hatch(st, eid, random.Random(1)) == "koala" and "wish" not in st["pets"][eid]
-
-
-def test_wish_crystal_only_on_eggs():
-    st = state()
-    eid = _hatched(st)
+        pets.use(st, egg_id(st), "traumkristall", datetime(2026, 11, 18), wish="dino")
+    res = pets.use(st, egg_id(st), "traumkristall", datetime(2026, 11, 18), wish="koala")
+    egg = st["pets"][res["egg"]]
+    assert egg["step"] == 0 and egg["wish"] == "koala" and "traumkristall" not in st["inv"]
+    egg["g"] = 30
+    assert pets.hatch(st, res["egg"], random.Random(1)) == "koala" and "wish" not in egg
     st["inv"]["traumkristall"] = 1
-    with pytest.raises(pets.PetError, match="not_egg"):
-        pets.use(st, eid, "traumkristall", datetime(2026, 11, 18), wish="koala")
-    assert st["inv"]["traumkristall"] == 1
+    fab = pets.use(st, egg_id(st), "traumkristall", datetime(2026, 11, 18), wish="phoenix")
+    assert st["pets"][fab["egg"]]["fabel"] is True
 
 
-def test_star_stone_fills_the_bar_and_gives_a_star_aura():
+def test_artefacts_need_a_hatched_pet_except_the_wish_crystal():
+    st = state()
+    st["inv"]["sternenstein"] = 1
+    with pytest.raises(pets.PetError, match="egg"):
+        pets.use(st, egg_id(st), "sternenstein", datetime(2026, 11, 18))
+    assert st["inv"]["sternenstein"] == 1
+
+
+def test_star_stone_fills_the_bar_and_unlocks_the_aura_for_good():
     st = state()
     eid = _hatched(st, step=2)
     st["inv"]["sternenstein"] = 1
     res = pets.use(st, eid, "sternenstein", datetime(2026, 11, 18))
-    assert res["ready"] and pets.ready(st["pets"][eid]) and st["pets"][eid]["look"]["aura"] == "sterne"
+    p = st["pets"][eid]
+    assert res["ready"] and pets.ready(p) and p["art"]["aura"] and p["art"]["aura_on"]
+    pets.evolve(st, eid, {"skin": "gold"}, "x", datetime(2026, 11, 18))
+    assert p["art"]["aura"]  # an evolution never takes it away
 
 
-def test_feather_and_mirror_change_the_colour_once():
+def test_colours_stay_unlocked_and_can_be_switched():
     st = state()
     eid = _hatched(st)
     st["inv"].update(regenbogenfeder=1, zauberspiegel=1)
     pets.use(st, eid, "regenbogenfeder", datetime(2026, 11, 18))
-    assert st["pets"][eid]["look"]["skin"] == "regenbogen"
     pets.use(st, eid, "zauberspiegel", datetime(2026, 11, 18))
-    assert st["pets"][eid]["look"]["skin"] == "kristall"
+    a = st["pets"][eid]["art"]
+    assert a["skins"] == ["regenbogen", "kristall"] and a["skin"] == "kristall"
+    pets.set_art(st, eid, "regenbogen", None)
+    pets.set_art(st, eid, "", False)
+    assert a["skin"] == "" and a["skins"] == ["regenbogen", "kristall"]
+    with pytest.raises(pets.PetError, match="locked"):
+        pets.set_art(st, eid, None, True)  # no star aura unlocked yet
     st["inv"]["zauberspiegel"] = 1
     with pytest.raises(pets.PetError, match="not_needed"):
         pets.use(st, eid, "zauberspiegel", datetime(2026, 11, 18))
 
 
-def test_far_sight_shows_the_tree_for_an_hour():
+def test_far_sight_stays_for_the_one_pet():
     st = state()
+    a_id = _hatched(st)
+    st["pets"]["b"] = {**pets.new_egg(datetime(2026, 11, 1)), "kind": "koala", "step": 1, "g": 30}
     st["inv"]["weitblick"] = 1
-    pets.use(st, egg_id(st), "weitblick", datetime(2026, 11, 18, 19, 0))
-    assert st["sight"] == "2026-11-18T20:00:00" and pets.view(st)["sight"] == st["sight"]
+    pets.use(st, a_id, "weitblick", datetime(2026, 11, 18))
+    v = pets.view(st)
+    assert v["pets"][a_id]["art"]["sight"] is True and v["pets"]["b"]["art"]["sight"] is False
+
+
+def test_level_gifts_once_per_level_and_season():
+    st = state()
+    got = pets.level_gifts(st, list(range(2, 10)), "2026-08-01")
+    assert got == ["sternenstein", "regenbogenfeder"]
+    assert pets.level_gifts(st, list(range(2, 10)), "2026-08-01") == []
+    assert pets.level_gifts(st, [4], "2027-08-01") == []  # still holding one: the gift waits
+    del st["inv"]["sternenstein"]
+    assert pets.level_gifts(st, [4], "2027-08-01") == ["sternenstein"]
 
 
 def test_pillow_and_lantern_stay_and_help():
