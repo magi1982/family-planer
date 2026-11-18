@@ -1004,10 +1004,10 @@ class LoxWochenplanerCard extends FpBase {
       .bin{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;align-self:stretch;justify-content:space-between}
       .bin .bx{white-space:normal;overflow:visible;display:block;overflow-wrap:break-word;word-break:normal;hyphens:manual;line-height:1.28;max-width:100%}
       .bin .b2{display:flex;align-items:center;gap:4px;min-width:0}.bin .bm{display:flex;flex-wrap:wrap;gap:3px 4px;min-width:0;flex:1 1 auto}
-      .bin .br{display:flex;align-items:center;gap:4px;margin:0 0 0 auto;flex:none}.bin .ptr{padding:0 6px 0 4px;line-height:18px}.bin .ptr .fpcoin{margin:0 2px 0 0}
+      .bin .br{display:flex;align-items:center;gap:4px;margin:0 0 0 auto;flex:none}.bin .ptr{display:inline-flex;align-items:center;height:22px;line-height:22px;border-radius:11px;padding:0 8px 0 5px;font-size:11.5px;box-sizing:border-box}.bin .ptr .fpcoin{margin:0 2px 0 0}
       .btn > .cb{display:none}.btn{padding:7px 9px}
-      .stt{display:none;width:20px;height:20px;border-radius:50%;background:#5BBF4A;box-sizing:border-box;flex:none;position:relative}
-      .btn.done .stt{display:inline-block}.btn.done .stt::after{content:'';position:absolute;left:7px;top:3.5px;width:5px;height:9px;border:solid #102a0c;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+      .stt{display:none;width:22px;height:22px;border-radius:50%;background:#5BBF4A;box-sizing:border-box;flex:none;position:relative}
+      .btn.done .stt{display:inline-block}.btn.done .stt::after{content:'';position:absolute;left:8px;top:4.5px;width:5px;height:9px;border:solid #102a0c;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
       .btn.arm .stt{display:inline-block;background:#E0A84F}
       .bin .bm .tag,.bin .bm .due,.bin .bm .age{font-size:10.5px;line-height:16px;padding:0 6px}
       .bl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;flex:1 1 auto}.br{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px;justify-content:flex-end;flex:0 1 auto;min-width:0;margin-left:auto}
