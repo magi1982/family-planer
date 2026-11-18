@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.2 – 2026-11-18
+### Fixed
+- **Pages missing in a dashboard stay inside the dashboard:** statistics and pets open right below the navigation instead of switching to the sidebar panel (0.17.1), so kiosk mode and guided access keep working.
+
 ## 0.17.1 – 2026-11-18
 ### Fixed
 - **Statistics and pets missing on older dashboards:** dashboards created before these pages existed have no view for them, so the buttons were hidden and the pet button in the planner led nowhere. The buttons now always show and open the page in the Family Planer panel when the dashboard has no view for it.

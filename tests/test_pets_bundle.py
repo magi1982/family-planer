@@ -24,11 +24,14 @@ def test_pet_file_has_no_dangerous_apis():
 
 
 def test_missing_dashboard_view_opens_the_panel():
-    """Dashboards made before statistics/pets existed: the buttons stay visible and open the page in the panel."""
+    """Dashboards made before statistics/pets existed: the buttons stay visible and show the page right in the
+    dashboard (kiosk mode / guided access never leaves it)."""
     import pathlib
     src = (pathlib.Path(__file__).parents[1] / "frontend_src")
     week = (src / "ui_week.js").read_text()
     nav = (src / "bridge.js").read_text()
-    assert "window.__fpViews" in week and "/family-planer/" in week
+    assert "window.__fpViews" in week and "fp-inline-page" in week
+    assert "history.pushState(null, '', `/family-planer/" not in week  # never jumps to the sidebar panel
+    assert "_inlinePage(key) {" in nav[nav.index("class FamilyPlanerNavCard"):nav.index("class FamilyPlanerPanel")]
     assert "window.__fpViews = this._views" in nav
     assert "if (miss && !this._editing()) return '';" not in nav

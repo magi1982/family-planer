@@ -406,9 +406,10 @@
         this._poke = () => this._pokeHint();
         window.addEventListener('pointerdown', this._poke, { capture: true, passive: true });
         this._hintT = setInterval(() => this._hintTick(), 1000);
-        window.addEventListener('location-changed', () => this._render());
+        window.addEventListener('location-changed', () => { this._inlinePage(null); this._render(); });
+        window.addEventListener('fp-inline-page', (e) => { if (this.isConnected) this._inlinePage(e.detail && e.detail.key); });
         this._tick = setInterval(() => this._clock(), 15000);
-        window.addEventListener('resize', () => { this._placeHint(); if (this._narrowNow() !== this._wasNarrow || this._topNow() !== this._wasTop) { this._wasNarrow = this._narrowNow(); this._wasTop = this._topNow(); this._render(); } });
+        window.addEventListener('resize', () => { this._placeHint(); this._placePage(); if (this._narrowNow() !== this._wasNarrow || this._topNow() !== this._wasTop) { this._wasNarrow = this._narrowNow(); this._wasTop = this._topNow(); this._render(); } });
       }
       this._render();
     }
@@ -421,6 +422,7 @@
       const sig = (st ? `${st.state}|${(st.attributes || {}).temperature}|${(st.attributes || {}).wind_speed}` : '') + `|${lt.night}|${lt.dusk}`;
       if (sig !== this._wxSig) { this._wxSig = sig; if (!first) this._soft(); }
       if (ent !== this._fcEnt) this._subForecast(ent);
+      if (this._page) this._page.firstChild.hass = h;
     }
     // how much of the scene's top is cut off at this header size (garlands hang from the visible edge)
     _topNow() {
@@ -473,7 +475,30 @@
         this._render();
       } catch (e) { this._views = null; window.__fpViews = null; }
     }
-    disconnectedCallback() { if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
+    // a page whose view is missing in this dashboard: shown in a layer right below the nav bar, the dashboard stays open
+    _inlinePage(key) {
+      const view = key && NAV_VIEW[key];
+      if (!view || view === 'week' && key === 'planer') {
+        if (this._page) { this._page.remove(); this._page = null; }
+        if (this._inline) { this._inline = null; this._render(); }
+        return;
+      }
+      if (this._inline === key && this._page) return;
+      if (this._page) this._page.remove();
+      this._inline = key;
+      const pg = document.createElement('div'); const card = document.createElement('family-planer-card');
+      card.setConfig({ view, entry_id: this._cfg.entry_id }); pg.appendChild(card);
+      const s = this._store && this._store.snap; if (s) applyTheme(pg, this._cfg.theme || s.theme, this._cfg.style || s.style);
+      document.body.appendChild(pg); this._page = pg; this._placePage();
+      if (this._hass) card.hass = this._hass;
+      this._render();
+    }
+    _placePage() {
+      if (!this._page) return;
+      const r = this.getBoundingClientRect();
+      this._page.style.cssText = `position:fixed;z-index:5;left:${Math.round(r.left)}px;width:${Math.round(r.width)}px;top:${Math.round(r.bottom + 8)}px;bottom:0;overflow:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box;padding-bottom:8px;background:var(--fp-page,var(--fp-bg0,#141414))`;
+    }
+    disconnectedCallback() { if (this._page) { this._page.remove(); this._page = null; this._inline = null; } if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
     // night mode: a soft dark veil over the whole dashboard (no layout change, clicks pass through)
     _night(on) {
       let v = document.getElementById('fp-night');
@@ -641,7 +666,7 @@
           .sug:focus>span{display:block;position:absolute;top:46px;right:0;width:240px;padding:9px 11px;border-radius:12px;background:var(--fp-pop,var(--fp-bg1));border:1px solid var(--fp-line);box-shadow:0 10px 28px rgba(0,0,0,.45);z-index:6;white-space:normal}.sug:focus>span span{white-space:normal;overflow:visible}}
         button.slab{font:inherit;font-size:12px;cursor:pointer;color:inherit;border:1px solid transparent}.hint.fi{max-width:340px;line-height:1.45}.slab.fun{border-color:var(--fp-acc,#69C350)}.slab.fun ha-icon{--mdc-icon-size:15px;opacity:.8}.slab.fun.on{background:var(--fp-bg3)}@media (max-width:700px){.sug,.wxn span,.slab{display:none}.slab.fun{display:inline-flex}}
       </style><div class="bar${sc.key ? ' sc' : ''}" data-fp-head><span class="t">${this._cfg.menu ? '<button class="menu" data-menu><ha-icon icon="mdi:menu"></ha-icon></button>' : ''}<span class="lft"><span class="clk">${showTitle ? `<i class="ttl">${escN(title)}</i>` : ''}<span class="tl"><b>${p2(n.getHours())}:${p2(n.getMinutes())}</b><span class="dt">${T.wd[n.getDay()]}, ${n.getDate()}. ${T.mon[n.getMonth()]}</span>${this._seasonLabel(s, lang)}</span></span>
-        <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${this._paths[k] === cur ? 'on' : ''}${this._editing() && this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
+        <div class="mid">${btns.filter((k) => k !== 'einstellungen').map((k) => `<button class="${(this._inline ? this._inline === k : this._paths[k] === cur) ? 'on' : ''}${this._editing() && this._views && !this._views.has(this._paths[k]) ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(this._views && !this._views.has(this._paths[k]) ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon><span class="l">${escN(NAV[lang][k])}</span></button>`).join('')}</div></span></span>
         ${this._right(s, lang, review, pending, btns.includes('einstellungen') ? this._navBtn('einstellungen', lang, cur) : '')}</div>`;
       const bar = this.shadowRoot.querySelector('.bar');
       if (sc.key && bar) {
@@ -671,7 +696,7 @@
     }
     _navBtn(k, lang, cur) {
       const T = NAV_T[lang]; const miss = this._views && !this._views.has(this._paths[k]);
-      return `<button class="sq${this._paths[k] === cur ? ' on' : ''}${miss && this._editing() ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(miss ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon></button>`;
+      return `<button class="sq${(this._inline ? this._inline === k : this._paths[k] === cur) ? ' on' : ''}${miss && this._editing() ? ' miss' : ''}" data-go="${escN(this._paths[k])}" aria-label="${escN(NAV[lang][k])}" title="${escN(miss ? T.miss.replace('{p}', this._paths[k]) : NAV[lang][k])}"><ha-icon icon="${NAV_ICON[k]}"></ha-icon></button>`;
     }
     _seasonLabel(s, lang) {
       const se = s && s.season; if (!se || se.enabled === false || !se.label || !window.FPSEASON) return '';
