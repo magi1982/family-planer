@@ -3286,9 +3286,9 @@ class LoxWochenplanerCard extends FpBase {
   // every task button is built the same: left title + time info (seit / heute fällig / bis Mo), right source + points.
   // Fits on one line → one line; otherwise left: title over time, right: points over source (see _fit()).
   _bi(title, time, src, pts) {
-    // grid: [title + meta chips] [points], both centred like the tick on the left – compact and symmetric
+    // line 1: title over the full width; line 2: chips left, points + open/done field right (no tick circle)
     const meta = `${time || ''}${src || ''}`;
-    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${meta ? `<span class="bm">${meta}</span>` : ''}</span>${pts > 0 ? `<span class="br"><b class="ptr">${fpCoin(11)}+${pts}</b></span>` : ''}</span>`;
+    return `<span class="bin"><span class="bx">${title}</span><span class="b2"><span class="bm">${meta}</span><span class="br">${pts > 0 ? `<b class="ptr">${fpCoin(11)}+${pts}</b>` : ''}<i class="stt" aria-hidden="true"></i></span></span></span>`;
   }
   _fit() {
     const root = this.shadowRoot; if (!root) return;
@@ -3823,10 +3823,14 @@ class LoxWochenplanerCard extends FpBase {
       .bg.one{grid-template-columns:minmax(0,1fr)}
 
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
-      .bin{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:6px}
-      .bin .bl{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}.bin .bm{display:flex;flex-wrap:wrap;gap:3px 4px;min-width:0;max-width:100%}
+      .bin{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;align-self:stretch;justify-content:space-between}
       .bin .bx{white-space:normal;overflow:visible;display:block;overflow-wrap:break-word;word-break:normal;hyphens:manual;line-height:1.28;max-width:100%}
-      .bin .br{display:flex;align-items:center;margin:0;flex:none}.bin .ptr{padding:0 6px 0 4px;line-height:18px}.bin .ptr .fpcoin{margin:0 2px 0 0}
+      .bin .b2{display:flex;align-items:center;gap:4px;min-width:0}.bin .bm{display:flex;flex-wrap:wrap;gap:3px 4px;min-width:0;flex:1 1 auto}
+      .bin .br{display:flex;align-items:center;gap:4px;margin:0 0 0 auto;flex:none}.bin .ptr{padding:0 6px 0 4px;line-height:18px}.bin .ptr .fpcoin{margin:0 2px 0 0}
+      .btn > .cb{display:none}.btn{padding:7px 9px}
+      .stt{width:26px;height:18px;border-radius:9px;border:1.5px dashed #6a6a6a;box-sizing:border-box;flex:none;position:relative;display:inline-block}
+      .btn.done .stt{background:#5bbf4a;border:none}.btn.done .stt::after{content:'';position:absolute;left:10px;top:3px;width:5px;height:9px;border:solid #102a0c;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+      .btn.tdo .stt{border-color:rgba(79,163,224,.8)}.btn.spc .stt{border-color:rgba(245,197,66,.8)}.btn.arm .stt{background:#e0a84f;border:none}
       .bin .bm .tag,.bin .bm .due,.bin .bm .age{font-size:10.5px;line-height:16px;padding:0 6px}
       .bl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;flex:1 1 auto}.br{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px;justify-content:flex-end;flex:0 1 auto;min-width:0;margin-left:auto}
       .bx{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -4688,9 +4692,9 @@ class LoxWochenplanerCard extends FpBase {
   // every task button is built the same: left title + time info (seit / heute fällig / bis Mo), right source + points.
   // Fits on one line → one line; otherwise left: title over time, right: points over source (see _fit()).
   _bi(title, time, src, pts) {
-    // grid: [title + meta chips] [points], both centred like the tick on the left – compact and symmetric
+    // line 1: title over the full width; line 2: chips left, points + open/done field right (no tick circle)
     const meta = `${time || ''}${src || ''}`;
-    return `<span class="bin"><span class="bl"><span class="bx">${title}</span>${meta ? `<span class="bm">${meta}</span>` : ''}</span>${pts > 0 ? `<span class="br"><b class="ptr">${fpCoin(11)}+${pts}</b></span>` : ''}</span>`;
+    return `<span class="bin"><span class="bx">${title}</span><span class="b2"><span class="bm">${meta}</span><span class="br">${pts > 0 ? `<b class="ptr">${fpCoin(11)}+${pts}</b>` : ''}<i class="stt" aria-hidden="true"></i></span></span></span>`;
   }
   _fit() {
     const root = this.shadowRoot; if (!root) return;
@@ -5225,10 +5229,14 @@ class LoxWochenplanerCard extends FpBase {
       .bg.one{grid-template-columns:minmax(0,1fr)}
 
       .tdmore{background:none;border:1px dashed var(--fp-line,#3a3a3a);color:var(--fp-text2,#999);border-radius:10px;font:inherit;font-size:12px;padding:6px 10px;cursor:pointer;text-align:left}
-      .bin{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:6px}
-      .bin .bl{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}.bin .bm{display:flex;flex-wrap:wrap;gap:3px 4px;min-width:0;max-width:100%}
+      .bin{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;align-self:stretch;justify-content:space-between}
       .bin .bx{white-space:normal;overflow:visible;display:block;overflow-wrap:break-word;word-break:normal;hyphens:manual;line-height:1.28;max-width:100%}
-      .bin .br{display:flex;align-items:center;margin:0;flex:none}.bin .ptr{padding:0 6px 0 4px;line-height:18px}.bin .ptr .fpcoin{margin:0 2px 0 0}
+      .bin .b2{display:flex;align-items:center;gap:4px;min-width:0}.bin .bm{display:flex;flex-wrap:wrap;gap:3px 4px;min-width:0;flex:1 1 auto}
+      .bin .br{display:flex;align-items:center;gap:4px;margin:0 0 0 auto;flex:none}.bin .ptr{padding:0 6px 0 4px;line-height:18px}.bin .ptr .fpcoin{margin:0 2px 0 0}
+      .btn > .cb{display:none}.btn{padding:7px 9px}
+      .stt{width:26px;height:18px;border-radius:9px;border:1.5px dashed #6a6a6a;box-sizing:border-box;flex:none;position:relative;display:inline-block}
+      .btn.done .stt{background:#5bbf4a;border:none}.btn.done .stt::after{content:'';position:absolute;left:10px;top:3px;width:5px;height:9px;border:solid #102a0c;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+      .btn.tdo .stt{border-color:rgba(79,163,224,.8)}.btn.spc .stt{border-color:rgba(245,197,66,.8)}.btn.arm .stt{background:#e0a84f;border:none}
       .bin .bm .tag,.bin .bm .due,.bin .bm .age{font-size:10.5px;line-height:16px;padding:0 6px}
       .bl{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;flex:1 1 auto}.br{display:flex;flex-wrap:wrap;align-items:center;gap:4px 5px;justify-content:flex-end;flex:0 1 auto;min-width:0;margin-left:auto}
       .bx{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
