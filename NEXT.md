@@ -915,3 +915,12 @@ Wunsch: im Inventar auf alles tippen können und erklärt bekommen, was es ist u
 - Sonderdinge (Kissen, Laterne, Artefakte): Erklärung, was sie bewirken; bei Artefakten auch, wofür sie im Entwicklungsbaum gebraucht werden.
 - Texte DE/EN, kindgerecht, kurz.
 - **Umgesetzt (18.11., 0.19.0):** Inventar antippbar mit Erklärung, Schritt-Grafik, Vorschau am eigenen Tierchen und „Jetzt einsetzen“; alle Sonderdinge haben eine echte Wirkung.
+
+### 65. Artefakte zu Ende denken + neues Ei sichtbar machen (18.11.)
+Michaels Vorgaben: im Entwicklungsbaum selbst wählen, ob ein Artefakt-Effekt aktiv ist; Tierchen-Auswahl mit doppelter Bestätigung; Traumkristall gibt dem Kind ein Ei; ein neues Ei muss man sehen.
+- **Ziel-Tierchen wählen:** „Jetzt einsetzen“ → alle Tierchen als Karten (Eier nur, wo es passt) → antippen → „Wirklich für Funki einsetzen? Abbrechen / Ja“ (zweiter Schritt, kein Zufallsklick).
+- **Effekte bleiben und sind schaltbar:** Farbe (Regenbogen, Kristall) und Sternen-Aura werden pro Tierchen dauerhaft gespeichert („freigeschaltet“), überleben jede Entwicklung. Im Entwicklungsbaum oben Schalter „Regenbogen-Farbe an/aus“, „Kristall an/aus“, „Sternen-Aura an/aus“ – nur eine Farbe gleichzeitig.
+- **Traumkristall = Wunsch-Ei:** gibt ein neues Ei, aus dem das gewählte Tier schlüpft (Tierauswahl mit doppelter Bestätigung). Kein wartendes Ei nötig; höchstens 1 wartendes Ei gilt hier nicht (bewusstes Geschenk).
+- **Neues Ei sichtbar:** heute nur in der Sammlung, ohne Hinweis. Neu: Meldung „Neues Ei! 🥚“ wenn es kommt; in „Aktuelles Tierchen“ oben eine Karte „Du hast ein Ei – jetzt ausbrüten“ (wechselt aufs Ei); Ei im Garten im Nest; kleiner Ei-Punkt am Tierchen auf der Planer-Karte.
+- **Vorschau** zeigt die echte Wirkung am gewählten Tierchen; **Weitblick** öffnet danach den Baum („sichtbar bis 21:20“); **Fenster** zweispaltig und kompakt.
+- **Level-Belohnungen statt Begleiter** (Level 4, 8, 13, 18, 22, 27) – Vorschlag Traumkristall, Sternenstein, Fabelwesen-Ei, Regenbogenfeder, Fabelwesen-Ei, Zauberspiegel.
