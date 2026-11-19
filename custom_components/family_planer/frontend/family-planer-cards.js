@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.4'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.5'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.

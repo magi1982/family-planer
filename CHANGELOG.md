@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.19.5 – unreleased
+## 0.19.5 – 2026-11-19
 ### Changed
 - **Timed announcements wait for someone to be there:** with a motion sensor, the evening summary and the birthday lines are said at the first motion from their time on (once, the same day) instead of to an empty room. The evening summary replaces the chore reminder at that motion.
 - **New default times:** evening summary from 18:15, birthday lines from 07:00, 12:15, 15:30, 18:15 and 19:30. The birthday times are a new setting.
