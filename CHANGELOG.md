@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.19.1 – unreleased
+## 0.19.1 – 2026-11-19
 ### Changed
 - **Level badge no longer grows and shrinks** after a level-up (it only glows softly); instead the pet at the avatar hops a little now and then.
 - **Speech bubble at the pet:** the pet shows one bubble – the most urgent need (🍎 hunger, 💧 thirst, ⚡ energy, 🎈 mood, below 30 %), otherwise a glowing waiting egg. Before, only hunger was shown and a new egg sat on the avatar. Trophies keep more distance from the pet.
