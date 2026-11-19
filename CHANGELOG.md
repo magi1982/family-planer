@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.2 – unreleased
+### Added
+- **Evolve choice shows what comes after:** each way shows how many ways follow right after it and how many final forms it leads to (or that it is a final form).
+
 ## 0.19.1 – 2026-11-19
 ### Changed
 - **Level badge no longer grows and shrinks** after a level-up (it only glows softly); instead the pet at the avatar hops a little now and then.

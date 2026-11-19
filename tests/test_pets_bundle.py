@@ -100,3 +100,9 @@ def test_pets_in_windows_are_never_bigger_than_on_the_care_page():
     assert ".care .pet{max-width:var(--petmax,200px)}" in ui and "window.__fpPetW = w" in ui
     # growth pills grow, they do not show a strange next form
     assert "wachs_s: 'wachs_s', wachs_m: 'wachs_m', wachs_l: 'wachs_l'" in ui and "run('wachsen')" not in ui
+
+
+def test_evolve_choice_shows_what_comes_after():
+    ui = CARDS
+    assert "afterTxt(t, o)" in ui and "const leaves" in ui
+    assert "Endformen" in ui and "final forms" in ui
