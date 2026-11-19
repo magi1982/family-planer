@@ -521,7 +521,7 @@
         root.querySelector('[data-demo]').addEventListener('click', () => { stage(target, wish); play(); });
         const err = (e) => { errEl.textContent = typeof e === 'string' ? e : errMsg(t, e); };
         const now = root.querySelector('[data-now]'); if (!now) return;
-        const confirmRow = (q, go, pic) => { pick.insertAdjacentHTML('beforeend', `<div class="conf">${pic ? `<span class="cv">${pic}</span>` : ''}<p>${esc(q)}</p><div class="irow"><button class="okb" data-no>${esc(t.cancel || 'Abbrechen')}</button><button class="okb green" data-yes>${esc(I.yes)}</button></div></div>`);
+        const confirmRow = (q, go, pic) => { const cf = document.createElement('div'); cf.className = 'conf'; cf.innerHTML = `${pic ? `<span class="cv">${pic}</span>` : ''}<p>${esc(q)}</p><div class="irow"><button class="okb" data-no>${esc(t.cancel || 'Abbrechen')}</button><button class="okb green" data-yes>${esc(I.yes)}</button></div>`; pick.appendChild(cf);
           pick.querySelector('[data-no]').addEventListener('click', () => { const c = pick.querySelector('.conf'); if (c) c.remove(); });
           pick.querySelector('[data-yes]').addEventListener('click', go); };
         const done = (after) => { setTimeout(() => { close(); after(); }, 2400); };
