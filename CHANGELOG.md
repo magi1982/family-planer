@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.19.1 – unreleased
+### Changed
+- **Waiting egg left of the wheel:** a new egg is shown as its own small egg next to the wheel instead of a dot on the avatar; the active pet stays where it was.
+- **Wheel turns slowly while it can be spun** and is hidden once spun – it comes back when the next spin is ready.
+
 ## 0.19.0 – 2026-11-19
 ### Added
 - **Inventory explained:** every thing can be tapped – what it is, its effect, three illustrated steps how to use it, a live preview on your own pet, where it comes from; things you have can be used right there. Compact two-column window.

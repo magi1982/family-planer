@@ -88,7 +88,8 @@ def test_artefacts_pick_a_pet_with_a_second_confirmation_and_hatching_has_no_spo
     assert "data-whom=" in ui and "data-wish=" in ui and "confirmRow(" in ui and "data-yes" in ui  # pick, then confirm
     assert "data-artskin" in ui and "data-artaura" in ui  # switch effects in the tree
     assert "window.__fpHatching = true" in ui and "if (window.__fpHatching)" in ui  # page waits while hatching
-    assert "data-gotoegg" in ui and "eggdot" in ui and "t.newEgg" in ui  # a new egg is seen
+    assert "data-gotoegg" in ui and "fpegg" in ui and "t.newEgg" in ui  # a new egg is seen (left of the wheel)
+    assert "eggdot" not in ui and "fpwh used" not in ui and "!st.spun" in ui and "fpspin" in ui  # wheel turns, hidden once spun
     assert "const lookOf = (p)" in ui
 
 

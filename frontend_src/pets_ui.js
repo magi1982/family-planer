@@ -238,10 +238,11 @@
   // ------------------------------------------------------------- person card: pet bottom-right at the avatar (60 px), the plain wheel top-right
   const CARD_CSS = `.ring{overflow:visible}.fppet{position:absolute;right:-31px;bottom:-17px;width:60px;height:60px;padding:0;border:0;background:none;cursor:pointer;z-index:5}.fppet svg{width:100%;height:100%;overflow:visible}
     .fppet.egg svg{animation:fpwob 2.2s ease-in-out infinite;transform-origin:50% 90%}@keyframes fpwob{0%,70%,100%{transform:rotate(0)}76%{transform:rotate(-8deg)}84%{transform:rotate(7deg)}92%{transform:rotate(-3deg)}}
-    .fppet .eggdot{position:absolute;left:-8px;top:-8px;font-style:normal;font-size:15px;animation:fpwob 2.2s ease-in-out infinite}
+    .fptop{position:absolute;right:12px;top:12px;display:flex;align-items:center;gap:6px;z-index:6}
+    .fpegg{width:38px;height:38px;padding:0;border:0;background:none;cursor:pointer}.fpegg svg{width:170%;height:170%;margin:-45% -35% 0;overflow:visible;animation:fpwob 2.2s ease-in-out infinite;transform-origin:50% 90%}
     .fppet .need{position:absolute;right:-6px;top:-6px;font-style:normal;font-size:12px;background:#fff;border-radius:10px;padding:1px 3px}
-    .fpwh{position:absolute;right:12px;top:12px;width:34px;height:34px;padding:0;border:0;background:none;cursor:pointer;z-index:6}.fpwh svg{width:100%;height:100%}.fpwh.used svg{filter:grayscale(1) brightness(.75);opacity:.55}
-    .lab.th.fphas .nm{padding-right:42px}@media (prefers-reduced-motion:reduce){.fppet.egg svg{animation:none}}`;
+    .fpwh{width:34px;height:34px;padding:0;border:0;background:none;cursor:pointer}.fpwh svg{width:100%;height:100%;animation:fpspin 14s linear infinite}@keyframes fpspin{to{transform:rotate(360deg)}}
+    .lab.th.fphas .nm{padding-right:42px}@media (prefers-reduced-motion:reduce){.fppet.egg svg,.fpegg svg,.fpwh svg{animation:none}}`;
   let wheelIcon = '';
   // returns [pet button (goes into the avatar ring), wheel button (top right of the card head)]
   const headBits = (snap, pid) => {
@@ -249,9 +250,12 @@
     const st = snap.pets[pid]; const p = st.pets[st.active]; const t = T(snap);
     if (!wheelIcon) { const d = document.createElement('div'); d.innerHTML = L().WHEEL.knob('#888', true); const s = d.querySelector('svg'); wheelIcon = s ? s.outerHTML : '🎡'; }
     const hungry = p && p.step > 0 && p.v && p.v.hunger < 30;
-    const waits = p && p.step > 0 && Object.values(st.pets).some((x) => x.step === 0);
-    return [p ? `<button class="fppet${p.step === 0 ? ' egg' : ''}" data-fppet="${esc(pid)}" aria-label="${esc(titleOf(p, t))}">${svgOf(st.active, p)}${hungry ? '<i class="need">🍎</i>' : ''}${waits ? '<i class="eggdot">🥚</i>' : ''}</button>` : '',
-      (snap.pets_cfg || {}).wheel ? `<button class="fpwh${st.spun ? ' used' : ''}" data-fpwheel="${esc(pid)}" aria-label="${t.wheel}">${wheelIcon}</button>` : ''];
+    const waiting = p && p.step > 0 ? Object.entries(st.pets).find(([, x]) => x.step === 0) : null;
+    // a waiting egg sits left of the wheel (not on the avatar); the wheel only shows while it can be spun and turns slowly
+    const egg = waiting ? `<button class="fpegg" data-fppet="${esc(pid)}" aria-label="${esc(t.eggWaits)}">${svgOf(waiting[0], waiting[1])}</button>` : '';
+    const wheel = (snap.pets_cfg || {}).wheel && !st.spun ? `<button class="fpwh" data-fpwheel="${esc(pid)}" aria-label="${t.wheel}">${wheelIcon}</button>` : '';
+    return [p ? `<button class="fppet${p.step === 0 ? ' egg' : ''}" data-fppet="${esc(pid)}" aria-label="${esc(titleOf(p, t))}">${svgOf(st.active, p)}${hungry ? '<i class="need">🍎</i>' : ''}</button>` : '',
+      egg || wheel ? `<div class="fptop">${egg}${wheel}</div>` : ''];
   };
 
   // ------------------------------------------------------------- after a chore: what was earned rises slowly above it
