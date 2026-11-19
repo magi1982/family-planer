@@ -3715,14 +3715,21 @@ class LoxWochenplanerCard extends FpBase {
         const sec = (title, html, info, right) => (html ? `<div class="tsec"><div class="tsh"><span>${title}${info ? ` · ${info}` : ''}</span>${right || ''}</div>${html}</div>` : '');
         const evRow = (e) => { const est = isT ? evState(e) : { c: '', b: '' }; return `<div class="ev one${est.c}" style="border-color:${e.c.farbe}"><span class="et">${esc(e.title)}</span><span class="tm">${evRange(e, false)}</span>${est.b}</div>`; };
         const school = ['alle', 'schule'].includes(modeX) ? (modeX === 'schule' ? ev.lessons.map((e) => ({ ...e, title: e.loc ? `${e.title} · ${e.loc}` : e.title })) : ev.blockEvs) : [];
-        const evs = ['alle', 'termine'].includes(modeX) ? ev.rest : [];
+        // "All" stays tidy: events end, then after a while they leave this view (they stay under "Events")
+        const pastMin = Number(this._cfg.termine_aus) || 0; const cut = Date.now() - pastMin * 60000;
+        const evs = modeX === 'termine' ? ev.rest : modeX === 'alle' ? ev.rest.filter((e) => !(isT && pastMin && !e.allDay && e.e && e.e.getTime() < cut)) : [];
         let chores = ''; let tdh = ''; let sph = ''; let chInfo = ''; let chRight = ''; let tdInfo = '';
         if (['alle', 'aemtli', 'extra'].includes(modeX)) {
           if (isT) {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
             if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
-            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Spezial</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : '';
+            // "All": done chores leave right away (after their little celebration); "Chores" still shows them
+            const hideDone = modeX === 'alle' && this._cfg.erledigt_aus !== false;
+            const recent = (i) => this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 2500;
+            const shown = hideDone ? mine.filter((i) => i.status !== 'completed' || recent(i)) : mine;
+            if (hideDone && shown.some((i) => i.status === 'completed')) { clearTimeout(this._hideT); this._hideT = setTimeout(() => this._render(), 2600); }
+            chores = shown.length ? '<div class="bg one">' + shown.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Spezial</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : (mine.length ? ' ' : ''); // all done and hidden: the header still says so
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
@@ -5180,14 +5187,21 @@ class LoxWochenplanerCard extends FpBase {
         const sec = (title, html, info, right) => (html ? `<div class="tsec"><div class="tsh"><span>${title}${info ? ` · ${info}` : ''}</span>${right || ''}</div>${html}</div>` : '');
         const evRow = (e) => { const est = isT ? evState(e) : { c: '', b: '' }; return `<div class="ev one${est.c}" style="border-color:${e.c.farbe}"><span class="et">${esc(e.title)}</span><span class="tm">${evRange(e, false)}</span>${est.b}</div>`; };
         const school = ['alle', 'schule'].includes(modeX) ? (modeX === 'schule' ? ev.lessons.map((e) => ({ ...e, title: e.loc ? `${e.title} · ${e.loc}` : e.title })) : ev.blockEvs) : [];
-        const evs = ['alle', 'termine'].includes(modeX) ? ev.rest : [];
+        // "All" stays tidy: events end, then after a while they leave this view (they stay under "Events")
+        const pastMin = Number(this._cfg.termine_aus) || 0; const cut = Date.now() - pastMin * 60000;
+        const evs = modeX === 'termine' ? ev.rest : modeX === 'alle' ? ev.rest.filter((e) => !(isT && pastMin && !e.allDay && e.e && e.e.getTime() < cut)) : [];
         let chores = ''; let tdh = ''; let sph = ''; let chInfo = ''; let chRight = ''; let tdInfo = '';
         if (['alle', 'aemtli', 'extra'].includes(modeX)) {
           if (isT) {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
             if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
-            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Special</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : '';
+            // "All": done chores leave right away (after their little celebration); "Chores" still shows them
+            const hideDone = modeX === 'alle' && this._cfg.erledigt_aus !== false;
+            const recent = (i) => this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 2500;
+            const shown = hideDone ? mine.filter((i) => i.status !== 'completed' || recent(i)) : mine;
+            if (hideDone && shown.some((i) => i.status === 'completed')) { clearTimeout(this._hideT); this._hideT = setTimeout(() => this._render(), 2600); }
+            chores = shown.length ? '<div class="bg one">' + shown.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Special</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : (mine.length ? ' ' : ''); // all done and hidden: the header still says so
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
@@ -6929,6 +6943,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('reliability_days', 'num', 'Zuverlässigkeit berechnen über', 'Calculate reliability over', 'Zeitraum für die Prozentzahl pro Person.', 'Period for the percentage per person.', { min: 7, max: 90, unit: { de: 'Tage', en: 'days' } }),
       F('school_gap', 'num', 'Heimweg über Mittag ab', 'Lunch at home from', 'Pause in Minuten, ab der der Schultag in zwei Blöcke geteilt wird (0 = automatisch).', 'Break in minutes from which the school day is split into two blocks (0 = automatic).', { min: 0, max: 240, unit: 'min' }),
       F('school_window', 'num', 'Schule nur rund um die Schulzeit zeigen', 'Show school only around school time', 'So viele Minuten vor dem Losgehen bis nach dem Heimkommen erscheint der Schulblock in der Ansicht „Alles“ (0 = immer).', 'Minutes before leaving and after being home in which the school block shows in the "All" view (0 = always).', { min: 0, max: 240, unit: 'min' }),
+      F('hide_done', 'bool', 'Erledigte Ämtli in „Alles“ ausblenden', 'Hide done chores in "All"', 'So wird die Ansicht gegen Abend übersichtlicher. Unter „Ämtli“ sieht man sie weiterhin und kann sie dort zurücknehmen.', 'Keeps the view tidy towards the evening. They still show under "Chores", where they can be undone.'),
+      F('hide_past', 'num', 'Vergangene Termine in „Alles“ ausblenden nach', 'Hide past events in "All" after', 'So viele Minuten nach dem Ende verschwindet ein Termin aus „Alles“ (0 = nie). Unter „Termine“ bleibt er sichtbar.', 'Minutes after its end an event leaves the "All" view (0 = never). It stays under "Events".', { min: 0, max: 240, unit: 'min' }),
     ] },
     { id: 'persons', icon: 'mdi:account-multiple-outline', label: { de: 'Personen', en: 'People' } },
     { id: 'chores', icon: 'mdi:clipboard-text-clock-outline', label: { de: 'Ämtli', en: 'Chores' } },
@@ -9060,12 +9076,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           .map((p) => [p.name, { zeiten: p.school.times || {}, weg: p.school.travel || 0 }])),
         abwesend: Object.fromEntries(s.persons.map((p) => [p.name, (s.away || {})[p.id] || []])),
         tage_zuverlaessigkeit: st.reliability_days || 30, schulpause: st.school_gap || 0, ruhe_sekunden: st.idle_seconds || 45,
-        schulfenster: st.school_window == null ? 60 : st.school_window,
+        schulfenster: st.school_window == null ? 60 : st.school_window, erledigt_aus: st.hide_done !== false, termine_aus: st.hide_past == null ? 30 : st.hide_past,
         fair: ((s.gamification || {}).mode || 'fair') === 'fair',
         todos_knopf: view === 'week', todos_offen: (s.todos || []).filter((t) => !t.done).length,
         termine_nach_namen: st.match_names !== false, auch_beim_besitzer: !!st.show_owner, tageswechsel: roll,
         plan: VIRT.plan, heute: VIRT.heute, verlauf: VIRT.verlauf, einstellungen: VIRT.settings, script: VIRT.script };
-      const sig = JSON.stringify([lang, cfg.fair, cfg.schulfenster, cfg.todos_offen, cfg.tage_zuverlaessigkeit, cfg.schulpause, cfg.ruhe_sekunden, cfg.schule, cfg.abwesend, cfg.punkte_standard, cfg.titel, kinder.map((k) => [k.name, k.farbe]), kalender, cfg.termine_nach_namen, cfg.auch_beim_besitzer, roll]);
+      const sig = JSON.stringify([lang, cfg.fair, cfg.schulfenster, cfg.erledigt_aus, cfg.termine_aus, cfg.todos_offen, cfg.tage_zuverlaessigkeit, cfg.schulpause, cfg.ruhe_sekunden, cfg.schule, cfg.abwesend, cfg.punkte_standard, cfg.titel, kinder.map((k) => [k.name, k.farbe]), kalender, cfg.termine_nach_namen, cfg.auch_beim_besitzer, roll]);
       if (!this._inner || this._lang !== lang) { this._lang = lang; this.innerHTML = ''; this._special = null; this._todos = null; this._inner = document.createElement(tag(view, lang)); this.appendChild(this._inner); this._sig = null; }
       this._inner.fpStore = this._store;
       if (sig !== this._sig) { this._sig = sig; this._inner.setConfig(cfg); this._inner.hass = this._wrap(); }

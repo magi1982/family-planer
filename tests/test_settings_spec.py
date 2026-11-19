@@ -22,6 +22,16 @@ def test_general_clamps_and_flags():
     assert len(patch["panel"]["title"]) <= 40
     assert patch["rollover_time"] == "03:00" and {"reload", "rollover"} <= flags
     assert patch["fullscreen_dblclick"] is True and patch["fullscreen_auto"] is False
+    assert patch["hide_done"] is True and patch["hide_past"] == 30  # tidy "All" view by default
+
+
+def test_general_tidy_all_view():
+    cur = {"modules": {"week": True, "lists": True}, "panel": {}}
+    patch, _ = S.general({"hide_done": False, "hide_past": 9999}, cur)
+    assert patch["hide_done"] is False and patch["hide_past"] == 240
+    patch, _ = S.general({}, {**cur, "hide_past": 0})
+    assert patch["hide_past"] == 0  # 0 = never hide, kept when not sent
+    assert S.general({"hide_past": "x"}, cur)[0]["hide_past"] == 30  # bad input: the default
 
 
 def test_general_needs_a_module():

@@ -862,14 +862,21 @@ class LoxWochenplanerCard extends FpBase {
         const sec = (title, html, info, right) => (html ? `<div class="tsec"><div class="tsh"><span>${title}${info ? ` · ${info}` : ''}</span>${right || ''}</div>${html}</div>` : '');
         const evRow = (e) => { const est = isT ? evState(e) : { c: '', b: '' }; return `<div class="ev one${est.c}" style="border-color:${e.c.farbe}"><span class="et">${esc(e.title)}</span><span class="tm">${evRange(e, false)}</span>${est.b}</div>`; };
         const school = ['alle', 'schule'].includes(modeX) ? (modeX === 'schule' ? ev.lessons.map((e) => ({ ...e, title: e.loc ? `${e.title} · ${e.loc}` : e.title })) : ev.blockEvs) : [];
-        const evs = ['alle', 'termine'].includes(modeX) ? ev.rest : [];
+        // "All" stays tidy: events end, then after a while they leave this view (they stay under "Events")
+        const pastMin = Number(this._cfg.termine_aus) || 0; const cut = Date.now() - pastMin * 60000;
+        const evs = modeX === 'termine' ? ev.rest : modeX === 'alle' ? ev.rest.filter((e) => !(isT && pastMin && !e.allDay && e.e && e.e.getTime() < cut)) : [];
         let chores = ''; let tdh = ''; let sph = ''; let chInfo = ''; let chRight = ''; let tdInfo = '';
         if (['alle', 'aemtli', 'extra'].includes(modeX)) {
           if (isT) {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
             if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
-            chores = mine.length ? '<div class="bg one">' + mine.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Spezial</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : '';
+            // "All": done chores leave right away (after their little celebration); "Chores" still shows them
+            const hideDone = modeX === 'alle' && this._cfg.erledigt_aus !== false;
+            const recent = (i) => this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 2500;
+            const shown = hideDone ? mine.filter((i) => i.status !== 'completed' || recent(i)) : mine;
+            if (hideDone && shown.some((i) => i.status === 'completed')) { clearTimeout(this._hideT); this._hideT = setTimeout(() => this._render(), 2600); }
+            chores = shown.length ? '<div class="bg one">' + shown.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Spezial</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : (mine.length ? ' ' : ''); // all done and hidden: the header still says so
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.4 – unreleased
+### Added
+- **Tidy "All" view:** done chores leave the "All" view right after ticking (they stay under "Chores", where they can be undone), and events leave it 30 minutes after they ended (they stay under "Events"). Both are settings under General (on / 30 min by default; 0 = never).
+
 ## 0.19.3 – 2026-11-19
 ### Changed
 - **Final forms in the evolve choice are shown in colour** (their names with far-sight).

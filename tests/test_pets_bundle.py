@@ -114,3 +114,9 @@ def test_cache_version_matches_the_release():
     import json
     manifest = json.loads((_fe.parent / "manifest.json").read_text())
     assert VERSION == manifest["version"]
+
+
+def test_all_view_hides_done_chores_and_past_events():
+    assert "erledigt_aus: st.hide_done !== false" in CARDS and "termine_aus:" in CARDS
+    assert "modeX === 'alle' && this._cfg.erledigt_aus !== false" in CARDS  # only in "All", "Chores" still shows them
+    assert "modeX === 'termine' ? ev.rest" in CARDS  # "Events" keeps past ones

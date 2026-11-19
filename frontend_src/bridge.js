@@ -306,12 +306,12 @@
           .map((p) => [p.name, { zeiten: p.school.times || {}, weg: p.school.travel || 0 }])),
         abwesend: Object.fromEntries(s.persons.map((p) => [p.name, (s.away || {})[p.id] || []])),
         tage_zuverlaessigkeit: st.reliability_days || 30, schulpause: st.school_gap || 0, ruhe_sekunden: st.idle_seconds || 45,
-        schulfenster: st.school_window == null ? 60 : st.school_window,
+        schulfenster: st.school_window == null ? 60 : st.school_window, erledigt_aus: st.hide_done !== false, termine_aus: st.hide_past == null ? 30 : st.hide_past,
         fair: ((s.gamification || {}).mode || 'fair') === 'fair',
         todos_knopf: view === 'week', todos_offen: (s.todos || []).filter((t) => !t.done).length,
         termine_nach_namen: st.match_names !== false, auch_beim_besitzer: !!st.show_owner, tageswechsel: roll,
         plan: VIRT.plan, heute: VIRT.heute, verlauf: VIRT.verlauf, einstellungen: VIRT.settings, script: VIRT.script };
-      const sig = JSON.stringify([lang, cfg.fair, cfg.schulfenster, cfg.todos_offen, cfg.tage_zuverlaessigkeit, cfg.schulpause, cfg.ruhe_sekunden, cfg.schule, cfg.abwesend, cfg.punkte_standard, cfg.titel, kinder.map((k) => [k.name, k.farbe]), kalender, cfg.termine_nach_namen, cfg.auch_beim_besitzer, roll]);
+      const sig = JSON.stringify([lang, cfg.fair, cfg.schulfenster, cfg.erledigt_aus, cfg.termine_aus, cfg.todos_offen, cfg.tage_zuverlaessigkeit, cfg.schulpause, cfg.ruhe_sekunden, cfg.schule, cfg.abwesend, cfg.punkte_standard, cfg.titel, kinder.map((k) => [k.name, k.farbe]), kalender, cfg.termine_nach_namen, cfg.auch_beim_besitzer, roll]);
       if (!this._inner || this._lang !== lang) { this._lang = lang; this.innerHTML = ''; this._special = null; this._todos = null; this._inner = document.createElement(tag(view, lang)); this.appendChild(this._inner); this._sig = null; }
       this._inner.fpStore = this._store;
       if (sig !== this._sig) { this._sig = sig; this._inner.setConfig(cfg); this._inner.hass = this._wrap(); }
