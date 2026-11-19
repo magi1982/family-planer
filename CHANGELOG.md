@@ -1,6 +1,8 @@
 # Changelog
 
 ## 0.19.3 – 2026-11-19
+### Changed
+- **Final forms in the evolve choice are shown in colour** (their names with far-sight).
 ### Fixed
 - **Browsers kept the old cards after updating to 0.19.1/0.19.2:** the cache version of the card file was not raised. It now always matches the release, and a test checks it.
 

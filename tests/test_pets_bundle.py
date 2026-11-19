@@ -106,7 +106,7 @@ def test_evolve_choice_shows_what_comes_after():
     ui = CARDS
     assert "afterTxt(t, o)" in ui and "const leaves" in ui
     assert "Endformen" in ui and "final forms" in ui
-    assert "endsHtml(t, p, o, sight)" in ui and "brightness(0) invert(1)" in ui  # final forms as silhouettes, in colour with far-sight
+    assert "endsHtml(t, p, o, sight)" in ui  # final forms small in colour, names with far-sight
 
 
 def test_cache_version_matches_the_release():
