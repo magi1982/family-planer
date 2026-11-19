@@ -2,7 +2,7 @@
 
 ## 0.19.2 – unreleased
 ### Added
-- **Evolve choice shows what comes after:** each way shows how many ways follow right after it and how many final forms it leads to (or that it is a final form).
+- **Evolve choice shows what comes after:** each way shows how many ways follow, how many steps are left and the final forms it leads to – as silhouettes, or in colour with names once the pet has far-sight.
 
 ## 0.19.1 – 2026-11-19
 ### Changed
