@@ -7,9 +7,11 @@
 - **Star pillow and lantern** work (energy +40 / mood +15) and stay like toys.
 - **New eggs are seen:** a notice "New egg!" (also for new artefacts), a card "You have an egg – hatch it now" on the current pet and a small egg on the planer card.
 - **Level rewards:** levels 4, 8, 13, 18, 22 and 27 give an artefact (once per level and school year) instead of an avatar companion.
+- **Sleep and naps:** pets sleep at night (9 pm–7 am) and fill up energy; a tired pet naps about an hour by day unless the child gives energy first. Before, energy only came back with an energy drink.
 ### Changed
 - **Avatar builder without companions:** every person has real pets now, so the companion tab is gone and companions are no longer drawn on avatars (saved avatars keep working).
 ### Fixed
+- **Star field with every artefact already held** gave nothing – it gives the jackpot now.
 - **Growth pills** showed a different, next form with a white flash (on the care page too) – they now show the pet growing.
 - **Pets in windows** (inventory, hatching, evolving) are never bigger than on the care page.
 - **Food** explains the favourite food of each of your pets; toys say they need 20 % energy; the dream crystal is marked as used up.

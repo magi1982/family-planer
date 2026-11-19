@@ -52,6 +52,14 @@ NEEDS = ("hunger", "durst", "energie", "laune")
 NEED_FLOOR = 10         # pets never suffer: values never drop below this
 DECAY = {"off": 0.0, "slow": 0.5, "normal": 1.0}
 DECAY_PER_H = {"hunger": 3.0, "durst": 4.0, "energie": 2.0, "laune": 1.5}
+# at night the pet sleeps and fills up its energy (local time of Home Assistant): no more tired pets in the morning
+SLEEP_FROM, SLEEP_TO, SLEEP_PER_H = 21, 7, 8.0
+# by day a tired pet takes a nap of about an hour by itself – unless the child gives it something first
+NAP_BELOW, NAP_HOURS, NAP_PER_H = 25.0, 1.0, 40.0
+
+
+def asleep(at: datetime) -> bool:
+    return at.hour >= SLEEP_FROM or at.hour < SLEEP_TO
 
 # item: (kind, effect) – care items are used up, toys stay, pills grow
 CARE = {"futter": {"hunger": 35}, "wasser": {"durst": 40}, "keks": {"laune": 20}, "energy": {"energie": 100},
@@ -275,7 +283,31 @@ def decay(pet: dict, now: datetime, mode: str = "normal", paused: bool = False) 
     if paused or not f or not hours or pet["step"] == 0:
         return
     for n in NEEDS:
-        pet["v"][n] = max(NEED_FLOOR, round(pet["v"].get(n, 70) - DECAY_PER_H[n] * f * hours, 1))
+        if n != "energie":
+            pet["v"][n] = max(NEED_FLOOR, round(pet["v"].get(n, 70) - DECAY_PER_H[n] * f * hours, 1))
+    # energy in quarter hours: it sinks by day and fills up while the pet sleeps at night
+    e = float(pet["v"].get("energie", 70))
+    step = 0.25
+    at = then
+    try:
+        nap = datetime.fromisoformat(pet.get("nap") or "")
+        if nap.tzinfo is None and now.tzinfo is not None:
+            nap = nap.replace(tzinfo=now.tzinfo)
+    except ValueError:
+        nap = None
+    for _ in range(int(min(hours, 96) / step)):
+        at += timedelta(hours=step)
+        if asleep(at):
+            e = min(100.0, e + SLEEP_PER_H * step)
+        elif nap and at <= nap:
+            e = min(100.0, e + NAP_PER_H * step)
+        elif e < NAP_BELOW:  # tired: a nap of about an hour
+            nap = at + timedelta(hours=NAP_HOURS)
+            e = min(100.0, e + NAP_PER_H * step)
+        else:
+            e = max(NEED_FLOOR, e - DECAY_PER_H["energie"] * f * step)
+    pet["v"]["energie"] = round(e, 1)
+    pet["nap"] = _now_iso(nap) if nap and nap > now else ""
 
 
 # ------------------------------------------------------------------ actions (each raises PetError with a reason code)
@@ -323,6 +355,8 @@ def use(st: dict, pet_id: str, item: str, now: datetime, speed: str = "normal", 
         return _use_artefact(st, pet, item, now, speed, wish)
     if pet["step"] == 0:
         raise PetError("egg")
+    if item in ("energy", "kissen"):
+        pet["nap"] = ""  # the child gave energy: no nap needed any more
     if item in REST:
         eff = REST[item]
         if all(pet["v"].get(n, 0) >= 95 for n in eff):
@@ -599,11 +633,12 @@ def spin(st: dict, today: date, rng: random.Random, eggs: str = "normal") -> dic
             eid = new_id()
             st["pets"][eid] = new_egg(datetime.combine(today, datetime.min.time()), fabel=True)
             res["egg"] = eid
-        elif star == "artefact":
-            it = rng.choice([a for a in ARTEFACTS if not st["inv"].get(a)] or list(ARTEFACTS))
-            if add_item(st, it):
-                res["items"].append(it)
-        else:
+        elif star == "artefact" and any(not st["inv"].get(a) for a in ARTEFACTS):
+            it = rng.choice([a for a in ARTEFACTS if not st["inv"].get(a)])
+            add_item(st, it)
+            res["items"].append(it)
+        else:  # the jackpot – also when every artefact is already in the inventory (nothing is lost)
+            res["star"] = "jackpot"
             st["pts"] += 100
             res["pts"] = 100
     return res
@@ -616,5 +651,5 @@ def view(st: dict, speed: str = "normal") -> dict:
     for k, p in st["pets"].items():
         pets[k] = {**p, "art": dict(art(dict(p))), "need": next_need(p, speed), "ready": ready(p, speed),
                    "v": {n: round(p["v"].get(n, 70)) for n in NEEDS}}
-    return {"on": st["on"], "pts": st["pts"], "active": st["active"], "pets": pets, "inv": dict(st["inv"]),
+    return {"on": st["on"], "pts": st["pts"], "active": st["active"], "pets": pets, "inv": dict(st["inv"]), "sleep": [SLEEP_FROM, SLEEP_TO],
             "spun": bool(st["wheel"]), "wheel_day": st["wheel"], "stats": dict(st["stats"])}

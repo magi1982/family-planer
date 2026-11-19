@@ -505,3 +505,55 @@ def test_pillow_and_lantern_stay_and_help():
     st["pets"][eid]["v"]["laune"] = 99
     with pytest.raises(pets.PetError, match="not_needed"):
         pets.use(st, eid, "laterne", datetime(2026, 11, 18))
+
+
+def test_pets_sleep_at_night_and_fill_up_energy():
+    p = {**pets.new_egg(datetime(2026, 11, 18)), "kind": "fuchs", "step": 1, "g": 30}
+    p["v"]["energie"] = 20
+    p["vt"] = "2026-11-18T21:00:00"
+    pets.decay(p, datetime(2026, 11, 19, 7, 0), "slow")
+    assert p["v"]["energie"] >= 95  # 10 h of sleep x 8: (almost) full in the morning
+    morning = p["v"]["energie"]
+    p["vt"] = "2026-11-19T08:00:00"
+    pets.decay(p, datetime(2026, 11, 19, 12, 0), "slow")
+    assert p["v"]["energie"] == round(morning - 4, 1)  # by day it sinks (4 h x 2 x 0.5)
+    assert pets.asleep(datetime(2026, 11, 19, 22, 0)) and not pets.asleep(datetime(2026, 11, 19, 12, 0))
+
+
+def test_holidays_keep_energy_as_it_was():
+    p = {**pets.new_egg(datetime(2026, 11, 18)), "kind": "fuchs", "step": 1, "g": 30}
+    p["v"]["energie"] = 20
+    p["vt"] = "2026-11-18T21:00:00"
+    pets.decay(p, datetime(2026, 11, 19, 7, 0), "slow", paused=True)
+    assert p["v"]["energie"] == 20
+
+
+def test_star_field_gives_the_jackpot_when_every_artefact_is_held():
+    st = state()
+    st["inv"].update({a: 1 for a in pets.ARTEFACTS})
+    rng = random.Random(1)
+    rng.randrange = lambda n: pets.FIELDS.index("star")
+    rng.choice = lambda seq: "artefact" if "artefact" in seq else seq[0]
+    res = pets.spin(st, date(2026, 11, 19), rng)
+    assert res["star"] == "jackpot" and res["pts"] == 100 and st["pts"] == 100
+
+
+def test_a_tired_pet_naps_about_an_hour_by_day():
+    p = {**pets.new_egg(datetime(2026, 11, 19)), "kind": "fuchs", "step": 1, "g": 30}
+    p["v"]["energie"] = 26
+    p["vt"] = "2026-11-19T12:00:00"
+    pets.decay(p, datetime(2026, 11, 19, 13, 0), "normal")  # 2/h by day: falls below 25 and starts a nap
+    assert p["nap"] and p["v"]["energie"] > 26
+    pets.decay(p, datetime(2026, 11, 19, 15, 0), "normal")
+    assert p["nap"] == "" and 55 <= p["v"]["energie"] <= 75  # about an hour of +40, then sinking again
+
+
+def test_energy_from_the_child_ends_a_nap():
+    st = state()
+    eid = _hatched(st)
+    p = st["pets"][eid]
+    p["nap"] = "2026-11-19T13:30:00"
+    p["v"]["energie"] = 30
+    st["inv"]["energy"] = 1
+    pets.use(st, eid, "energy", datetime(2026, 11, 19, 13, 0))
+    assert p["nap"] == "" and p["v"]["energie"] == 100

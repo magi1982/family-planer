@@ -8039,7 +8039,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       kpi: { pets: 'Tierchen gesammelt', endf: 'Endformen', evos: 'Entwicklungen', days: 'Tage mit {n}', fed: 'Mal gefüttert', spins: 'Mal Glücksrad' },
       wheel: 'Glücksrad', spin: 'Drehen!', spun: 'Heute schon gedreht – wieder ab Mitternacht', won: 'Gewonnen!', inInv: '📦 Liegt jetzt in deinem Inventar.', daily: 'Dazu: Futter und Wasser für deine Tierchen.',
       chooseWay: 'Entwickeln – wähle den Weg', ways: 'Dein Tierchen ist bereit! Wähle einen von {n} Wegen. Das kann man nicht rückgängig machen.', oneWay: 'Dein Tierchen ist bereit! Hier gibt es nur einen Weg.', pick: 'Ja, {n} wählen!',
-      hatching: 'Dein Ei schlüpft!', hatchOk: 'Super!', newEgg: 'Neues Ei!', eggWaits: 'Du hast ein Ei – jetzt ausbrüten', newThing: 'Neu:', hatched: '{n}! Es wohnt jetzt in deinem Garten.', foggy: '🌫️ Was nach {n} kommt, bleibt geheim – grün ist dein Weg bis jetzt.', nowLooks: 'So sieht es jetzt aus',
+      hatching: 'Dein Ei schlüpft!', hatchOk: 'Super!', sleeps: '{n} schläft und tankt Energie (bis {t} Uhr).', naps: '{n} macht ein Nickerchen und tankt Energie (bis {t}). Mit einem Energydrink ist es sofort wach.', newEgg: 'Neues Ei!', eggWaits: 'Du hast ein Ei – jetzt ausbrüten', newThing: 'Neu:', hatched: '{n}! Es wohnt jetzt in deinem Garten.', foggy: '🌫️ Was nach {n} kommt, bleibt geheim – grün ist dein Weg bis jetzt.', nowLooks: 'So sieht es jetzt aus',
       prize: { grow: ['Wachstumspille', 'Für ein Tierchen deiner Wahl.'], extra: ['Haustier-Extra', 'Leckerli, Spielzeug, Energydrink, Happy-Pille …'], food: ['Futterpaket', '3 Futter und 3 Wasser.'], pts: ['+30 Punkte', 'Direkt zu deinen Tierchen-Punkten.'], egg: ['Ein neues Ei!', 'Es liegt jetzt in deiner Sammlung – setze Punkte ein, dann schlüpft es.'], eggPill: ['Grosse Wachstumspille', 'Ein Ei wartet schon – darum gibt es diesmal eine grosse Wachstumspille.'],
         dev: ['Entwicklungs-Pille', 'Bringt ein Tierchen sofort eine ganze Stufe weiter.'], again: ['Nochmals drehen!', 'Du darfst gleich noch einmal.'], star: ['Sternfeld', 'Fabelwesen-Ei, Artefakt oder Jackpot +100.'],
         fabel_egg: ['Fabelwesen-Ei!', 'Ein ganz besonderes Ei liegt jetzt in deiner Sammlung.'], artefact: ['Artefakt!', 'Etwas Seltenes für deine Tierchen.'], jackpot: ['Jackpot +100 Punkte', 'Direkt zu deinen Tierchen-Punkten.'] },
@@ -8050,7 +8050,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           futter: ['Das Lieblingsessen deines Tierchens – jedes Tier hat sein eigenes.', 'Hunger +35', 'Bei Ämtli (abwechselnd mit Wasser), jeden Tag 2 vom Glücksrad, Futterpaket'],
           wasser: ['Frisches Wasser zum Trinken.', 'Durst +40', 'Bei Ämtli (abwechselnd mit Futter), jeden Tag 2 vom Glücksrad, Futterpaket'],
           keks: ['Ein kleines Leckerli zwischendurch.', 'Laune +20', 'Glücksrad: Haustier-Extra'],
-          energy: ['Ein Energydrink, wenn dein Tierchen müde ist.', 'Energie voll', 'Glücksrad: Haustier-Extra'],
+          energy: ['Ein Energydrink, wenn dein Tierchen tagsüber müde ist. Nachts (21–7 Uhr) schläft es, und wird es tagsüber müde, macht es von selbst ein Nickerchen von etwa einer Stunde.', 'Energie voll', 'Glücksrad: Haustier-Extra'],
           seife: ['Seife für ein Schaumbad.', 'Laune +10', 'Glücksrad: Haustier-Extra'],
           happy: ['Macht dein Tierchen sofort wieder fröhlich.', 'Laune voll', 'Manchmal bei Ämtli, Glücksrad: Haustier-Extra'],
           ball: ['Ein Ball zum Spielen. Spielsachen bleiben – du kannst sie immer wieder benutzen.', 'Laune +20, Energie −10', 'Glücksrad: Haustier-Extra'],
@@ -8061,7 +8061,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           wachs_m: ['Eine mittlere Wachstumspille.', '+30 Wachstum', 'Manchmal bei Ämtli, Glücksrad: Wachstumspille'],
           wachs_l: ['Eine grosse Wachstumspille.', '+60 Wachstum', 'Bei grossen Ämtli, Glücksrad: Wachstumspille oder Ei-Feld'],
           glitzerpille: ['Die Entwicklungs-Pille füllt den Balken sofort – danach tippst du auf Entwickeln.', 'Ganze Stufe', 'Glücksrad (spätestens nach 24 Drehs), selten bei Ämtli'],
-          kissen: ['Ein Sternkissen zum Ausruhen. Bleibt in deinem Inventar.', 'Energie +40', 'Glücksrad: Haustier-Extra'],
+          kissen: ['Ein Sternkissen für ein Nickerchen am Tag. Bleibt in deinem Inventar. Nachts (21–7 Uhr) schläft dein Tierchen sowieso, und wird es müde, macht es von selbst ein Nickerchen.', 'Energie +40', 'Glücksrad: Haustier-Extra'],
           laterne: ['Eine Laterne für gemütliches Licht. Bleibt in deinem Inventar.', 'Laune +15', 'Glücksrad: Haustier-Extra'],
           sternenstein: ['Ein Stein voller Sternenstaub: Der Balken ist sofort voll, und dein Tierchen bekommt für immer eine Sternen-Aura (im Entwicklungsbaum ein- und ausschaltbar).', 'Ganze Stufe + Sternen-Aura', 'Glücksrad: Sternfeld (Artefakt), manche Level'],
           weitblick: ['Mit dem Weitblick-Kristall siehst du den ganzen Entwicklungsbaum eines Tierchens – für immer, auch die geheimen Formen.', 'Ganzer Baum, für immer', 'Glücksrad: Sternfeld (Artefakt), manche Level'],
@@ -8087,7 +8087,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       kpi: { pets: 'Pets collected', endf: 'Final forms', evos: 'Evolutions', days: 'Days with {n}', fed: 'Times fed', spins: 'Wheel spins' },
       wheel: 'Wheel', spin: 'Spin!', spun: 'Already spun today – again after midnight', won: 'You won!', inInv: '📦 It is in your inventory now.', daily: 'Plus: food and water for your pets.',
       chooseWay: 'Evolve – choose the way', ways: 'Your pet is ready! Choose one of {n} ways. This cannot be undone.', oneWay: 'Your pet is ready! There is only one way here.', pick: 'Yes, choose {n}!',
-      hatching: 'Your egg hatches!', hatchOk: 'Great!', newEgg: 'New egg!', eggWaits: 'You have an egg – hatch it now', newThing: 'New:', hatched: 'A {n}! It lives in your garden now.', foggy: '🌫️ What comes after {n} stays secret – green is your way so far.', nowLooks: 'This is how it looks now',
+      hatching: 'Your egg hatches!', hatchOk: 'Great!', sleeps: '{n} is asleep and fills up energy (until {t}:00).', naps: '{n} takes a nap and fills up energy (until {t}). An energy drink wakes it at once.', newEgg: 'New egg!', eggWaits: 'You have an egg – hatch it now', newThing: 'New:', hatched: 'A {n}! It lives in your garden now.', foggy: '🌫️ What comes after {n} stays secret – green is your way so far.', nowLooks: 'This is how it looks now',
       prize: { grow: ['Growth pill', 'For a pet of your choice.'], extra: ['Pet extra', 'Treat, toy, energy drink, happy pill …'], food: ['Food pack', '3 food and 3 water.'], pts: ['+30 points', 'Straight to your pet points.'], egg: ['A new egg!', 'It is in your collection now – put points in and it hatches.'], eggPill: ['Big growth pill', 'An egg is already waiting – so this time you get a big growth pill.'],
         dev: ['Evolution pill', 'Takes a pet a whole step further at once.'], again: ['Spin again!', 'You may spin once more.'], star: ['Star field', 'Fable egg, artefact or jackpot +100.'],
         fabel_egg: ['Fable egg!', 'A very special egg is in your collection now.'], artefact: ['Artefact!', 'Something rare for your pets.'], jackpot: ['Jackpot +100 points', 'Straight to your pet points.'] },
@@ -8098,7 +8098,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           futter: ['Your pet\'s favourite food – every animal has its own.', 'Hunger +35', 'With chores (taking turns with water), 2 a day from the wheel, food pack'],
           wasser: ['Fresh water to drink.', 'Thirst +40', 'With chores (taking turns with food), 2 a day from the wheel, food pack'],
           keks: ['A little treat.', 'Mood +20', 'Wheel: pet extra'],
-          energy: ['An energy drink when your pet is tired.', 'Energy full', 'Wheel: pet extra'],
+          energy: ['An energy drink when your pet is tired during the day. At night (9 pm–7 am) it sleeps, and when it gets tired by day it takes a nap of about an hour by itself.', 'Energy full', 'Wheel: pet extra'],
           seife: ['Soap for a bubble bath.', 'Mood +10', 'Wheel: pet extra'],
           happy: ['Makes your pet happy again right away.', 'Mood full', 'Sometimes with chores, wheel: pet extra'],
           ball: ['A ball to play with. Toys stay – you can use them again and again.', 'Mood +20, energy −10', 'Wheel: pet extra'],
@@ -8109,7 +8109,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
           wachs_m: ['A medium growth pill.', '+30 growth', 'Sometimes with chores, wheel: growth pill'],
           wachs_l: ['A big growth pill.', '+60 growth', 'With big chores, wheel: growth pill or egg field'],
           glitzerpille: ['The evolution pill fills the bar at once – then tap Evolve.', 'Whole step', 'Wheel (after 24 spins at the latest), rarely with chores'],
-          kissen: ['A star pillow to rest on. It stays in your inventory.', 'Energy +40', 'Wheel: pet extra'],
+          kissen: ['A star pillow for a nap during the day. It stays in your inventory. At night (9 pm–7 am) your pet sleeps anyway, and when it gets tired it takes a nap by itself.', 'Energy +40', 'Wheel: pet extra'],
           laterne: ['A lantern for a cosy light. It stays in your inventory.', 'Mood +15', 'Wheel: pet extra'],
           sternenstein: ['A stone full of stardust: the bar is full at once and your pet gets a star aura for good (switch it on and off in the evolution tree).', 'Whole step + star aura', 'Wheel: star field (artefact), some levels'],
           weitblick: ['With the far-sight crystal you see the whole evolution tree of one pet – for good, even the secret forms.', 'Whole tree, for good', 'Wheel: star field (artefact), some levels'],
@@ -8473,11 +8473,14 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const pills = [...PILLS.map(([k, v]) => [k, `+${v}`]), [DEV, t.it[DEV] && (s.lang === 'en' ? 'whole step' : 'ganze Stufe')]].filter(([k]) => (st.inv[k] || 0) > 0);
       const have = [...CARE_ITEMS, ...TOYS, 'kissen', 'laterne'].filter((k) => (st.inv[k] || 0) > 0);
       const waiting = !egg && Object.entries(st.pets).find(([, q]) => q.step === 0);
+      const hr = new Date().getHours(); const sl = st.sleep || [21, 7]; const napEnd = p.nap ? new Date(p.nap) : null; const napping = !egg && napEnd && napEnd > new Date(); const sleeping = !egg && !napping && (hr >= sl[0] || hr < sl[1]);
       const eggCard = waiting ? `<button class="eggwait" data-gotoegg="${esc(waiting[0])}"><span class="ew">${svgOf(waiting[0], waiting[1])}</span><b>🥚 ${esc(t.eggWaits)}</b><span class="go">›</span></button>` : '';
       return `${eggCard}<div class="dev${cares ? ' two' : ''}">
         <div class="tile big" style="--pc:${col}"><div class="top"><span class="stg">${esc(t.steps[p.step])}</span>${act ? `<em class="act">${t.active}</em>` : ''}</div>
           ${cares ? `<div class="cbox" data-cbox="${esc(id)}"></div>` : `<div class="spot" style="--tc:${col}">${svgOf(id, p)}</div>`}
           <div class="nrow"><b>${esc(titleOf(p, t))}</b>${!egg && p.nick ? `<small>${esc(kindOf(p))}</small>` : ''}${egg ? '' : `<button class="pen" data-pen="${esc(id)}" aria-label="${t.name}"><ha-icon icon="mdi:pencil"></ha-icon></button>`}</div><div class="nick"></div>
+          ${cares && sleeping ? `<p class="hint zz">😴 ${esc(fmt(t.sleeps, { n: titleOf(p, t), t: (st.sleep || [21, 7])[1] }))}</p>` : ''}
+          ${cares && napping ? `<p class="hint zz">💤 ${esc(fmt(t.naps, { n: titleOf(p, t), t: `${String(napEnd.getHours()).padStart(2, '0')}:${String(napEnd.getMinutes()).padStart(2, '0')}` }))}</p>` : ''}
           ${cares ? '<div class="vals"></div>' : egg ? `<p class="hint">${fmt(t.eggHint, { n: nx })}</p>` : `<button class="okb green mk" data-mk="${esc(id)}">${t.careThis}</button>`}</div>
         <div class="side"><div class="tile" style="--pc:${col}"><div class="gl"><b>${egg ? t.hatchT : t.dev}</b><span>${esc(t.steps[p.step])}${nx != null ? ` → ${esc(t.steps[p.step + 1])}` : ''}</span>${egg ? '' : `<button class="tree" data-tree="${esc(id)}">${t.tree}</button>`}</div>
           <div class="gt${p.ready ? ' ready' : ''}"><i style="width:${pctOf(p, steps)}%"></i><span>${nx == null ? t.grown : p.ready ? t.ready : `${p.g} / ${nx} · ${fmt(t.left, { n: nx - p.g })}`}</span></div>

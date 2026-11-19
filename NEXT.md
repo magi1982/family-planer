@@ -926,3 +926,4 @@ Michaels Vorgaben: im Entwicklungsbaum selbst wählen, ob ein Artefakt-Effekt ak
 - **Vorschau** zeigt die echte Wirkung am gewählten Tierchen; **Fenster** zweispaltig und kompakt.
 - **Level-Belohnungen statt Begleiter** (Level 4, 8, 13, 18, 22, 27) – Vorschlag Traumkristall, Sternenstein, Fabelwesen-Ei, Regenbogenfeder, Fabelwesen-Ei, Zauberspiegel.
 - **Umgesetzt (18.11., 0.19.0):** #65 komplett – Zielwahl mit Rückfrage, Effekte dauerhaft und im Baum schaltbar, Weitblick pro Tierchen für immer, Traumkristall gibt Wunsch-Ei, Ei-Hinweise, Schlüpfen ohne Vorwegnahme, Level-Artefakte statt Begleiter (alle Kinder aktuell ≤ Level 3).
+- **Umgesetzt (19.11., 0.19.0):** Nachtschlaf 21–7 Uhr (+8 Energie/h), Nickerchen unter 25 % Energie (~1 h, +40/h), Energydrink/Sternkissen beendet es; Sternfeld gibt Jackpot, wenn alle Artefakte schon da sind.
