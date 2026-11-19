@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.19.4 – unreleased
+## 0.19.4 – 2026-11-19
 ### Added
 - **Tidy "All" view:** done chores leave the "All" view right after ticking (they stay under "Chores", where they can be undone), and events leave it 30 minutes after they ended (they stay under "Events"). Both are settings under General (on / 30 min by default; 0 = never).
 
