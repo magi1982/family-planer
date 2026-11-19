@@ -134,7 +134,10 @@ def test_award_settings_in_points_section():
 def test_announce_fixed_times_without_motion():
     patch, _ = S.announce({"enabled": True, "notify": ["notify.alexa"], "times": "18:30, 12:30, 99:00, x"}, {}, {})
     a = patch["announce"]
-    assert a["times"] == ["12:30", "18:30"] and a["fixed"] and a["evening_time"] == "20:00"
+    assert a["times"] == ["12:30", "18:30"] and a["fixed"] and a["evening_time"] == "18:15"
+    assert a["birthday_times"] == ["07:00", "12:15", "15:30", "18:15", "19:30"]
+    b = S.announce({"enabled": True, "notify": ["notify.alexa"], "birthday_times": "19:30, 07:00, x"}, {}, {})[0]["announce"]
+    assert b["birthday_times"] == ["07:00", "19:30"]
     with pytest.raises(S.SettingsError):
         S.announce({"enabled": True, "notify": ["notify.alexa"], "fixed": False}, {}, {})
 

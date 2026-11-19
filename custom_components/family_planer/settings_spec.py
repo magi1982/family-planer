@@ -243,9 +243,11 @@ def announce(data: dict, cur: dict, persons: dict) -> tuple[dict, set[str]]:
         "fixed": _bool(data, "fixed", cur.get("fixed", True)),
         "times": _times(data.get("times", cur.get("times", ["12:30", "18:30"]))),
         "evening": _bool(data, "evening", cur.get("evening", True)),
-        "evening_time": validate.hhmm(data.get("evening_time"), cur.get("evening_time") or "20:00"),
+        "evening_time": validate.hhmm(data.get("evening_time"), cur.get("evening_time") or "18:15"),
         "praise": _bool(data, "praise", cur.get("praise", True)),
         "birthday": _bool(data, "birthday", cur.get("birthday", True)),
+        "birthday_times": _times(data.get("birthday_times", cur.get("birthday_times", ["07:00", "12:15", "15:30", "18:15", "19:30"])))
+        or ["07:00", "12:15", "15:30", "18:15", "19:30"],
     }
     if new["enabled"] and not new["motion"] and not new["fixed"]:
         raise SettingsError("motion", "no_motion")

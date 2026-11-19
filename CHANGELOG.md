@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.19.5 – unreleased
+### Changed
+- **Timed announcements wait for someone to be there:** with a motion sensor, the evening summary and the birthday lines are said at the first motion from their time on (once, the same day) instead of to an empty room. The evening summary replaces the chore reminder at that motion.
+- **New default times:** evening summary from 18:15, birthday lines from 07:00, 12:15, 15:30, 18:15 and 19:30. The birthday times are a new setting.
+
 ## 0.19.4 – 2026-11-19
 ### Added
 - **Tidy "All" view:** done chores leave the "All" view right after ticking (they stay under "Chores", where they can be undone), and events leave it 30 minutes after they ended (they stay under "Events"). Both are settings under General (on / 30 min by default; 0 = never).

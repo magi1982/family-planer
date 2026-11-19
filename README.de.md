@@ -241,7 +241,7 @@ Im Planer stehen pro Person höchstens die **4 ältesten** offenen To-dos (einst
 
 ### Ansagen bei Bewegung
 
-**Ohne Bewegungsmelder** sagt der Planer zu festen Zeiten an (Standard 12:30 und 18:30). Zusätzlich wählbar: um 20:00 eine Zusammenfassung, was noch offen ist (höchstens so viele Ämtli pro Person wie eingestellt), ab und zu ein Lob (höchstens einmal am Tag) und an Geburtstagen fünf lustige Ansagen fürs Geburtstagskind, über den Tag verteilt. Ist im Ferien-Check „weg“ bestätigt, wird nichts angesagt.
+**Ohne Bewegungsmelder** sagt der Planer zu festen Zeiten an (Standard 12:30 und 18:30). Zusätzlich wählbar: ab 18:15 eine Zusammenfassung, was noch offen ist (höchstens so viele Ämtli pro Person wie eingestellt), ab und zu ein Lob (höchstens einmal am Tag) und an Geburtstagen lustige Ansagen fürs Geburtstagskind (Standard ab 07:00, 12:15, 15:30, 18:15 und 19:30). **Mit Bewegungsmelder** warten Zusammenfassung und Geburtstags-Sprüche auf die erste Bewegung ab ihrer Zeit – so spricht niemand in ein leeres Zimmer. Ist im Ferien-Check „weg“ bestätigt, wird nichts angesagt.
 
 - **Bewegungsmelder** wählen (Bewegung, Präsenz, Anwesenheit) und eine **Ansage** über
   - Alexa: Benachrichtigungs-Entität *Ankündigen* oder *Sprechen* (Integration *Alexa Devices*), oder

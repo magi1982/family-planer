@@ -242,7 +242,7 @@ At most the **4 oldest** open to-dos per person are shown in the planner (adjust
 
 ### Announcements on motion
 
-**Without a motion sensor** the planner announces at fixed times (default 12:30 and 18:30). In addition, optional: a summary at 20:00 of what is still open (at most the set number of chores per person), now and then some praise (at most once a day), and on birthdays five funny announcements for the birthday child, spread over the day. Nothing is announced while *away* is confirmed in the holiday check.
+**Without a motion sensor** the planner announces at fixed times (default 12:30 and 18:30). In addition, optional: a summary from 18:15 of what is still open (at most the set number of chores per person), now and then some praise (at most once a day), and on birthdays funny announcements for the birthday child (default from 07:00, 12:15, 15:30, 18:15 and 19:30). **With a motion sensor** the summary and the birthday lines wait for the first motion from their time on – nobody talks to an empty room. Nothing is announced while *away* is confirmed in the holiday check.
 
 - Choose **motion sensors** (motion, presence, occupancy) and an **announcement** via
   - Alexa: notify entity *Announce* or *Speak* (*Alexa Devices* integration), or

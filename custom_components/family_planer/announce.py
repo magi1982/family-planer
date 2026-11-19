@@ -28,10 +28,10 @@ DEFAULT_ANNOUNCE: dict[str, Any] = {
     "queue": True, "queue_start": "07:00", "queue_end": "21:00", "queue_rewards": True, "queue_special": True,
     "max_items": 3, "reward_hours": 0,  # 0 = until the next day change
     # without a motion sensor: fixed times (lunch, evening) plus a 20:00 summary of what is still open
-    "fixed": True, "times": ["12:30", "18:30"], "evening": True, "evening_time": "20:00",
-    "praise": True, "birthday": True,
+    "fixed": True, "times": ["12:30", "18:30"], "evening": True, "evening_time": "18:15",
+    "praise": True, "birthday": True, "birthday_times": ["07:00", "12:15", "15:30", "18:15", "19:30"],
 }
-BIRTHDAY_TIMES = ("08:15", "11:45", "14:30", "16:45", "19:15")
+BIRTHDAY_TIMES = ("07:00", "12:15", "15:30", "18:15", "19:30")
 
 
 def _in_window(now: time, start: str, end: str) -> bool:
@@ -52,6 +52,8 @@ class Announcer:
         self._timers: list = []
         self._praise_day: str | None = None
         self._bday_said: dict[str, int] = {}
+        # with a motion sensor, timed announcements (evening summary, birthday lines) wait for the next motion
+        self._pending: dict[str, str] = {}  # kind -> day it became due
 
     @property
     def cfg(self) -> dict[str, Any]:
@@ -71,7 +73,7 @@ class Announcer:
         if cfg["evening"]:
             self._at(cfg["evening_time"], "evening")
         if cfg["birthday"]:
-            for t in BIRTHDAY_TIMES:
+            for t in cfg.get("birthday_times") or BIRTHDAY_TIMES:
                 self._at(t, "birthday")
 
     def _at(self, hhmm: str, kind: str) -> None:
@@ -104,7 +106,32 @@ class Announcer:
                 and today not in (p.away.get(pid) or ())]
 
     async def async_timed(self, kind: str) -> str:
-        """Fixed-time announcements (no motion sensor), the evening summary and birthday messages."""
+        """A timed announcement is due: spoken now without a motion sensor, otherwise at the next motion today."""
+        if self.cfg["motion"] and kind in ("evening", "birthday"):
+            self._pending[kind] = self.planner.today().isoformat()
+            return ""
+        text = self._timed_text(kind)
+        if text:
+            await self.async_say(text)
+        return text
+
+    def _take_pending(self, now: datetime) -> list[str]:
+        """Due timed announcements of today, said once at the first motion inside the queue window."""
+        cfg = self.cfg
+        today = self.planner.today().isoformat()
+        self._pending = {k: d for k, d in self._pending.items() if d == today}
+        if not self._pending or not _in_window(now.time(), cfg["queue_start"], cfg["queue_end"]):
+            return []
+        out = []
+        for kind in ("birthday", "evening"):
+            if self._pending.pop(kind, None):
+                text = self._timed_text(kind)
+                if text:
+                    out.append(text)
+        return out
+
+    def _timed_text(self, kind: str) -> str:
+        """Text of a fixed-time announcement, the evening summary or a birthday line ('' = nothing to say)."""
         cfg = self.cfg
         p = self.planner
         home = self._home()
@@ -118,7 +145,8 @@ class Announcer:
             for pid in bdays:
                 n = self._bday_said.get(f"{today}:{pid}", 0)
                 name = p.data["persons"][pid]["name"]
-                msgs = speech.birthday_messages(name, p.lang, today.toordinal() + hash(pid) % 97, len(BIRTHDAY_TIMES),
+                msgs = speech.birthday_messages(name, p.lang, today.toordinal() + hash(pid) % 97,
+                                                len(cfg.get("birthday_times") or BIRTHDAY_TIMES),
                                                 (p.season().get("ages") or {}).get(pid))
                 if n < len(msgs):
                     parts.append(msgs[n])
@@ -144,8 +172,6 @@ class Announcer:
                 self._praise_day = today.isoformat()
                 who = done[today.toordinal() % len(done)]
                 text = (text + " " + speech.praise_message(who, p.lang, today.toordinal())).strip()
-        if text:
-            await self.async_say(text)
         return text
 
     @callback
@@ -211,12 +237,16 @@ class Announcer:
             queued = msgqueue.take(self.queue, sensor, now, self.planner.data["items"])
             if len(self.queue) != before:
                 self.planner.save_soon()
-        kind, message = self._chores_due(force, now)
+        timed = self._take_pending(now)
+        # the evening summary already says what is open: no extra chore reminder at the same motion
+        kind, message = ("", "") if timed and not force else self._chores_due(force, now)
+        if timed:
+            self._last = now
         if kind:
             self._last = now
             if kind == "done":
                 self._all_done_day = self.planner.today().isoformat()
-        text = " ".join([*queued, message]).strip()
+        text = " ".join([*queued, *timed, message]).strip()
         if text:
             await self.async_say(text)
         return text
