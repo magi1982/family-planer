@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.19.0 – unreleased
+## 0.19.0 – 2026-11-19
 ### Added
 - **Inventory explained:** every thing can be tapped – what it is, its effect, three illustrated steps how to use it, a live preview on your own pet, where it comes from; things you have can be used right there. Compact two-column window.
 - **Artefacts work for good, on one pet:** the child picks the pet and confirms a second time. Star stone (bar full + star aura), far-sight crystal (that pet's whole tree visible for good), magic mirror and rainbow feather (colours). Colours and aura stay through every evolution and are switched on and off in the evolution tree. The dream crystal gives the egg of an animal the child picks (with a second confirmation).
