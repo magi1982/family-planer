@@ -915,13 +915,15 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
   // now – the Titanic and the lunar module on their days, otherwise a tap story (window.FPTAPS). Returns ms or 0.
   api.play = (svg, ctx) => {
     if (!svg) return 0;
-    const T = window.FPTAPS; const n = T ? T.pick(ctx) : null;
+    const T = window.FPTAPS; const n = T ? T.pick({ ...ctx, tap: T.taps ? T.taps(ctx) : 0 }) : null;
     if (n === 'lm' || n === 'titanic') {
       const el = svg.querySelector(`[data-tap="${n}"]`); const ms = { titanic: 34500, lm: 9200 }[n];
       if (!el || svg.classList.contains('t-' + n)) return 0;
       svg.classList.add('t-' + n); setTimeout(() => svg.classList.remove('t-' + n), ms); return ms;
     }
-    return n && T ? T.play(svg, n, ctx.lang) : 0;
+    const ms = n && T ? T.play(svg, n, ctx.lang) : 0;
+    if (ms && T.bump) T.bump(ctx); // the next tap brings the next story
+    return ms;
   };
   api.canPlay = (ctx) => { const T = window.FPTAPS; return !!(T && T.pick(ctx)); };
   api.reduce = reduce;
@@ -2207,6 +2209,8 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     herbst: { day: [54, 77, 105], eve: [87, 57], night: [60, 66, 76] },
     winter: { day: [89], night: [45, 66] },
   };
+  // stories for any day of the year, mixed in from the second tap on
+  const EVERY = { day: [56, 86, 92, 98, 99, 107], night: [66, 76, 110, 63, 74, 41] };
   const SURPRISE = { day: [61, 70, 86, 88, 93, 94, 97, 106, 107], night: [63, 74, 110, 41] };
   const hash = (str) => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -2231,35 +2235,61 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     // the beach (summer holidays): dolphins and the pirate ship by day
     if (vis === 'sommer') return night ? null : daily([35, 52], d, slot);
     if (NOHOUSE.includes(vis)) return null;
-    // 2. occasions
-    if ((s.birthdays || []).length && !night) return 39;
-    if (vis === 'liebe' && (night || eve)) return 67;
-    if (vis === 'fasnacht') return 27;
-    if (vis === 'ostern' && !night) return 29;
-    if (vis === 'schule' && !night) return 101;
-    if (vis === 'august' && (night || eve)) return 38;
-    if (s.sub === 'samichlaus' && !night) return 19;
-    if (vis === 'weihnachten' && (night || eve)) return 65;
-    if (vis === 'silvester' && s.key === 'silvester') return night ? 22 : 93;
-    // 3. strong weather, checked at every tap (day and evening)
-    if (!night) {
-      if (['rainy', 'pouring', 'lightning'].includes(kind)) return 68;
-      if (ctx.rained && ['sunny', 'partlycloudy'].includes(kind)) return 71;
-      if (kind === 'windy') return s.jz === 'herbst' ? 7 : 51;
-      if (ctx.frost) return 79;
-      if (kind === 'snowy' || (s.snow && s.jz === 'winter')) return daily([72, 55], d, slot);
-      if (kind === 'sunny' && w.temp != null && w.temp >= 30) return 59;
-      if (kind === 'partlycloudy') return 49;
-    }
-    // 5. surprise day
-    if (surpriseDay(d, ctx.surprises || 'rare')) return daily(night ? SURPRISE.night : SURPRISE.day, d, slot);
-    // 4. season and time of day
+    // 2. occasions and 3. strong weather lead: the first tap of the day (in this part of the day) shows them
+    const lead = (() => {
+      if ((s.birthdays || []).length && !night) return 39;
+      if (vis === 'liebe' && (night || eve)) return 67;
+      if (vis === 'fasnacht') return 27;
+      if (vis === 'ostern' && !night) return 29;
+      if (vis === 'schule' && !night) return 101;
+      if (vis === 'august' && (night || eve)) return 38;
+      if (s.sub === 'samichlaus' && !night) return 19;
+      if (vis === 'weihnachten' && (night || eve)) return 65;
+      if (vis === 'silvester' && s.key === 'silvester') return night ? 22 : 93;
+      if (!night) {
+        if (['rainy', 'pouring', 'lightning'].includes(kind)) return 68;
+        if (ctx.rained && ['sunny', 'partlycloudy'].includes(kind)) return 71;
+        if (kind === 'windy') return s.jz === 'herbst' ? 7 : 51;
+        if (ctx.frost) return 79;
+        if (kind === 'snowy' || (s.snow && s.jz === 'winter')) return daily([72, 55], d, slot);
+        if (kind === 'sunny' && w.temp != null && w.temp >= 30) return 59;
+        if (kind === 'partlycloudy') return 49;
+      }
+      return null;
+    })();
+    // 5. surprise day, 4. season and time of day (sunny extras join)
+    const surprise = surpriseDay(d, ctx.surprises || 'rare');
     const P = SEASON[s.jz] || SEASON.sommer;
-    let pool = (night ? P.night : eve && P.eve ? P.eve : P.day).slice();
+    const pool = (night ? P.night : eve && P.eve ? P.eve : P.day).slice();
     if (night && s.jz === 'sommer' && d.getMonth() === 7) pool.push(48);
     if (!night && kind === 'sunny') { pool.push(50, 106); if (w.temp != null && w.temp >= 20) pool.push(16); }
-    return daily(pool, d, slot);
+    const first = lead != null ? lead : surprise ? daily(night ? SURPRISE.night : SURPRISE.day, d, slot) : daily(pool, d, slot);
+    const tap = Math.max(0, Math.floor(Number(ctx.tap) || 0));
+    if (!tap) return first;
+    // every further tap: the next story from everything that fits now (weather, season, every-day stories,
+    // surprises on a surprise day) – in a mixed order of the day, none twice before all have played
+    const wx = [];
+    if (!night) {
+      if (['rainy', 'pouring', 'lightning'].includes(kind)) wx.push(68);
+      if (ctx.rained && ['sunny', 'partlycloudy'].includes(kind)) wx.push(71);
+      if (kind === 'windy') wx.push(s.jz === 'herbst' ? 7 : 51);
+      if (ctx.frost) wx.push(79);
+      if (kind === 'snowy' || (s.snow && s.jz === 'winter')) wx.push(72, 55);
+      if (kind === 'sunny' && w.temp != null && w.temp >= 30) wx.push(59);
+      if (kind === 'partlycloudy') wx.push(49);
+    }
+    const all = [...new Set([...wx, ...pool, ...(night ? EVERY.night : EVERY.day), ...(surprise ? (night ? SURPRISE.night : SURPRISE.day) : [])])].filter((n) => n !== first);
+    const key = `${iso(d)}|${slot}`; all.sort((a, b) => hash(`${key}|${a}`) - hash(`${key}|${b}`));
+    const order = [first, ...all];
+    return order[tap % order.length];
   };
+
+  // how often the scene was tapped today in this part of the day (kept on this device), so each tap moves on
+  const slotOf = (ctx) => { const d = ctx.date || new Date(); const h = ctx.hour != null ? ctx.hour : d.getHours(); const night = ctx.night != null ? !!ctx.night : (h < 6 || h >= 20); return `${iso(d)}|${night ? 'night' : h >= 17 ? 'eve' : 'day'}`; };
+  let tapMem = { k: '', n: 0 };
+  const readTaps = () => { try { const v = JSON.parse(localStorage.getItem('fp_taps') || 'null'); if (v && typeof v.k === 'string' && Number.isFinite(v.n)) tapMem = v; } catch (e) { /* storage blocked: memory only */ } return tapMem; };
+  const taps = (ctx) => { const v = readTaps(); return v.k === slotOf(ctx) ? v.n : 0; };
+  const bump = (ctx) => { const k = slotOf(ctx); const v = readTaps(); tapMem = { k, n: v.k === k ? v.n + 1 : 1 }; try { localStorage.setItem('fp_taps', JSON.stringify(tapMem)); } catch (e) { /* memory only */ } };
 
   // lay a story over the rendered scene <svg> and play it; returns how long it plays (ms), 0 when nothing starts
   const play = (svg, n, lang) => {
@@ -2285,7 +2315,7 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     return ms;
   };
 
-  window.FPTAPS = { list: T, css: () => css, pick, play, EN, SEASON, SURPRISE };
+  window.FPTAPS = { list: T, css: () => css, pick, play, taps, bump, EN, SEASON, SURPRISE, EVERY };
 })();
 
 // Coins ("Münzen"): flat silver disc, gold core, a stamped letter (or a small ring) and one notch

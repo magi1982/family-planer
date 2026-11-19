@@ -52,5 +52,17 @@ for (let i = 0; i < 60; i += 1) {
 const count = (mode) => { let k = 0; for (let i = 0; i < 700; i += 1) { const d = new Date(2027, 0, 1 + i); const n = T.pick({ season: { vis: 'alltag', jz: 'fruehling' }, wx: { kind: 'cloudy' }, hour: 10, night: false, date: d, surprises: mode }); if (T.SURPRISE.day.includes(n)) k += 1; } return k; };
 const off = count('off'); const rare = count('rare'); const often = count('often');
 ok(off === 0, `surprises off: ${off}`); ok(rare > 60 && rare < 150, `surprises rare: ${rare} of 700`); ok(often > 220 && often < 380, `surprises often: ${often} of 700`);
+// 7. every tap brings the next story: weather leads the first tap, then many different ones without repeats
+for (const [jz, kind, hour, night] of [['herbst', 'partlycloudy', 10, false], ['herbst', 'rainy', 15, false], ['winter', 'cloudy', 11, false], ['winter', 'cloudy', 18, false], ['herbst', 'clear-night', 22, true]]) {
+  const c = { season: { vis: 'alltag', jz }, wx: { kind, temp: 8 }, hour, night, date: new Date(2027, 10, 19), surprises: 'rare' };
+  const seq = Array.from({ length: 30 }, (_, i) => T.pick({ ...c, tap: i }));
+  ok(seq[0] === T.pick(c), `${jz}/${kind}: first tap as before`);
+  const n = new Set(seq).size; ok(n >= 5, `${jz}/${kind} ${hour}h: only ${n} different stories over 30 taps`);
+  const firstRound = seq.slice(0, n); ok(new Set(firstRound).size === n, `${jz}/${kind}: a story repeats before all played`);
+  ok(seq.every((x) => T.list.some((o) => o.n === x)), `${jz}/${kind}: unknown story`);
+}
+const pc = { season: { vis: 'alltag', jz: 'herbst' }, wx: { kind: 'partlycloudy', temp: 10 }, hour: 10, night: false, date: new Date(2027, 10, 19), surprises: 'off' };
+ok(T.pick(pc) === 49 && T.pick({ ...pc, tap: 1 }) !== 49, 'unicorn only on the first tap');
+ok(typeof T.taps === 'function' && typeof T.bump === 'function', 'tap counter');
 if (errors.length) { console.error(errors.slice(0, 30).join('\n')); process.exit(1); }
 console.log('ok', T.list.length, 'stories,', seen.size, 'reachable');

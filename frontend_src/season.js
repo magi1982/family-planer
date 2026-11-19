@@ -913,13 +913,15 @@
   // now – the Titanic and the lunar module on their days, otherwise a tap story (window.FPTAPS). Returns ms or 0.
   api.play = (svg, ctx) => {
     if (!svg) return 0;
-    const T = window.FPTAPS; const n = T ? T.pick(ctx) : null;
+    const T = window.FPTAPS; const n = T ? T.pick({ ...ctx, tap: T.taps ? T.taps(ctx) : 0 }) : null;
     if (n === 'lm' || n === 'titanic') {
       const el = svg.querySelector(`[data-tap="${n}"]`); const ms = { titanic: 34500, lm: 9200 }[n];
       if (!el || svg.classList.contains('t-' + n)) return 0;
       svg.classList.add('t-' + n); setTimeout(() => svg.classList.remove('t-' + n), ms); return ms;
     }
-    return n && T ? T.play(svg, n, ctx.lang) : 0;
+    const ms = n && T ? T.play(svg, n, ctx.lang) : 0;
+    if (ms && T.bump) T.bump(ctx); // the next tap brings the next story
+    return ms;
   };
   api.canPlay = (ctx) => { const T = window.FPTAPS; return !!(T && T.pick(ctx)); };
   api.reduce = reduce;

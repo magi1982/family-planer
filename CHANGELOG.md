@@ -1,6 +1,8 @@
 # Changelog
 
 ## 0.19.2 – unreleased
+### Changed
+- **More variety in the banner stories:** the weather or occasion story (e.g. the unicorn on partly cloudy days, the underwater garden in the rain) now only leads the first tap of the morning, afternoon or night; every further tap plays the next story that fits – weather, season, every-day stories and surprises – none twice before all have played. Before, the same story came at every tap.
 ### Added
 - **Evolve choice shows what comes after:** each way shows how many ways follow, how many steps are left and the final forms it leads to – as silhouettes, or in colour with names once the pet has far-sight.
 
