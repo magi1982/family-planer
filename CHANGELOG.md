@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.19.2 – unreleased
+## 0.19.2 – 2026-11-19
 ### Changed
 - **More variety in the banner stories:** the weather or occasion story (e.g. the unicorn on partly cloudy days, the underwater garden in the rain) now only leads the first tap of the morning, afternoon or night; every further tap plays the next story that fits – weather, season, every-day stories and surprises – none twice before all have played. Before, the same story came at every tap.
 ### Added
