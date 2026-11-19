@@ -122,7 +122,7 @@ const AWCSS = `.crown{position:absolute;top:-13px;left:0;right:0;margin:0 auto;w
 .md{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 32% 28%,color-mix(in srgb,var(--mc) 55%,#fff) 0%,var(--mc) 45%,color-mix(in srgb,var(--mc) 60%,#000) 100%);border:1px solid color-mix(in srgb,var(--mc) 70%,#fff);color:#1b1b1b;display:inline-flex;align-items:center;justify-content:center;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.45)}.md ha-icon{--mdc-icon-size:13px}
 .ring{position:relative;width:48px;height:48px;flex:none}.ring .lvb{position:absolute;right:-4px;bottom:-3px;z-index:4;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;border-radius:11px;border:2px solid var(--fp-bg2,#1e1e1e);background:var(--lc);color:#1b1b1b;font:800 11px/18px -apple-system,Segoe UI,Roboto,sans-serif;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.5)}
 .ring .lvb.t-ruby{color:#fff}.ring .lvb.glow{animation:fplvglow 1.6s ease-in-out infinite;box-shadow:0 0 10px var(--lc),0 0 18px var(--lc)}.ring .lvb.fade{box-shadow:0 0 calc(var(--g) * 14px) var(--lc)}
-@keyframes fplvglow{0%,100%{box-shadow:0 0 6px var(--lc),0 0 10px var(--lc);transform:scale(1)}50%{box-shadow:0 0 14px var(--lc),0 0 26px var(--lc);transform:scale(1.15)}}
+@keyframes fplvglow{0%,100%{box-shadow:0 0 4px var(--lc),0 0 8px var(--lc)}50%{box-shadow:0 0 10px var(--lc),0 0 18px var(--lc)}}
 @media (prefers-reduced-motion:reduce){.ring .lvb.glow{animation:none}}
 .ring .ava{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden;-webkit-mask-image:-webkit-radial-gradient(white,black)}
 .ring .ava > span{width:100%!important;height:100%!important;border-radius:50%}.ring .ava svg{display:block}`;
@@ -892,7 +892,7 @@ class LoxWochenplanerCard extends FpBase {
         const petBits = window.FPPET ? window.FPPET.headBits(snapX, pidOf[k.name]) : ['', '', ''];
         return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th${petBits[1] ? ' fphas' : ''}${petBits[0] ? ' fpp' : ''}" data-person="${esc(k.name)}">
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${petBits[0]}</div>${petBits[1]}
-          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${petBits[2] || ''}${aw.slice(0, petBits[2] ? 3 : 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
+          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div>${this._awBadge(snapX, pidOf[k.name])}</div></div>
           <div class="tbody">${body}</div></div>`;
       });
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(auto-fit,minmax(min(100%,150px),1fr))`}">${cols.join('')}</div>`;
