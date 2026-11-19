@@ -2,7 +2,7 @@
 
 ## 0.19.1 – unreleased
 ### Changed
-- **Waiting egg beside the pet:** a new egg is shown right next to the active pet, on the same line and in the same size, instead of a dot on the avatar.
+- **Waiting egg in the badge row:** a new egg lines up first among the trophies instead of a dot on the avatar; trophies keep more distance from the pet.
 - **Wheel turns slowly while it can be spun** and is hidden once spun – it comes back when the next spin is ready.
 
 ## 0.19.0 – 2026-11-19

@@ -3712,10 +3712,10 @@ class LoxWochenplanerCard extends FpBase {
         const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
         const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || this._noneBox(k, dSel, evWho);
-        const petBits = window.FPPET ? window.FPPET.headBits(snapX, pidOf[k.name]) : ['', ''];
-        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th${petBits[1] ? ' fphas' : ''}" data-person="${esc(k.name)}">
+        const petBits = window.FPPET ? window.FPPET.headBits(snapX, pidOf[k.name]) : ['', '', ''];
+        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th${petBits[1] ? ' fphas' : ''}${petBits[0] ? ' fpp' : ''}" data-person="${esc(k.name)}">
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${petBits[0]}</div>${petBits[1]}
-          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
+          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${petBits[2] || ''}${aw.slice(0, petBits[2] ? 3 : 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(auto-fit,minmax(min(100%,150px),1fr))`}">${cols.join('')}</div>`;
@@ -5177,10 +5177,10 @@ class LoxWochenplanerCard extends FpBase {
         const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
         const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || this._noneBox(k, dSel, evWho);
-        const petBits = window.FPPET ? window.FPPET.headBits(snapX, pidOf[k.name]) : ['', ''];
-        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th${petBits[1] ? ' fphas' : ''}" data-person="${esc(k.name)}">
+        const petBits = window.FPPET ? window.FPPET.headBits(snapX, pidOf[k.name]) : ['', '', ''];
+        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th${petBits[1] ? ' fphas' : ''}${petBits[0] ? ' fpp' : ''}" data-person="${esc(k.name)}">
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${petBits[0]}</div>${petBits[1]}
-          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
+          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${petBits[2] || ''}${aw.slice(0, petBits[2] ? 3 : 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(auto-fit,minmax(min(100%,150px),1fr))`}">${cols.join('')}</div>`;
@@ -8257,10 +8257,10 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   const CARD_CSS = `.ring{overflow:visible}.fppet{position:absolute;right:-31px;bottom:-17px;width:60px;height:60px;padding:0;border:0;background:none;cursor:pointer;z-index:5}.fppet svg{width:100%;height:100%;overflow:visible}
     .fppet.egg svg{animation:fpwob 2.2s ease-in-out infinite;transform-origin:50% 90%}@keyframes fpwob{0%,70%,100%{transform:rotate(0)}76%{transform:rotate(-8deg)}84%{transform:rotate(7deg)}92%{transform:rotate(-3deg)}}
     .fptop{position:absolute;right:12px;top:12px;display:flex;align-items:center;gap:6px;z-index:6}
-    .fpegg{position:absolute;right:-74px;bottom:-17px;width:60px;height:60px;padding:0;border:0;background:none;cursor:pointer;z-index:5}.fpegg svg{width:100%;height:100%;overflow:visible;scale:1.2;transform-origin:50% 97%;animation:fpwob 2.2s ease-in-out infinite}
+    .lv2 .md.fpegg{padding:0;cursor:pointer;overflow:visible;--mc:#9C7BE0}.fpegg svg{width:150%;height:150%;margin-top:-58%;flex:none;overflow:visible;animation:fpwob 2.2s ease-in-out infinite;transform-origin:50% 92%}
     .fppet .need{position:absolute;right:-6px;top:-6px;font-style:normal;font-size:12px;background:#fff;border-radius:10px;padding:1px 3px}
     .fpwh{width:34px;height:34px;padding:0;border:0;background:none;cursor:pointer}.fpwh svg{width:100%;height:100%;animation:fpspin 14s linear infinite}@keyframes fpspin{to{transform:rotate(360deg)}}
-    .lab.th.fphas .nm{padding-right:42px}@media (prefers-reduced-motion:reduce){.fppet.egg svg,.fpegg svg,.fpwh svg{animation:none}}`;
+    .lab.th.fphas .nm{padding-right:42px}.lab.th.fpp .ring{margin-right:26px}@media (prefers-reduced-motion:reduce){.fppet.egg svg,.fpegg svg,.fpwh svg{animation:none}}`;
   let wheelIcon = '';
   // returns [pet button (goes into the avatar ring), wheel button (top right of the card head)]
   const headBits = (snap, pid) => {
@@ -8269,11 +8269,11 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     if (!wheelIcon) { const d = document.createElement('div'); d.innerHTML = L().WHEEL.knob('#888', true); const s = d.querySelector('svg'); wheelIcon = s ? s.outerHTML : '🎡'; }
     const hungry = p && p.step > 0 && p.v && p.v.hunger < 30;
     const waiting = p && p.step > 0 ? Object.entries(st.pets).find(([, x]) => x.step === 0) : null;
-    // a waiting egg sits right beside the pet, on the same line and in the same size (not on the avatar); the wheel only shows while it can be spun and turns slowly
-    const egg = waiting ? `<button class="fpegg" data-fppet="${esc(pid)}" aria-label="${esc(t.eggWaits)}">${svgOf(waiting[0], waiting[1])}</button>` : '';
+    // a waiting egg lines up first in the badge row (not on the avatar); the wheel only shows while it can be spun and turns slowly
+    const egg = waiting ? `<button class="md fpegg" data-fppet="${esc(pid)}" aria-label="${esc(t.eggWaits)}" title="${esc(t.eggWaits)}">${svgOf(waiting[0], waiting[1])}</button>` : '';
     const wheel = (snap.pets_cfg || {}).wheel && !st.spun ? `<button class="fpwh" data-fpwheel="${esc(pid)}" aria-label="${t.wheel}">${wheelIcon}</button>` : '';
-    return [p ? `<button class="fppet${p.step === 0 ? ' egg' : ''}" data-fppet="${esc(pid)}" aria-label="${esc(titleOf(p, t))}">${svgOf(st.active, p)}${hungry ? '<i class="need">🍎</i>' : ''}</button>${egg}` : '',
-      wheel ? `<div class="fptop">${wheel}</div>` : ''];
+    return [p ? `<button class="fppet${p.step === 0 ? ' egg' : ''}" data-fppet="${esc(pid)}" aria-label="${esc(titleOf(p, t))}">${svgOf(st.active, p)}${hungry ? '<i class="need">🍎</i>' : ''}</button>` : '',
+      wheel ? `<div class="fptop">${wheel}</div>` : '', egg];
   };
 
   // ------------------------------------------------------------- after a chore: what was earned rises slowly above it

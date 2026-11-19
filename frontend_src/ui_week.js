@@ -889,10 +889,10 @@ class LoxWochenplanerCard extends FpBase {
         const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
         const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || this._noneBox(k, dSel, evWho);
-        const petBits = window.FPPET ? window.FPPET.headBits(snapX, pidOf[k.name]) : ['', ''];
-        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th${petBits[1] ? ' fphas' : ''}" data-person="${esc(k.name)}">
+        const petBits = window.FPPET ? window.FPPET.headBits(snapX, pidOf[k.name]) : ['', '', ''];
+        return `<div class="tcol${isBday ? ' bday' : ''}" style="--pc:${k.farbe}"><div class="lab th${petBits[1] ? ' fphas' : ''}${petBits[0] ? ' fpp' : ''}" data-person="${esc(k.name)}">
           <div class="ring${frames[k.name] ? ' fr-' + frames[k.name] : ''}" style="width:64px;height:64px"><span class="ava">${avatarHtml(k, 64)}</span>${isBday && seX.anim_bday !== false ? BDAY_FX(Number((seX.bday_anim || {})[pidOf[k.name]]) || 0) : ''}${String(k.bild || '').startsWith('av2:') && window.FPAV ? window.FPAV.outer(k.bild) + (window.FPAVS ? window.FPAVS.outer(k.name) : '') : ''}${petBits[0]}</div>${petBits[1]}
-          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${aw.slice(0, 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
+          <div class="lt"><div class="nm">${esc(k.name)}${isBday ? ` <span class="x2" title="${TX.x2}">🎂 x2</span>` : ''}</div>${this._lvCap(k.name, lv.c, st.pct, TX.rel)}${this._awBadge(snapX, pidOf[k.name])}<div class="lv2">${petBits[2] || ''}${aw.slice(0, petBits[2] ? 3 : 4).map((a) => `<span class="md" style="--mc:${a.c}" title="${esc(a.t)}"><ha-icon icon="${a.icon}"></ha-icon></span>`).join('')}</div></div></div>
           <div class="tbody">${body}</div></div>`;
       });
       todayGrid = `<div class="tgrid" style="grid-template-columns:${phone ? '1fr' : `repeat(auto-fit,minmax(min(100%,150px),1fr))`}">${cols.join('')}</div>`;
