@@ -120,3 +120,13 @@ def test_all_view_hides_done_chores_and_past_events():
     assert "erledigt_aus: st.hide_done !== false" in CARDS and "termine_aus:" in CARDS
     assert "modeX === 'alle' && this._cfg.erledigt_aus !== false" in CARDS  # only in "All", "Chores" still shows them
     assert "modeX === 'termine' ? ev.rest" in CARDS  # "Events" keeps past ones
+
+
+def test_all_view_also_hides_done_special_chores_and_todos():
+    # done to-dos and special chores leave "All" too (after their celebration); "Extras" still shows them
+    assert "(!hideDone || recent(t.id))" in CARDS
+    assert "this._sonderBtns(snapX, pid, tStr, hideDone ? recent : null)" in CARDS
+    assert "(!keep || keep(it.id))" in CARDS
+    assert "const hideDone = isT && modeX === 'alle'" in CARDS  # never in "Chores" / "Extras"
+    assert "const HIDE_DONE_MS = 30000;" in CARDS  # done items stay 30 s, then leave
+    assert CARDS.count("this._markDone(") >= 3  # chores, special chores and to-dos

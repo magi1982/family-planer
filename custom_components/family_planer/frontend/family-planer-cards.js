@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.5'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.6'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
@@ -2857,6 +2857,7 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
 // Datenhaltung: todo.amtli_plan (Plan), todo.amtli_heute (heutige Ämtli), todo.amtli_verlauf (Tagesbilanz)
 // Beschreibungen: "fp1:" + JSON   Plan {k,t:[1..7]}   Heute {k,d,c}   Verlauf {s:[[kind,erledigt,total]],x:[[kind,text]]}
 const G = 'var(--fp-accent)';
+const HIDE_DONE_MS = 30000; // "All": done chores, special chores and to-dos leave the view 30 s after ticking
 const WD = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const WDL = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 const MON = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -3343,9 +3344,18 @@ class LoxWochenplanerCard extends FpBase {
     // the eye stays while the job is shown: a second tap hides it again (never ticks it off)
     return it.secret ? `<button class="rvb${hot ? ' y' : ''}${this._reveal === it.id ? ' on' : ''}" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
   }
-  _sonderBtns(snap, pid, tStr) {
+  // "All": something ticked off here stays visible this long before it leaves the view (it stays under "Chores" / "Extras")
+  _markDone(id) { (this._doneAt = this._doneAt || {})[id] = Date.now(); }
+  _doneLeft(id) { const t = (this._doneAt || {})[id]; return t ? HIDE_DONE_MS - (Date.now() - t) : 0; }
+  _hideLater() {
+    const left = Object.keys(this._doneAt || {}).map((id) => this._doneLeft(id)).filter((ms) => ms > 0);
+    if (!left.length) return;
+    clearTimeout(this._hideT); this._hideT = setTimeout(() => this._render(), Math.min(...left) + 100);
+  }
+  // keep: set in "All" with hiding on – a done special chore then shows only while it is celebrated
+  _sonderBtns(snap, pid, tStr, keep) {
     const pts = snap.sonder_points || {};
-    return (snap.sonder || []).filter((it) => it.pid === pid && (it.done ? (it.done_at || '').slice(0, 10) === tStr : this._sonderVisible(it, tStr)))
+    return (snap.sonder || []).filter((it) => it.pid === pid && (it.done ? (it.done_at || '').slice(0, 10) === tStr && (!keep || keep(it.id)) : this._sonderVisible(it, tStr)))
       .map((it) => { const b = `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span>${this._bi(this._sonderTitle(it), '', `<em class="tag">${esc(it.icon)}<span class="tl"> ${TX.spc}</span></em>`, Number(pts[it.id]) || 0)}</button>`;
         const r = it.done ? '' : this._revealBtn(it); return r ? `<div class="spw">${b}${r}</div>` : b; }).join('');
   }
@@ -3478,7 +3488,7 @@ class LoxWochenplanerCard extends FpBase {
       if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
       // one press at a time: until the server answered, further presses on this to-do are ignored (no double coins)
       this._tdBusy = this._tdBusy || new Set(); if (this._tdBusy.has(t.id)) return;
-      this._tdArm = null; if (!t.done) { this._coinFly(tdb, `t:${t.id}`); this._pop = { uid: t.id, t: Date.now() }; }
+      this._tdArm = null; if (!t.done) { this._coinFly(tdb, `t:${t.id}`); this._pop = { uid: t.id, t: Date.now() }; this._markDone(t.id); }
       this._tdBusy.add(t.id); const free = () => setTimeout(() => this._tdBusy.delete(t.id), 600);
       this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).then(free, () => { free(); this._render(); }); return;
     }
@@ -3495,7 +3505,7 @@ class LoxWochenplanerCard extends FpBase {
     const sb = e.target.closest('[data-sonder]');
     if (sb && this.fpStore) {
       const it = ((this.fpStore.snap || {}).sonder || []).find((x) => x.id === sb.dataset.sonder); if (!it) return;
-      if (!it.done) { this._coinFly(sb, `s:${it.id}`); this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!it.done) { this._coinFly(sb, `s:${it.id}`); this._pop = { uid: it.id, t: Date.now() }; this._markDone(it.id); const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this.fpStore.ws('family_planer/sonder/set', { inst_id: it.id, done: !it.done }).catch(() => this._render()); return;
     }
     const lt = e.target.closest('[data-lvtap]'); if (lt) { this._lvTap(lt.dataset.lvtap, lt); return; }
@@ -3506,7 +3516,7 @@ class LoxWochenplanerCard extends FpBase {
       const done = b.classList.contains('done');
       b.classList.toggle('done');
       // little check animation only for the chore that was just ticked off
-      if (!done) { this._coinFly(b, `c:${b.dataset.uid}`); this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!done) { this._coinFly(b, `c:${b.dataset.uid}`); this._pop = { uid: b.dataset.uid, t: Date.now() }; this._markDone(b.dataset.uid); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this._call('todo', 'update_item', { item: b.dataset.uid, status: done ? 'needs_action' : 'completed' }, this._cfg.heute).catch(() => this._render());
       return;
     }
@@ -3719,23 +3729,25 @@ class LoxWochenplanerCard extends FpBase {
         const pastMin = Number(this._cfg.termine_aus) || 0; const cut = Date.now() - pastMin * 60000;
         const evs = modeX === 'termine' ? ev.rest : modeX === 'alle' ? ev.rest.filter((e) => !(isT && pastMin && !e.allDay && e.e && e.e.getTime() < cut)) : [];
         let chores = ''; let tdh = ''; let sph = ''; let chInfo = ''; let chRight = ''; let tdInfo = '';
+        // "All": done chores, special chores and to-dos leave right away (after their little celebration); "Chores" / "Extras" still show them
+        const hideDone = isT && modeX === 'alle' && this._cfg.erledigt_aus !== false;
+        const recent = (id) => this._doneLeft(id) > 0;
+        let keepT = false; // something done is still shown for a moment: render again when the first one is due to leave
         if (['alle', 'aemtli', 'extra'].includes(modeX)) {
           if (isT) {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
             if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
-            // "All": done chores leave right away (after their little celebration); "Chores" still shows them
-            const hideDone = modeX === 'alle' && this._cfg.erledigt_aus !== false;
-            const recent = (i) => this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 2500;
-            const shown = hideDone ? mine.filter((i) => i.status !== 'completed' || recent(i)) : mine;
-            if (hideDone && shown.some((i) => i.status === 'completed')) { clearTimeout(this._hideT); this._hideT = setTimeout(() => this._render(), 2600); }
+            const shown = hideDone ? mine.filter((i) => i.status !== 'completed' || recent(i.uid)) : mine;
+            if (hideDone && shown.some((i) => i.status === 'completed')) keepT = true;
             chores = shown.length ? '<div class="bg one">' + shown.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Spezial</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : (mine.length ? ' ' : ''); // all done and hidden: the header still says so
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
         }
         if (isT && ['alle', 'extra'].includes(modeX)) {
-          const tdAll = (snapX.todos || []).filter((t) => t.person_id === pid && (!t.done || (t.done_at || '').slice(0, 10) === tStr));
+          const tdAll = (snapX.todos || []).filter((t) => t.person_id === pid && (!t.done || ((t.done_at || '').slice(0, 10) === tStr && (!hideDone || recent(t.id)))));
+          if (hideDone && tdAll.some((t) => t.done)) keepT = true;
           const tdOpen = tdAll.filter((t) => !t.done); const maxTd = Number((snapX.todo_settings || {}).max_shown) || 4;
           const list = this._tdMore === k.name ? tdAll : [...tdOpen.slice(0, maxTd), ...tdAll.filter((t) => t.done)];
           const rest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
@@ -3744,8 +3756,9 @@ class LoxWochenplanerCard extends FpBase {
             + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '');
           if (tdh) tdh = `<div class="bg one">${tdh}</div>`;
           if (tdOpen.length) tdInfo = TX.open.replace('{n}', tdOpen.length);
-          sph = this._sonderBtns(snapX, pid, tStr); if (sph) sph = `<div class="bg one">${sph}</div>`;
+          sph = this._sonderBtns(snapX, pid, tStr, hideDone ? recent : null); if (sph) sph = `<div class="bg one">${sph}</div>`;
         }
+        if (keepT || (hideDone && (snapX.sonder || []).some((it) => it.pid === pid && it.done && recent(it.id)))) this._hideLater();
         const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
         const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || this._noneBox(k, dSel, evWho);
@@ -4329,6 +4342,7 @@ customElements.whenDefined('fp-week-inner').then(() => {
 // Datenhaltung: todo.amtli_plan (Plan), todo.amtli_heute (heutige Ämtli), todo.amtli_verlauf (Tagesbilanz)
 // Beschreibungen: "fp1:" + JSON   Plan {k,t:[1..7]}   Heute {k,d,c}   Verlauf {s:[[kind,erledigt,total]],x:[[kind,text]]}
 const G = 'var(--fp-accent)';
+const HIDE_DONE_MS = 30000; // "All": done chores, special chores and to-dos leave the view 30 s after ticking
 const WD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const WDL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -4815,9 +4829,18 @@ class LoxWochenplanerCard extends FpBase {
     // the eye stays while the job is shown: a second tap hides it again (never ticks it off)
     return it.secret ? `<button class="rvb${hot ? ' y' : ''}${this._reveal === it.id ? ' on' : ''}" data-reveal="${esc(it.id)}" title="${TX.reveal}" aria-label="${TX.reveal}">${REVEAL_EYE}</button>` : '';
   }
-  _sonderBtns(snap, pid, tStr) {
+  // "All": something ticked off here stays visible this long before it leaves the view (it stays under "Chores" / "Extras")
+  _markDone(id) { (this._doneAt = this._doneAt || {})[id] = Date.now(); }
+  _doneLeft(id) { const t = (this._doneAt || {})[id]; return t ? HIDE_DONE_MS - (Date.now() - t) : 0; }
+  _hideLater() {
+    const left = Object.keys(this._doneAt || {}).map((id) => this._doneLeft(id)).filter((ms) => ms > 0);
+    if (!left.length) return;
+    clearTimeout(this._hideT); this._hideT = setTimeout(() => this._render(), Math.min(...left) + 100);
+  }
+  // keep: set in "All" with hiding on – a done special chore then shows only while it is celebrated
+  _sonderBtns(snap, pid, tStr, keep) {
     const pts = snap.sonder_points || {};
-    return (snap.sonder || []).filter((it) => it.pid === pid && (it.done ? (it.done_at || '').slice(0, 10) === tStr : this._sonderVisible(it, tStr)))
+    return (snap.sonder || []).filter((it) => it.pid === pid && (it.done ? (it.done_at || '').slice(0, 10) === tStr && (!keep || keep(it.id)) : this._sonderVisible(it, tStr)))
       .map((it) => { const b = `<button class="btn spc2${it.done ? ' done' : ''}${this._pop && this._pop.uid === it.id && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-sonder="${esc(it.id)}"><span class="cb"></span>${this._bi(this._sonderTitle(it), '', `<em class="tag">${esc(it.icon)}<span class="tl"> ${TX.spc}</span></em>`, Number(pts[it.id]) || 0)}</button>`;
         const r = it.done ? '' : this._revealBtn(it); return r ? `<div class="spw">${b}${r}</div>` : b; }).join('');
   }
@@ -4950,7 +4973,7 @@ class LoxWochenplanerCard extends FpBase {
       if (!t.done && confirm && this._tdArm !== t.id) { this._tdArm = t.id; clearTimeout(this._tdT); this._tdT = setTimeout(() => { this._tdArm = null; this._render(); }, 4000); this._render(); return; }
       // one press at a time: until the server answered, further presses on this to-do are ignored (no double coins)
       this._tdBusy = this._tdBusy || new Set(); if (this._tdBusy.has(t.id)) return;
-      this._tdArm = null; if (!t.done) { this._coinFly(tdb, `t:${t.id}`); this._pop = { uid: t.id, t: Date.now() }; }
+      this._tdArm = null; if (!t.done) { this._coinFly(tdb, `t:${t.id}`); this._pop = { uid: t.id, t: Date.now() }; this._markDone(t.id); }
       this._tdBusy.add(t.id); const free = () => setTimeout(() => this._tdBusy.delete(t.id), 600);
       this.fpStore.ws('family_planer/todo/set', { todo_id: t.id, done: !t.done }).then(free, () => { free(); this._render(); }); return;
     }
@@ -4967,7 +4990,7 @@ class LoxWochenplanerCard extends FpBase {
     const sb = e.target.closest('[data-sonder]');
     if (sb && this.fpStore) {
       const it = ((this.fpStore.snap || {}).sonder || []).find((x) => x.id === sb.dataset.sonder); if (!it) return;
-      if (!it.done) { this._coinFly(sb, `s:${it.id}`); this._pop = { uid: it.id, t: Date.now() }; const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!it.done) { this._coinFly(sb, `s:${it.id}`); this._pop = { uid: it.id, t: Date.now() }; this._markDone(it.id); const r = sb.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this.fpStore.ws('family_planer/sonder/set', { inst_id: it.id, done: !it.done }).catch(() => this._render()); return;
     }
     const lt = e.target.closest('[data-lvtap]'); if (lt) { this._lvTap(lt.dataset.lvtap, lt); return; }
@@ -4978,7 +5001,7 @@ class LoxWochenplanerCard extends FpBase {
       const done = b.classList.contains('done');
       b.classList.toggle('done');
       // little check animation only for the chore that was just ticked off
-      if (!done) { this._coinFly(b, `c:${b.dataset.uid}`); this._pop = { uid: b.dataset.uid, t: Date.now() }; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
+      if (!done) { this._coinFly(b, `c:${b.dataset.uid}`); this._pop = { uid: b.dataset.uid, t: Date.now() }; this._markDone(b.dataset.uid); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); const r = b.getBoundingClientRect(); if (window.FPSEASON) window.FPSEASON.burst(this, r.left + 20, r.top + r.height / 2); }
       this._call('todo', 'update_item', { item: b.dataset.uid, status: done ? 'needs_action' : 'completed' }, this._cfg.heute).catch(() => this._render());
       return;
     }
@@ -5191,23 +5214,25 @@ class LoxWochenplanerCard extends FpBase {
         const pastMin = Number(this._cfg.termine_aus) || 0; const cut = Date.now() - pastMin * 60000;
         const evs = modeX === 'termine' ? ev.rest : modeX === 'alle' ? ev.rest.filter((e) => !(isT && pastMin && !e.allDay && e.e && e.e.getTime() < cut)) : [];
         let chores = ''; let tdh = ''; let sph = ''; let chInfo = ''; let chRight = ''; let tdInfo = '';
+        // "All": done chores, special chores and to-dos leave right away (after their little celebration); "Chores" / "Extras" still show them
+        const hideDone = isT && modeX === 'alle' && this._cfg.erledigt_aus !== false;
+        const recent = (id) => this._doneLeft(id) > 0;
+        let keepT = false; // something done is still shown for a moment: render again when the first one is due to leave
         if (['alle', 'aemtli', 'extra'].includes(modeX)) {
           if (isT) {
             const mine = heute.filter((i) => i.m.k === k.name && (modeX !== 'extra' || specIds.has(i.m.c))).sort((a, b) => ((a.status === 'completed') - (b.status === 'completed')) || a.summary.localeCompare(b.summary, 'de'));
             const dn = mine.filter((i) => i.status === 'completed').length;
             if (mine.length) { chInfo = TX.of.replace('{a}', dn).replace('{b}', mine.length); chRight = dn === mine.length ? `<span class="gr">${TX.allDone}</span>` : ''; }
-            // "All": done chores leave right away (after their little celebration); "Chores" still shows them
-            const hideDone = modeX === 'alle' && this._cfg.erledigt_aus !== false;
-            const recent = (i) => this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 2500;
-            const shown = hideDone ? mine.filter((i) => i.status !== 'completed' || recent(i)) : mine;
-            if (hideDone && shown.some((i) => i.status === 'completed')) { clearTimeout(this._hideT); this._hideT = setTimeout(() => this._render(), 2600); }
+            const shown = hideDone ? mine.filter((i) => i.status !== 'completed' || recent(i.uid)) : mine;
+            if (hideDone && shown.some((i) => i.status === 'completed')) keepT = true;
             chores = shown.length ? '<div class="bg one">' + shown.map((i) => `<button class="btn${specIds.has(i.m.c) ? ' spc' : ''}${i.status === 'completed' ? ' done' : ''}${this._pop && this._pop.uid === i.uid && Date.now() - this._pop.t < 600 ? ' pop' : ''}" data-uid="${esc(i.uid)}"><span class="cb"></span>${this._bi(esc(i.summary), dueTag(i.m, tStr), specIds.has(i.m.c) ? '<em class="tag">⭐<span class="tl"> Special</span></em>' : '', this._pts('item_points', i.uid))}</button>`).join('') + '</div>' : (mine.length ? ' ' : ''); // all done and hidden: the header still says so
           } else {
             const pl = this._planFor(k.name, dSel); chores = pl.map((x) => `<div class="pl">${esc(x)}</div>`).join('');
           }
         }
         if (isT && ['alle', 'extra'].includes(modeX)) {
-          const tdAll = (snapX.todos || []).filter((t) => t.person_id === pid && (!t.done || (t.done_at || '').slice(0, 10) === tStr));
+          const tdAll = (snapX.todos || []).filter((t) => t.person_id === pid && (!t.done || ((t.done_at || '').slice(0, 10) === tStr && (!hideDone || recent(t.id)))));
+          if (hideDone && tdAll.some((t) => t.done)) keepT = true;
           const tdOpen = tdAll.filter((t) => !t.done); const maxTd = Number((snapX.todo_settings || {}).max_shown) || 4;
           const list = this._tdMore === k.name ? tdAll : [...tdOpen.slice(0, maxTd), ...tdAll.filter((t) => t.done)];
           const rest = this._tdMore === k.name ? 0 : Math.max(0, tdOpen.length - maxTd);
@@ -5216,8 +5241,9 @@ class LoxWochenplanerCard extends FpBase {
             + (rest ? `<button class="tdmore" data-tdmore="${esc(k.name)}">${TX.more.replace('{n}', rest)}</button>` : '');
           if (tdh) tdh = `<div class="bg one">${tdh}</div>`;
           if (tdOpen.length) tdInfo = TX.open.replace('{n}', tdOpen.length);
-          sph = this._sonderBtns(snapX, pid, tStr); if (sph) sph = `<div class="bg one">${sph}</div>`;
+          sph = this._sonderBtns(snapX, pid, tStr, hideDone ? recent : null); if (sph) sph = `<div class="bg one">${sph}</div>`;
         }
+        if (keepT || (hideDone && (snapX.sonder || []).some((it) => it.pid === pid && it.done && recent(it.id)))) this._hideLater();
         const awL = away ? this._awayLook(snapX, k.name, dStr) : null;
         const body = away ? `<div class="vc"><ha-icon icon="${awL.icon}"></ha-icon><span>${awL.text}</span></div>`
           : (sec(TX.school, withNow(school, isT, evRow)) + sec(TX.events, withNow(evs, isT, evRow)) + sec(TX.chores, chores, chInfo, chRight) + sec(TX.todos, tdh, tdInfo) + sec(TX.spcH, sph)) || this._noneBox(k, dSel, evWho);
@@ -6943,7 +6969,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('reliability_days', 'num', 'Zuverlässigkeit berechnen über', 'Calculate reliability over', 'Zeitraum für die Prozentzahl pro Person.', 'Period for the percentage per person.', { min: 7, max: 90, unit: { de: 'Tage', en: 'days' } }),
       F('school_gap', 'num', 'Heimweg über Mittag ab', 'Lunch at home from', 'Pause in Minuten, ab der der Schultag in zwei Blöcke geteilt wird (0 = automatisch).', 'Break in minutes from which the school day is split into two blocks (0 = automatic).', { min: 0, max: 240, unit: 'min' }),
       F('school_window', 'num', 'Schule nur rund um die Schulzeit zeigen', 'Show school only around school time', 'So viele Minuten vor dem Losgehen bis nach dem Heimkommen erscheint der Schulblock in der Ansicht „Alles“ (0 = immer).', 'Minutes before leaving and after being home in which the school block shows in the "All" view (0 = always).', { min: 0, max: 240, unit: 'min' }),
-      F('hide_done', 'bool', 'Erledigte Ämtli in „Alles“ ausblenden', 'Hide done chores in "All"', 'So wird die Ansicht gegen Abend übersichtlicher. Unter „Ämtli“ sieht man sie weiterhin und kann sie dort zurücknehmen.', 'Keeps the view tidy towards the evening. They still show under "Chores", where they can be undone.'),
+      F('hide_done', 'bool', 'Erledigtes in „Alles“ ausblenden', 'Hide done items in "All"', 'Erledigte Ämtli, Sonderämtli und To-dos verschwinden 30 Sekunden nach dem Abhaken aus „Alles“ – so wird die Ansicht gegen Abend übersichtlicher. Unter „Ämtli“ bzw. „Extras“ sieht man sie weiterhin und kann sie dort zurücknehmen.', 'Done chores, special chores and to-dos leave the "All" view 30 seconds after ticking – keeps it tidy towards the evening. They still show under "Chores" or "Extras", where they can be undone.'),
       F('hide_past', 'num', 'Vergangene Termine in „Alles“ ausblenden nach', 'Hide past events in "All" after', 'So viele Minuten nach dem Ende verschwindet ein Termin aus „Alles“ (0 = nie). Unter „Termine“ bleibt er sichtbar.', 'Minutes after its end an event leaves the "All" view (0 = never). It stays under "Events".', { min: 0, max: 240, unit: 'min' }),
     ] },
     { id: 'persons', icon: 'mdi:account-multiple-outline', label: { de: 'Personen', en: 'People' } },

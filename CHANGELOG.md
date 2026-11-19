@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.6 – 2026-11-19
+### Fixed
+- **Tidy "All" view now covers everything done:** besides chores, done special chores and to-dos also leave the "All" view. Everything done now stays visible for 30 seconds after ticking (before: a moment) and then leaves; it stays under "Chores" or "Extras", where it can be undone. Past events still leave 30 minutes after they ended. Same setting under General, now called "Hide done items in "All"".
+
 ## 0.19.5 – 2026-11-19
 ### Changed
 - **Timed announcements wait for someone to be there:** with a motion sensor, the evening summary and the birthday lines are said at the first motion from their time on (once, the same day) instead of to an empty room. The evening summary replaces the chore reminder at that motion.
