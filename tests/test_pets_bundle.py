@@ -107,3 +107,10 @@ def test_evolve_choice_shows_what_comes_after():
     assert "afterTxt(t, o)" in ui and "const leaves" in ui
     assert "Endformen" in ui and "final forms" in ui
     assert "endsHtml(t, p, o, sight)" in ui and "brightness(0) invert(1)" in ui  # final forms as silhouettes, in colour with far-sight
+
+
+def test_cache_version_matches_the_release():
+    # the cards are loaded as ...?v=VERSION: a stale VERSION keeps browsers on the old file after an update
+    import json
+    manifest = json.loads((_fe.parent / "manifest.json").read_text())
+    assert VERSION == manifest["version"]

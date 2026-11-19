@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.3 – 2026-11-19
+### Fixed
+- **Browsers kept the old cards after updating to 0.19.1/0.19.2:** the cache version of the card file was not raised. It now always matches the release, and a test checks it.
+
 ## 0.19.2 – 2026-11-19
 ### Changed
 - **More variety in the banner stories:** the weather or occasion story (e.g. the unicorn on partly cloudy days, the underwater garden in the rain) now only leads the first tap of the morning, afternoon or night; every further tap plays the next story that fits – weather, season, every-day stories and surprises – none twice before all have played. Before, the same story came at every tap.
