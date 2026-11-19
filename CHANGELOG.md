@@ -2,7 +2,7 @@
 
 ## 0.19.1 – unreleased
 ### Changed
-- **Waiting egg left of the wheel:** a new egg is shown as its own small egg next to the wheel instead of a dot on the avatar; the active pet stays where it was.
+- **Waiting egg beside the pet:** a new egg is shown right next to the active pet, on the same line and in the same size, instead of a dot on the avatar.
 - **Wheel turns slowly while it can be spun** and is hidden once spun – it comes back when the next spin is ready.
 
 ## 0.19.0 – 2026-11-19
