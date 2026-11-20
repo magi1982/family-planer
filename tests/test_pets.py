@@ -406,6 +406,16 @@ def test_view_tells_need_and_ready():
     assert v["spun"] is False
 
 
+def test_wheel_is_free_again_the_next_day():
+    # before 0.19.7 "spun" stayed true after the first spin ever, so the wheel never came back on the card
+    st = state()
+    day = date(2026, 11, 18)
+    st["wheel"] = day.isoformat()
+    assert pets.view(st, today=day)["spun"] is True
+    assert pets.view(st, today=day + timedelta(days=1))["spun"] is False
+    st["wheel"] = ""
+    assert pets.view(st, today=day)["spun"] is False
+
 
 def test_grant_gives_only_pet_points_and_never_goes_below_zero():
     st = state()

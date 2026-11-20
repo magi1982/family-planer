@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.7 – 2026-11-20
+### Fixed
+- **Wheel never came back on the person card:** after the first spin it counted as "spun" for good, so the wheel stayed hidden. It now shows again every new planner day.
+
 ## 0.19.6 – 2026-11-19
 ### Fixed
 - **Tidy "All" view now covers everything done:** besides chores, done special chores and to-dos also leave the "All" view. Everything done now stays visible for 30 seconds after ticking (before: a moment) and then leaves; it stays under "Chores" or "Extras", where it can be undone. Past events still leave 30 minutes after they ended. Same setting under General, now called "Hide done items in "All"".

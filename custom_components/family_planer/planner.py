@@ -754,7 +754,7 @@ class FamilyPlanner:
         cfg = self.pets_settings()
         if not cfg["enabled"]:
             return {}
-        return {pid: pets.view(st, cfg["speed"]) for pid, st in (self.data.get("pets") or {}).items()}
+        return {pid: pets.view(st, cfg["speed"], self.today()) for pid, st in (self.data.get("pets") or {}).items()}
 
     async def async_pet(self, person_id: str, action: str, args: dict[str, Any]) -> dict[str, Any]:
         """One action of a child on its pets. Raises pets.PetError (reason code) or KeyError (unknown person)."""

@@ -645,11 +645,13 @@ def spin(st: dict, today: date, rng: random.Random, eggs: str = "normal") -> dic
 
 
 # ------------------------------------------------------------------ what the planer gets
-def view(st: dict, speed: str = "normal") -> dict:
-    """A copy for the browser: with the growth needed for the next step and whether the bar is full."""
+def view(st: dict, speed: str = "normal", today: date | None = None) -> dict:
+    """A copy for the browser: with the growth needed for the next step and whether the bar is full.
+
+    "spun" is only true on the day of the spin – the wheel is free again on the next planner day."""
     pets = {}
     for k, p in st["pets"].items():
         pets[k] = {**p, "art": dict(art(dict(p))), "need": next_need(p, speed), "ready": ready(p, speed),
                    "v": {n: round(p["v"].get(n, 70)) for n in NEEDS}}
     return {"on": st["on"], "pts": st["pts"], "active": st["active"], "pets": pets, "inv": dict(st["inv"]), "sleep": [SLEEP_FROM, SLEEP_TO],
-            "spun": bool(st["wheel"]), "wheel_day": st["wheel"], "stats": dict(st["stats"])}
+            "spun": bool(st["wheel"]) and (today is None or st["wheel"] == today.isoformat()), "wheel_day": st["wheel"], "stats": dict(st["stats"])}
