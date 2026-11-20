@@ -930,3 +930,21 @@ Michaels Vorgaben: im Entwicklungsbaum selbst wählen, ob ein Artefakt-Effekt ak
 - **Idee (19.11.): Tierchen/Ei nicht mehr im Avatar** – Planer-Karte: Tierchen bekommt eigenen Platz rechts neben dem Avatar. A = Ei im Nest daneben, B = rundes Medaillon in Personenfarbe. Hinweis-Ei (🥚) und Apfel sauber am Rand statt im Gesicht. → Michael: Tierchen bleibt, Ei als erstes in der Pokal-Reihe, mehr Abstand Pokale–Tierchen, Rad dreht langsam, nach Drehen ausgeblendet (umgesetzt 0.19.1).
 - **Idee (19.11.): Ei hervorheben + Sprechblase** – A: Ei leuchtet golden bei den Pokalen mit „Neu“-Schild, Bedürfnis als Sprechblase beim Tierchen. B: eine Sprechblase vom Tierchen, Bedürfnis vor Ei. Prio der Bedürfnisse: das dringendste (tiefster Wert unter 30 - **Idee (19.11.): Ei hervorheben + Sprechblase** – A: Ei leuchtet golden bei den Pokalen mit „Neu“-Schild, Bedürfnis als Sprechblase beim Tierchen. B: eine Sprechblase vom Tierchen, Bedürfnis vor Ei. Prio: das dringendste Bedürfnis (tiefster Wert unter 30 %) mit 🍎/💧/⚡/🎈. → Michael: Sprechblase (Bedürfnis vor Ei), „weg“-Hinweis unter die Pokale; Level-Knopf wackelt nicht mehr, Tierchen hüpft ab und zu (0.19.1).
 - **Idee (19.11.): Mehr Abwechslung bei den Banner-Geschichten** – Heute: Wetter schlägt alles (teilweise bewölkt → immer Einhorn, Regen → immer Unterwasser) und pro Tageszeit läuft bei jedem Tippen dieselbe Geschichte. Vorschlag: (1) Wetter-Geschichte nur beim ersten Tippen des Tages bzw. als eine von mehreren im Topf; Gewitter/Schnee/Frost/über 30° bleiben besonders. (2) Jedes Tippen die nächste Geschichte aus dem passenden Topf (Jahreszeit + Wetter + „jeder Tag“), keine Wiederholung bis alle durch. (3) Kleine Töpfe vergrössern (Winter-Tag hat nur 1 Geschichte). → umgesetzt 0.19.2.
+
+## #71 Fair mode: chores added later in the day must not cost points (20.11.)
+**Status:** 💡 Idee – entschieden: Variante B. Code erst nach „mach es“.
+
+**Problem (gefunden 19.11.):** Im Fair-Modus ist ein ganzer Tag immer `day_points` wert (Standard 30), verteilt auf alle Ämtli des Tages. Kommt am Abend ein Ämtli dazu, bucht `rebook_fair` die schon erledigten neu – sie werden kleiner und es sieht aus wie Minuspunkte.
+Beispiel: 1 Ämtli erledigt = 30 → 18:47 zweites dazu → 15 (−15) → 18:48 drittes dazu → 10 (−5). Auch die Lifetime-Münzen sinken.
+
+**Entscheid – Variante B:** Ämtli, die erst im Laufe des Tages dazukommen, zählen **ab dem nächsten Tag** in die faire Verteilung.
+- Heute bereits erledigte Ämtli behalten ihren Wert – nie wieder rückwirkende Abzüge.
+- Nachträglich hinzugefügte Ämtli sind heute ein Extra mit festem Wert (Vorschlag: Grösse „klein“ aus `size_points`), sie senken die 100 % nicht und ziehen nichts ab.
+- Ab dem Folgetag gehören sie normal zum Tagesplan.
+- Gilt auch für Alexa-To-dos, die einer Person zugeordnet werden.
+
+**Offene Fragen bei der Umsetzung:**
+- Ab wann gilt „nachträglich“? Vorschlag: nach dem ersten Abhaken des Tages oder nach einer einstellbaren Uhrzeit.
+- Bleibt der Tagesbonus/Serienbonus erhalten, wenn ein Extra-Ämtli offen bleibt? Vorschlag: ja.
+- Mögliche Einstellung (DE/EN beschrieben): „Später hinzugefügte Ämtli zählen ab morgen“ – Standard: an.
+- Tests: rebook_fair darf nie einen erledigten Eintrag verkleinern; Lifetime darf nie sinken (ausser bei echtem Rückgängig-Machen).
