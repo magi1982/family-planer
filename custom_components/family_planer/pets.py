@@ -167,6 +167,16 @@ def new_state(now: datetime, on: bool = True) -> dict:
             "stats": {"fed": 0, "spins": 0, "evos": 0}}
 
 
+def gift_toy(st: dict, rng: random.Random) -> str:
+    """One-time present (0.19.8): a random toy for everyone, one they don't have yet if possible. '' = already given."""
+    if st.get("gift_toy"):
+        return ""
+    st["gift_toy"] = True
+    pool = [t for t in TOYS if not st["inv"].get(t)] or list(TOYS)
+    toy = rng.choice(sorted(pool))
+    return toy if add_item(st, toy) else ""
+
+
 def ensure(data: dict, persons: dict, now: datetime, adults_default: bool = False) -> bool:
     """Every person gets a state (kids switched on, adults as set); removed persons are dropped. True = changed."""
     store = data.setdefault("pets", {})

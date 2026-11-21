@@ -3,7 +3,7 @@ from __future__ import annotations
 
 DOMAIN = "family_planer"
 NAME = "Family Planer"
-VERSION = "0.19.7"
+VERSION = "0.19.8"
 STORAGE_VERSION = 1
 
 # modules (can be switched on/off; more will follow)

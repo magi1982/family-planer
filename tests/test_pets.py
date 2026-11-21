@@ -567,3 +567,12 @@ def test_energy_from_the_child_ends_a_nap():
     st["inv"]["energy"] = 1
     pets.use(st, eid, "energy", datetime(2026, 11, 19, 13, 0))
     assert p["nap"] == "" and p["v"]["energie"] == 100
+
+
+def test_gift_toy_once_for_everyone():
+    st = state()
+    st["inv"]["ball"] = 1
+    toy = pets.gift_toy(st, random.Random(3))
+    assert toy in pets.TOYS and toy != "ball" and st["inv"][toy] == 1
+    assert pets.gift_toy(st, random.Random(3)) == ""  # never twice
+    assert sum(st["inv"].get(t, 0) for t in pets.TOYS) == 2

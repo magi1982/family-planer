@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.8 – 2026-11-21
+### Added
+- **A present for everyone:** once, every person with pets gets a random toy (one they don't have yet), so the pets can play and get happy again. Toys stay and can be used again and again.
+
 ## 0.19.7 – 2026-11-20
 ### Fixed
 - **Wheel never came back on the person card:** after the first spin it counted as "spun" for good, so the wheel stayed hidden. It now shows again every new planner day.

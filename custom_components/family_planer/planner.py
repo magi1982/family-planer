@@ -728,6 +728,7 @@ class FamilyPlanner:
         since = (now - timedelta(days=2)).isoformat()
         away = self.away_now()
         for pid, st in self.data["pets"].items():
+            pets.gift_toy(st, self._rng)
             pets.sync_points(st, rewards.lifetime(self.data["ledger"], pid))
             new = [e for e in self.data["ledger"] if e["pid"] == pid and e["ts"] >= since]
             pets.drops(st, new, self._rng)
