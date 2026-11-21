@@ -948,3 +948,6 @@ Beispiel: 1 Ämtli erledigt = 30 → 18:47 zweites dazu → 15 (−15) → 18:48
 - Bleibt der Tagesbonus/Serienbonus erhalten, wenn ein Extra-Ämtli offen bleibt? Vorschlag: ja.
 - Mögliche Einstellung (DE/EN beschrieben): „Später hinzugefügte Ämtli zählen ab morgen“ – Standard: an.
 - Tests: rebook_fair darf nie einen erledigten Eintrag verkleinern; Lifetime darf nie sinken (ausser bei echtem Rückgängig-Machen).
+
+## #72 Tierchen: zu wenig Spielzeug – Laune sinkt bei allen (21.11.)
+- Spielzeug gibt es nur übers Glücksrad (Extra-Feld, ca. 1 von 10 Drehungen) – und das Rad war bis 0.19.7 nach der ersten Drehung weg. Vorschlag: jede Person bekommt einmalig einen Ball, Ämtli können selten ein Spielzeug bringen (nur solange man keins hat), Spielzeug bleibt wie bisher.
