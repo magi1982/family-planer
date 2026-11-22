@@ -507,13 +507,19 @@
     }
     disconnectedCallback() { if (this._page) { this._page.remove(); this._page = null; this._inline = null; } if (this._lockOld != null) { document.documentElement.style.overflow = this._lockOld; this._lockOld = null; } if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
     // night mode: a soft dark veil over the whole dashboard (no layout change, clicks pass through)
+    // the veil belongs to the planer's own dashboard: HA keeps a dashboard alive in the background when another
+    // menu is opened, so it is hidden as soon as the address leaves that dashboard (and never shown from a hidden card)
     _night(on) {
+      const root = () => (window.location.pathname.split('/')[1] || '');
       let v = document.getElementById('fp-night');
-      if (!on) { if (v) v.style.opacity = '0'; return; }
+      if (!window.__fpNightNav) { window.__fpNightNav = true;
+        const chk = () => { const n = document.getElementById('fp-night'); if (n && n.dataset.root !== root()) n.style.opacity = '0'; };
+        window.addEventListener('location-changed', chk); window.addEventListener('popstate', chk); }
+      if (!on || !this.isConnected) { if (v) v.style.opacity = '0'; return; }
       if (!v) { v = document.createElement('div'); v.id = 'fp-night'; v.setAttribute('aria-hidden', 'true');
         v.style.cssText = 'position:fixed;inset:0;pointer-events:none;background:rgba(6,9,28,.30);z-index:2147483000;opacity:0;transition:opacity 3s ease';
         document.body.appendChild(v); }
-      v.style.opacity = '1';
+      v.dataset.root = root(); v.style.opacity = '1';
     }
     getCardSize() { return 1; }
     // who a holiday applies to, as picked in the popup (default: the persons found in the calendar)

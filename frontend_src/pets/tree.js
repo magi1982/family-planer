@@ -127,6 +127,17 @@
   const look = (nd) => ({ pal: nd.pal, deco: nd.deco, under: nd.under, back: nd.back, skin: nd.skin, aura: nd.aura, morph: nd.morph, ability: nd.ability });
   const endForms = (k) => { const out = []; const walk = (nd) => { if (!nd.kids.length) out.push(nd); nd.kids.forEach(walk); }; walk(tree(k)); return out; };
   const leaves = (t) => t.kids.length ? t.kids.reduce((a, c) => a + leaves(c), 0) : 1;
+  // where a pet stands in its tree: the node of its step whose name it carries (the server keeps 24 characters).
+  // Several nodes share a step (one per colour/way), so the step alone would always point at the first way.
+  const ST = ['ei', 'baby', 'jung', 'gross', 'gross', 'gross', 'gross'];
+  const pathOf = (t, p) => {
+    const st = ST[(p && p.step) || 0]; const nm = String((p && p.name) || ''); let first = null; let hit = null;
+    const walk = (nd, path, depth) => { if (hit) return;
+      if (depth === ((p && p.step) || 0) && nd.st === st) { if (!first) first = path; if (nm && String(nd.name || '').slice(0, 24) === nm) { hit = path; return; } }
+      nd.kids.forEach((c, i) => walk(c, path.concat(i), depth + 1)); };
+    walk(t, [], 0); return hit || first || [];
+  };
+  const nodeAt = (t, path) => path.reduce((c, i) => (c && c.kids[i]) || c, t);
   // compact left-to-right drawing: columns Ei | Baby | Jung | Gross, curved lines, the chosen path is highlighted
   const BADGE = { merkmal: ['⭐', 'gross'], farbe: ['💊', 'Spezialfarbe'], schein: ['✨', 'Schein'], form: ['🪽', 'neue Form'], legende: ['👑', 'Legende'] };
   const COLS = ['Ei', 'Baby', 'Jung', 'Gross', 'Endform', 'Legende'];
@@ -137,7 +148,8 @@
     const L = leaves(t); const H = L * (NS + GAP); const nodes = []; const edges = []; let li = 0; let maxCol = 0;
     const lay = (nd, col, path) => { maxCol = Math.max(maxCol, col); let y; if (!nd.kids.length) { y = li * (NS + GAP) + NS / 2; li += 1; } else { const ys = nd.kids.map((c, i) => lay(c, col + 1, path.concat(i))); y = (ys[0] + ys[ys.length - 1]) / 2; nd.kids.forEach((c, i) => edges.push([col, y, col + 1, ys[i], path.concat(i), c.kind])); } nodes.push({ nd, col, y, path }); return y; };
     lay(t, 0, []);
-    let sel = o.sel || (() => { const p = []; let c = t; while (c.kids.length) { p.push(c.kids.length - 1); c = c.kids[c.kids.length - 1]; } return p; })();
+    // the highlighted way starts with the pet's own way (o.pet), then follows the last branch to one possible end
+    let sel = o.sel || (() => { const p = o.pet ? pathOf(t, o.pet) : []; let c = nodeAt(t, p); while (c.kids.length) { p.push(c.kids.length - 1); c = c.kids[c.kids.length - 1]; } return p; })();
     const onPath = (p) => p.length <= sel.length && p.every((v, i) => sel[i] === v);
     const x = (col) => col * CW + NS / 2; const head = o.small ? 0 : 36;
     // fog: everything after column o.fog is a secret silhouette (the Weitblick-Kristall lifts it for 1 hour)
@@ -153,5 +165,5 @@
     };
     draw();
   };
-  window.FPTREE = { THEME_TXT, WORD, REQ, BADGE, feat, tree, render, leaves, look, endForms, COL, SHAPE, SHAPE_TXT, FABEL, THEME, TH };
+  window.FPTREE = { pathOf, nodeAt, THEME_TXT, WORD, REQ, BADGE, feat, tree, render, leaves, look, endForms, COL, SHAPE, SHAPE_TXT, FABEL, THEME, TH };
 })();

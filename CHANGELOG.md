@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.19.10 – 2026-11-23
+### Fixed
+- **Pet evolution showed the wrong way:** after choosing a colour or way, the next evolution offered the ways of another branch, so the final form looked different from what was shown before. The planner now finds the pet on its own way (in the evolve dialog and in the evolution tree, which also highlights the pet's real way).
+- **Night mode darkened all of Home Assistant:** the dark night veil stayed when another menu was opened. It now only shows on the planer's own dashboard.
+
 ## 0.19.9 – 2026-11-22
 ### Fixed
 - **Special chores with their own rule (every few weeks/months, 1st Saturday, one-off dates …) did not show on coming days:** looking ahead (e.g. at Monday) only showed the weekly plan. Their next dates now show for the right person, marked with ⭐.

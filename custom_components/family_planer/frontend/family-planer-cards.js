@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.9'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.10'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
@@ -8318,8 +8318,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   // ------------------------------------------------------------- evolving: up to three ways from the tree (the current form is found by its name)
   const evolveOpts = (p) => {
     const TR = L().TREE; const tr = TR.tree(p.kind);
-    const find = (nd, f) => (f(nd) ? nd : (nd.kids || []).reduce((r, c) => r || find(c, f), null));
-    const cur = (p.step >= 3 && p.name && find(tr, (nd) => nd.name === p.name)) || find(tr, (nd) => nd.st === ST[p.step]);
+    // the pet's own node (by step and name) – not just the first node of that step, which belongs to another way
+    const cur = TR.nodeAt(tr, TR.pathOf(tr, p));
     return ((cur && cur.kids) || []).slice(0, 3).map((o) => ({ ...o, theme: o.theme || Object.keys(TR.WORD).find((th) => TR.WORD[th].some((w) => String(o.name || '').startsWith(w))) }));
   };
   // what lies behind a way: how many ways right after it and how many final forms in the end
@@ -8766,7 +8766,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         vals(); this._vt = setInterval(vals, 500);
       }
       const gw = R.querySelector('.gw'); if (gw) this._garden(gw, st);
-      const tw = R.querySelector('.tw2'); if (tw && this._sub && this._sub.tree) { const p = st.pets[this._sub.tree]; L().TREE.render(tw, p.kind, { size: 40, gap: 4, colW: 72, fog: (p.art || {}).sight ? null : Math.min(p.step, 3) }); }
+      const tw = R.querySelector('.tw2'); if (tw && this._sub && this._sub.tree) { const p = st.pets[this._sub.tree]; L().TREE.render(tw, p.kind, { size: 40, gap: 4, colW: 72, pet: p, fog: (p.art || {}).sight ? null : Math.min(p.step, 3) }); }
     }
     _garden(g, st) {
       const mine = Object.values(st.pets).filter((p) => p.step > 0).slice(0, 8);
@@ -9331,13 +9331,19 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     disconnectedCallback() { if (this._page) { this._page.remove(); this._page = null; this._inline = null; } if (this._lockOld != null) { document.documentElement.style.overflow = this._lockOld; this._lockOld = null; } if (this._off) { this._off(); this._off = null; this._hass = null; } if (this._layer) { this._layer.remove(); this._layer = null; } this._night(false); }
     // night mode: a soft dark veil over the whole dashboard (no layout change, clicks pass through)
+    // the veil belongs to the planer's own dashboard: HA keeps a dashboard alive in the background when another
+    // menu is opened, so it is hidden as soon as the address leaves that dashboard (and never shown from a hidden card)
     _night(on) {
+      const root = () => (window.location.pathname.split('/')[1] || '');
       let v = document.getElementById('fp-night');
-      if (!on) { if (v) v.style.opacity = '0'; return; }
+      if (!window.__fpNightNav) { window.__fpNightNav = true;
+        const chk = () => { const n = document.getElementById('fp-night'); if (n && n.dataset.root !== root()) n.style.opacity = '0'; };
+        window.addEventListener('location-changed', chk); window.addEventListener('popstate', chk); }
+      if (!on || !this.isConnected) { if (v) v.style.opacity = '0'; return; }
       if (!v) { v = document.createElement('div'); v.id = 'fp-night'; v.setAttribute('aria-hidden', 'true');
         v.style.cssText = 'position:fixed;inset:0;pointer-events:none;background:rgba(6,9,28,.30);z-index:2147483000;opacity:0;transition:opacity 3s ease';
         document.body.appendChild(v); }
-      v.style.opacity = '1';
+      v.dataset.root = root(); v.style.opacity = '1';
     }
     getCardSize() { return 1; }
     // who a holiday applies to, as picked in the popup (default: the persons found in the calendar)

@@ -200,8 +200,8 @@
   // ------------------------------------------------------------- evolving: up to three ways from the tree (the current form is found by its name)
   const evolveOpts = (p) => {
     const TR = L().TREE; const tr = TR.tree(p.kind);
-    const find = (nd, f) => (f(nd) ? nd : (nd.kids || []).reduce((r, c) => r || find(c, f), null));
-    const cur = (p.step >= 3 && p.name && find(tr, (nd) => nd.name === p.name)) || find(tr, (nd) => nd.st === ST[p.step]);
+    // the pet's own node (by step and name) – not just the first node of that step, which belongs to another way
+    const cur = TR.nodeAt(tr, TR.pathOf(tr, p));
     return ((cur && cur.kids) || []).slice(0, 3).map((o) => ({ ...o, theme: o.theme || Object.keys(TR.WORD).find((th) => TR.WORD[th].some((w) => String(o.name || '').startsWith(w))) }));
   };
   // what lies behind a way: how many ways right after it and how many final forms in the end
@@ -648,7 +648,7 @@
         vals(); this._vt = setInterval(vals, 500);
       }
       const gw = R.querySelector('.gw'); if (gw) this._garden(gw, st);
-      const tw = R.querySelector('.tw2'); if (tw && this._sub && this._sub.tree) { const p = st.pets[this._sub.tree]; L().TREE.render(tw, p.kind, { size: 40, gap: 4, colW: 72, fog: (p.art || {}).sight ? null : Math.min(p.step, 3) }); }
+      const tw = R.querySelector('.tw2'); if (tw && this._sub && this._sub.tree) { const p = st.pets[this._sub.tree]; L().TREE.render(tw, p.kind, { size: 40, gap: 4, colW: 72, pet: p, fog: (p.art || {}).sight ? null : Math.min(p.step, 3) }); }
     }
     _garden(g, st) {
       const mine = Object.values(st.pets).filter((p) => p.step > 0).slice(0, 8);
