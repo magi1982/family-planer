@@ -951,3 +951,6 @@ Beispiel: 1 Ämtli erledigt = 30 → 18:47 zweites dazu → 15 (−15) → 18:48
 
 ## #72 Tierchen: zu wenig Spielzeug – Laune sinkt bei allen (21.11.)
 - Spielzeug gibt es nur übers Glücksrad (Extra-Feld, ca. 1 von 10 Drehungen) – und das Rad war bis 0.19.7 nach der ersten Drehung weg. Vorschlag: jede Person bekommt einmalig einen Ball, Ämtli können selten ein Spielzeug bringen (nur solange man keins hat), Spielzeug bleibt wie bisher.
+
+## #73 Tierchen: alles Benutzbare direkt beim aktuellen Tierchen (22.11.)
+- Beim aktuellen Tierchen eine Leiste „Jetzt benutzen“ mit allem aus dem Inventar, das bei diesem Tierchen geht (Pillen, Pflege, Spielzeug, Artefakte); geht es gerade nicht, ausgegraut mit Grund (Balken voll, zu müde, satt). Antippen = benutzen.
