@@ -42,6 +42,7 @@
         const r = this.shadowRoot;
         r.addEventListener('click', (e) => this._click(e));
         r.addEventListener('change', (e) => this._change(e));
+        r.addEventListener('focusout', (e) => { if (this._dateLater && e.target === this._dateLater) setTimeout(() => this._dateDone(), 30); });
         r.addEventListener('input', (e) => { if (e.target.dataset.k === 'title') this._ed.title = e.target.value; });
       }
       this._render();
@@ -86,11 +87,21 @@
       if (k === 'title') this._ed.title = el.value;
       else if (k === 'points') this._ed.points = num(el.value);
       else if (k === 'window') this._ed.window = Math.max(1, Math.min(60, num(el.value) || 1));
-      else if (k === 'adddate' && el.value) { const v = sc.type === 'yearly' ? el.value.slice(5) : el.value; if (!sc.dates.includes(v)) sc.dates = [...sc.dates, v].sort(); el.value = ''; }
+      // date fields: while the picker is open (iPad fills in today as soon as it opens) nothing is drawn again –
+      // redrawing closed the picker at once. The date is taken when the field is left.
+      else if (/^(adddate|start|mstart)$/.test(k) && this.shadowRoot.activeElement === el) { this._dateLater = el; return; }
+      else if (k === 'adddate' && el.value) this._addDate(el);
       else if (k === 'start') sc.start = el.value || todayIso();
       else if (k === 'mstart') sc.start = (el.value || todayIso().slice(0, 7)) + '-01';
       else if (['every', 'day', 'nth', 'weekday'].includes(k)) sc[k] = num(el.value);
       else if (k === 'unit' || k === 'mode') sc[k] = el.value;
+      this._render();
+    }
+    _addDate(el) { const sc = this._ed.schedule; const v = sc.type === 'yearly' ? el.value.slice(5) : el.value; if (!sc.dates.includes(v)) sc.dates = [...sc.dates, v].sort(); el.value = ''; }
+    _dateDone() {
+      const el = this._dateLater; this._dateLater = null; if (!el || !this._ed) return;
+      const k = el.dataset.k; const sc = this._ed.schedule;
+      if (k === 'adddate') { if (el.value) this._addDate(el); } else if (k === 'start') sc.start = el.value || todayIso(); else sc.start = (el.value || todayIso().slice(0, 7)) + '-01';
       this._render();
     }
     _flash(er) { this._msg = String((er && er.message) || er); this._render(); clearTimeout(this._mt); this._mt = setTimeout(() => { this._msg = ''; this._render(); }, 4000); }

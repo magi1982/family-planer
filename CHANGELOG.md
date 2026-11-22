@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.19.9 – 2026-11-22
+### Fixed
+- **Special chores with their own rule (every few weeks/months, 1st Saturday, one-off dates …) did not show on coming days:** looking ahead (e.g. at Monday) only showed the weekly plan. Their next dates now show for the right person, marked with ⭐.
+- **Date picker closed at once** when adding a date (one-off, yearly) or choosing the start of a special chore, e.g. on an iPad. The planner no longer redraws while the picker is open; the date is taken when you leave the field.
+
 ## 0.19.8 – 2026-11-21
 ### Added
 - **A present for everyone:** once, every person with pets gets a random toy (one they don't have yet), so the pets can play and get happy again. Toys stay and can be used again and again.

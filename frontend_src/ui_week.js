@@ -618,7 +618,15 @@ class LoxWochenplanerCard extends FpBase {
     if (((this._cfg.abwesend || {})[kid] || []).includes(ymd(date))) return [];
     const wd = isoWd(date);
     return (this._data.plan || []).map((p) => ({ t: p.summary, m: parseDesc(p.description) }))
-      .filter((p) => (planZ(p.m)[kid] || []).includes(wd) && planActive(p.m, kid, wd, date)).map((p) => { const f = (p.m.f || {})[`${kid}|${wd}`] || 1; return f > 1 ? `${p.t} (bis ${WD[(wd - 1 + f - 1) % 7]})` : p.t; }).sort((a, b) => a.localeCompare(b, 'de'));
+      .filter((p) => (planZ(p.m)[kid] || []).includes(wd) && planActive(p.m, kid, wd, date)).map((p) => { const f = (p.m.f || {})[`${kid}|${wd}`] || 1; return f > 1 ? `${p.t} (bis ${WD[(wd - 1 + f - 1) % 7]})` : p.t; })
+      .concat(this._schedFor(kid, date)).sort((a, b) => a.localeCompare(b, 'de'));
+  }
+  // special chores with their own rule (every 6 months, 1st Saturday …) are not in the weekly plan: their next dates come from the server
+  _schedFor(kid, date) {
+    const s = (this.fpStore && this.fpStore.snap) || {}; const p = (s.persons || []).find((x) => x.name === kid); if (!p) return [];
+    const ds = ymd(date); const wd = isoWd(date);
+    return (s.chores || []).filter((c) => c.schedule && (c.upcoming || []).some((u) => u.date === ds && (u.persons || []).includes(p.id)))
+      .map((c) => { const f = Number(c.window) || 1; return `⭐ ${c.title}${f > 1 ? ` (bis ${WD[(wd - 1 + f - 1) % 7]})` : ''}`; });
   }
   _onClick(e) {
     const fpp = e.target.closest('[data-fppet]');
@@ -838,7 +846,7 @@ class LoxWochenplanerCard extends FpBase {
         }
         if (modeX === 'extra' && ds !== tStr) {
           const sp = alle.filter((i) => i.m.k === k.name && specIds.has(i.m.c) && i.status !== 'completed' && (i.m.d || '') <= ds && (i.m.e || i.m.d || '') >= ds);
-          return `<div class="c ${ds < tStr ? 'p' : 'f'}${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}">${sp.map((i) => `<div class="pl spl">⭐ ${esc(i.summary)}</div>`).join('') || '<div class="none">–</div>'}</div>`;
+          return `<div class="c ${ds < tStr ? 'p' : 'f'}${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}">${sp.map((i) => `<div class="pl spl">⭐ ${esc(i.summary)}</div>`).join('') + (ds > tStr ? this._schedFor(k.name, d).map((x) => `<div class="pl spl">${esc(x)}</div>`).join('') : '') || '<div class="none">–</div>'}</div>`;
         }
         const pl = this._planFor(k.name, d);
         const opl = alle.filter((i) => i.m.k === k.name && i.status !== 'completed' && (i.m.d || '') <= tStr && (i.m.e || i.m.d || '') >= ds);

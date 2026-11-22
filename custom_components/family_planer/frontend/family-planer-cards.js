@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.8'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.9'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
@@ -3471,7 +3471,15 @@ class LoxWochenplanerCard extends FpBase {
     if (((this._cfg.abwesend || {})[kid] || []).includes(ymd(date))) return [];
     const wd = isoWd(date);
     return (this._data.plan || []).map((p) => ({ t: p.summary, m: parseDesc(p.description) }))
-      .filter((p) => (planZ(p.m)[kid] || []).includes(wd) && planActive(p.m, kid, wd, date)).map((p) => { const f = (p.m.f || {})[`${kid}|${wd}`] || 1; return f > 1 ? `${p.t} (bis ${WD[(wd - 1 + f - 1) % 7]})` : p.t; }).sort((a, b) => a.localeCompare(b, 'de'));
+      .filter((p) => (planZ(p.m)[kid] || []).includes(wd) && planActive(p.m, kid, wd, date)).map((p) => { const f = (p.m.f || {})[`${kid}|${wd}`] || 1; return f > 1 ? `${p.t} (bis ${WD[(wd - 1 + f - 1) % 7]})` : p.t; })
+      .concat(this._schedFor(kid, date)).sort((a, b) => a.localeCompare(b, 'de'));
+  }
+  // special chores with their own rule (every 6 months, 1st Saturday …) are not in the weekly plan: their next dates come from the server
+  _schedFor(kid, date) {
+    const s = (this.fpStore && this.fpStore.snap) || {}; const p = (s.persons || []).find((x) => x.name === kid); if (!p) return [];
+    const ds = ymd(date); const wd = isoWd(date);
+    return (s.chores || []).filter((c) => c.schedule && (c.upcoming || []).some((u) => u.date === ds && (u.persons || []).includes(p.id)))
+      .map((c) => { const f = Number(c.window) || 1; return `⭐ ${c.title}${f > 1 ? ` (bis ${WD[(wd - 1 + f - 1) % 7]})` : ''}`; });
   }
   _onClick(e) {
     const fpp = e.target.closest('[data-fppet]');
@@ -3691,7 +3699,7 @@ class LoxWochenplanerCard extends FpBase {
         }
         if (modeX === 'extra' && ds !== tStr) {
           const sp = alle.filter((i) => i.m.k === k.name && specIds.has(i.m.c) && i.status !== 'completed' && (i.m.d || '') <= ds && (i.m.e || i.m.d || '') >= ds);
-          return `<div class="c ${ds < tStr ? 'p' : 'f'}${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}">${sp.map((i) => `<div class="pl spl">⭐ ${esc(i.summary)}</div>`).join('') || '<div class="none">–</div>'}</div>`;
+          return `<div class="c ${ds < tStr ? 'p' : 'f'}${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}">${sp.map((i) => `<div class="pl spl">⭐ ${esc(i.summary)}</div>`).join('') + (ds > tStr ? this._schedFor(k.name, d).map((x) => `<div class="pl spl">${esc(x)}</div>`).join('') : '') || '<div class="none">–</div>'}</div>`;
         }
         const pl = this._planFor(k.name, d);
         const opl = alle.filter((i) => i.m.k === k.name && i.status !== 'completed' && (i.m.d || '') <= tStr && (i.m.e || i.m.d || '') >= ds);
@@ -4956,7 +4964,15 @@ class LoxWochenplanerCard extends FpBase {
     if (((this._cfg.abwesend || {})[kid] || []).includes(ymd(date))) return [];
     const wd = isoWd(date);
     return (this._data.plan || []).map((p) => ({ t: p.summary, m: parseDesc(p.description) }))
-      .filter((p) => (planZ(p.m)[kid] || []).includes(wd) && planActive(p.m, kid, wd, date)).map((p) => { const f = (p.m.f || {})[`${kid}|${wd}`] || 1; return f > 1 ? `${p.t} (until ${WD[(wd - 1 + f - 1) % 7]})` : p.t; }).sort((a, b) => a.localeCompare(b, 'de'));
+      .filter((p) => (planZ(p.m)[kid] || []).includes(wd) && planActive(p.m, kid, wd, date)).map((p) => { const f = (p.m.f || {})[`${kid}|${wd}`] || 1; return f > 1 ? `${p.t} (until ${WD[(wd - 1 + f - 1) % 7]})` : p.t; })
+      .concat(this._schedFor(kid, date)).sort((a, b) => a.localeCompare(b, 'de'));
+  }
+  // special chores with their own rule (every 6 months, 1st Saturday …) are not in the weekly plan: their next dates come from the server
+  _schedFor(kid, date) {
+    const s = (this.fpStore && this.fpStore.snap) || {}; const p = (s.persons || []).find((x) => x.name === kid); if (!p) return [];
+    const ds = ymd(date); const wd = isoWd(date);
+    return (s.chores || []).filter((c) => c.schedule && (c.upcoming || []).some((u) => u.date === ds && (u.persons || []).includes(p.id)))
+      .map((c) => { const f = Number(c.window) || 1; return `⭐ ${c.title}${f > 1 ? ` (bis ${WD[(wd - 1 + f - 1) % 7]})` : ''}`; });
   }
   _onClick(e) {
     const fpp = e.target.closest('[data-fppet]');
@@ -5176,7 +5192,7 @@ class LoxWochenplanerCard extends FpBase {
         }
         if (modeX === 'extra' && ds !== tStr) {
           const sp = alle.filter((i) => i.m.k === k.name && specIds.has(i.m.c) && i.status !== 'completed' && (i.m.d || '') <= ds && (i.m.e || i.m.d || '') >= ds);
-          return `<div class="c ${ds < tStr ? 'p' : 'f'}${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}">${sp.map((i) => `<div class="pl spl">⭐ ${esc(i.summary)}</div>`).join('') || '<div class="none">–</div>'}</div>`;
+          return `<div class="c ${ds < tStr ? 'p' : 'f'}${T[ds] === 's' ? ' sm' : ''}" data-focus="${ds}">${sp.map((i) => `<div class="pl spl">⭐ ${esc(i.summary)}</div>`).join('') + (ds > tStr ? this._schedFor(k.name, d).map((x) => `<div class="pl spl">${esc(x)}</div>`).join('') : '') || '<div class="none">–</div>'}</div>`;
         }
         const pl = this._planFor(k.name, d);
         const opl = alle.filter((i) => i.m.k === k.name && i.status !== 'completed' && (i.m.d || '') <= tStr && (i.m.e || i.m.d || '') >= ds);
@@ -6657,6 +6673,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         const r = this.shadowRoot;
         r.addEventListener('click', (e) => this._click(e));
         r.addEventListener('change', (e) => this._change(e));
+        r.addEventListener('focusout', (e) => { if (this._dateLater && e.target === this._dateLater) setTimeout(() => this._dateDone(), 30); });
         r.addEventListener('input', (e) => { if (e.target.dataset.k === 'title') this._ed.title = e.target.value; });
       }
       this._render();
@@ -6701,11 +6718,21 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (k === 'title') this._ed.title = el.value;
       else if (k === 'points') this._ed.points = num(el.value);
       else if (k === 'window') this._ed.window = Math.max(1, Math.min(60, num(el.value) || 1));
-      else if (k === 'adddate' && el.value) { const v = sc.type === 'yearly' ? el.value.slice(5) : el.value; if (!sc.dates.includes(v)) sc.dates = [...sc.dates, v].sort(); el.value = ''; }
+      // date fields: while the picker is open (iPad fills in today as soon as it opens) nothing is drawn again –
+      // redrawing closed the picker at once. The date is taken when the field is left.
+      else if (/^(adddate|start|mstart)$/.test(k) && this.shadowRoot.activeElement === el) { this._dateLater = el; return; }
+      else if (k === 'adddate' && el.value) this._addDate(el);
       else if (k === 'start') sc.start = el.value || todayIso();
       else if (k === 'mstart') sc.start = (el.value || todayIso().slice(0, 7)) + '-01';
       else if (['every', 'day', 'nth', 'weekday'].includes(k)) sc[k] = num(el.value);
       else if (k === 'unit' || k === 'mode') sc[k] = el.value;
+      this._render();
+    }
+    _addDate(el) { const sc = this._ed.schedule; const v = sc.type === 'yearly' ? el.value.slice(5) : el.value; if (!sc.dates.includes(v)) sc.dates = [...sc.dates, v].sort(); el.value = ''; }
+    _dateDone() {
+      const el = this._dateLater; this._dateLater = null; if (!el || !this._ed) return;
+      const k = el.dataset.k; const sc = this._ed.schedule;
+      if (k === 'adddate') { if (el.value) this._addDate(el); } else if (k === 'start') sc.start = el.value || todayIso(); else sc.start = (el.value || todayIso().slice(0, 7)) + '-01';
       this._render();
     }
     _flash(er) { this._msg = String((er && er.message) || er); this._render(); clearTimeout(this._mt); this._mt = setTimeout(() => { this._msg = ''; this._render(); }, 4000); }
