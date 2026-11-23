@@ -954,3 +954,17 @@ Beispiel: 1 Ämtli erledigt = 30 → 18:47 zweites dazu → 15 (−15) → 18:48
 
 ## #73 Tierchen: alles Benutzbare direkt beim aktuellen Tierchen (22.11.)
 - Beim aktuellen Tierchen eine Leiste „Jetzt benutzen“ mit allem aus dem Inventar, das bei diesem Tierchen geht (Pillen, Pflege, Spielzeug, Artefakte); geht es gerade nicht, ausgegraut mit Grund (Balken voll, zu müde, satt). Antippen = benutzen.
+
+## #74 Durchsicht 23.11. – 12 Vorschläge (Galerie, Entscheid offen)
+1. Fehler: mehrtägige Ämtli („bis Fr“) zählen jeden Tag neu in die faire Verteilung → nur am Starttag zählen.
+2. Fehler: Fabelwesen/Einhorn/Drache – Schlüpfen wählt nie die Babyfarbe, 27 von 45 Endformen unerreichbar → Farbwahl beim Schlüpfen.
+3. Fehler: #71 Variante B (später dazugekommene Ämtli zählen ab morgen) umsetzen.
+4. Automatische Klick-Tests (Playwright, iPad-Grösse, Beispieldaten) bei jedem Push.
+5. Listen: Grundwort zuerst (Apfelsaft → Getränke, Butterkekse → Süsses).
+6. Listen: Schweizer Sortiment (Sbrinz, Wienerli, Ovomaltine, Rivella, Gnocchi …) + Abteilung „Kühlregal“.
+7. Planer: alle Personen-Spalten passen aufs iPad (Eltern schmaler).
+8. Planer: Ämtli-Knöpfe kompakter, Münzen neben dem Titel, Titel max. 2 Zeilen.
+9. Planer: Tagesziel „18 von 30 Münzen heute“ pro Kind.
+10. Ämtliplan: Punkte-Vorschau pro Kind + Warnung, wenn ein Ämtli > 50 % des Tages ausmacht.
+11. Tierchen: Entwicklungsbaum zeigt alle möglichen Enden als Silhouetten statt einer festen Endform.
+12. Tierchen: „Jetzt benutzen“-Leiste beim aktuellen Tierchen (= #73).
