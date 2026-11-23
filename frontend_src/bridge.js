@@ -226,7 +226,7 @@
       if (!INNER[this._cfg.view]) throw new Error('view: week | plan | lists | rewards | settings');
       this._sig = null; this._inner = null; this.innerHTML = ''; this._attach();
     }
-    set hass(h) { this._hass = h; this._attach(); if (window.FPSCREEN && this._store) window.FPSCREEN.update(h, this._store.snap); if (this._inner && this._wrapped) this._inner.hass = STORE_VIEWS.includes(this._cfg.view) ? h : this._wrap(); }
+    set hass(h) { this._hass = h; this._attach(); if (window.FPSCREEN && this._store) window.FPSCREEN.update(h, this._store.snap, this); if (this._inner && this._wrapped) this._inner.hass = STORE_VIEWS.includes(this._cfg.view) ? h : this._wrap(); }
     // to-do window of the planer (opened from the button in the top bar of the week view)
     _todoWin(lang) {
       if (!this._win || this._win.parentNode !== this) {
@@ -279,7 +279,7 @@
     }
     _sync() {
       const s = this._store.snap;
-      if (window.FPSCREEN) window.FPSCREEN.update(this._hass, s);
+      if (window.FPSCREEN) window.FPSCREEN.update(this._hass, s, this);
       if (!s) { if (this._store.err) this.innerHTML = `<ha-card style="padding:16px">Family Planer: ${this._store.err}</ha-card>`; return; }
       const lang = LANG(this._hass, this._cfg, this._store); const view = this._cfg.view;
       const mod = view === 'lists' ? 'lists' : view === 'settings' ? null : 'week';

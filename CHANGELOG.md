@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.11 – 2026-11-23
+### Fixed
+- **Black screen in other apps:** "Black screen when idle" also turned other menus and add-on pages (e.g. Worldmap) black, because taps inside an add-on page never reach the dashboard. The saver now only works while the planer is shown on its own dashboard; leaving it lifts the black at once and restarts the timer.
+
 ## 0.19.10 – 2026-11-23
 ### Fixed
 - **Pet evolution showed the wrong way:** after choosing a colour or way, the next evolution offered the ways of another branch, so the final form looked different from what was shown before. The planner now finds the pet on its own way (in the evolve dialog and in the evolution tree, which also highlights the pet's real way).

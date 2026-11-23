@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.10'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.11'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
@@ -7907,12 +7907,26 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
 // ---------------------------------------------------------------------------
 // Black screen when idle (wall tablet): after N minutes without a tap and without motion the planner turns black.
 // A motion sensor (Home Assistant state "on") or a tap wakes it at once; the waking tap does nothing else.
-// window.FPSCREEN.update(hass, snap) – called by every planer card on each update; one saver per page.
+// window.FPSCREEN.update(hass, snap, card) – called by every planer card on each update; one saver per page.
+// The saver belongs to the planer's own dashboard: in any other menu or app (e.g. an add-on page, whose taps happen
+// inside its own frame and never reach this page) it stays off and the idle timer starts again.
 // ---------------------------------------------------------------------------
 (() => {
   if (window.FPSCREEN) return;
   let cfg = { enabled: false, minutes: 5, style: 'black', motion: [] };
   let last = Date.now(); let dark = false; let layer = null; let timer = null; let seen = {}; let moving = false;
+  const cards = new Set(); let withCards = false; // planer cards that asked for the saver
+  const root = () => ((window.location && window.location.pathname) || '').split('/')[1] || '';
+  // is a planer card shown right now? (connected, visible, on the dashboard the address points to)
+  const onPlaner = () => {
+    if (typeof document.visibilityState === 'string' && document.visibilityState !== 'visible') return false;
+    if (!withCards) return true; // older callers without a card
+    for (const c of cards) {
+      if (!c.isConnected) { cards.delete(c); continue; }
+      if (c.getClientRects().length && c.__fpRoot === root()) return true;
+    }
+    return false;
+  };
 
   const wake = () => { last = Date.now(); if (!dark) return; dark = false; if (layer) { layer.style.opacity = '0'; layer.style.pointerEvents = 'none'; } };
   const clockHtml = () => { const d = new Date(); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
@@ -7942,14 +7956,19 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
   };
   const tick = () => {
     if (!cfg.enabled) { wake(); return; }
+    if (!onPlaner()) { wake(); last = Date.now(); return; } // another menu or app: never black there
     if (dark) { paint(); return; }
     if (moving) { last = Date.now(); return; } // someone is there: stay on
     if (Date.now() - last >= cfg.minutes * 60000) sleep();
   };
   // every tap or key counts as activity (capture: also taps inside cards)
   ['pointerdown', 'keydown', 'wheel'].forEach((t) => window.addEventListener(t, () => { if (!dark) last = Date.now(); }, { capture: true, passive: true }));
+  // leaving the planer (other dashboard, settings, an add-on) lifts the black at once and restarts the timer
+  ['location-changed', 'popstate', 'visibilitychange'].forEach((t) => (t === 'visibilitychange' ? document : window).addEventListener
+    && (t === 'visibilitychange' ? document : window).addEventListener(t, () => { if (!onPlaner()) { wake(); last = Date.now(); } }));
 
-  const update = (hass, snap) => {
+  const update = (hass, snap, card) => {
+    if (card && card.isConnected && card.getClientRects && card.getClientRects().length) { card.__fpRoot = root(); cards.add(card); withCards = true; }
     const c = snap && snap.screen_cfg;
     if (c) cfg = c;
     if (!cfg.enabled) { wake(); if (timer) { clearInterval(timer); timer = null; } return; }
@@ -9050,7 +9069,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!INNER[this._cfg.view]) throw new Error('view: week | plan | lists | rewards | settings');
       this._sig = null; this._inner = null; this.innerHTML = ''; this._attach();
     }
-    set hass(h) { this._hass = h; this._attach(); if (window.FPSCREEN && this._store) window.FPSCREEN.update(h, this._store.snap); if (this._inner && this._wrapped) this._inner.hass = STORE_VIEWS.includes(this._cfg.view) ? h : this._wrap(); }
+    set hass(h) { this._hass = h; this._attach(); if (window.FPSCREEN && this._store) window.FPSCREEN.update(h, this._store.snap, this); if (this._inner && this._wrapped) this._inner.hass = STORE_VIEWS.includes(this._cfg.view) ? h : this._wrap(); }
     // to-do window of the planer (opened from the button in the top bar of the week view)
     _todoWin(lang) {
       if (!this._win || this._win.parentNode !== this) {
@@ -9103,7 +9122,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     _sync() {
       const s = this._store.snap;
-      if (window.FPSCREEN) window.FPSCREEN.update(this._hass, s);
+      if (window.FPSCREEN) window.FPSCREEN.update(this._hass, s, this);
       if (!s) { if (this._store.err) this.innerHTML = `<ha-card style="padding:16px">Family Planer: ${this._store.err}</ha-card>`; return; }
       const lang = LANG(this._hass, this._cfg, this._store); const view = this._cfg.view;
       const mod = view === 'lists' ? 'lists' : view === 'settings' ? null : 'week';

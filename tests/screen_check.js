@@ -24,4 +24,14 @@ S.update(hass('on', 'b'), snap); ok(!S._state().dark, 'motion wakes');
 now += 30 * 60000; run(); ok(!S._state().dark, 'stays on while motion is on');
 S.update(hass('off', 'c'), snap); now += 6 * 60000; run(); ok(S._state().dark, 'dark after motion ended');
 S.update(hass('off', 'c'), { screen_cfg: { ...snap.screen_cfg, enabled: false } }); ok(!S._state().dark, 'switching off wakes');
+// the saver belongs to the planer's dashboard only (not other menus or add-on pages like Worldmap)
+window.location = { pathname: '/family-planer/0' };
+const card = { isConnected: true, rects: 1, getClientRects() { return { length: this.rects }; } };
+S.update(hass('off', 'd'), snap, card); now += 6 * 60000; run(); ok(S._state().dark, 'dark on the planer dashboard');
+listeners.pointerdown && S.wake();
+window.location = { pathname: '/hassio/ingress/x_worldmap' }; listeners['location-changed'](); ok(!S._state().dark, 'leaving lifts the black');
+now += 30 * 60000; run(); ok(!S._state().dark, 'never black in another app');
+window.location = { pathname: '/family-planer/0' }; card.rects = 0; now += 30 * 60000; run(); ok(!S._state().dark, 'not black while the card is hidden');
+card.isConnected = false; card.rects = 1; now += 30 * 60000; run(); ok(!S._state().dark, 'not black after the card left the page');
+card.isConnected = true; S.update(hass('off', 'd'), snap, card); now += 6 * 60000; run(); ok(S._state().dark, 'back on the planer: works again');
 console.log('screen ok');
