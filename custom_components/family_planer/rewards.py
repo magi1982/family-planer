@@ -153,20 +153,27 @@ def fair_shares(items: list[tuple[str, int, bool]], day_points: int) -> dict[str
     return out
 
 
-def item_points(items: list[tuple[str, int]], fair: bool, day_points: int) -> dict[str, int]:
+def item_points(items: list[tuple[str, int]], fair: bool, day_points: int, own: set[str] | None = None) -> dict[str, int]:
     """Points one person's chores of today are worth – what the planner shows next to each chore.
 
     items: (item id, chore weight). Fair mode: the share of day_points (same as rebook_fair books);
-    per-chore mode: the chore's own weight.
+    per-chore mode: the chore's own weight. own: items that always keep their own points (special chores with
+    their own rule) – they come on top and never eat up the day's share of the normal chores.
     """
+    own = own or set()
     if fair:
-        return fair_shares([(iid, w, False) for iid, w in items], day_points)
+        out = fair_shares([(iid, w, False) for iid, w in items if iid not in own], day_points)
+        out.update({iid: max(0, int(w)) for iid, w in items if iid in own})
+        return out
     return {iid: max(0, int(w)) for iid, w in items}
 
 
-def rebook_fair(data: dict, pid: str, items: list[tuple[str, dict, int]], day_points: int, ts: str) -> None:
-    """Re-book the chore points of one person's current items (done ones get their fair share)."""
-    shares = fair_shares([(iid, w, bool(it.get("done"))) for iid, it, w in items], day_points)
+def rebook_fair(data: dict, pid: str, items: list[tuple[str, dict, int]], day_points: int, ts: str,
+                own: set[str] | None = None) -> None:
+    """Re-book the chore points of one person's current items (done ones get their fair share; own = own points)."""
+    own = own or set()
+    shares = fair_shares([(iid, w, bool(it.get("done"))) for iid, it, w in items if iid not in own], day_points)
+    shares.update({iid: max(0, int(w)) for iid, _it, w in items if iid in own})
     for iid, it, _w in items:
         ref = f"item:{iid}"
         old = next((e for e in data["ledger"] if e.get("ref") == ref), None)

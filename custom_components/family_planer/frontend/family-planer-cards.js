@@ -1,5 +1,5 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
-window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.11'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
+window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.19.12'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
 // Seasons & weather: animated header scene, page background, band, check effect and suggestions.
 // Everything is drawn from data (season from the server, weather from the HA weather entity) – no images.
@@ -7013,7 +7013,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     { id: 'points', icon: 'mdi:star-circle-outline', label: { de: 'Münzen', en: 'Coins' }, fields: [
       F('mode', 'select', 'Münzen verteilen', 'How coins are given', 'Fair: ein ganz erledigter Tag ist für alle gleich viel wert. Pro Ämtli: mehr Ämtli, mehr Münzen.', 'Fair: a fully completed day is worth the same for everybody. Per chore: more chores, more coins.',
         { opts: [['fair', { de: 'Fair', en: 'Fair' }], ['per_chore', { de: 'Pro Ämtli', en: 'Per chore' }]] }),
-      F('day_points', 'num', 'Münzen für einen ganzen Tag (fair)', 'Points for a full day (fair)', 'Wird auf die Ämtli des Tages verteilt.', 'Split across the day\'s chores.', { min: 0, max: 1000 }),
+      F('day_points', 'num', 'Münzen für einen ganzen Tag (fair)', 'Points for a full day (fair)', 'Wird auf die Ämtli des Tages verteilt. ⭐ Spezial-Ämtli behalten ihre eigenen Punkte obendrauf.', 'Split across the day\'s chores. ⭐ Special chores keep their own points on top.', { min: 0, max: 1000 }),
       F('default_points', 'num', 'Münzen pro Ämtli (Standard bzw. Gewicht)', 'Points per chore (default or weight)', 'Pro Ämtli im Ämtliplan änderbar.', 'Can be changed per chore in the chore plan.', { min: 0, max: 1000 }),
       F('day_bonus', 'num', 'Tagesbonus', 'Day bonus', 'Für einen ganz erledigten Tag.', 'For a fully completed day.', { min: 0, max: 1000 }),
       F('streak_bonus', 'num', 'Serienbonus', 'Streak bonus', 'Für jede 7-Tage-Serie.', 'For every 7-day streak.', { min: 0, max: 1000 }),
@@ -8600,7 +8600,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     }
     _body(s, t, pr, st) {
       if (this._sub && this._sub.tree) return this._tree(s, t, st, this._sub.tree);
-      if (this._sub && this._sub.pet && st.pets[this._sub.pet]) return `<div class="back"><button class="okb" data-back>‹ ${t.backColl}</button></div>${this._petView(s, t, pr, st, this._sub.pet)}`;
+      if (this._sub && this._sub.pet && st.pets[this._sub.pet]) return `<div class="back"><button class="okb" data-back>‹ ${this._sub.egg ? t.back : t.backColl}</button></div>${this._petView(s, t, pr, st, this._sub.pet)}`;
       if (this._tab === 'tier') return this._petView(s, t, pr, st, st.active);
       if (this._tab === 'inv') return this._inv(t, st);
       if (this._tab === 'samm') return this._coll(s, t, st);
@@ -8616,7 +8616,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const have = [...CARE_ITEMS, ...TOYS, 'kissen', 'laterne'].filter((k) => (st.inv[k] || 0) > 0);
       const waiting = !egg && Object.entries(st.pets).find(([, q]) => q.step === 0);
       const hr = new Date().getHours(); const sl = st.sleep || [21, 7]; const napEnd = p.nap ? new Date(p.nap) : null; const napping = !egg && napEnd && napEnd > new Date(); const sleeping = !egg && !napping && (hr >= sl[0] || hr < sl[1]);
-      const eggCard = waiting ? `<button class="eggwait" data-gotoegg="${esc(waiting[0])}"><span class="ew">${svgOf(waiting[0], waiting[1])}</span><b>🥚 ${esc(t.eggWaits)}</b><span class="go">›</span></button>` : '';
+      const eggCard = waiting ? `<button class="eggwait" data-gotoegg="${esc(waiting[0])}"><span class="ew">${svgOf(waiting[0], waiting[1])}</span><b>${esc(t.eggWaits)}</b><span class="go">›</span></button>` : '';
       return `${eggCard}<div class="dev${cares ? ' two' : ''}">
         <div class="tile big" style="--pc:${col}"><div class="top"><span class="stg">${esc(t.steps[p.step])}</span>${act ? `<em class="act">${t.active}</em>` : ''}</div>
           ${cares ? `<div class="cbox" data-cbox="${esc(id)}"></div>` : `<div class="spot" style="--tc:${col}">${svgOf(id, p)}</div>`}
@@ -8828,7 +8828,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         const inp = w.querySelector('input'); inp.focus(); inp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') w.querySelector('[data-nicksave]').click(); }); return; }
       if ((b = q('[data-nicksave]'))) { const v = this.shadowRoot.querySelector('.nick input').value; this._hold = 0; this._act('nick', { pet: b.dataset.nicksave, nick: v.slice(0, 16) }); return; }
       if ((b = q('[data-info]'))) { this._info(b.dataset.info); return; }
-      if ((b = q('[data-gotoegg]'))) { this._act('active', { pet: b.dataset.gotoegg }, () => { this._tab = 'tier'; this._sub = null; this.update(); }); return; }
+      // the egg opens right here (no server call): points can go in and it hatches, the active pet stays the active one
+      if ((b = q('[data-gotoegg]'))) { this._sub = { pet: b.dataset.gotoegg, egg: true }; this._render(); return; }
       if ((b = q('[data-artskin]'))) { this._act('artfx', { pet: b.dataset.artpet, skin: b.dataset.artskin }); return; }
       if ((b = q('[data-artaura]'))) { this._act('artfx', { pet: b.dataset.artpet, aura: b.dataset.artaura === '1' }); return; }
       if ((b = q('[data-use]'))) {

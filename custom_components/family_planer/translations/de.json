@@ -302,7 +302,7 @@
           "day_bonus": "Wird beim Tageswechsel gutgeschrieben.",
           "streak_bonus": "Nach 7, 14, 21 … Tagen am Stück alles erledigt.",
           "mode": "Fair: Wer alle seine Ämtli des Tages erledigt, bekommt gleich viele Münzen – egal ob 2 oder 6 Ämtli. Pro Ämtli: jedes Ämtli bringt seine Münzen, wer mehr Ämtli hat, kann mehr verdienen.",
-          "day_points": "Wird auf die Ämtli des Tages verteilt; jedes erledigte Ämtli bringt sofort seinen Anteil. Der Wert im Ämtliplan wirkt dabei als Gewicht (z. B. 20 = zählt doppelt so viel wie 10).",
+          "day_points": "Wird auf die Ämtli des Tages verteilt; jedes erledigte Ämtli bringt sofort seinen Anteil. Der Wert im Ämtliplan wirkt dabei als Gewicht (z. B. 20 = zählt doppelt so viel wie 10). ⭐ Spezial-Ämtli (eigene Regel) behalten immer ihre eigenen Punkte obendrauf.",
           "remove_pin": "Setzt die PIN auf die Start-PIN 123456 zurück. Sie muss danach im Planer sofort geändert werden.",
           "reward_value": "Geldwert einer grossen Belohnung (so viel verdient jemand in einem Monat, wenn alle Ämtli erledigt sind – inkl. Boni). Klein = ¼, Mittel = ½, Mega = 2×, Riesig = 5×. Dient nur zur Orientierung, z. B. 20.",
           "currency": "Wird hinter den Beträgen angezeigt, z. B. CHF oder €."

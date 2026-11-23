@@ -847,13 +847,18 @@ class FamilyPlanner:
         mode = (self.settings.get("gamification") or {}).get("mode")
         return mode if mode in rewards.MODES else "fair"
 
+    def own_points_items(self, items: list[tuple[str, dict]]) -> set[str]:
+        """Items of special chores (own rule, ⭐ Spezial): they keep their own points in fair mode."""
+        return {iid for iid, it in items if (self.data["chores"].get(it.get("chore_id") or "") or {}).get("schedule")}
+
     def item_points(self) -> dict[str, int]:
         """Points each of today's chores is worth (shown on the chore button)."""
         today, fair, out = self.today(), self.points_mode() == "fair", {}
         day = self.gamification()["day_points"]
         for pid in self.data["persons"]:
-            items = [(iid, self.chore_points(it.get("chore_id"))) for iid, it in engine.active_items(self.data["items"], pid, today)]
-            out.update(rewards.item_points(items, fair, day))
+            act = engine.active_items(self.data["items"], pid, today)
+            items = [(iid, self.chore_points(it.get("chore_id"))) for iid, it in act]
+            out.update(rewards.item_points(items, fair, day, self.own_points_items(act)))
         return out
 
     @callback
@@ -864,9 +869,9 @@ class FamilyPlanner:
         today = self.today()
         g = self.gamification()
         for pid in person_ids or list(self.data["persons"]):
-            items = [(iid, it, self.chore_points(it.get("chore_id")))
-                     for iid, it in engine.active_items(self.data["items"], pid, today)]
-            rewards.rebook_fair(self.data, pid, items, g["day_points"], dt_util.now().isoformat())
+            act = engine.active_items(self.data["items"], pid, today)
+            items = [(iid, it, self.chore_points(it.get("chore_id"))) for iid, it in act]
+            rewards.rebook_fair(self.data, pid, items, g["day_points"], dt_util.now().isoformat(), self.own_points_items(act))
 
     async def async_rollover(self) -> None:
         today = self.today()

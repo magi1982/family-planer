@@ -28,3 +28,13 @@ def test_night_veil_stays_on_the_planer_dashboard():
     night = src[a:src.index("    getCardSize()", a)]
     assert "addEventListener('location-changed'" in night and "n.dataset.root !== root()" in night
     assert "!this.isConnected" in night and "v.dataset.root = root();" in night
+
+
+def test_egg_banner_shows_one_egg_and_opens_the_egg_locally():
+    """The banner drew the egg twice (picture + 🥚) and its tap waited for a server call that changed nothing visible."""
+    src = (pathlib.Path(__file__).parents[1] / "frontend_src" / "pets_ui.js").read_text()
+    card = src[src.index("const eggCard = waiting"):]
+    card = card[:card.index("\n")]
+    assert "🥚" not in card and "data-gotoegg" in card
+    assert "this._sub = { pet: b.dataset.gotoegg, egg: true }; this._render();" in src
+    assert "_act('active', { pet: b.dataset.gotoegg }" not in src

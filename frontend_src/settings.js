@@ -71,7 +71,7 @@
     { id: 'points', icon: 'mdi:star-circle-outline', label: { de: 'Münzen', en: 'Coins' }, fields: [
       F('mode', 'select', 'Münzen verteilen', 'How coins are given', 'Fair: ein ganz erledigter Tag ist für alle gleich viel wert. Pro Ämtli: mehr Ämtli, mehr Münzen.', 'Fair: a fully completed day is worth the same for everybody. Per chore: more chores, more coins.',
         { opts: [['fair', { de: 'Fair', en: 'Fair' }], ['per_chore', { de: 'Pro Ämtli', en: 'Per chore' }]] }),
-      F('day_points', 'num', 'Münzen für einen ganzen Tag (fair)', 'Points for a full day (fair)', 'Wird auf die Ämtli des Tages verteilt.', 'Split across the day\'s chores.', { min: 0, max: 1000 }),
+      F('day_points', 'num', 'Münzen für einen ganzen Tag (fair)', 'Points for a full day (fair)', 'Wird auf die Ämtli des Tages verteilt. ⭐ Spezial-Ämtli behalten ihre eigenen Punkte obendrauf.', 'Split across the day\'s chores. ⭐ Special chores keep their own points on top.', { min: 0, max: 1000 }),
       F('default_points', 'num', 'Münzen pro Ämtli (Standard bzw. Gewicht)', 'Points per chore (default or weight)', 'Pro Ämtli im Ämtliplan änderbar.', 'Can be changed per chore in the chore plan.', { min: 0, max: 1000 }),
       F('day_bonus', 'num', 'Tagesbonus', 'Day bonus', 'Für einen ganz erledigten Tag.', 'For a fully completed day.', { min: 0, max: 1000 }),
       F('streak_bonus', 'num', 'Serienbonus', 'Streak bonus', 'Für jede 7-Tage-Serie.', 'For every 7-day streak.', { min: 0, max: 1000 }),

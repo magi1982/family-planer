@@ -302,7 +302,7 @@
           "day_bonus": "Credited at the day change.",
           "streak_bonus": "After 7, 14, 21 … days in a row with everything done.",
           "mode": "Fair: whoever finishes all of their chores of the day gets the same coins – whether 2 or 6 chores. Per chore: each chore earns its coins, so more chores means more coins.",
-          "day_points": "Split across the day's chores; each done chore immediately earns its share. The value in the chore plan acts as a weight (e.g. 20 counts twice as much as 10).",
+          "day_points": "Split across the day's chores; each done chore immediately earns its share. The value in the chore plan acts as a weight (e.g. 20 counts twice as much as 10). ⭐ Special chores (own rule) always keep their own points on top.",
           "remove_pin": "Resets the PIN to the start PIN 123456. It must then be changed in the planner right away.",
           "reward_value": "Money equivalent of a large reward (what a person earns in a month with every chore done, incl. bonuses). Small = ¼, medium = ½, mega = 2×, giant = 5×. Only shown as a guide, e.g. 20.",
           "currency": "Shown after the amounts, e.g. CHF or €."

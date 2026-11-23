@@ -463,7 +463,7 @@
     }
     _body(s, t, pr, st) {
       if (this._sub && this._sub.tree) return this._tree(s, t, st, this._sub.tree);
-      if (this._sub && this._sub.pet && st.pets[this._sub.pet]) return `<div class="back"><button class="okb" data-back>‹ ${t.backColl}</button></div>${this._petView(s, t, pr, st, this._sub.pet)}`;
+      if (this._sub && this._sub.pet && st.pets[this._sub.pet]) return `<div class="back"><button class="okb" data-back>‹ ${this._sub.egg ? t.back : t.backColl}</button></div>${this._petView(s, t, pr, st, this._sub.pet)}`;
       if (this._tab === 'tier') return this._petView(s, t, pr, st, st.active);
       if (this._tab === 'inv') return this._inv(t, st);
       if (this._tab === 'samm') return this._coll(s, t, st);
@@ -479,7 +479,7 @@
       const have = [...CARE_ITEMS, ...TOYS, 'kissen', 'laterne'].filter((k) => (st.inv[k] || 0) > 0);
       const waiting = !egg && Object.entries(st.pets).find(([, q]) => q.step === 0);
       const hr = new Date().getHours(); const sl = st.sleep || [21, 7]; const napEnd = p.nap ? new Date(p.nap) : null; const napping = !egg && napEnd && napEnd > new Date(); const sleeping = !egg && !napping && (hr >= sl[0] || hr < sl[1]);
-      const eggCard = waiting ? `<button class="eggwait" data-gotoegg="${esc(waiting[0])}"><span class="ew">${svgOf(waiting[0], waiting[1])}</span><b>🥚 ${esc(t.eggWaits)}</b><span class="go">›</span></button>` : '';
+      const eggCard = waiting ? `<button class="eggwait" data-gotoegg="${esc(waiting[0])}"><span class="ew">${svgOf(waiting[0], waiting[1])}</span><b>${esc(t.eggWaits)}</b><span class="go">›</span></button>` : '';
       return `${eggCard}<div class="dev${cares ? ' two' : ''}">
         <div class="tile big" style="--pc:${col}"><div class="top"><span class="stg">${esc(t.steps[p.step])}</span>${act ? `<em class="act">${t.active}</em>` : ''}</div>
           ${cares ? `<div class="cbox" data-cbox="${esc(id)}"></div>` : `<div class="spot" style="--tc:${col}">${svgOf(id, p)}</div>`}
@@ -691,7 +691,8 @@
         const inp = w.querySelector('input'); inp.focus(); inp.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') w.querySelector('[data-nicksave]').click(); }); return; }
       if ((b = q('[data-nicksave]'))) { const v = this.shadowRoot.querySelector('.nick input').value; this._hold = 0; this._act('nick', { pet: b.dataset.nicksave, nick: v.slice(0, 16) }); return; }
       if ((b = q('[data-info]'))) { this._info(b.dataset.info); return; }
-      if ((b = q('[data-gotoegg]'))) { this._act('active', { pet: b.dataset.gotoegg }, () => { this._tab = 'tier'; this._sub = null; this.update(); }); return; }
+      // the egg opens right here (no server call): points can go in and it hatches, the active pet stays the active one
+      if ((b = q('[data-gotoegg]'))) { this._sub = { pet: b.dataset.gotoegg, egg: true }; this._render(); return; }
       if ((b = q('[data-artskin]'))) { this._act('artfx', { pet: b.dataset.artpet, skin: b.dataset.artskin }); return; }
       if ((b = q('[data-artaura]'))) { this._act('artfx', { pet: b.dataset.artpet, aura: b.dataset.artaura === '1' }); return; }
       if ((b = q('[data-use]'))) {

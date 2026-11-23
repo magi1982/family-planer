@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.19.12 – 2026-11-23
+### Fixed
+- **⭐ Special chores ate up the day's points (fair mode):** a special chore with its own rule was split together with the normal chores, so it took almost all of the day's points – the other chores showed +1 or nothing, and the special one less than set. Special chores now keep their own points on top; the normal chores share the day's points as before.
+- **Egg banner on the pet page:** it showed two eggs and a tap did nothing visible. It now shows one egg and opens the egg right away (put points in, hatch); the active pet stays the active one.
+
 ## 0.19.11 – 2026-11-23
 ### Fixed
 - **Black screen in other apps:** "Black screen when idle" also turned other menus and add-on pages (e.g. Worldmap) black, because taps inside an add-on page never reach the dashboard. The saver now only works while the planer is shown on its own dashboard; leaving it lifts the black at once and restarts the timer.
