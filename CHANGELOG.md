@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.19.13 – 2026-11-24
+### Security
+- **Code scanning (CodeQL) findings fixed:** the avatar picker now escapes its button value and replaces every separator in the label key (not only the first); a leftover no-op string replacement in the pet drawing was removed. A test keeps both patterns out of the frontend.
+
 ## 0.19.12 – 2026-11-23
 ### Fixed
 - **⭐ Special chores ate up the day's points (fair mode):** a special chore with its own rule was split together with the normal chores, so it took almost all of the day's points – the other chores showed +1 or nothing, and the special one less than set. Special chores now keep their own points on top; the normal chores share the day's points as before.

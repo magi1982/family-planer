@@ -220,7 +220,7 @@
     if (k === 'pinguin' && st === 'baby') { dlook.c = '#8C96A2'; dlook.b = '#DDE2E8'; }
     if (k === 'papagei' && st === 'baby') { dlook.c = '#B9C2CC'; dlook.b = '#DDE2E8'; dlook.wingC = '#9AA3AE'; }
     const B = body(dlook, st, form); dlook._bk = B.bk; dlook._st = st;
-    const hr = B.hr; const x = 50; const y = B.hy - (o.longLegs && form === 'stand' ? 0 : 0);
+    const hr = B.hr; const x = 50; const y = B.hy;
     const tk = (o.tk || 1) * (st === 'baby' ? .7 : st === 'jung' ? .88 : 1);
     const MO = CUR.morph || []; const tk2 = tk * (MO.includes('langschwanz') ? 1.9 : 1);
     if (o.tail && TAIL[o.tail]) { const one = TAIL[o.tail](dlook, B.tail[0], B.tail[1], tk2); back += MO.includes('dreischwanz') ? [-28, 0, 28].map((a) => `<g transform="rotate(${a} ${f(B.tail[0])} ${f(B.tail[1])})">${one}</g>`).join('') : one; }
@@ -245,8 +245,7 @@
     front += arms(dlook, B.sh, form, armKind);
     if (o.claws) front += [B.sh[0] - (form === 'stand' ? 2.6 : .5), B.sh[2] + (form === 'stand' ? 2.6 : .5)].map((cx) => S(`M${f(cx - 1.5)} ${f(B.sh[1] + (form === 'stand' ? 12.5 : 9.5))} l-.6 2 M${f(cx)} ${f(B.sh[1] + (form === 'stand' ? 13 : 10))} v2.2 M${f(cx + 1.5)} ${f(B.sh[1] + (form === 'stand' ? 12.5 : 9.5))} l.6 2`, '#F3E6CC', .8)).join('');
     if (o.neck) front += o.neck(x, y + hr * .9, st);
-    // long bird legs (flamingo) are drawn by the body; extend
-    if (o.longLegs && form === 'stand') mid2 = mid2.replace(/v9 a/g, 'v9 a');
+    // long bird legs (flamingo) are drawn completely by the body
     // ears behind the head
     headB += morphBack((CUR.morph || []).filter((d) => ['megamaehne','elfenohren','glutmaehne','blattmaehne','eiskragen','flossen','mondhalo','sonnenkranz'].includes(d)), x, y, hr, dlook, {});
     if (o.ear && EARS[o.ear]) headB += EARS[o.ear](dlook, x, y, hr, mood, o.earK);
