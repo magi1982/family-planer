@@ -1,31 +1,57 @@
 // Family Planer cards – built by frontend_src/build.py, do not edit
 window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((res, rej) => { if (window.FPPETS) { res(window.FPPETS); return; } const s = document.createElement('script'); s.src = (window.FP_STATIC_BASE || '/family_planer_static') + '/family-planer-pets.js?v=0.20.0'; s.onload = () => res(window.FPPETS); s.onerror = () => { window.__fpPetsP = null; rej(new Error('pets')); }; document.head.appendChild(s); }));
 // ---------------------------------------------------------------------------------------------------------
-// The house in the header, built from parts (house builder, release 1: only today's house).
-// draw(o, cfg)  – the markup of the house with garage, pergola, pool (drawing coordinates: centre x 956, ground 98)
-// geo(cfg)      – where everything is, in header coordinates (the house sits at x 640, scaled .75): roof line,
-//                 chimney, door, pool, garage roof, walls. The pets and the animations take their places from here,
-//                 so a different house later moves them along instead of leaving them in the air or in a wall.
-// window.FPHOUSE = { DEFAULT, draw, geo, toHeader }
+// The house in the header, built from parts (house builder). The settings choose the parts; today's house is the
+// default and is drawn exactly as before (a test compares the markup for hundreds of situations).
+// draw(o, cfg)     – house, annexes, pool or terrace (drawing coordinates: centre x 956, ground 98)
+// drawPond(o, cfg) – the garden pond (header coordinates), only when the house shows one
+// geo(cfg)         – where everything is, in header coordinates (the house sits at x 640, scaled .75): roof line,
+//                    chimney, walls, garage roof, water. The pets take their places from here, so they never stand
+//                    in a wall or swim on the lawn, whatever house is chosen.
+// features(cfg)    – what the house has (pool, garage): tap stories that need one only play when it is there
+// window.FPHOUSE = { DEFAULT, OPTIONS, clean, use, current, draw, drawPond, geo, features, toHeader }
 // ---------------------------------------------------------------------------------------------------------
 (() => {
   if (window.FPHOUSE) return;
+  // the parts (keys are stored in the settings; the server checks them against the same lists)
+  const WALL = { creme: '#f1e3c8', weiss: '#f6f3ee', grau: '#c9ccd2', sand: '#e2c99a', gelb: '#f0d57a', rot: '#c96b55', blau: '#9cb8d6', gruen: '#a9c79a', schwedenrot: '#9b3a2e', anthrazit: '#565c66' };
+  const ROOF = { ziegel: '#b5523b', dunkelrot: '#8a3428', schiefer: '#4d5562', anthrazit: '#2f343b', gruen: '#4f7a4a', braun: '#7a4f33', blau: '#3f5f8a', kupfer: '#5f9e8a' };
+  const SHUT = { none: null, gruen: '#3f7a46', blau: '#3f6a9a', rot: '#a83a2e', weiss: '#f4f4f4', holz: '#8a5a34' };
+  const OPTIONS = {
+    wall: Object.keys(WALL), roof: Object.keys(ROOF), windows: ['steg', 'sprossen', 'gross', 'bogen'], shutters: Object.keys(SHUT),
+    facade: ['glatt', 'holz', 'klinker', 'fachwerk', 'sockel'],
+    left: ['garage', 'carport', 'huette', 'winter', 'turm', 'velo', 'pergola', 'none'],
+    right: ['none', 'garage', 'carport', 'huette', 'winter', 'turm', 'velo', 'pergola'],
+    water: ['pool', 'rund', 'jacuzzi', 'plansch', 'none'], pond: ['auto'],
+  };
   // today's house: tall gable house, garage with a frosted-glass railing on the left, pergola, pool in front
-  const DEFAULT = Object.freeze({ width: 112, floors: 2, roof: 'gable', garage: 'left', pergola: true, pool: true });
-  const CX = 956; const GROUND = 98; const FLOOR = 29; const SCALE = 0.75;
+  const DEFAULT = Object.freeze({ wall: 'creme', roof: 'ziegel', windows: 'steg', shutters: 'none', facade: 'glatt', left: 'garage', right: 'none', water: 'pool', pond: 'auto' });
+  const clean = (cfg) => { const c = {}; Object.keys(DEFAULT).forEach((k) => { const v = cfg && cfg[k]; c[k] = OPTIONS[k].includes(v) ? v : DEFAULT[k]; }); return c; };
+  let CUR = { ...DEFAULT };
+  const use = (cfg) => { CUR = clean(cfg); return CUR; };
+  const current = () => CUR;
+
+  const CX = 956; const GROUND = 98; const FLOOR = 29; const SCALE = 0.75; const W = 112; const FLOORS = 2;
   const toHeader = (x, y) => [640 + SCALE * (x - CX), 99 + SCALE * (y - 99)];
+  const swims = (c) => c.water === 'pool' || c.water === 'rund';
+  const hasPond = (c) => c.pond === 'on' || !swims(c);
+  const features = (cfg) => { const c = clean(cfg || CUR); return { pool: swims(c), garage: c.left === 'garage' }; };
+  const dark = (hex, k) => { const n = parseInt(hex.slice(1), 16); return '#' + [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.round(v * k).toString(16).padStart(2, '0')).join(''); };
 
   // all measures of one house in drawing coordinates – the only place where the shape is decided
   const shape = (cfg) => {
-    const c = { ...DEFAULT, ...(cfg || {}) };
-    const x0 = CX - c.width / 2; const x1 = CX + c.width / 2; const top = GROUND - c.floors * FLOOR;
-    const rise = c.width * 2 / 7; // gable height: 32 on a 112 wide house
+    const c = clean(cfg);
+    const x0 = CX - W / 2; const x1 = CX + W / 2; const top = GROUND - FLOORS * FLOOR;
+    const rise = W * 2 / 7; // gable height: 32 on a 112 wide house
+    const annex = (kind, side) => (kind === 'none' ? null : { kind, side, x0: side < 0 ? x0 - 48 : x1, x1: side < 0 ? x0 : x1 + 48,
+      top: { garage: 55, carport: 63, huette: 70, winter: 63, turm: 4, velo: 71, pergola: 66 }[kind] });
     return {
       c, x0, x1, top, peak: top - rise,
       roofLine: [[x0 - 8, top + 4], [CX, top - rise - 2], [x1 + 8, top + 4]],
       chimney: { x: x1 - 24, y: 10, w: 9, h: 20 },
-      garage: c.garage ? { x0: x0 - 48, x1: x0, top: 68, roof: 66, rail: 55 } : null,
-      pool: c.pool ? { x1: 872, x2: 1040, y1: 102, y2: 113, tile: [864, 99, 1048, 117] } : null,
+      annexes: [annex(c.left, -1), annex(c.right, 1)].filter(Boolean),
+      garage: c.left === 'garage' ? { x0: x0 - 48, x1: x0, top: 68, roof: 66, rail: 55 } : null,
+      pool: { x1: 872, x2: 1040, y1: 102, y2: 113, tile: [864, 99, 1048, 117] },
     };
   };
 
@@ -43,6 +69,62 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     if (o.night) g += `<ellipse cx="${(x1 + x2) / 2}" cy="${(y1 + y2) / 2}" rx="${(x2 - x1) / 2.4}" ry="${(y2 - y1) / 2.2}" fill="#7ff7ff" opacity=".25" class="sun"/>`;
     return g;
   };
+  // the other waters in front of the house (same place as the pool)
+  const otherWater = (o, kind) => {
+    const winter = o.snow || o.jz === 'winter' || (o.hour != null && (o.hour >= 22 || o.hour < 8));
+    const deck = o.snow ? '#eef4fa' : '#d8c4a2'; const water = o.night ? '#1fa0bf' : '#5fd6ea';
+    const lounger = (x) => `<path d="M${x} 112 h18 l4 -7" stroke="#f2f2f2" stroke-width="3" fill="none"/>`;
+    if (kind === 'rund') return `<ellipse cx="${CX}" cy="107.5" rx="90" ry="9.5" fill="${o.snow ? '#eef4fa' : TILE}"/><ellipse cx="${CX}" cy="107.5" rx="82" ry="6.5" fill="${winter ? '#3f4f5c' : water}"/>`
+      + (winter ? '' : `<path d="M${CX - 50} 106 q5 -2 10 0 t10 0 M${CX + 20} 109 q5 -2 10 0 t10 0" stroke="#fff" stroke-width="1" fill="none" opacity=".55"/>`);
+    let g = `<rect x="864" y="104" width="184" height="12" rx="3" fill="${deck}"/>` + lounger(890) + lounger(918);
+    if (kind === 'jacuzzi') g += `<ellipse cx="1010" cy="106" rx="22" ry="7" fill="#8a6a4a"/><ellipse cx="1010" cy="105.4" rx="17" ry="4.6" fill="${o.snow ? '#3f4f5c' : '#7fe0f0'}"/>` + (o.snow ? '' : '<circle cx="1003" cy="104.6" r="1" fill="#fff"/><circle cx="1015" cy="105.6" r="1" fill="#fff"/>');
+    if (kind === 'plansch' && !o.snow) g += `<ellipse cx="1005" cy="108" rx="30" ry="6.6" fill="#3E8EDE"/><ellipse cx="1005" cy="107" rx="30" ry="5.8" fill="#FF7FA6"/><ellipse cx="1005" cy="107.4" rx="25" ry="4.2" fill="${water}"/><circle cx="993" cy="106.6" r="2" fill="#FFE066"/>`;
+    if (kind === 'none' && o.jz === 'sommer') g += '<path d="M1010 112 V90" stroke="#7a5a36" stroke-width="2"/><path d="M992 95 Q1010 80 1028 95Z" fill="#E5604D"/>';
+    return g;
+  };
+  // annexes left and right of the house (not the planer's garage on the left, which is drawn exactly as before)
+  const annexS = (o, A, wall, roof) => {
+    const x = A.x0; const s = A.side; const g0 = o.night ? '#FFD86B' : '#bfe6ff';
+    const near = s < 0 ? A.x1 : A.x0; const far = s < 0 ? A.x0 : A.x1; // the side touching the house, the outer side
+    switch (A.kind) {
+      case 'garage': return `<rect x="${x}" y="68" width="48" height="30" fill="${wall}"/><rect x="${x - 2}" y="66" width="52" height="3" fill="#a7adb5"/><rect x="${x}" y="56" width="48" height="10" fill="#fff" opacity="${o.night ? 0.3 : 0.6}"/><rect x="${x}" y="55" width="48" height="1.6" fill="#a7adb5"/>`
+        + (o.snow ? `<rect x="${x - 2}" y="53" width="52" height="2.5" rx="1.2" fill="#fff"/><rect x="${x - 2}" y="64.5" width="52" height="2" fill="#fff"/>` : '');
+      case 'carport': return `<rect x="${x - 2}" y="63" width="52" height="4" fill="#6a7078"/><rect x="${x}" y="67" width="3" height="31" fill="#6a7078"/><rect x="${x + 45}" y="67" width="3" height="31" fill="#6a7078"/>`
+        + `<path d="M${x + 8} 97 v-10 q3 -8 12 -8 h11 q8 0 12 8 v10z" fill="#E5604D"/><rect x="${x + 17}" y="82" width="17" height="5" fill="${g0}"/><circle cx="${x + 16}" cy="97" r="4" fill="#222"/><circle cx="${x + 38}" cy="97" r="4" fill="#222"/>`
+        + (o.snow ? `<rect x="${x - 2}" y="60.6" width="52" height="2.6" rx="1.2" fill="#fff"/>` : '');
+      case 'huette': { const hx = s < 0 ? x + 4 : x + 8; return `<rect x="${hx}" y="78" width="36" height="20" fill="#c98d5a"/><path d="M${hx} 82 h36 M${hx} 87 h36 M${hx} 92 h36" stroke="#a8703f" stroke-width=".8"/><path d="M${hx - 4} 80 L${hx + 18} 70 L${hx + 40} 80" fill="${roof}"/><rect x="${hx + 13}" y="85" width="10" height="13" fill="#6b4a2a"/>`
+        + (o.snow ? `<path d="M${hx - 4} 78 L${hx + 18} 68 L${hx + 40} 78" stroke="#fff" stroke-width="2.4" fill="none"/>` : ''); }
+      case 'winter': return `<rect x="${x}" y="68" width="48" height="30" fill="#d8f1ff" opacity=".6"/>${o.night ? `<rect x="${x}" y="68" width="48" height="30" fill="#FFD86B" opacity=".35"/>` : ''}<path d="M${x} 68 v30 M${x + 12} 68 v30 M${x + 24} 68 v30 M${x + 36} 68 v30 M${x + 48} 68 v30" stroke="#f4f4f4" stroke-width="1.6"/>`
+        + `<path d="M${far} 69 L${near} 63" stroke="#f4f4f4" stroke-width="3"/><ellipse cx="${x + 14}" cy="92" rx="7" ry="6" fill="#4fa83f"/><ellipse cx="${x + 32}" cy="91" rx="6" ry="7" fill="#5fb548"/>`
+        + (o.snow ? `<path d="M${far} 66.6 L${near} 60.6" stroke="#fff" stroke-width="2.4"/>` : '');
+      case 'turm': { const tx = s < 0 ? x + 18 : x; return `<rect x="${tx}" y="30" width="30" height="68" fill="${wall}"/><path d="M${tx - 4} 31 L${tx + 15} 4 L${tx + 34} 31Z" fill="${roof}"/><path d="M${tx + 15} 4 v-6" stroke="#8a9098" stroke-width="1.2"/><path d="M${tx + 15} -2 l7 3 l-7 3z" fill="#E5604D"/>`
+        + `<path d="M${tx + 9} 54 v-7 q6 -7 12 0 v7z" fill="${g0}" stroke="#fff" stroke-width="1.5"/><path d="M${tx + 9} 82 v-7 q6 -7 12 0 v7z" fill="${g0}" stroke="#fff" stroke-width="1.5"/>`
+        + (o.snow ? `<path d="M${tx - 4} 29 L${tx + 15} 2 L${tx + 34} 29" stroke="#fff" stroke-width="2.4" fill="none"/>` : ''); }
+      case 'velo': return `<path d="M${far} 75 L${near} 71" stroke="#6a7078" stroke-width="3.4"/><rect x="${s < 0 ? x + 1 : x + 44}" y="75" width="2.4" height="23" fill="#6a7078"/>`
+        + [x + 12, x + 30].map((b) => `<circle cx="${b - 5}" cy="93" r="4.4" fill="none" stroke="#333" stroke-width="1.3"/><circle cx="${b + 5}" cy="93" r="4.4" fill="none" stroke="#333" stroke-width="1.3"/><path d="M${b - 5} 93 L${b - 1} 86 L${b + 5} 93 M${b - 1} 86 h4" stroke="#3E8EDE" stroke-width="1.3" fill="none"/>`).join('');
+      case 'pergola': return `<rect x="${x}" y="70" width="48" height="4" fill="#7a5a36"/><rect x="${x + 2}" y="74" width="3" height="24" fill="#7a5a36"/><rect x="${x + 43}" y="74" width="3" height="24" fill="#7a5a36"/>`
+        + [...Array(8)].map((_, i) => `<circle cx="${x + 3 + i * 6}" cy="${71 + (i % 2)}" r="4.4" fill="${o.snow ? '#e8eef3' : '#5fb548'}"/>`).join('') + `<path d="M${x + 14} 90 h20 M${x + 17} 90 v8 M${x + 31} 90 v8" stroke="#3a3f46" stroke-width="2"/>`;
+      default: return '';
+    }
+  };
+  // window of the upper floor in the chosen style (the planer's window: a pane with one bar in the middle)
+  const win = (c, x, y, glass) => {
+    let s = c.windows === 'bogen' ? `<path d="M${x} ${y + 16} V${y + 7} Q${x + 14} ${y - 4} ${x + 28} ${y + 7} V${y + 16}Z" fill="${glass}" stroke="#fff" stroke-width="2"/>`
+      : `<rect x="${x}" y="${y}" width="28" height="16" rx="1" fill="${glass}" stroke="#fff" stroke-width="2"/>`;
+    if (c.windows === 'steg') s += `<line x1="${x + 14}" y1="${y}" x2="${x + 14}" y2="${y + 16}" stroke="#fff" stroke-width="1.5"/>`;
+    if (c.windows === 'sprossen') s += `<line x1="${x + 14}" y1="${y}" x2="${x + 14}" y2="${y + 16}" stroke="#fff" stroke-width="1.5"/><line x1="${x}" y1="${y + 8}" x2="${x + 28}" y2="${y + 8}" stroke="#fff" stroke-width="1.5"/>`;
+    if (c.windows === 'gross') s += `<line x1="${x + 19}" y1="${y}" x2="${x + 19}" y2="${y + 16}" stroke="#fff" stroke-width="1.5"/>`;
+    if (SHUT[c.shutters]) s += `<rect x="${x - 6}" y="${y}" width="4.5" height="16" fill="${SHUT[c.shutters]}"/><rect x="${x + 29.5}" y="${y}" width="4.5" height="16" fill="${SHUT[c.shutters]}"/>`;
+    return s;
+  };
+  const facade = (c, x0, x1, top, night) => {
+    const w = x1 - x0;
+    if (c.facade === 'holz') return [...Array(Math.floor(w / 5))].map((_, i) => `<path d="M${x0 + 3 + i * 5} ${top} V${GROUND}" stroke="#000" stroke-opacity=".13" stroke-width="1"/>`).join('');
+    if (c.facade === 'klinker') { let g = ''; for (let y = top + 3; y < GROUND; y += 4) { g += `<path d="M${x0} ${y} H${x1}" stroke="#7a2a1e" stroke-opacity=".28" stroke-width=".6"/>`; for (let x = x0 + (((y - top) / 4) % 2 ? 4 : 0); x < x1; x += 8) g += `<path d="M${x} ${y} v4" stroke="#7a2a1e" stroke-opacity=".28" stroke-width=".6"/>`; } return g; }
+    if (c.facade === 'fachwerk') { const b = night ? '#3a2618' : '#5a3a22'; let g = `<path d="M${x0} ${top + 1} H${x1} M${x0} 69 H${x1}" stroke="${b}" stroke-width="2.4"/>`; for (let i = 0; i <= 4; i++) { const x = x0 + w * i / 4; g += `<path d="M${x} ${top} V69" stroke="${b}" stroke-width="2.4"/>`; if (i < 4) g += `<path d="M${x} 69 L${x + w / 4} ${top}" stroke="${b}" stroke-width="1.8"/>`; } return g; }
+    if (c.facade === 'sockel') return `<rect x="${x0}" y="86" width="${w}" height="12" fill="${night ? '#5d6168' : '#9a9ea6'}"/><path d="M${x0} 92 H${x1}" stroke="#80858d" stroke-width=".8"/>`;
+    return '';
+  };
   // thatched parasol (brown palm leaves), only out in summer
   const parasol = (o, x, ground) => {
     const top = ground - 28; let g = `<path d="M${x} ${ground} V${top}" stroke="#7a5a36" stroke-width="2"/><g class="sw" style="transform-origin:${x}px ${top}px">`;
@@ -54,10 +136,11 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
 
   // snow, pool cover in winter, lights in the evening, fairy lights in Advent, icicles below -5°
   const draw = (o, cfg) => {
-    const S = shape(cfg); const { x0, x1, top } = S; const w = x1 - x0;
+    const S = shape(cfg || CUR); const c = S.c; const { x0, x1, top } = S; const w = x1 - x0;
     const cold = typeof o.temp === 'number' && o.temp < -5;
     const glass = o.night ? '#2c3648' : '#bfe0ff';
-    const wall = o.night ? '#8f8574' : '#f1e3c8'; const roof = o.night ? '#6e3326' : '#b5523b';
+    const wall = o.night ? (c.wall === 'creme' ? '#8f8574' : dark(WALL[c.wall], 0.6)) : WALL[c.wall];
+    const roof = o.night ? (c.roof === 'ziegel' ? '#6e3326' : dark(ROOF[c.roof], 0.6)) : ROOF[c.roof];
     const late = o.hour != null && (o.hour >= 23 || o.hour < 6);
     const on = (x, y, ww, h, dur, dl) => `<rect class="wl" x="${x}" y="${y}" width="${ww}" height="${h}" rx="1" fill="${late ? '#2e4c86' : '#FFD86B'}" style="animation-duration:${dur}s;animation-delay:-${dl}s"/>`;
     const icicles = (a, b, y) => { let g = ''; for (let x = a + 3; x < b - 2; x += 6) { const l = 3 + ((x * 7) % 5); g += `<path d="M${x - 1.5} ${y} L${x} ${y + l} L${x + 1.5} ${y}Z" fill="#e8f7ff" opacity=".95"/>`; } return g; };
@@ -71,11 +154,14 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
       if (o.snow) g += `<rect x="${G.x0 - 2}" y="${G.rail - 2}" width="${gw + 4}" height="2.5" rx="1.2" fill="#fff"/><rect x="${G.x0 - 2}" y="${G.roof - 1.5}" width="${gw + 4}" height="2" fill="#fff"/>`;
       if (cold) g += icicles(G.x0 - 2, G.x1 + 2, G.roof + 3);
     }
+    S.annexes.forEach((A) => { if (!(A.side < 0 && G)) g += annexS(o, A, wall, roof); });
     // house: tall body, gable to the front
     const [rl, rp, rr] = S.roofLine;
     g += `<rect x="${x0}" y="${top}" width="${w}" height="${GROUND - top}" fill="${wall}"/>`;
     g += `<rect x="${S.chimney.x}" y="${S.chimney.y}" width="${S.chimney.w}" height="${S.chimney.h}" fill="#8a3b2b"/>` + smoke(o, S.chimney.x + 4, S.chimney.y - 2);
-    g += `<path d="M${x0} ${top} L${CX} ${S.peak} L${x1} ${top}Z" fill="${wall}"/><path d="M${rl[0]} ${rl[1]} L${rp[0]} ${rp[1]} L${rr[0]} ${rr[1]}" fill="none" stroke="${roof}" stroke-width="7" stroke-linejoin="round"/>`;
+    g += `<path d="M${x0} ${top} L${CX} ${S.peak} L${x1} ${top}Z" fill="${wall}"/>`;
+    g += facade(c, x0, x1, top, o.night);
+    g += `<path d="M${rl[0]} ${rl[1]} L${rp[0]} ${rp[1]} L${rr[0]} ${rr[1]}" fill="none" stroke="${roof}" stroke-width="7" stroke-linejoin="round"/>`;
     if (o.snow) g += `<path d="M${rl[0] - 2} ${rl[1] - 3} L${rp[0]} ${rp[1] - 3} L${rr[0] + 2} ${rr[1] - 3}" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>`;
     if (cold) {
       g += '<g>' + Array.from({ length: 7 }, (_, i) => { const x = rl[0] + 4 + i * 9.5; const y = rl[1] - (x - rl[0]) * 0.59; const l = 3 + (i % 3) * 2; return `<path d="M${x - 1.4} ${y} L${x} ${y + l} L${x + 1.4} ${y}Z" fill="#e8f7ff"/>`; }).join('')
@@ -83,28 +169,38 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     }
     // upper floor: smaller window left, wider window right; ground floor glass front
     const wy = top + 6; const wa = x0 + 16; const wb = x1 - 44;
-    g += `<rect x="${wa}" y="${wy}" width="28" height="16" rx="1" fill="${glass}" stroke="#fff" stroke-width="2"/><line x1="${wa + 14}" y1="${wy}" x2="${wa + 14}" y2="${wy + 16}" stroke="#fff" stroke-width="1.5"/><rect x="${wb}" y="${wy}" width="28" height="16" rx="1" fill="${glass}" stroke="#fff" stroke-width="2"/><line x1="${wb + 14}" y1="${wy}" x2="${wb + 14}" y2="${wy + 16}" stroke="#fff" stroke-width="1.5"/>`;
+    g += win(c, wa, wy, glass) + win(c, wb, wy, glass);
     // ground floor: either every pane is lit or none (lit in the evening, dark late at night)
     const low = o.night && !late ? '#FFD86B' : glass;
     g += `<rect x="${x0 + 10}" y="76" width="38" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/><rect x="${x0 + 54}" y="76" width="22" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/><rect x="${x0 + 82}" y="76" width="${x1 - 6 - (x0 + 82)}" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/>`;
     if (o.night) g += on(wa + 1, wy + 1, 26, 14, 19, 3) + on(wb + 1, wy + 1, 26, 14, 27, 14);
     // pergola: roof bar and posts only, table silhouette
-    if (S.c.pergola) {
-      g += `<rect x="${x0 + 2}" y="69" width="${w - 4}" height="5" fill="#4a5058"/><rect x="${x0 + 3}" y="69" width="3" height="29" fill="#4a5058"/><rect x="${x1 - 6}" y="69" width="3" height="29" fill="#4a5058"/><path d="M${CX - 12} 90 h22 M${CX - 8} 90 v8 M${CX + 6} 90 v8" stroke="#3a3f46" stroke-width="2"/>`;
-      if (o.snow) g += `<rect x="${x0 + 1}" y="67" width="${w - 2}" height="2.5" rx="1.2" fill="#fff"/>`;
-      if (o.night) g += `<rect x="${x0 + 6}" y="74" width="${w - 12}" height="1.2" fill="#FFE7A8"/>`;
-      if (o.vis === 'weihnachten') for (let x = x0 + 8; x < x1 - 6; x += 7) g += `<circle class="tw" cx="${x}" cy="75.5" r="1.5" fill="${['#E5483B', '#F2B33D', '#3FA66B', '#3E8EDE'][(x / 7 | 0) % 4]}" style="animation-delay:-${(x % 7) / 3}s"/>`;
-      if (cold) g += icicles(x0 + 1, x1 - 1, 74);
-    }
-    if (o.jz === 'sommer' && o.vis !== 'liebe') g += parasol(o, (G ? G.x0 : x0) - 16, GROUND);
-    if (S.pool) g += pool(o, S.pool.x1, S.pool.x2, S.pool.y1, S.pool.y2);
+    g += `<rect x="${x0 + 2}" y="69" width="${w - 4}" height="5" fill="#4a5058"/><rect x="${x0 + 3}" y="69" width="3" height="29" fill="#4a5058"/><rect x="${x1 - 6}" y="69" width="3" height="29" fill="#4a5058"/><path d="M${CX - 12} 90 h22 M${CX - 8} 90 v8 M${CX + 6} 90 v8" stroke="#3a3f46" stroke-width="2"/>`;
+    if (o.snow) g += `<rect x="${x0 + 1}" y="67" width="${w - 2}" height="2.5" rx="1.2" fill="#fff"/>`;
+    if (o.night) g += `<rect x="${x0 + 6}" y="74" width="${w - 12}" height="1.2" fill="#FFE7A8"/>`;
+    if (o.vis === 'weihnachten') for (let x = x0 + 8; x < x1 - 6; x += 7) g += `<circle class="tw" cx="${x}" cy="75.5" r="1.5" fill="${['#E5483B', '#F2B33D', '#3FA66B', '#3E8EDE'][(x / 7 | 0) % 4]}" style="animation-delay:-${(x % 7) / 3}s"/>`;
+    if (cold) g += icicles(x0 + 1, x1 - 1, 74);
+    if (o.jz === 'sommer' && o.vis !== 'liebe') g += parasol(o, x0 - 64, GROUND);
+    if (c.water === 'pool') g += pool(o, S.pool.x1, S.pool.x2, S.pool.y1, S.pool.y2); else g += otherWater(o, c.water);
     return g;
+  };
+
+  // the garden pond (header coordinates): always there when the house has no pool to swim in, or when chosen
+  const POND = { cx: 912, cy: 109, rx: 30, ry: 4.2 };
+  const drawPond = (o, cfg) => {
+    const c = clean(cfg || CUR); if (!hasPond(c)) return '';
+    const { cx, cy, rx, ry } = POND; const ice = o.snow || o.jz === 'winter';
+    let g = `<ellipse cx="${cx}" cy="${cy}" rx="${rx + 4}" ry="${ry + 1.8}" fill="${o.snow ? '#e3e9ef' : '#b9b2a4'}"/>`;
+    for (let i = 0; i < 14; i++) { const t = i / 14 * Math.PI * 2; g += `<ellipse cx="${(cx + Math.cos(t) * (rx + 4)).toFixed(1)}" cy="${(cy + Math.sin(t) * (ry + 1.6)).toFixed(1)}" rx="3.2" ry="1.6" fill="${o.snow ? '#d6dde4' : '#a8a092'}"/>`; }
+    g += `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${ice ? '#dfeaf2' : o.night ? '#1f6a8a' : '#5fb6d0'}"/>`;
+    if (!ice) g += `<ellipse cx="${cx - 14}" cy="${cy + 0.6}" rx="3.4" ry="1.2" fill="#4f9a3f"/><ellipse cx="${cx + 12}" cy="${cy - 0.8}" rx="3" ry="1" fill="#4f9a3f"/><circle cx="${cx + 12}" cy="${cy - 1.5}" r="1.1" fill="#FF8FB0"/>`;
+    return g + `<path d="M${cx + rx + 2} ${cy} v-9 M${cx + rx + 5} ${cy + 1} v-11" stroke="${o.snow ? '#a8b09a' : '#5a8a3a'}" stroke-width="1"/>`;
   };
 
   // where everything is, in header coordinates (rounded like the hand-made numbers the pets used before)
   const r1 = (n) => Math.round(n * 10) / 10;
   const geo = (cfg) => {
-    const S = shape(cfg); const H = toHeader;
+    const S = shape(cfg || CUR); const c = S.c; const H = toHeader;
     const [hx0] = H(S.x0, 0); const [hx1] = H(S.x1, 0); const peak = H(CX, S.roofLine[1][1])[1];
     const g = {
       ground: 99,
@@ -113,30 +209,45 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
       chimney: H(S.chimney.x + S.chimney.w / 2, S.chimney.y),
       door: [640, 99],
       body: [H(S.roofLine[0][0], 0)[0], Math.round(peak + 2.75), H(S.roofLine[2][0], 0)[0], 99],
-      // pets: fliers above the roof, hopping onto the roof and the garage, swimming in the pool
+      // pets: fliers above the roof, hopping onto the roof and the garage, swimming in the pool or the pond
       roofAir: [Math.round((hx0 + hx1) / 2 - (hx1 - hx0) / 2 + 2), Math.max(0, Math.round(peak) - 23), Math.round((hx0 + hx1) / 2 + (hx1 - hx0) / 2 - 2), Math.round(peak + 2.75)],
       roofPerch: { x: 640, y: 99, z: Math.round(99 - peak) },
+      walls: [],
     };
+    S.annexes.forEach((A) => { if (A.side < 0 && S.garage) return; const [ax0, ay] = H(A.x0, A.top); const [ax1] = H(A.x1, 0); g.walls.push([ax0, ay, ax1, 99]); });
     if (S.garage) {
       const [gx0] = H(S.garage.x0, 0); const [gx1] = H(S.garage.x1, 0);
       g.garageAir = [gx0, H(0, S.garage.rail)[1] - 6, gx1, Math.round(H(0, S.garage.rail + 1)[1])];
       g.garagePerch = { x: (gx0 + gx1) / 2, y: 99, z: Math.round(99 - H(0, S.garage.rail)[1] - 2) };
       g.garageBody = [gx0, H(0, S.garage.top)[1], gx1, 99];
-    }
-    if (S.pool) {
-      const P = S.pool; const [px1, py1] = H(P.x1, P.y1); const [px2, py2] = H(P.x2, P.y2);
-      const [tx1, ty1] = H(P.tile[0], P.tile[1]); const [tx2, ty2] = H(P.tile[2], P.tile[3]);
+    } else g.garagePerch = { x: 536, y: 104, z: 5 }; // without the garage: a sun stone on the lawn
+    const P = S.pool; const [px1, py1] = H(P.x1, P.y1); const [px2, py2] = H(P.x2, P.y2);
+    const [tx1, ty1] = H(P.tile[0], P.tile[1]); const [tx2, ty2] = H(P.tile[2], P.tile[3]);
+    g.terrace = [px1 - 17, Math.round(ty2), px2 + 17, 118];
+    const inEll = (e, k) => (x, y) => ((x - e.cx) / (e.rx + k)) ** 2 + ((y - e.cy) / (e.ry + k * 0.3)) ** 2 < 1;
+    let inWater = () => false;
+    if (c.water === 'pool') {
       g.pool = [px1, r1(py1), px2, py2];
-      g.poolTile = [tx1, ty1, tx2, ty2];
       g.swim = { cx: (px1 + px2) / 2, cy: r1((py1 + py2) / 2), rx: (px2 - px1) / 2, ry: r1((py2 - py1) / 2 + 0.2), n: 8 };
       g.cover = { x: (px1 + px2) / 2, y: Math.round((py1 + py2) / 2), z: 1 };
-      g.terrace = [px1 - 17, Math.round(ty2), px2 + 17, 118];
-      g.inPool = (x, y) => x > tx1 - 3 && x < tx2 + 3 && y > Math.round(ty1) - 2 && y < Math.round(ty2) + 1;
+      inWater = (x, y) => x > tx1 - 3 && x < tx2 + 3 && y > Math.round(ty1) - 2 && y < Math.round(ty2) + 1;
+    } else if (c.water === 'rund') {
+      const [rcx, rcy] = H(CX, 107.5);
+      g.pool = [rcx - 61.5, r1(rcy - 4.9), rcx + 61.5, r1(rcy + 4.9)];
+      g.swim = { cx: rcx, cy: r1(rcy), rx: 61.5, ry: 4.9, n: 2 };
+      g.cover = { x: rcx, y: Math.round(rcy), z: 1 };
+      inWater = inEll({ cx: rcx, cy: rcy, rx: 67.5, ry: 7.1 }, 3);
     }
+    if (hasPond(c)) {
+      g.pond = { ...POND };
+      const inPond = inEll(POND, 5); const inPoolOnly = inWater; inWater = (x, y) => inPoolOnly(x, y) || inPond(x, y);
+      if (!g.swim) { g.swim = { cx: POND.cx, cy: POND.cy, rx: POND.rx - 1, ry: POND.ry, n: 2 }; g.cover = { x: POND.cx, y: POND.cy, z: 1 }; g.pool = [POND.cx - POND.rx, POND.cy - POND.ry, POND.cx + POND.rx, POND.cy + POND.ry]; g.swimInPond = true; }
+    }
+    g.inPool = inWater;
     return g;
   };
 
-  window.FPHOUSE = { DEFAULT, draw, geo, toHeader, shape };
+  window.FPHOUSE = { DEFAULT, OPTIONS, WALL, ROOF, SHUT, clean, use, current, draw, drawPond, geo, features, toHeader, shape };
 })();
 
 // ---------------------------------------------------------------------------------------------------------
@@ -306,11 +417,11 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
   // the house is built from parts in house.js (house builder); the scene only places it
   const smoke = (o, x, y) => (o.smoke ? Array.from({ length: 3 }, (_, i) => `<circle class="smk" cx="${x}" cy="${y}" r="4" fill="#dfe3e8" style="--dx:${Math.round(12 + o.wind / 3)}px;animation-delay:-${i * 1.3}s"/>`).join('') : '');
   // placed between the buttons and the weather corner, so the controls never hide it
-  const poolHouse = (o) => `<g transform="translate(888 99) scale(.75) translate(-956 -99)">${window.FPHOUSE.draw(o)}</g>`;
+  const poolHouse = (o, cfg) => `<g transform="translate(888 99) scale(.75) translate(-956 -99)">${window.FPHOUSE.draw(o, cfg)}</g>`;
 
   // ------------------------------------------------------------------------------ the scene
   // o: { season, wx (weather()), hour, lang, intensity ('calm'|'normal'|'lots'), storm (km/h), still (bool) }
-  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [o.hour < 8 || o.hour >= 22, o.top || 0, o.dusk, s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, s.beach, w.temp != null && w.temp < -5, o.narrow, !!o.frost, o.hour >= 23 || o.hour < 6, (s.fun || {}).key, w.temp != null && w.temp > 30, w.temp != null && w.temp >= 20].join('|'); };
+  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [o.hour < 8 || o.hour >= 22, o.top || 0, o.dusk, s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, s.beach, w.temp != null && w.temp < -5, o.narrow, !!o.frost, o.hour >= 23 || o.hour < 6, (s.fun || {}).key, w.temp != null && w.temp > 30, w.temp != null && w.temp >= 20, o.houseCfg ? JSON.stringify(o.houseCfg) : ''].join('|'); };
   api.scene = (o) => {
     o = { ...o, house: 'pool' }; // there is only the house with pool (the tap stories are drawn for it)
     const s = o.season || { vis: 'alltag', jz: 'sommer' }; const fun = s.fun || null; let vis = fun && fun.scene ? fun.key : (s.vis || 'alltag');
@@ -422,9 +533,11 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     const smokeOn = ['herbst', 'winter'].includes(jz) || vis === 'weihnachten';
     const own = !noHouse;
     if (own) {
-      svg += poolHouse({ night, snow: snowGround, smoke: smokeOn, wind, jz, vis, temp: w.temp, hour });
+      svg += poolHouse({ night, snow: snowGround, smoke: smokeOn, wind, jz, vis, temp: w.temp, hour }, o.houseCfg);
       const gz = vis === 'ostern' || vis === 'fruehling' ? 'fruehling' : vis === 'herbst' ? 'herbst' : ['weihnachten', 'sport', 'silvester', 'dreikoenig'].includes(vis) ? 'winter' : jz;
       svg += redMaple(1112, 103, 0.95, gz, snowGround) + (vis === 'sport' ? '' : appleTree(1042, 104, 1.25, gz, snowGround, r)) + flowerBed(978, 106, gz, snowGround, r);
+      // the garden pond of the house builder (header coordinates, so it is moved back by the landscape shift)
+      const pond = window.FPHOUSE.drawPond({ night, snow: snowGround, jz }, o.houseCfg); if (pond) svg += `<g transform="translate(${dx} 0)">${pond}</g>`;
     }
     const hot = temp != null && temp > 30 && !night && !wild && jz !== 'winter' && !['weihnachten', 'sport'].includes(vis);
     if (hot) {
@@ -2365,6 +2478,18 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     return order[tap % order.length];
   };
 
+  // stories drawn on parts of today's house: they only play when the chosen house has that part (house builder)
+  const NEEDS = { 59: 'pool', 75: 'pool', 78: 'pool', 83: 'pool', 92: 'pool', 65: 'garage' };
+  const pickAny = pick;
+  const pickFor = (ctx) => {
+    const f = window.FPHOUSE ? window.FPHOUSE.features() : { pool: true, garage: true };
+    const ok = (n) => !NEEDS[n] || f[NEEDS[n]];
+    const n0 = pickAny(ctx); if (n0 == null || ok(n0)) return n0;
+    const t0 = Math.max(0, Math.floor(Number(ctx.tap) || 0));
+    for (let k = 1; k <= 40; k++) { const n = pickAny({ ...ctx, tap: t0 + k }); if (n == null) return null; if (ok(n)) return n; }
+    return null;
+  };
+
   // how often the scene was tapped today in this part of the day (kept on this device), so each tap moves on
   const slotOf = (ctx) => { const d = ctx.date || new Date(); const h = ctx.hour != null ? ctx.hour : d.getHours(); const night = ctx.night != null ? !!ctx.night : (h < 6 || h >= 20); return `${iso(d)}|${night ? 'night' : h >= 17 ? 'eve' : 'day'}`; };
   let tapMem = { k: '', n: 0 };
@@ -2396,7 +2521,7 @@ window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP = new Promise((r
     return ms;
   };
 
-  window.FPTAPS = { list: T, css: () => css, pick, play, taps, bump, EN, SEASON, SURPRISE, EVERY };
+  window.FPTAPS = { list: T, css: () => css, pick: pickFor, play, taps, bump, EN, SEASON, SURPRISE, EVERY };
 })();
 
 // Coins ("Münzen"): flat silver disc, gold core, a stamped letter (or a small ring) and one notch
@@ -7080,6 +7205,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       F('hide_done', 'bool', 'Erledigtes in „Alles“ ausblenden', 'Hide done items in "All"', 'Erledigte Ämtli, Sonderämtli und To-dos verschwinden 30 Sekunden nach dem Abhaken aus „Alles“ – so wird die Ansicht gegen Abend übersichtlicher. Unter „Ämtli“ bzw. „Extras“ sieht man sie weiterhin und kann sie dort zurücknehmen.', 'Done chores, special chores and to-dos leave the "All" view 30 seconds after ticking – keeps it tidy towards the evening. They still show under "Chores" or "Extras", where they can be undone.'),
       F('hide_past', 'num', 'Vergangene Termine in „Alles“ ausblenden nach', 'Hide past events in "All" after', 'So viele Minuten nach dem Ende verschwindet ein Termin aus „Alles“ (0 = nie). Unter „Termine“ bleibt er sichtbar.', 'Minutes after its end an event leaves the "All" view (0 = never). It stays under "Events".', { min: 0, max: 240, unit: 'min' }),
     ] },
+    { id: 'house', icon: 'mdi:home-edit-outline', label: { de: 'Haus', en: 'House' } },
     { id: 'persons', icon: 'mdi:account-multiple-outline', label: { de: 'Personen', en: 'People' } },
     { id: 'chores', icon: 'mdi:clipboard-text-clock-outline', label: { de: 'Ämtli', en: 'Chores' } },
     { id: 'vacation', icon: 'mdi:palm-tree', label: { de: 'Ferien', en: 'Holidays' }, fields: [
@@ -7215,12 +7341,12 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     { id: 'status', icon: 'mdi:heart-pulse', label: { de: 'Status', en: 'Status' } },
   ];
   // tab order on the page
-  const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'pets', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'screen', 'status'];
+  const ORDER = ['pics', 'general', 'house', 'persons', 'chores', 'sonder', 'points', 'pets', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'screen', 'status'];
   const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Münzen & Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', ontime: 'Pünktlich-Profi', volunteer: 'Freiwilligen-Champion', rescue: 'Retter in der Not', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', ontime: 'On-time pro', volunteer: 'Volunteer champion', rescue: 'Rescuer', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
   const AWS = { de: { none: 'Ohne Münzen', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
-  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder', pets: 'pets', screen: 'screen' };
+  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder', pets: 'pets', screen: 'screen', house: 'house' };
   // season events in the settings (keys from the server's catalogue)
   const SEV = { weihnachten: ['Advent & Weihnachten', 'Advent & Christmas'], samichlaus: ['Samichlaus', 'St. Nicholas'], heiligabend: ['Heiligabend', 'Christmas Eve'], weihnachtstag: ['Weihnachtstag', 'Christmas Day'], stephanstag: ['Stephanstag', 'Boxing Day'], winteranfang: ['Winteranfang', 'First day of winter'],
     silvester: ['Silvester', 'New Year\'s Eve'], neujahr: ['Neujahr', 'New Year'], berchtoldstag: ['Berchtoldstag', 'St. Berchtold\'s Day'], dreikoenig: ['Dreikönigstag', 'Epiphany'], winter: ['Winter', 'Winter'],
@@ -7278,7 +7404,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       if (!res) { this._render(); return; }
       this._data = res; this._forms = {};
       for (const t of TABS) if (t.fields) this._forms[t.id] = this._formFor(t.id);
-      this._persons = clone(res.persons); this._lists = clone(res.lists);
+      this._forms.house = clone(res.house || {}); this._persons = clone(res.persons); this._lists = clone(res.lists);
       this._render();
     }
     _formFor(id) {
@@ -7334,6 +7460,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         // a season extra the child picked that would cover the new choice (e.g. the toadstool hat over a new cap) is taken off
         const S = window.FPAVS; const v = S && S.active() ? Object.keys(p.season_av || {}).find((k) => k === (window.FPSEASON.cur || {}).vis) : null;
         if (v && val !== '0') { const own = p.season_av[v]; const keep = (own.x || []).filter((k) => S.fits(k, code)); if (keep.length !== (own.x || []).length) this._avSeason(p, { ...p.season_av, [v]: { ...own, x: keep } }); } } return; }
+      if (this._houseClick(t)) return;
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
       if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
       if (t.closest('[data-refreshall]')) { this._refreshAll(); return; }
@@ -7687,6 +7814,7 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const tab = TABS.find((x) => x.id === this._tab) || TABS[0];
       let body = '';
       if (tab.id === 'pics') body = this._picsView();
+      else if (tab.id === 'house') body = this._houseTab();
       else if (tab.id === 'persons') body = this._personsTab();
       else if (tab.id === 'chores') body = `<div class="hint3">${esc(lang === 'en' ? 'Tap a day to assign a chore. Special chores and to-dos: buttons at the top of the chore plan.' : 'Tag antippen, um ein Ämtli zuzuteilen. Besondere Ämtli und To-dos: Knöpfe oben im Ämtliplan.')}</div><div class="planhost"></div>`;
       else if (tab.id === 'status') body = this._statusTab();
@@ -7743,6 +7871,57 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
         if (this._avLocal) delete this._avLocal[p.id];
         this._flash(lbl('Foto gespeichert.', 'Photo saved.'));
       } catch (er) { this._flash(lbl('Bild konnte nicht gelesen werden.', 'The picture could not be read.'), true); }
+    }
+    // ---------------------------------------------------------------- house builder (the house in the header)
+    _houseTab() {
+      const H = window.FPHOUSE; const S = window.FPSEASON; const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de);
+      if (!H || !S) return '';
+      const f = H.clean(this._forms.house); this._forms.house = f; const pv = this._hpv || 'tag';
+      const night = pv === 'nacht'; const winter = pv === 'winter';
+      let scene = S.scene({ season: { vis: 'alltag', jz: winter ? 'winter' : 'sommer', snow: winter }, wx: { kind: night ? 'clear-night' : winter ? 'snowy' : 'sunny', wind: 4, temp: winter ? -2 : 22 },
+        hour: night ? 21 : 14, night, lang, intensity: 'calm', still: true, houseCfg: f });
+      scene = scene.replace('viewBox="0 0 1200 120"', 'viewBox="440 0 520 120"'); // just the house and the garden next to it
+      const N = {
+        wall: { creme: ['Crème', 'Cream'], weiss: ['Weiss', 'White'], grau: ['Grau', 'Grey'], sand: ['Sand', 'Sand'], gelb: ['Gelb', 'Yellow'], rot: ['Rot', 'Red'], blau: ['Hellblau', 'Light blue'], gruen: ['Salbeigrün', 'Sage green'], schwedenrot: ['Schwedenrot', 'Falu red'], anthrazit: ['Anthrazit', 'Anthracite'] },
+        roof: { ziegel: ['Ziegelrot', 'Tile red'], dunkelrot: ['Dunkelrot', 'Dark red'], schiefer: ['Schiefer', 'Slate'], anthrazit: ['Anthrazit', 'Anthracite'], gruen: ['Grün', 'Green'], braun: ['Braun', 'Brown'], blau: ['Blau', 'Blue'], kupfer: ['Kupfer-Patina', 'Copper patina'] },
+        windows: { steg: ['Mittelsteg', 'Centre bar'], sprossen: ['Sprossen', 'Glazing bars'], gross: ['Gross', 'Large'], bogen: ['Bogen', 'Arched'] },
+        shutters: { none: ['Keine', 'None'], gruen: ['Grün', 'Green'], blau: ['Blau', 'Blue'], rot: ['Rot', 'Red'], weiss: ['Weiss', 'White'], holz: ['Holz', 'Wood'] },
+        facade: { glatt: ['Glatt', 'Plain'], holz: ['Holz', 'Wood'], klinker: ['Klinker', 'Brick'], fachwerk: ['Fachwerk', 'Half-timbered'], sockel: ['Steinsockel', 'Stone base'] },
+        annex: { garage: ['Garage', 'Garage'], carport: ['Carport', 'Carport'], huette: ['Gartenhaus', 'Garden shed'], winter: ['Wintergarten', 'Conservatory'], turm: ['Turm', 'Tower'], velo: ['Velounterstand', 'Bike shelter'], pergola: ['Pergola', 'Pergola'], none: ['Nichts', 'Nothing'] },
+        water: { pool: ['Pool (eckig)', 'Pool'], rund: ['Runder Pool', 'Round pool'], jacuzzi: ['Jacuzzi', 'Hot tub'], plansch: ['Planschbecken', 'Paddling pool'], none: ['Terrasse', 'Terrace'] },
+      };
+      const nm = (grp, v) => { const x = (N[grp] || {})[v]; return x ? lbl(x[0], x[1]) : v; };
+      const chips = (k, grp) => `<div class="hch">${H.OPTIONS[k].map((v) => `<button class="hc${f[k] === v ? ' on' : ''}" data-hk="${k}" data-hv="${v}">${esc(nm(grp || k, v))}</button>`).join('')}</div>`;
+      const sw = (k, map) => `<div class="hch">${H.OPTIONS[k].map((v) => `<button class="hsw${f[k] === v ? ' on' : ''}" style="background:${map[v]}" data-hk="${k}" data-hv="${v}" title="${esc(nm(k, v))}" aria-label="${esc(nm(k, v))}"></button>`).join('')}</div>`;
+      const row = (t, d, body) => `<div class="hg"><b>${esc(t)}</b>${d ? `<small>${esc(d)}</small>` : ''}${body}</div>`;
+      const ours = JSON.stringify(f) === JSON.stringify(H.clean({}));
+      return `<style>.hpv{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--fp-line,#333);margin:0 0 10px;aspect-ratio:520/120;max-height:230px;width:100%}
+        .hbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}.hgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+        .hg{background:var(--fp-bg3,#262626);border-radius:12px;padding:10px 12px}.hg b{display:block;font-size:14px}.hg small{display:block;color:var(--fp-text2,#9a9a9a);font-size:12px;margin:2px 0 6px}
+        .hch{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.hc{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--fp-line,#3a3a3a);background:var(--fp-bg4,#2e2e2e);color:var(--fp-text,#ddd);font:inherit;font-size:14px;cursor:pointer}
+        .hc.on{border-color:var(--fp-accent);background:color-mix(in srgb,var(--fp-accent) 1800%,transparent);color:var(--fp-accent);font-weight:600}.hsw{width:40px;height:40px;border-radius:10px;border:3px solid var(--fp-line,#3a3a3a);cursor:pointer}.hsw.on{border-color:#fff}
+        .hnote{font-size:12px;color:var(--fp-text2,#9a9a9a);margin:8px 0 0}${S.CSS || ''}.card,.pnl{-webkit-backdrop-filter:var(--fp-blur,none);backdrop-filter:var(--fp-blur,none);box-shadow:var(--fp-glow,none)}.card{position:relative}.card::before{content:"";position:absolute;left:18px;right:18px;top:-1px;height:3px;border-radius:3px;background:var(--fp-band,none);pointer-events:none}</style>
+        <div class="hpv">${scene}</div>
+        <div class="hbar"><div class="hch" style="margin:0">${[['tag', lbl('Tag', 'Day')], ['nacht', lbl('Nacht', 'Night')], ['winter', lbl('Winter', 'Winter')]].map(([k, t]) => `<button class="hc${pv === k ? ' on' : ''}" data-hpv="${k}">${esc(t)}</button>`).join('')}</div>
+          <button class="hc" data-hreset ${ours ? 'disabled' : ''}>${esc(lbl('Zurück zum Standard-Haus', 'Back to the standard house'))}</button><span style="flex:1"></span><button class="sg ok" data-savetab>${esc(this.T.save)}</button></div>
+        <div class="hgrid">
+          ${row(lbl('Wandfarbe', 'Wall colour'), '', sw('wall', H.WALL))}
+          ${row(lbl('Dachfarbe', 'Roof colour'), '', sw('roof', H.ROOF))}
+          ${row(lbl('Fassade', 'Facade'), '', chips('facade'))}
+          ${row(lbl('Fenster oben', 'Upper windows'), '', chips('windows'))}
+          ${row(lbl('Fensterläden', 'Shutters'), '', chips('shutters'))}
+          ${row(lbl('Anbau links', 'Left annex'), '', chips('left', 'annex'))}
+          ${row(lbl('Anbau rechts', 'Right annex'), '', chips('right', 'annex'))}
+          ${row(lbl('Vor dem Haus', 'In front of the house'), lbl('Ohne Pool zum Schwimmen kommt ein Teich in den Garten – dort baden die Tierchen. Tipp-Animationen mit dem Pool spielen nur, wenn es einen gibt.', 'Without a pool to swim in, a pond appears in the garden – the pets swim there. Tap stories with the pool only play when there is one.'), chips('water'))}
+        </div>
+        <div class="hnote">${esc(lbl('Gilt für die Kopfzeile auf allen Geräten. Die Tierchen laufen, landen und schwimmen passend zum gewählten Haus.', 'Applies to the header on every device. The pets walk, land and swim to fit the chosen house.'))}</div>`;
+    }
+    _houseClick(t) {
+      if (this._tab !== 'house') return false;
+      const k = t.closest('[data-hk]'); if (k) { this._forms.house = { ...this._forms.house, [k.dataset.hk]: k.dataset.hv }; this._render(); return true; }
+      const p = t.closest('[data-hpv]'); if (p) { this._hpv = p.dataset.hpv; this._render(); return true; }
+      if (t.closest('[data-hreset]')) { this._forms.house = window.FPHOUSE ? { ...window.FPHOUSE.DEFAULT } : {}; this._render(); return true; }
+      return false;
     }
     _picsView() {
       const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de); const s = this._snap(); const ps = s.persons || [];
@@ -8552,14 +8731,15 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     const root = bar.getRootNode(); if (!bannerSheet) { bannerSheet = new CSSStyleSheet(); bannerSheet.replaceSync(L().P4.CSS + L().M.CSS + SCN_CSS); }
     if (root.adoptedStyleSheets && !root.adoptedStyleSheets.includes(bannerSheet)) root.adoptedStyleSheets = [...root.adoptedStyleSheets, bannerSheet];
     const want = bannerPets(snap); const wkey = JSON.stringify(want); const br = bar.getBoundingClientRect();
-    const key = cropOf(svg).map((v) => Math.round(v)).join(',') + '|' + Math.round(sr.width);
+    const house = window.FPHOUSE ? window.FPHOUSE.current() : null; const key = cropOf(svg).map((v) => Math.round(v)).join(',') + '|' + Math.round(sr.width) + '|' + JSON.stringify(house);
     let s = bannerState.get(owner);
     if (!s || s.key !== key || s.wkey !== wkey) {
       if (s) s.host.remove();
       const host = document.createElement('div'); host.className = 'fpscene';
       host.style.cssText = `position:absolute;left:${sr.left - br.left}px;top:${sr.top - br.top}px;width:${sr.width}px;height:${sr.height}px;z-index:1;pointer-events:none;overflow:hidden`;
       bar.appendChild(host);
-      const scene = new (L().M.Scene)(host, { geo: { ...L().HEADER.HEADER, draw: () => '' }, crop: cropOf(svg) }); scene.social = 0.4; try { scene.setPool(true); } catch (e) { /* no pool */ }
+      const hgeo = house && L().HEADER.headerFor ? L().HEADER.headerFor(house).geo : L().HEADER.HEADER; // pets follow the house of the house builder
+      const scene = new (L().M.Scene)(host, { geo: { ...hgeo, draw: () => '' }, crop: cropOf(svg) }); scene.social = 0.4; try { scene.setPool(true); } catch (e) { /* no pool */ }
       want.forEach(([k, stg, look], n) => { const a = scene.add(k, stg, n % 2 ? 730 + Math.random() * 150 : 420 + Math.random() * 130, 104 + Math.random() * 8); if (look && Object.keys(look).length) { a.var = { ...look }; a.deco = [...(look.deco || [])]; a.key = ''; a.setView('front'); } });
       s = { host, scene, key, wkey, bar }; bannerState.set(owner, s);
       // a banner story plays: the pets step back behind it
@@ -9385,6 +9565,8 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
       const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
       const lt = this._light();
       const o = { season: se, wx, hour: n.getHours(), night: lt.night, dusk: lt.dusk, lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), narrow: this._narrowNow(), top: this._topNow() };
+      // the house of the house builder (settings): drawn in the scene; pets and tap stories follow it
+      if (window.FPHOUSE) o.houseCfg = window.FPHOUSE.use(s.house_cfg);
       const lim = Number.isFinite(Number(cfg.frost_below)) ? Number(cfg.frost_below) : -1;
       o.frost = cfg.frost_mode !== false && !!wx && typeof wx.temp === 'number' && wx.temp <= lim;
       if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };

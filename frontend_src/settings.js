@@ -57,6 +57,7 @@
       F('hide_done', 'bool', 'Erledigtes in „Alles“ ausblenden', 'Hide done items in "All"', 'Erledigte Ämtli, Sonderämtli und To-dos verschwinden 30 Sekunden nach dem Abhaken aus „Alles“ – so wird die Ansicht gegen Abend übersichtlicher. Unter „Ämtli“ bzw. „Extras“ sieht man sie weiterhin und kann sie dort zurücknehmen.', 'Done chores, special chores and to-dos leave the "All" view 30 seconds after ticking – keeps it tidy towards the evening. They still show under "Chores" or "Extras", where they can be undone.'),
       F('hide_past', 'num', 'Vergangene Termine in „Alles“ ausblenden nach', 'Hide past events in "All" after', 'So viele Minuten nach dem Ende verschwindet ein Termin aus „Alles“ (0 = nie). Unter „Termine“ bleibt er sichtbar.', 'Minutes after its end an event leaves the "All" view (0 = never). It stays under "Events".', { min: 0, max: 240, unit: 'min' }),
     ] },
+    { id: 'house', icon: 'mdi:home-edit-outline', label: { de: 'Haus', en: 'House' } },
     { id: 'persons', icon: 'mdi:account-multiple-outline', label: { de: 'Personen', en: 'People' } },
     { id: 'chores', icon: 'mdi:clipboard-text-clock-outline', label: { de: 'Ämtli', en: 'Chores' } },
     { id: 'vacation', icon: 'mdi:palm-tree', label: { de: 'Ferien', en: 'Holidays' }, fields: [
@@ -192,12 +193,12 @@
     { id: 'status', icon: 'mdi:heart-pulse', label: { de: 'Status', en: 'Status' } },
   ];
   // tab order on the page
-  const ORDER = ['pics', 'general', 'persons', 'chores', 'sonder', 'points', 'pets', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'screen', 'status'];
+  const ORDER = ['pics', 'general', 'house', 'persons', 'chores', 'sonder', 'points', 'pets', 'todos', 'lists', 'vacation', 'seasons', 'announce', 'screen', 'status'];
   const NAVL = { de: { planer: 'Planer', listen: 'Listen', aemtliplan: 'Ämtliplan', belohnungen: 'Münzen & Belohnungen', statistik: 'Statistik', tierchen: 'Tierchen', einstellungen: 'Einstellungen' }, en: { planer: 'Planner', listen: 'Lists', aemtliplan: 'Chore plan', belohnungen: 'Rewards', statistik: 'Statistics', tierchen: 'Pets', einstellungen: 'Settings' } };
   const AWN = { de: { trophy: 'Pokal des Monats', crown: 'Krone der Woche', perfect: 'Perfekte Woche', bee: 'Fleissbiene', weekend: 'Wochenend-Held', climber: 'Aufsteiger', ontime: 'Pünktlich-Profi', volunteer: 'Freiwilligen-Champion', rescue: 'Retter in der Not', diamond: 'Diamant-Serie', milestone: 'Meilensteine', team: 'Familien-Teamwork' },
     en: { trophy: 'Trophy of the month', crown: 'Crown of the week', perfect: 'Perfect week', bee: 'Busy bee', weekend: 'Weekend hero', climber: 'Climber', ontime: 'On-time pro', volunteer: 'Volunteer champion', rescue: 'Rescuer', diamond: 'Diamond streak', milestone: 'Milestones', team: 'Family teamwork' } };
   const AWS = { de: { none: 'Ohne Münzen', s: 'Klein', m: 'Mittel', l: 'Gross', xl: 'Riesig' }, en: { none: 'No points', s: 'Small', m: 'Medium', l: 'Large', xl: 'Giant' } };
-  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder', pets: 'pets', screen: 'screen' };
+  const SECTION = { general: 'general', vacation: 'vacation', points: 'points', todos: 'todos', announce: 'announce', lists: 'lists_settings', seasons: 'seasons', sonder: 'sonder', pets: 'pets', screen: 'screen', house: 'house' };
   // season events in the settings (keys from the server's catalogue)
   const SEV = { weihnachten: ['Advent & Weihnachten', 'Advent & Christmas'], samichlaus: ['Samichlaus', 'St. Nicholas'], heiligabend: ['Heiligabend', 'Christmas Eve'], weihnachtstag: ['Weihnachtstag', 'Christmas Day'], stephanstag: ['Stephanstag', 'Boxing Day'], winteranfang: ['Winteranfang', 'First day of winter'],
     silvester: ['Silvester', 'New Year\'s Eve'], neujahr: ['Neujahr', 'New Year'], berchtoldstag: ['Berchtoldstag', 'St. Berchtold\'s Day'], dreikoenig: ['Dreikönigstag', 'Epiphany'], winter: ['Winter', 'Winter'],
@@ -255,7 +256,7 @@
       if (!res) { this._render(); return; }
       this._data = res; this._forms = {};
       for (const t of TABS) if (t.fields) this._forms[t.id] = this._formFor(t.id);
-      this._persons = clone(res.persons); this._lists = clone(res.lists);
+      this._forms.house = clone(res.house || {}); this._persons = clone(res.persons); this._lists = clone(res.lists);
       this._render();
     }
     _formFor(id) {
@@ -311,6 +312,7 @@
         // a season extra the child picked that would cover the new choice (e.g. the toadstool hat over a new cap) is taken off
         const S = window.FPAVS; const v = S && S.active() ? Object.keys(p.season_av || {}).find((k) => k === (window.FPSEASON.cur || {}).vis) : null;
         if (v && val !== '0') { const own = p.season_av[v]; const keep = (own.x || []).filter((k) => S.fits(k, code)); if (keep.length !== (own.x || []).length) this._avSeason(p, { ...p.season_av, [v]: { ...own, x: keep } }); } } return; }
+      if (this._houseClick(t)) return;
       const tab = t.closest('[data-tabsel]'); if (tab) { this._tab = tab.dataset.tabsel; this._render(); return; }
       if (t.closest('[data-chpin]')) { try { await window.FPPIN.change(this._store, this._ctx()); this._flash(this.T.pinChanged); } catch (er) { if (er !== window.FPPIN.CANCEL) this._flash(this._errText(er), true); } return; }
       if (t.closest('[data-refreshall]')) { this._refreshAll(); return; }
@@ -664,6 +666,7 @@
       const tab = TABS.find((x) => x.id === this._tab) || TABS[0];
       let body = '';
       if (tab.id === 'pics') body = this._picsView();
+      else if (tab.id === 'house') body = this._houseTab();
       else if (tab.id === 'persons') body = this._personsTab();
       else if (tab.id === 'chores') body = `<div class="hint3">${esc(lang === 'en' ? 'Tap a day to assign a chore. Special chores and to-dos: buttons at the top of the chore plan.' : 'Tag antippen, um ein Ämtli zuzuteilen. Besondere Ämtli und To-dos: Knöpfe oben im Ämtliplan.')}</div><div class="planhost"></div>`;
       else if (tab.id === 'status') body = this._statusTab();
@@ -720,6 +723,57 @@
         if (this._avLocal) delete this._avLocal[p.id];
         this._flash(lbl('Foto gespeichert.', 'Photo saved.'));
       } catch (er) { this._flash(lbl('Bild konnte nicht gelesen werden.', 'The picture could not be read.'), true); }
+    }
+    // ---------------------------------------------------------------- house builder (the house in the header)
+    _houseTab() {
+      const H = window.FPHOUSE; const S = window.FPSEASON; const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de);
+      if (!H || !S) return '';
+      const f = H.clean(this._forms.house); this._forms.house = f; const pv = this._hpv || 'tag';
+      const night = pv === 'nacht'; const winter = pv === 'winter';
+      let scene = S.scene({ season: { vis: 'alltag', jz: winter ? 'winter' : 'sommer', snow: winter }, wx: { kind: night ? 'clear-night' : winter ? 'snowy' : 'sunny', wind: 4, temp: winter ? -2 : 22 },
+        hour: night ? 21 : 14, night, lang, intensity: 'calm', still: true, houseCfg: f });
+      scene = scene.replace('viewBox="0 0 1200 120"', 'viewBox="440 0 520 120"'); // just the house and the garden next to it
+      const N = {
+        wall: { creme: ['Crème', 'Cream'], weiss: ['Weiss', 'White'], grau: ['Grau', 'Grey'], sand: ['Sand', 'Sand'], gelb: ['Gelb', 'Yellow'], rot: ['Rot', 'Red'], blau: ['Hellblau', 'Light blue'], gruen: ['Salbeigrün', 'Sage green'], schwedenrot: ['Schwedenrot', 'Falu red'], anthrazit: ['Anthrazit', 'Anthracite'] },
+        roof: { ziegel: ['Ziegelrot', 'Tile red'], dunkelrot: ['Dunkelrot', 'Dark red'], schiefer: ['Schiefer', 'Slate'], anthrazit: ['Anthrazit', 'Anthracite'], gruen: ['Grün', 'Green'], braun: ['Braun', 'Brown'], blau: ['Blau', 'Blue'], kupfer: ['Kupfer-Patina', 'Copper patina'] },
+        windows: { steg: ['Mittelsteg', 'Centre bar'], sprossen: ['Sprossen', 'Glazing bars'], gross: ['Gross', 'Large'], bogen: ['Bogen', 'Arched'] },
+        shutters: { none: ['Keine', 'None'], gruen: ['Grün', 'Green'], blau: ['Blau', 'Blue'], rot: ['Rot', 'Red'], weiss: ['Weiss', 'White'], holz: ['Holz', 'Wood'] },
+        facade: { glatt: ['Glatt', 'Plain'], holz: ['Holz', 'Wood'], klinker: ['Klinker', 'Brick'], fachwerk: ['Fachwerk', 'Half-timbered'], sockel: ['Steinsockel', 'Stone base'] },
+        annex: { garage: ['Garage', 'Garage'], carport: ['Carport', 'Carport'], huette: ['Gartenhaus', 'Garden shed'], winter: ['Wintergarten', 'Conservatory'], turm: ['Turm', 'Tower'], velo: ['Velounterstand', 'Bike shelter'], pergola: ['Pergola', 'Pergola'], none: ['Nichts', 'Nothing'] },
+        water: { pool: ['Pool (eckig)', 'Pool'], rund: ['Runder Pool', 'Round pool'], jacuzzi: ['Jacuzzi', 'Hot tub'], plansch: ['Planschbecken', 'Paddling pool'], none: ['Terrasse', 'Terrace'] },
+      };
+      const nm = (grp, v) => { const x = (N[grp] || {})[v]; return x ? lbl(x[0], x[1]) : v; };
+      const chips = (k, grp) => `<div class="hch">${H.OPTIONS[k].map((v) => `<button class="hc${f[k] === v ? ' on' : ''}" data-hk="${k}" data-hv="${v}">${esc(nm(grp || k, v))}</button>`).join('')}</div>`;
+      const sw = (k, map) => `<div class="hch">${H.OPTIONS[k].map((v) => `<button class="hsw${f[k] === v ? ' on' : ''}" style="background:${map[v]}" data-hk="${k}" data-hv="${v}" title="${esc(nm(k, v))}" aria-label="${esc(nm(k, v))}"></button>`).join('')}</div>`;
+      const row = (t, d, body) => `<div class="hg"><b>${esc(t)}</b>${d ? `<small>${esc(d)}</small>` : ''}${body}</div>`;
+      const ours = JSON.stringify(f) === JSON.stringify(H.clean({}));
+      return `<style>.hpv{position:relative;border-radius:12px;overflow:hidden;border:1px solid #333;margin:0 0 10px;aspect-ratio:520/120;max-height:230px;width:100%}
+        .hbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}.hgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+        .hg{background:#262626;border-radius:12px;padding:10px 12px}.hg b{display:block;font-size:14px}.hg small{display:block;color:#9a9a9a;font-size:12px;margin:2px 0 6px}
+        .hch{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.hc{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid #3a3a3a;background:#2e2e2e;color:#ddd;font:inherit;font-size:14px;cursor:pointer}
+        .hc.on{border-color:#69C350;background:rgba(105,195,80,.18);color:#a7dc93;font-weight:600}.hsw{width:40px;height:40px;border-radius:10px;border:3px solid #3a3a3a;cursor:pointer}.hsw.on{border-color:#fff}
+        .hnote{font-size:12px;color:#9a9a9a;margin:8px 0 0}${S.CSS || ''}</style>
+        <div class="hpv">${scene}</div>
+        <div class="hbar"><div class="hch" style="margin:0">${[['tag', lbl('Tag', 'Day')], ['nacht', lbl('Nacht', 'Night')], ['winter', lbl('Winter', 'Winter')]].map(([k, t]) => `<button class="hc${pv === k ? ' on' : ''}" data-hpv="${k}">${esc(t)}</button>`).join('')}</div>
+          <button class="hc" data-hreset ${ours ? 'disabled' : ''}>${esc(lbl('Zurück zum Standard-Haus', 'Back to the standard house'))}</button><span style="flex:1"></span><button class="sg ok" data-savetab>${esc(this.T.save)}</button></div>
+        <div class="hgrid">
+          ${row(lbl('Wandfarbe', 'Wall colour'), '', sw('wall', H.WALL))}
+          ${row(lbl('Dachfarbe', 'Roof colour'), '', sw('roof', H.ROOF))}
+          ${row(lbl('Fassade', 'Facade'), '', chips('facade'))}
+          ${row(lbl('Fenster oben', 'Upper windows'), '', chips('windows'))}
+          ${row(lbl('Fensterläden', 'Shutters'), '', chips('shutters'))}
+          ${row(lbl('Anbau links', 'Left annex'), '', chips('left', 'annex'))}
+          ${row(lbl('Anbau rechts', 'Right annex'), '', chips('right', 'annex'))}
+          ${row(lbl('Vor dem Haus', 'In front of the house'), lbl('Ohne Pool zum Schwimmen kommt ein Teich in den Garten – dort baden die Tierchen. Tipp-Animationen mit dem Pool spielen nur, wenn es einen gibt.', 'Without a pool to swim in, a pond appears in the garden – the pets swim there. Tap stories with the pool only play when there is one.'), chips('water'))}
+        </div>
+        <div class="hnote">${esc(lbl('Gilt für die Kopfzeile auf allen Geräten. Die Tierchen laufen, landen und schwimmen passend zum gewählten Haus.', 'Applies to the header on every device. The pets walk, land and swim to fit the chosen house.'))}</div>`;
+    }
+    _houseClick(t) {
+      if (this._tab !== 'house') return false;
+      const k = t.closest('[data-hk]'); if (k) { this._forms.house = { ...this._forms.house, [k.dataset.hk]: k.dataset.hv }; this._render(); return true; }
+      const p = t.closest('[data-hpv]'); if (p) { this._hpv = p.dataset.hpv; this._render(); return true; }
+      if (t.closest('[data-hreset]')) { this._forms.house = window.FPHOUSE ? { ...window.FPHOUSE.DEFAULT } : {}; this._render(); return true; }
+      return false;
     }
     _picsView() {
       const lang = this._lang; const lbl = (de, en) => (lang === 'en' ? en : de); const s = this._snap(); const ps = s.persons || [];

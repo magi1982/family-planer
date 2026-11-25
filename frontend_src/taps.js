@@ -1352,6 +1352,18 @@
     return order[tap % order.length];
   };
 
+  // stories drawn on parts of today's house: they only play when the chosen house has that part (house builder)
+  const NEEDS = { 59: 'pool', 75: 'pool', 78: 'pool', 83: 'pool', 92: 'pool', 65: 'garage' };
+  const pickAny = pick;
+  const pickFor = (ctx) => {
+    const f = window.FPHOUSE ? window.FPHOUSE.features() : { pool: true, garage: true };
+    const ok = (n) => !NEEDS[n] || f[NEEDS[n]];
+    const n0 = pickAny(ctx); if (n0 == null || ok(n0)) return n0;
+    const t0 = Math.max(0, Math.floor(Number(ctx.tap) || 0));
+    for (let k = 1; k <= 40; k++) { const n = pickAny({ ...ctx, tap: t0 + k }); if (n == null) return null; if (ok(n)) return n; }
+    return null;
+  };
+
   // how often the scene was tapped today in this part of the day (kept on this device), so each tap moves on
   const slotOf = (ctx) => { const d = ctx.date || new Date(); const h = ctx.hour != null ? ctx.hour : d.getHours(); const night = ctx.night != null ? !!ctx.night : (h < 6 || h >= 20); return `${iso(d)}|${night ? 'night' : h >= 17 ? 'eve' : 'day'}`; };
   let tapMem = { k: '', n: 0 };
@@ -1383,5 +1395,5 @@
     return ms;
   };
 
-  window.FPTAPS = { list: T, css: () => css, pick, play, taps, bump, EN, SEASON, SURPRISE, EVERY };
+  window.FPTAPS = { list: T, css: () => css, pick: pickFor, play, taps, bump, EN, SEASON, SURPRISE, EVERY };
 })();

@@ -714,6 +714,9 @@ class FamilyPlanner:
     def screen_settings(self) -> dict[str, Any]:
         return settings_spec.clean_screen(self.settings.get("screen"))
 
+    def house_settings(self) -> dict[str, Any]:
+        return settings_spec.clean_house(self.settings.get("house"))
+
     def pets_settings(self) -> dict[str, Any]:
         return settings_spec.clean_pets(self.settings.get("pets"))
 
@@ -1520,6 +1523,7 @@ class FamilyPlanner:
             "sonder": self.sonder_settings(),
             "pets": self.pets_settings(),
             "screen": self.screen_settings(),
+            "house": self.house_settings(),
             "season_upcoming": seasons.upcoming(self.season_settings(), self.today(), self.data.get("ferien"))[:40],
             "vacation": {k: v for k, v in self.vacation_settings().items() if k != "scanned"},
             "points": {**self.gamification(), "mode": self.points_mode(),
@@ -1570,6 +1574,8 @@ class FamilyPlanner:
             patch, flags = settings_spec.pets(data, self.pets_settings())
         elif section == "screen":
             patch, flags = settings_spec.screen(data, self.screen_settings())
+        elif section == "house":
+            patch, flags = settings_spec.house(data, self.house_settings())
         else:
             raise settings_spec.SettingsError("section", "unknown_section")
         if "gamification" in patch:
@@ -1746,6 +1752,7 @@ class FamilyPlanner:
             "busy": self.busy,
             "pets": self.pets_view(),
             "screen_cfg": self.screen_settings(),
+            "house_cfg": self.house_settings(),
             "pets_cfg": {**self.pets_settings(), "fields": list(pets.FIELDS_BY_MODE[self.pets_settings()["eggs"]]), "steps": list(pets.thresholds(self.pets_settings()["speed"])), "spend": pets.SPEND_MAX},
             "away_kind": self.away_kind,
             "away_badge": {pid: b for pid, spans in self.away_spans.items() if (b := vacation.badge_at(spans, dt_util.now()))},

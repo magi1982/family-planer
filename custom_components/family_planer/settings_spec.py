@@ -35,7 +35,7 @@ LANGUAGES = ("auto", "de", "en")
 MODES = ("fair", "per_chore")
 MODULES = ("week", "lists")
 TODO_SIZES = ("none", "s", "m", "l")
-SECTIONS = ("general", "vacation", "points", "announce", "lists_settings", "todos", "seasons", "sonder", "pets", "screen")
+SECTIONS = ("general", "vacation", "points", "announce", "lists_settings", "todos", "seasons", "sonder", "pets", "screen", "house")
 VIEWS = ("today", "week")
 
 
@@ -183,6 +183,32 @@ def clean_screen(raw) -> dict:
 
 def screen(data: dict, cur: dict) -> tuple[dict, set[str]]:
     return {"screen": clean_screen({**cur, **{k: v for k, v in (data or {}).items() if k in SCREEN_DEFAULT}})}, set()
+
+
+# house builder: the parts of the house in the header (same lists as frontend_src/house.js, a test keeps them equal)
+HOUSE_OPTIONS = {
+    "wall": ("creme", "weiss", "grau", "sand", "gelb", "rot", "blau", "gruen", "schwedenrot", "anthrazit"),
+    "roof": ("ziegel", "dunkelrot", "schiefer", "anthrazit", "gruen", "braun", "blau", "kupfer"),
+    "windows": ("steg", "sprossen", "gross", "bogen"),
+    "shutters": ("none", "gruen", "blau", "rot", "weiss", "holz"),
+    "facade": ("glatt", "holz", "klinker", "fachwerk", "sockel"),
+    "left": ("garage", "carport", "huette", "winter", "turm", "velo", "pergola", "none"),
+    "right": ("none", "garage", "carport", "huette", "winter", "turm", "velo", "pergola"),
+    "water": ("pool", "rund", "jacuzzi", "plansch", "none"),
+    "pond": ("auto",),
+}
+HOUSE_DEFAULT = {"wall": "creme", "roof": "ziegel", "windows": "steg", "shutters": "none", "facade": "glatt",
+                 "left": "garage", "right": "none", "water": "pool", "pond": "auto"}
+
+
+def clean_house(raw) -> dict:
+    """The house in the header: one choice per part; anything unknown falls back to today's house."""
+    raw = raw if isinstance(raw, dict) else {}
+    return {k: raw.get(k) if raw.get(k) in HOUSE_OPTIONS[k] else d for k, d in HOUSE_DEFAULT.items()}
+
+
+def house(data: dict, cur: dict) -> tuple[dict, set[str]]:
+    return {"house": clean_house({**cur, **{k: v for k, v in (data or {}).items() if k in HOUSE_DEFAULT}})}, set()
 
 
 def points(data: dict, cur_game: dict, cur_mode: str, cur_notify: list,

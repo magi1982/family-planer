@@ -334,14 +334,15 @@
     const root = bar.getRootNode(); if (!bannerSheet) { bannerSheet = new CSSStyleSheet(); bannerSheet.replaceSync(L().P4.CSS + L().M.CSS + SCN_CSS); }
     if (root.adoptedStyleSheets && !root.adoptedStyleSheets.includes(bannerSheet)) root.adoptedStyleSheets = [...root.adoptedStyleSheets, bannerSheet];
     const want = bannerPets(snap); const wkey = JSON.stringify(want); const br = bar.getBoundingClientRect();
-    const key = cropOf(svg).map((v) => Math.round(v)).join(',') + '|' + Math.round(sr.width);
+    const house = window.FPHOUSE ? window.FPHOUSE.current() : null; const key = cropOf(svg).map((v) => Math.round(v)).join(',') + '|' + Math.round(sr.width) + '|' + JSON.stringify(house);
     let s = bannerState.get(owner);
     if (!s || s.key !== key || s.wkey !== wkey) {
       if (s) s.host.remove();
       const host = document.createElement('div'); host.className = 'fpscene';
       host.style.cssText = `position:absolute;left:${sr.left - br.left}px;top:${sr.top - br.top}px;width:${sr.width}px;height:${sr.height}px;z-index:1;pointer-events:none;overflow:hidden`;
       bar.appendChild(host);
-      const scene = new (L().M.Scene)(host, { geo: { ...L().HEADER.HEADER, draw: () => '' }, crop: cropOf(svg) }); scene.social = 0.4; try { scene.setPool(true); } catch (e) { /* no pool */ }
+      const hgeo = house && L().HEADER.headerFor ? L().HEADER.headerFor(house).geo : L().HEADER.HEADER; // pets follow the house of the house builder
+      const scene = new (L().M.Scene)(host, { geo: { ...hgeo, draw: () => '' }, crop: cropOf(svg) }); scene.social = 0.4; try { scene.setPool(true); } catch (e) { /* no pool */ }
       want.forEach(([k, stg, look], n) => { const a = scene.add(k, stg, n % 2 ? 730 + Math.random() * 150 : 420 + Math.random() * 130, 104 + Math.random() * 8); if (look && Object.keys(look).length) { a.var = { ...look }; a.deco = [...(look.deco || [])]; a.key = ''; a.setView('front'); } });
       s = { host, scene, key, wkey, bar }; bannerState.set(owner, s);
       // a banner story plays: the pets step back behind it

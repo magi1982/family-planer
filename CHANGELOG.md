@@ -1,12 +1,15 @@
 # Changelog
 
 ## 0.20.0 – 2026-11-25
-House builder, step 1 of 4 – nothing looks different yet.
+### Added
+- **House builder** (*Settings → House*, behind the parent PIN): put together the house in the header – wall and roof colour, facade (plain, wood, brick, half-timbered, stone base), upper windows, shutters, annex left and right (garage, carport, garden shed, conservatory, tower, bike shelter, pergola or nothing) and what is in front of the house (pool, round pool, hot tub, paddling pool or terrace). A live preview shows the house by day, at night and in winter. The standard is today's house, drawn exactly as before.
+- **Garden pond:** without a pool to swim in, a pond appears in the garden and the pets swim there (frozen in winter).
 ### Changed
-- **The house in the header is built from parts:** a new house module draws today's house (garage, pergola, pool) and knows where everything is – roof line, chimney, door, garage roof, pool. It draws exactly what was drawn before (checked for 864 situations and 3,456 complete header scenes).
-- **Pets follow the house:** their walking, swimming and perching places in the header (roof, garage roof, pool, house walls) are now computed from the house instead of fixed numbers – same places as before, ready for other houses.
+- **Pets follow the house:** their walking, swimming and perching places in the header are computed from the chosen house (roof line, garage roof, walls, pool or pond) instead of fixed numbers – with today's house they are exactly the same as before.
+- **Tap stories follow the house:** stories that need the pool (water slide, fountains, frog concert, kraken, zero gravity) only play when there is a pool; the light house (it decorates the garage) only with the garage. With today's house every tap plays exactly what it played before.
 ### Tests
-- New checks: the house markup must stay identical to today's, the pets' places must stay identical, and every house must keep the rules (no walking into walls or water, the roof perch sits on the roof, swimming only inside the pool).
+- Today's house: identical markup in 864 situations and 3,456 complete header scenes, identical pet places, identical tap choices in 25,920 situations.
+- All 320 house shapes (annex left × right × water): no walking into walls or water, the roof perch sits on the roof line, there is always water to swim in and the pets swim in the right one, free spots, hiding places and the race track never in water; every colour, window, shutter and facade renders cleanly. Settings: only known parts are stored.
 
 ## 0.19.13 – 2026-11-24
 ### Security

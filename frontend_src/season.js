@@ -165,11 +165,11 @@
   // the house is built from parts in house.js (house builder); the scene only places it
   const smoke = (o, x, y) => (o.smoke ? Array.from({ length: 3 }, (_, i) => `<circle class="smk" cx="${x}" cy="${y}" r="4" fill="#dfe3e8" style="--dx:${Math.round(12 + o.wind / 3)}px;animation-delay:-${i * 1.3}s"/>`).join('') : '');
   // placed between the buttons and the weather corner, so the controls never hide it
-  const poolHouse = (o) => `<g transform="translate(888 99) scale(.75) translate(-956 -99)">${window.FPHOUSE.draw(o)}</g>`;
+  const poolHouse = (o, cfg) => `<g transform="translate(888 99) scale(.75) translate(-956 -99)">${window.FPHOUSE.draw(o, cfg)}</g>`;
 
   // ------------------------------------------------------------------------------ the scene
   // o: { season, wx (weather()), hour, lang, intensity ('calm'|'normal'|'lots'), storm (km/h), still (bool) }
-  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [o.hour < 8 || o.hour >= 22, o.top || 0, o.dusk, s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, s.beach, w.temp != null && w.temp < -5, o.narrow, !!o.frost, o.hour >= 23 || o.hour < 6, (s.fun || {}).key, w.temp != null && w.temp > 30, w.temp != null && w.temp >= 20].join('|'); };
+  api.sceneKey = (o) => { const s = o.season || {}; const w = o.wx || {}; return [o.hour < 8 || o.hour >= 22, o.top || 0, o.dusk, s.vis, s.jz, s.sub, s.advent, s.snow, s.key, w.kind, Math.round((w.wind || 0) / 10), o.hour >= 21 ? (o.hour >= 22 ? 2 : 1) : 0, o.night, o.intensity, o.still, o.lang, (s.anniversary || {}).years, s.beach, w.temp != null && w.temp < -5, o.narrow, !!o.frost, o.hour >= 23 || o.hour < 6, (s.fun || {}).key, w.temp != null && w.temp > 30, w.temp != null && w.temp >= 20, o.houseCfg ? JSON.stringify(o.houseCfg) : ''].join('|'); };
   api.scene = (o) => {
     o = { ...o, house: 'pool' }; // there is only the house with pool (the tap stories are drawn for it)
     const s = o.season || { vis: 'alltag', jz: 'sommer' }; const fun = s.fun || null; let vis = fun && fun.scene ? fun.key : (s.vis || 'alltag');
@@ -281,9 +281,11 @@
     const smokeOn = ['herbst', 'winter'].includes(jz) || vis === 'weihnachten';
     const own = !noHouse;
     if (own) {
-      svg += poolHouse({ night, snow: snowGround, smoke: smokeOn, wind, jz, vis, temp: w.temp, hour });
+      svg += poolHouse({ night, snow: snowGround, smoke: smokeOn, wind, jz, vis, temp: w.temp, hour }, o.houseCfg);
       const gz = vis === 'ostern' || vis === 'fruehling' ? 'fruehling' : vis === 'herbst' ? 'herbst' : ['weihnachten', 'sport', 'silvester', 'dreikoenig'].includes(vis) ? 'winter' : jz;
       svg += redMaple(1112, 103, 0.95, gz, snowGround) + (vis === 'sport' ? '' : appleTree(1042, 104, 1.25, gz, snowGround, r)) + flowerBed(978, 106, gz, snowGround, r);
+      // the garden pond of the house builder (header coordinates, so it is moved back by the landscape shift)
+      const pond = window.FPHOUSE.drawPond({ night, snow: snowGround, jz }, o.houseCfg); if (pond) svg += `<g transform="translate(${dx} 0)">${pond}</g>`;
     }
     const hot = temp != null && temp > 30 && !night && !wild && jz !== 'winter' && !['weihnachten', 'sport'].includes(vis);
     if (hot) {

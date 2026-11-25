@@ -460,6 +460,8 @@
       const se = s.season.enabled === false ? { ...s.season, vis: 'alltag' } : s.season;
       const lt = this._light();
       const o = { season: se, wx, hour: n.getHours(), night: lt.night, dusk: lt.dusk, lang, intensity: cfg.intensity || 'normal', storm: cfg.storm_kmh || 50, still: SE.reduce(), narrow: this._narrowNow(), top: this._topNow() };
+      // the house of the house builder (settings): drawn in the scene; pets and tap stories follow it
+      if (window.FPHOUSE) o.houseCfg = window.FPHOUSE.use(s.house_cfg);
       const lim = Number.isFinite(Number(cfg.frost_below)) ? Number(cfg.frost_below) : -1;
       o.frost = cfg.frost_mode !== false && !!wx && typeof wx.temp === 'number' && wx.temp <= lim;
       if (!wx && !cfg.weather && se.vis === 'alltag') return { key: '', html: '' };

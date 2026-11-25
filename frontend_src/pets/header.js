@@ -2,9 +2,7 @@
    Same coordinates as the real header: viewBox 0 0 1200 120, house centred at x 640, pool right in front of it. */
 (() => {
   const M = window.FPMOTION; const rnd = (a, b) => a + Math.random() * (b - a);
-  // house, garage and pool come from the house builder: the pets follow the house that is really drawn
-  const HG = window.FPHOUSE.geo();
-  const inPool = HG.inPool || (() => false);
+  // house, garage and water come from the house builder: the pets follow the house that is really drawn
   const bush = (x, y, w, c) => `<g transform="translate(${x} ${y})"><ellipse cx="0" cy="-${w * .45}" rx="${w}" ry="${w * .55}" fill="${c || '#3f9a3a'}"/><ellipse cx="${-w * .45}" cy="-${w * .35}" rx="${w * .6}" ry="${w * .45}" fill="#4caa44"/><ellipse cx="${w * .5}" cy="-${w * .4}" rx="${w * .55}" ry="${w * .45}" fill="#56b34b"/><circle cx="${-w * .2}" cy="-${w * .7}" r="1.4" fill="#FF8FB0"/><circle cx="${w * .35}" cy="-${w * .55}" r="1.4" fill="#fff"/></g>`;
   const PLANTS = [
     [106, `<g transform="translate(794 106)"><rect x="-3" y="-38" width="6" height="38" fill="#8a5a34"/><path d="M2 -30 L26 -34" stroke="#8a5a34" stroke-width="3"/><circle cx="0" cy="-46" r="18" fill="#4fa83f"/><circle cx="-12" cy="-38" r="11" fill="#5fb548"/><circle cx="13" cy="-40" r="12" fill="#5fb548"/><circle cx="-6" cy="-48" r="2.4" fill="#e5483b"/><circle cx="8" cy="-38" r="2.4" fill="#e5483b"/></g>`],
@@ -30,32 +28,55 @@
       <rect class="gcover" x="577" y="101.3" width="126" height="8.2" fill="#3f4f5c" style="opacity:0;transition:opacity .8s"/><path class="gcover" d="M608.5 101.3 V109.5 M640 101.3 V109.5 M671.5 101.3 V109.5" stroke="#5a6c7a" style="opacity:0;transition:opacity .8s"/>
     </svg>`;
   // zones: where animals may go (walk), only fliers (air), the pool, hiding places, and no-go
-  const ZONES = [
+  const zonesFor = (HG) => [
     { n: 'Wiese links', c: '#8CE07A', r: [380, 101, 560, 118], walk: 3 },
     ...(HG.pool ? [{ n: 'Terrasse vor dem Pool', c: '#FFD34D', r: HG.terrace, walk: 1 },
-      { n: 'Pool – offen: baden, zu: auf der Abdeckung', c: '#3AA0DA', r: HG.pool, pool: 1 }] : []),
+      { n: HG.swimInPond ? 'Teich – baden' : 'Pool – offen: baden, zu: auf der Abdeckung', c: '#3AA0DA', r: HG.pool, pool: 1 }] : []),
     { n: 'Blumenbeet', c: '#FF8FB0', r: [718, 104, 754, 112] },
     { n: 'Unter dem Apfelbaum', c: '#2E8A4A', r: [770, 104, 830, 118], walk: 1 },
     { n: 'Wiese rechts', c: '#8CE07A', r: [754, 101, 1060, 118], walk: 4 },
     ...(HG.garageAir ? [{ n: 'Garagendach – Flieger und Kletterer', c: '#B58CFF', r: HG.garageAir, air: 1 }] : []),
     { n: 'Hausdach – nur Flieger', c: '#B58CFF', r: HG.roofAir, air: 1 },
     { n: 'Haus – kein Zutritt', c: '#E5483B', r: HG.body, no: 1 },
+    ...HG.walls.map((r) => ({ n: 'Anbau – kein Zutritt', c: '#E5483B', r, no: 1 })),
+    ...(HG.pond && !HG.swimInPond ? [{ n: 'Teich', c: '#3AA0DA', r: [HG.pond.cx - HG.pond.rx, HG.pond.cy - HG.pond.ry, HG.pond.cx + HG.pond.rx, HG.pond.cy + HG.pond.ry] }] : []),
   ];
   const HIDES = [{ x: 455, y: 105, n: 'hinter dem Busch' }, { x: 1015, y: 107, n: 'hinter dem grossen Busch' }, { x: 548, y: 99.6, n: 'hinter dem Busch an der Garage' }, { x: 794, y: 104.6, n: 'hinter dem Apfelbaum' }, { x: 736, y: 107.5, n: 'im Blumenbeet' }, { x: 985, y: 112.5, n: 'hinter dem kleinen Busch' }];
+  // everything of the header world that depends on the house (the rest – trees, beds, nests – stays where it is)
+  const forHouse = (cfg) => {
+    const HG = window.FPHOUSE.geo(cfg); const ZONES = zonesFor(HG); const inPool = HG.inPool || (() => false);
+    const pickZone = () => { const W = ZONES.filter((z) => z.walk); const tot = W.reduce((a, z) => a + z.walk, 0); let r = Math.random() * tot; for (const z of W) { r -= z.walk; if (r <= 0) return z; } return W[0]; };
+    const pondX = HG.pond ? HG.pond.cx - HG.pond.rx - 6 : null;
+    return {
+      HG, ZONES, inPool,
+      part: {
+        pond: HG.swim, roof: HG.roofPerch, stone: HG.garagePerch, cover: HG.cover,
+        // the race track along the lawn stops before a garden pond; water lilies grow in the water the pets swim in
+        race: [740, pondX != null ? Math.min(1060, pondX) : 1060, 109, 113],
+        bedsSeerose: HG.swimInPond ? { x: HG.swim.cx + 6, y: HG.swim.cy } : { x: 660, y: 106 },
+        zones: ZONES,
+        free: () => { for (;;) { const z = pickZone(); const p = [rnd(z.r[0] + 4, z.r[2] - 4), rnd(z.r[1] + .5, z.r[3] - .5)]; if (!inPool(p[0], p[1])) return p; } },
+      },
+    };
+  };
+  const BASE = forHouse(window.FPHOUSE.current()); const ZONES = BASE.ZONES; const HG = BASE.HG; const inPool = BASE.inPool;
   const zonesSvg = () => `<svg class="gzones" viewBox="0 0 1200 120" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:1200px;height:120px;z-index:4300;pointer-events:none">${ZONES.map((z) => `<rect x="${z.r[0]}" y="${z.r[1]}" width="${z.r[2] - z.r[0]}" height="${z.r[3] - z.r[1]}" fill="${z.c}" fill-opacity="${z.no ? .25 : .28}" stroke="${z.c}" stroke-width=".8" ${z.air ? 'stroke-dasharray="3 2"' : ''} rx="1.5"/>`).join('')}${HIDES.map((h) => `<circle cx="${h.x}" cy="${h.y}" r="2.4" fill="#fff" stroke="#2a3140" stroke-width=".6"/><text x="${h.x}" y="${h.y + .9}" text-anchor="middle" font-size="3" font-weight="900" fill="#2a3140">👀</text>`).join('')}${ZONES.map((z, i) => `<text x="${(z.r[0] + z.r[2]) / 2}" y="${z.no ? 70 : z.r[1] - 1.5}" text-anchor="middle" font-size="4.6" font-weight="800" fill="#1e2430" stroke="#fff" stroke-width="1.6" paint-order="stroke" font-family="system-ui">${z.n}</text>`).join('')}</svg>`;
-  const pickZone = () => { const W = ZONES.filter((z) => z.walk); const tot = W.reduce((a, z) => a + z.walk, 0); let r = Math.random() * tot; for (const z of W) { r -= z.walk; if (r <= 0) return z; } return W[0]; };
   const HEADER = {
     W: 1200, H: 120, y0: 98, y1: 118, base: 46, sk: .3, zk: .3, fxk: .55, rippleK: .22, poolOpen: true,
-    pond: HG.swim,
+    pond: BASE.part.pond,
     tree: { x: 794, y: 106, branchY: 72, branchX: 812 },
     branchZ: (x) => 106 - (74 - (x - 794) * .12),
-    roof: HG.roofPerch, stone: HG.garagePerch, post: { x: 872, y: 112, z: 34 },
+    roof: BASE.part.roof, stone: BASE.part.stone, post: { x: 872, y: 112, z: 34 },
     flowers: [[724, 109], [736, 112], [748, 108]], bowl: { x: 700, y: 116 }, nest: { x: 764, y: 116 }, hill: { x: 960, y: 110 },
-    cover: HG.cover, race: [740, 1060, 109, 113],
-    beds: { huette: { x: 520, y: 108 }, korb: { x: 714, y: 116 }, vogelhaus: { x: 872, y: 112, z: 34 }, seerose: { x: 660, y: 106 }, bau: { x: 960, y: 110 }, nest: { x: 764, y: 116 } },
+    cover: BASE.part.cover, race: BASE.part.race,
+    beds: { huette: { x: 520, y: 108 }, korb: { x: 714, y: 116 }, vogelhaus: { x: 872, y: 112, z: 34 }, seerose: BASE.part.bedsSeerose, bau: { x: 960, y: 110 }, nest: { x: 764, y: 116 } },
     hides: HIDES, zones: ZONES,
-    free: () => { for (;;) { const z = pickZone(); const p = [rnd(z.r[0] + 4, z.r[2] - 4), rnd(z.r[1] + .5, z.r[3] - .5)]; if (!inPool(p[0], p[1])) return p; } },
+    free: BASE.part.free,
     draw: () => bgSvg() + PLANTS.map(([z, inner]) => `<svg viewBox="0 0 1200 120" preserveAspectRatio="none" style="position:absolute;left:0;top:0;width:1200px;height:120px;z-index:${z};pointer-events:none">${inner}</svg>`).join(''),
   };
-  window.FPHEADER = { HEADER, ZONES, HIDES, zonesSvg, inPool, HOUSE: HG };
+  // the header geometry for another house: the default header with every house-dependent part replaced
+  const headerFor = (cfg) => { const F = forHouse(cfg); const P = F.part;
+    return { geo: { ...HEADER, pond: P.pond, roof: P.roof, stone: P.stone, cover: P.cover, race: P.race, zones: P.zones, free: P.free,
+      beds: { ...HEADER.beds, seerose: P.bedsSeerose }, slots: HEADER.slots && F.HG.swimInPond ? { ...HEADER.slots, seerose: [[P.bedsSeerose.x, P.bedsSeerose.y], [P.bedsSeerose.x - 10, P.bedsSeerose.y + 0.4], [P.bedsSeerose.x + 8, P.bedsSeerose.y - 0.4]] } : HEADER.slots }, ...F }; };
+  window.FPHEADER = { HEADER, ZONES, HIDES, zonesSvg, inPool, HOUSE: HG, headerFor };
 })();

@@ -25,17 +25,41 @@ same(window.FPHEADER.ZONES, before.ZONES, 'ZONES'); same(window.FPHEADER.HIDES, 
 // the pool test of the pets: same answer as the hand-made rule on a fine grid
 const old = (x, y) => x > 568 && x < 712 && y > 97 && y < 114;
 for (let x = 540; x <= 740; x += 0.5) for (let y = 90; y <= 120; y += 0.25) if (old(x, y) !== window.FPHEADER.inPool(x, y)) { errors.push(`inPool differs at ${x},${y}`); x = 1e9; break; }
-// 3) rules (for every house the builder will make – here: today's house)
-const G = window.FPHEADER.HOUSE; const Z = window.FPHEADER.ZONES;
+// 3) rules for EVERY house the builder can make (all annexes left and right, every water): the pets' world
+const F = window.FPHOUSE; const O = F.OPTIONS; let shapes = 0;
 const hit = (a, b) => a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3];
-const walls = [G.body, G.garageBody].filter(Boolean); const water = [G.pool].filter(Boolean);
-Z.filter((z) => z.walk).forEach((z) => { walls.forEach((w) => { if (hit(z.r, w)) errors.push(`walk zone "${z.n}" runs into a wall`); }); water.forEach((w) => { if (hit(z.r, w)) errors.push(`walk zone "${z.n}" runs into the pool`); }); });
 const yOn = (pts, x) => { for (let i = 0; i < pts.length - 1; i++) { const [a, b] = [pts[i], pts[i + 1]]; if (x >= a[0] && x <= b[0]) return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); } return null; };
-const ry = yOn(G.roofLine, G.roofPerch.x); if (ry == null || Math.abs((99 - G.roofPerch.z) - ry) > 1) errors.push(`roof perch (z ${G.roofPerch.z}) is not on the roof line (y ${ry})`);
-if (G.roofAir[3] > G.body[1] + 0.01 || G.roofAir[1] < 0) errors.push('roof air zone is not above the house');
-if (G.garageAir && G.garageAir[3] > G.garageBody[1]) errors.push('garage air zone is not above the garage');
-if (G.swim) { const s = G.swim; if (s.cx - s.rx < G.pool[0] - 0.01 || s.cx + s.rx > G.pool[2] + 0.01 || s.cy - s.ry < G.pool[1] - 0.3 || s.cy + s.ry > G.pool[3] + 0.3) errors.push('swim area leaves the pool'); }
-window.FPHEADER.HIDES.forEach((h) => { if (G.inPool && G.inPool(h.x, h.y)) errors.push(`hiding place "${h.n}" is in the pool`); });
-for (let i = 0; i < 3000; i++) { const [x, y] = window.FPHEADER.HEADER.free(); if (G.inPool(x, y) || walls.some((w) => x > w[0] && x < w[2] && y > w[1] && y < w[3])) { errors.push(`free spot ${x},${y} is in the pool or in a wall`); break; } }
+for (const left of O.left) for (const right of O.right) for (const water of O.water) {
+  const cfg = { left, right, water }; const tag = JSON.stringify(cfg); shapes += 1;
+  const X = window.FPHEADER.headerFor(cfg); const G = X.HG; const geo = X.geo; const Z = geo.zones;
+  const walls = [G.body, G.garageBody, ...G.walls].filter(Boolean);
+  // walking only on the ground: no walk zone runs into a wall
+  Z.filter((z) => z.walk).forEach((z) => walls.forEach((w) => { if (hit(z.r, w)) errors.push(`${tag}: walk zone "${z.n}" runs into a wall`); }));
+  // there is always water to swim in, and it is real water: the pool, or the pond when there is no pool
+  const sw = geo.pond; if (!sw) { errors.push(`${tag}: no water to swim in`); continue; }
+  if (['pool', 'rund'].includes(water) === !!G.swimInPond) errors.push(`${tag}: pets swim in the wrong water`);
+  if (G.swimInPond && !(G.pond && Math.abs(sw.cx - G.pond.cx) < 0.01)) errors.push(`${tag}: swim area is not the pond`);
+  if (!G.inPool(sw.cx, sw.cy) || !G.inPool(sw.cx + sw.rx * 0.9, sw.cy) || !G.inPool(sw.cx - sw.rx * 0.9, sw.cy)) errors.push(`${tag}: swim area is not inside the water`);
+  // landing on the roof means on the roof line, fliers' zones are above the walls
+  const ry = yOn(G.roofLine, geo.roof.x); if (ry == null || Math.abs((99 - geo.roof.z) - ry) > 1) errors.push(`${tag}: roof perch not on the roof line`);
+  if (geo.stone.y - geo.stone.z < 0 || (G.garageBody && Math.abs((99 - geo.stone.z) - G.garageAir[1]) > 8)) errors.push(`${tag}: perch stone floats`);
+  // free spots, hiding places, beds and the race track never in water or a wall
+  for (let i = 0; i < 400; i++) { const [x, y] = geo.free(); if (G.inPool(x, y) || walls.some((w) => x > w[0] && x < w[2] && y > w[1] && y < w[3])) { errors.push(`${tag}: free spot ${x.toFixed(1)},${y.toFixed(1)} in water or a wall`); break; } }
+  geo.hides.forEach((h) => { if (G.inPool(h.x, h.y)) errors.push(`${tag}: hiding place "${h.n}" in water`); });
+  Object.entries(geo.beds).forEach(([k, b]) => { if (k !== 'seerose' && G.inPool(b.x, b.y)) errors.push(`${tag}: bed ${k} in water`); });
+  if (!G.inPool(geo.beds.seerose.x, geo.beds.seerose.y)) errors.push(`${tag}: water lilies not in the water`);
+  for (let x = geo.race[0]; x <= geo.race[1]; x += 2) if (G.inPool(x, geo.race[2]) || G.inPool(x, geo.race[3])) { errors.push(`${tag}: race track through water at ${x}`); break; }
+  // the drawing: every combination renders cleanly, day, night and snow
+  for (const o of [{ hour: 14, jz: 'sommer', vis: 'alltag' }, { hour: 21, night: true, jz: 'herbst', vis: 'weihnachten' }, { hour: 14, snow: true, jz: 'winter', temp: -8, smoke: true, wind: 10 }]) {
+    const m = F.draw(o, cfg) + F.drawPond(o, cfg); if (/undefined|NaN|null|\[object/.test(m)) errors.push(`${tag}: drawing broken`);
+    if (!!F.drawPond(o, cfg) !== !!G.swimInPond) errors.push(`${tag}: pond drawn ${!!F.drawPond(o, cfg)} but pets swim in pond ${!!G.swimInPond}`);
+  }
+}
+// colours, windows, shutters and facades only change the look: every value renders cleanly
+for (const k of ['wall', 'roof', 'windows', 'shutters', 'facade']) for (const v of O[k]) for (const night of [false, true]) {
+  const m = F.draw({ hour: night ? 21 : 14, night, jz: 'sommer', vis: 'alltag' }, { [k]: v }); if (/undefined|NaN|null|\[object/.test(m)) errors.push(`${k}=${v}: drawing broken`);
+}
+// unknown values fall back to today's house
+if (JSON.stringify(F.clean({ wall: 'pink', left: '<x>', water: 1 })) !== JSON.stringify(F.DEFAULT)) errors.push('clean() keeps unknown values');
 if (errors.length) { console.error(errors.slice(0, 15).join('\n')); console.error(`${errors.length} errors`); process.exit(1); }
-console.log(`ok: ${cases.length} situations identical, pet geometry identical, rules kept`);
+console.log(`ok: ${cases.length} situations identical, pet geometry identical, rules kept for ${shapes} house shapes`);

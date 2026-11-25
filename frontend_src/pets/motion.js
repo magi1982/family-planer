@@ -240,10 +240,11 @@
     if ((G.pond.n || 2) > 2) { // rectangular pool: go along the long side, outside the corners
       const pp = G.pond; const up = (y0 + y1) / 2 < pp.cy; const vy = pp.cy + (up ? -1 : 1) * pp.ry * 1.75; const side = x1 > x0 ? -1 : 1;
       return [[pp.cx + side * pp.rx * 1.18, vy], [pp.cx - side * pp.rx * 1.18, vy], [x1, y1]]; }
-    const top = [G.pond.cx, G.pond.cy - G.pond.ry * 1.42], bot = [G.pond.cx, Math.min(508, G.pond.cy + G.pond.ry * 1.36)];
+    const fl = G.pond.ry < 12 ? 1.5 : 0; // small, flat header pond: keep the detour further off the water
+    const top = [G.pond.cx, G.pond.cy - G.pond.ry * (1.42 + fl)], bot = [G.pond.cx, Math.min(508, G.pond.cy + G.pond.ry * (1.36 + fl))];
     const d = (p) => Math.hypot(p[0] - x0, p[1] - y0) + Math.hypot(x1 - p[0], y1 - p[1]);
     const via = d(top) < d(bot) ? top : bot; const side = x1 > x0 ? -1 : 1;
-    return [[via[0] + side * G.pond.rx * .55, via[1] + (via === top ? 8 : -6)], via, [via[0] - side * G.pond.rx * .55, via[1] + (via === top ? 8 : -6)], [x1, y1]].filter((p, i, a) => i === a.length - 1 || Math.sign(p[0] - x0) === Math.sign(x1 - x0) || Math.abs(p[0] - x0) > 30);
+    return [[via[0] + side * G.pond.rx * .55, via[1] + (via === top ? Math.min(8, G.pond.ry * .3) : -Math.min(6, G.pond.ry * .25))], via, [via[0] - side * G.pond.rx * .55, via[1] + (via === top ? Math.min(8, G.pond.ry * .3) : -Math.min(6, G.pond.ry * .25))], [x1, y1]].filter((p, i, a) => i === a.length - 1 || Math.sign(p[0] - x0) === Math.sign(x1 - x0) || Math.abs(p[0] - x0) > 30);
   };
   const freeSpot = () => { if (G.free) return G.free(); for (;;) { const p = [rnd(240, 960), rnd(290, 505)]; if (!inPond(p[0], p[1], 1.3) && !(p[0] > 420 && p[0] < 620 && p[1] < 290)) return p; } };
 
