@@ -741,22 +741,37 @@
         facade: { glatt: ['Glatt', 'Plain'], holz: ['Holz', 'Wood'], klinker: ['Klinker', 'Brick'], fachwerk: ['Fachwerk', 'Half-timbered'], sockel: ['Steinsockel', 'Stone base'] },
         annex: { garage: ['Garage', 'Garage'], carport: ['Carport', 'Carport'], huette: ['Gartenhaus', 'Garden shed'], winter: ['Wintergarten', 'Conservatory'], turm: ['Turm', 'Tower'], velo: ['Velounterstand', 'Bike shelter'], pergola: ['Pergola', 'Pergola'], none: ['Nichts', 'Nothing'] },
         water: { pool: ['Pool (eckig)', 'Pool'], rund: ['Runder Pool', 'Round pool'], jacuzzi: ['Jacuzzi', 'Hot tub'], plansch: ['Planschbecken', 'Paddling pool'], none: ['Terrasse', 'Terrace'] },
+        width: { normal: ['Normal', 'Normal'], schmal: ['Schmal', 'Narrow'], breit: ['Breit', 'Wide'] },
+        floors: { 1: ['1 Stockwerk', '1 floor'], 2: ['2 Stockwerke', '2 floors'], 3: ['3 Stockwerke', '3 floors'] },
+        roofform: { sattel: ['Satteldach', 'Gable'], krueppel: ['Krüppelwalm', 'Half-hipped'], walm: ['Walmdach', 'Hipped'], zelt: ['Zeltdach', 'Pyramid'], mansarde: ['Mansarde', 'Mansard'], pult: ['Pultdach', 'Shed roof'], flach: ['Flachdach', 'Flat roof'], tonne: ['Tonnendach', 'Barrel roof'] },
+        chimney: { ja: ['Mit Kamin', 'With chimney'], nein: ['Ohne Kamin', 'No chimney'] },
+        preset: { giebel: ['Giebelhaus (heute)', 'Gable house (today)'], bungalow: ['Bungalow', 'Bungalow'], chalet: ['Chalet', 'Chalet'], modern: ['Modern mit Flachdach', 'Modern, flat roof'], stadt: ['Stadthaus', 'Town house'], landhaus: ['Landhaus', 'Country house'], architekt: ['Pultdach-Haus', 'Shed-roof house'], maerchen: ['Märchenhaus', 'Fairy-tale cottage'], bogen: ['Bogenhaus', 'Arched house'], turmhaus: ['Schwedenhaus hoch', 'Tall Swedish house'] },
       };
       const nm = (grp, v) => { const x = (N[grp] || {})[v]; return x ? lbl(x[0], x[1]) : v; };
       const chips = (k, grp) => `<div class="hch">${H.OPTIONS[k].map((v) => `<button class="hc${f[k] === v ? ' on' : ''}" data-hk="${k}" data-hv="${v}">${esc(nm(grp || k, v))}</button>`).join('')}</div>`;
       const sw = (k, map) => `<div class="hch">${H.OPTIONS[k].map((v) => `<button class="hsw${f[k] === v ? ' on' : ''}" style="background:${map[v]}" data-hk="${k}" data-hv="${v}" title="${esc(nm(k, v))}" aria-label="${esc(nm(k, v))}"></button>`).join('')}</div>`;
       const row = (t, d, body) => `<div class="hg"><b>${esc(t)}</b>${d ? `<small>${esc(d)}</small>` : ''}${body}</div>`;
       const ours = JSON.stringify(f) === JSON.stringify(H.clean({}));
+      // ready-made houses as small pictures (just the house, built from the same parts as the header)
+      const tiles = `<div class="hpre">${(H.PRESETS || []).map((p) => { const cfg = { ...f, ...p.set, left: 'none', right: 'none', water: 'none' }; const on = Object.entries(p.set).every(([k, v]) => f[k] === v);
+        return `<button class="hpt${on ? ' on' : ''}" data-hpre="${esc(p.id)}"><svg viewBox="872 -36 168 152" aria-hidden="true"><rect x="872" y="-36" width="168" height="134" fill="#9fd4f5"/><rect x="872" y="98" width="168" height="18" fill="#79c257"/>${H.draw({ hour: 14, jz: 'herbst', vis: 'alltag' }, cfg)}</svg><span>${esc(nm('preset', p.id))}</span></button>`; }).join('')}</div>`;
       return `<style>.hpv{position:relative;border-radius:12px;overflow:hidden;border:1px solid #333;margin:0 0 10px;aspect-ratio:520/120;max-height:230px;width:100%}
         .hbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}.hgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
         .hg{background:#262626;border-radius:12px;padding:10px 12px}.hg b{display:block;font-size:14px}.hg small{display:block;color:#9a9a9a;font-size:12px;margin:2px 0 6px}
         .hch{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.hc{min-height:40px;padding:0 12px;border-radius:10px;border:1px solid #3a3a3a;background:#2e2e2e;color:#ddd;font:inherit;font-size:14px;cursor:pointer}
         .hc.on{border-color:#69C350;background:rgba(105,195,80,.18);color:#a7dc93;font-weight:600}.hsw{width:40px;height:40px;border-radius:10px;border:3px solid #3a3a3a;cursor:pointer}.hsw.on{border-color:#fff}
-        .hnote{font-size:12px;color:#9a9a9a;margin:8px 0 0}${S.CSS || ''}</style>
+        .hnote{font-size:12px;color:#9a9a9a;margin:8px 0 0}.hpre{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));margin-top:8px}
+        .hpt{display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:6px;border-radius:12px;border:2px solid #3a3a3a;background:#2e2e2e;color:#ddd;font:inherit;font-size:13px;cursor:pointer}
+        .hpt svg{width:100%;aspect-ratio:168/152;border-radius:8px;display:block}.hpt.on{border-color:#69C350;background:rgba(105,195,80,.18);color:#a7dc93;font-weight:600}${S.CSS || ''}</style>
         <div class="hpv">${scene}</div>
         <div class="hbar"><div class="hch" style="margin:0">${[['tag', lbl('Tag', 'Day')], ['nacht', lbl('Nacht', 'Night')], ['winter', lbl('Winter', 'Winter')]].map(([k, t]) => `<button class="hc${pv === k ? ' on' : ''}" data-hpv="${k}">${esc(t)}</button>`).join('')}</div>
           <button class="hc" data-hreset ${ours ? 'disabled' : ''}>${esc(lbl('Zurück zum Standard-Haus', 'Back to the standard house'))}</button><span style="flex:1"></span><button class="sg ok" data-savetab>${esc(this.T.save)}</button></div>
-        <div class="hgrid">
+        ${row(lbl('Hausformen', 'House shapes'), lbl('Tippe auf ein fertiges Haus. Danach kannst du darunter alles einzeln ändern.', 'Tap a ready-made house. Then change any part below.'), tiles)}
+        <div class="hgrid" style="margin-top:10px">
+          ${row(lbl('Dachform', 'Roof shape'), '', chips('roofform'))}
+          ${row(lbl('Stockwerke', 'Floors'), '', chips('floors'))}
+          ${row(lbl('Breite', 'Width'), '', chips('width'))}
+          ${row(lbl('Kamin', 'Chimney'), lbl('Tipp-Geschichten auf Dach und Kamin (Drache, Wasserrutsche, Gespenster, Lichterhaus, Dachparty, Neon) spielen nur beim Giebelhaus von heute.', 'Tap stories on the roof and chimney (dragon, water slide, ghosts, light house, roof party, neon) only play with today\'s gable house.'), chips('chimney'))}
           ${row(lbl('Wandfarbe', 'Wall colour'), '', sw('wall', H.WALL))}
           ${row(lbl('Dachfarbe', 'Roof colour'), '', sw('roof', H.ROOF))}
           ${row(lbl('Fassade', 'Facade'), '', chips('facade'))}
@@ -772,6 +787,8 @@
       if (this._tab !== 'house') return false;
       const k = t.closest('[data-hk]'); if (k) { this._forms.house = { ...this._forms.house, [k.dataset.hk]: k.dataset.hv }; this._render(); return true; }
       const p = t.closest('[data-hpv]'); if (p) { this._hpv = p.dataset.hpv; this._render(); return true; }
+      const pr = t.closest('[data-hpre]'); const P = pr && window.FPHOUSE && (window.FPHOUSE.PRESETS || []).find((x) => x.id === pr.dataset.hpre);
+      if (P) { this._forms.house = window.FPHOUSE.clean({ ...this._forms.house, ...P.set }); this._render(); return true; }
       if (t.closest('[data-hreset]')) { this._forms.house = window.FPHOUSE ? { ...window.FPHOUSE.DEFAULT } : {}; this._render(); return true; }
       return false;
     }

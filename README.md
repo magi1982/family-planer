@@ -416,6 +416,7 @@ Everything that the Home Assistant dialogs offer, in one clear page – also on 
 - Every field with a short description; invalid input is refused with a clear message (e.g. announcements without speaker).
 - Changes that need new timers (day change, modules, lists, announcements) reload the integration automatically; the planner reconnects by itself.
 - The dialogs under *Settings → Devices & services → Family Planer → Configure* remain available.
+- **House builder** (*Settings → House*, parent PIN): build the house in the header yourself. Start from one of ten ready-made houses shown as pictures (today's gable house, bungalow, chalet, modern flat-roof house, town house, country house, shed-roof house, fairy-tale cottage, arched house, tall Swedish house), then change any part: roof shape (gable, half-hipped, hipped, pyramid, mansard with dormers, shed, flat, barrel), 1–3 floors, width (narrow, normal, wide), chimney, wall and roof colour, facade, windows, shutters, an annex left and right (garage, carport, garden shed, conservatory, tower, bike shelter, pergola) and what is in front of the house (pool, round pool, hot tub, paddling pool or terrace). Without a pool a garden pond appears. The pets walk, land and swim to fit the chosen house; tap stories that need the pool or garage only play when there is one, and stories drawn on today's roof and chimney (dragon, water slide, ghosts, light house, roof party, neon) only with today's gable house. "Back to the standard house" restores today's house exactly.
 
 ## Fullscreen on double tap
 

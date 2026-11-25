@@ -1352,12 +1352,14 @@
     return order[tap % order.length];
   };
 
-  // stories drawn on parts of today's house: they only play when the chosen house has that part (house builder)
-  const NEEDS = { 59: 'pool', 75: 'pool', 78: 'pool', 83: 'pool', 92: 'pool', 65: 'garage' };
+  // stories drawn on parts of today's house: they only play when the chosen house has that part (house builder);
+  // shape = today's body (width, floors, gable roof, chimney): the dragon, the slide, the ghosts, the light house,
+  // the roof party and the neon outline sit exactly on today's roof and chimney
+  const NEEDS = { 59: ['pool', 'shape'], 75: 'pool', 78: 'pool', 83: 'pool', 92: 'pool', 65: ['garage', 'shape'], 54: 'shape', 60: 'shape', 93: 'shape', 107: 'shape' };
   const pickAny = pick;
   const pickFor = (ctx) => {
-    const f = window.FPHOUSE ? window.FPHOUSE.features() : { pool: true, garage: true };
-    const ok = (n) => !NEEDS[n] || f[NEEDS[n]];
+    const f = window.FPHOUSE ? window.FPHOUSE.features() : { pool: true, garage: true, shape: true };
+    const ok = (n) => !NEEDS[n] || [].concat(NEEDS[n]).every((k) => f[k]);
     const n0 = pickAny(ctx); if (n0 == null || ok(n0)) return n0;
     const t0 = Math.max(0, Math.floor(Number(ctx.tap) || 0));
     for (let k = 1; k <= 40; k++) { const n = pickAny({ ...ctx, tap: t0 + k }); if (n == null) return null; if (ok(n)) return n; }

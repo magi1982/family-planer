@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.21.0 – 2026-11-25
+### Added
+- **House shapes in the house builder** (*Settings → House*): ten ready-made houses shown as pictures (today's gable house, bungalow, chalet, modern flat-roof house, town house, country house, shed-roof house, fairy-tale cottage, arched house, tall Swedish house) and every shape part on its own: roof shape (gable, half-hipped, hipped, pyramid, mansard with dormers, shed, flat, barrel), 1–3 floors, width (narrow, normal, wide) and chimney on or off. Snow, icicles, evening lights, timber frame and the pets follow every shape.
+### Changed
+- Tap stories drawn on today's roof and chimney (friendly dragon, water slide, spooky night, light house, mega party, synthwave) only play with today's gable house; every other story plays with every house.
+### Tests
+- Today's house: still identical markup in 864 situations, identical pet places and identical tap choices in 25,920 situations.
+- All 46,080 house shapes (144 bodies × annex left × right × water): no walking into walls or water, the roof perch sits on the roof line, the roof and chimney stay inside the picture, pets swim in the right water; every colour, window, shutter and facade renders cleanly on every body. Settings: only known shape parts are stored.
+
 ## 0.20.0 – 2026-11-25
 ### Added
 - **House builder** (*Settings → House*, behind the parent PIN): put together the house in the header – wall and roof colour, facade (plain, wood, brick, half-timbered, stone base), upper windows, shutters, annex left and right (garage, carport, garden shed, conservatory, tower, bike shelter, pergola or nothing) and what is in front of the house (pool, round pool, hot tub, paddling pool or terrace). A live preview shows the house by day, at night and in winter. The standard is today's house, drawn exactly as before.

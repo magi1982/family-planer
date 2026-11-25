@@ -44,7 +44,7 @@ def test_house_options_are_the_same_in_python_and_js():
     wall = re.findall(r"(\w+): '#", js[js.index("const WALL"):js.index("const ROOF")])
     roof = re.findall(r"(\w+): '#", js[js.index("const ROOF"):js.index("const SHUT")])
     assert tuple(wall) == S.HOUSE_OPTIONS["wall"] and tuple(roof) == S.HOUSE_OPTIONS["roof"]
-    for k in ("windows", "facade", "left", "right", "water", "pond"):
+    for k in ("windows", "facade", "left", "right", "water", "pond", "width", "floors", "roofform", "chimney"):
         m = re.search(k + r": \[([^\]]*)\]", js)
         assert tuple(re.findall(r"'(\w+)'", m.group(1))) == S.HOUSE_OPTIONS[k], k
     assert "shutters" in S.HOUSE_OPTIONS and S.HOUSE_OPTIONS["shutters"][0] == "none"
@@ -57,3 +57,11 @@ def test_clean_house_keeps_only_known_parts():
     patch, flags = S.house({"right": "carport", "wall": 5}, S.HOUSE_DEFAULT)
     assert patch["house"]["right"] == "carport" and patch["house"]["wall"] == "creme" and not flags
     assert "house" in S.SECTIONS
+
+
+def test_clean_house_knows_the_house_shapes():
+    c = S.clean_house({"width": "breit", "floors": "3", "roofform": "mansarde", "chimney": "nein"})
+    assert (c["width"], c["floors"], c["roofform"], c["chimney"]) == ("breit", "3", "mansarde", "nein")
+    c = S.clean_house({"width": "riesig", "floors": 3, "roofform": "kuppel", "chimney": True})
+    assert (c["width"], c["floors"], c["roofform"], c["chimney"]) == ("normal", "2", "sattel", "ja")
+    assert S.clean_house({"wall": "rot"})["roofform"] == "sattel"  # houses saved before the shapes keep today's body

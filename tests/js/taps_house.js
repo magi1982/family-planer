@@ -22,5 +22,12 @@ ctxs.forEach((c) => { const b = now.FPTAPS.pick(c); if (POOL.includes(b) || b ==
 now.FPHOUSE.use({ water: 'rund' });
 let poolSeen = 0; ctxs.forEach((c) => { if (POOL.includes(now.FPTAPS.pick(c))) poolSeen += 1; });
 if (!poolSeen) errors.push('round pool: pool stories never play');
+// another house shape: no story that sits on today's roof or chimney, but the pool stories still play when they can
+const ROOF = [54, 59, 60, 65, 93, 107];
+for (const body of [{ roofform: 'flach' }, { floors: '3' }, { width: 'breit' }, { chimney: 'nein' }]) {
+  now.FPHOUSE.use(body); let pool = 0;
+  ctxs.forEach((c) => { const b = now.FPTAPS.pick(c); if (ROOF.includes(b)) errors.push(`${JSON.stringify(body)}: picked roof story ${b}`); if (POOL.includes(b)) pool += 1; });
+  if (!pool) errors.push(`${JSON.stringify(body)}: pool stories never play`);
+}
 if (errors.length) { console.error(errors.slice(0, 10).join('\n')); console.error(`${errors.length} errors`); process.exit(1); }
-console.log(`ok: ${n} taps unchanged with today's house, pool/garage stories only with a pool/garage`);
+console.log(`ok: ${n} taps unchanged with today's house, pool/garage stories only with a pool/garage, roof stories only on today's roof`);

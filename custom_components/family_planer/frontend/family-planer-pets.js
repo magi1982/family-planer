@@ -8,7 +8,8 @@
 //                    chimney, walls, garage roof, water. The pets take their places from here, so they never stand
 //                    in a wall or swim on the lawn, whatever house is chosen.
 // features(cfg)    – what the house has (pool, garage): tap stories that need one only play when it is there
-// window.FPHOUSE = { DEFAULT, OPTIONS, clean, use, current, draw, drawPond, geo, features, toHeader }
+// window.FPHOUSE = { DEFAULT, OPTIONS, PRESETS, clean, use, current, draw, drawPond, geo, features, toHeader }
+// shapes: width (normal/narrow/wide), 1–3 floors, 8 roof forms, chimney on or off; PRESETS are ready-made houses
 // ---------------------------------------------------------------------------------------------------------
 (() => {
   if (window.FPHOUSE) return;
@@ -22,32 +23,84 @@
     left: ['garage', 'carport', 'huette', 'winter', 'turm', 'velo', 'pergola', 'none'],
     right: ['none', 'garage', 'carport', 'huette', 'winter', 'turm', 'velo', 'pergola'],
     water: ['pool', 'rund', 'jacuzzi', 'plansch', 'none'], pond: ['auto'],
+    width: ['normal', 'schmal', 'breit'], floors: ['2', '1', '3'], roofform: ['sattel', 'krueppel', 'walm', 'zelt', 'mansarde', 'pult', 'flach', 'tonne'], chimney: ['ja', 'nein'],
   };
   // today's house: tall gable house, garage with a frosted-glass railing on the left, pergola, pool in front
-  const DEFAULT = Object.freeze({ wall: 'creme', roof: 'ziegel', windows: 'steg', shutters: 'none', facade: 'glatt', left: 'garage', right: 'none', water: 'pool', pond: 'auto' });
+  const DEFAULT = Object.freeze({ wall: 'creme', roof: 'ziegel', windows: 'steg', shutters: 'none', facade: 'glatt', left: 'garage', right: 'none', water: 'pool', pond: 'auto', width: 'normal', floors: '2', roofform: 'sattel', chimney: 'ja' });
+  // ready-made houses (the settings show them as pictures; a tap sets these parts, the rest stays as chosen)
+  const PRESETS = [
+    { id: 'giebel', set: { width: 'normal', floors: '2', roofform: 'sattel', chimney: 'ja' } },
+    { id: 'bungalow', set: { width: 'breit', floors: '1', roofform: 'walm', chimney: 'ja', wall: 'weiss', roof: 'schiefer', windows: 'gross' } },
+    { id: 'chalet', set: { width: 'breit', floors: '2', roofform: 'krueppel', chimney: 'ja', wall: 'sand', roof: 'braun', facade: 'holz', shutters: 'gruen', windows: 'sprossen' } },
+    { id: 'modern', set: { width: 'breit', floors: '2', roofform: 'flach', chimney: 'nein', wall: 'weiss', roof: 'anthrazit', facade: 'glatt', windows: 'gross', shutters: 'none' } },
+    { id: 'stadt', set: { width: 'schmal', floors: '3', roofform: 'mansarde', chimney: 'ja', wall: 'gelb', roof: 'schiefer', windows: 'sprossen', shutters: 'blau' } },
+    { id: 'landhaus', set: { width: 'breit', floors: '2', roofform: 'walm', chimney: 'ja', wall: 'creme', roof: 'dunkelrot', facade: 'sockel', shutters: 'holz' } },
+    { id: 'architekt', set: { width: 'normal', floors: '2', roofform: 'pult', chimney: 'nein', wall: 'grau', roof: 'anthrazit', facade: 'holz', windows: 'gross', shutters: 'none' } },
+    { id: 'maerchen', set: { width: 'schmal', floors: '1', roofform: 'zelt', chimney: 'ja', wall: 'rot', roof: 'gruen', windows: 'bogen', shutters: 'weiss' } },
+    { id: 'bogen', set: { width: 'normal', floors: '1', roofform: 'tonne', chimney: 'nein', wall: 'blau', roof: 'kupfer', windows: 'bogen' } },
+    { id: 'turmhaus', set: { width: 'schmal', floors: '3', roofform: 'sattel', chimney: 'ja', wall: 'schwedenrot', roof: 'anthrazit', facade: 'holz', shutters: 'weiss' } },
+  ];
   const clean = (cfg) => { const c = {}; Object.keys(DEFAULT).forEach((k) => { const v = cfg && cfg[k]; c[k] = OPTIONS[k].includes(v) ? v : DEFAULT[k]; }); return c; };
   let CUR = { ...DEFAULT };
   const use = (cfg) => { CUR = clean(cfg); return CUR; };
   const current = () => CUR;
 
-  const CX = 956; const GROUND = 98; const FLOOR = 29; const SCALE = 0.75; const W = 112; const FLOORS = 2;
+  const CX = 956; const GROUND = 98; const FLOOR = 29; const SCALE = 0.75; const WIDTH = { normal: 112, schmal: 96, breit: 128 };
+  // today's body: normal width, two floors, gable roof (drawn with exactly the numbers used before the house builder)
+  const todayBody = (c) => c.width === 'normal' && c.floors === '2' && c.roofform === 'sattel';
+  // height of a roof line at x (the line runs left to right)
+  const yAt = (pts, x) => { for (let i = 0; i < pts.length - 1; i++) { const a = pts[i]; const b = pts[i + 1]; if (x >= a[0] && x <= b[0]) return b[0] === a[0] ? Math.min(a[1], b[1]) : a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); } return null; };
+  const q = (n) => Math.round(n * 100) / 100;
   const toHeader = (x, y) => [640 + SCALE * (x - CX), 99 + SCALE * (y - 99)];
   const swims = (c) => c.water === 'pool' || c.water === 'rund';
   const hasPond = (c) => c.pond === 'on' || !swims(c);
-  const features = (cfg) => { const c = clean(cfg || CUR); return { pool: swims(c), garage: c.left === 'garage' }; };
+  // shape: today's body with its chimney – stories drawn onto today's roof and chimney only play then
+  const features = (cfg) => { const c = clean(cfg || CUR); return { pool: swims(c), garage: c.left === 'garage', shape: todayBody(c) && c.chimney === 'ja' }; };
   const dark = (hex, k) => { const n = parseInt(hex.slice(1), 16); return '#' + [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.round(v * k).toString(16).padStart(2, '0')).join(''); };
+
+  // the roof forms (front view): line = outer edge of the roof (pets land on it, snow lies on it), wall = gable or
+  // wall part above the top floor, fill = roof surface seen from the front, stroke = edge drawn as a thick line
+  const roofOf = (form, x0, x1, top, rise) => {
+    const e = top + 4; const L = x0 - 8; const Rr = x1 + 8; const hw = (x1 - x0) / 2;
+    switch (form) {
+      case 'krueppel': { // half-hipped: a gable with its tip cut off by a small hip
+        const xa = q(CX - hw * 0.55); const xb = q(CX + hw * 0.55); const s = (rise + 6) / (hw + 8); const ya = q(e - s * (xa - L)); const p = q(top - rise - 2);
+        return { line: [[L, e], [xa, ya], [CX, p], [xb, ya], [Rr, e]], wall: `M${x0} ${top} L${xa} ${q(ya + 3)} L${xb} ${q(ya + 3)} L${x1} ${top}Z`, fill: `M${xa} ${ya} L${CX} ${p} L${xb} ${ya}Z`, stroke: 1 }; }
+      case 'walm': { // hipped, eaves to the front: the roof surface is a trapezoid
+        const h = q(top - rise * 0.78); const a = q(CX - hw * 0.42); const b = q(CX + hw * 0.42);
+        return { line: [[L, e], [a, h], [b, h], [Rr, e]], fill: `M${L} ${e} L${a} ${h} L${b} ${h} L${Rr} ${e}Z`, hips: [[a, h, q(L + 14), e], [b, h, q(Rr - 14), e]] }; }
+      case 'zelt': { // pyramid roof
+        const p = q(top - rise * 1.05);
+        return { line: [[L, e], [CX, p], [Rr, e]], fill: `M${L} ${e} L${CX} ${p} L${Rr} ${e}Z`, hips: [[CX, p, CX, e]], half: `M${L} ${e} L${CX} ${p} L${CX} ${e}Z` }; }
+      case 'mansarde': { // steep lower part with dormers, flat upper part
+        const m = q(top - rise * 0.55); const p = q(top - rise * 0.85);
+        return { line: [[x0 - 6, e], [x0 + 5, m], [x0 + 22, p], [x1 - 22, p], [x1 - 5, m], [x1 + 6, e]], fill: `M${x0 - 6} ${e} L${x0 + 5} ${m} L${x0 + 22} ${p} L${x1 - 22} ${p} L${x1 - 5} ${m} L${x1 + 6} ${e}Z`, upper: `M${x0 + 5} ${m} L${x0 + 22} ${p} L${x1 - 22} ${p} L${x1 - 5} ${m}Z`, dormers: [q(x0 + hw * 0.5 - 7), q(x1 - hw * 0.5 - 7)], dy: q(m + 2) }; }
+      case 'pult': { // shed roof: high on the left, low on the right
+        const hi = q(top - rise * 0.8);
+        return { line: [[x0 - 6, q(hi - 2)], [Rr, e]], wall: `M${x0} ${top} V${hi} L${x1} ${q(top + 2)} V${top}Z`, stroke: 1 }; }
+      case 'flach': // flat roof with a parapet
+        return { line: [[x0 - 4, top - 5], [x1 + 4, top - 5]], parapet: [x0 - 4, top - 5, x1 - x0 + 8, 6] };
+      case 'tonne': { // barrel roof: one round arch
+        const k = top - rise * 1.1; const pts = []; for (let i = 0; i <= 8; i++) { const t = i / 8; pts.push([q((1 - t) ** 2 * L + 2 * t * (1 - t) * CX + t * t * Rr), q((1 - t) ** 2 * e + 2 * t * (1 - t) * k + t * t * e)]); }
+        return { line: pts, wall: `M${x0} ${top} Q${CX} ${q(k + 4)} ${x1} ${top}Z`, arc: `M${L} ${e} Q${CX} ${q(k)} ${Rr} ${e}`, stroke: 1 }; }
+      default: // gable to the front: today's roof
+        return { line: [[L, e], [CX, top - rise - 2], [Rr, e]], wall: `M${x0} ${top} L${CX} ${top - rise} L${x1} ${top}Z`, stroke: 1 };
+    }
+  };
 
   // all measures of one house in drawing coordinates – the only place where the shape is decided
   const shape = (cfg) => {
-    const c = clean(cfg);
-    const x0 = CX - W / 2; const x1 = CX + W / 2; const top = GROUND - FLOORS * FLOOR;
+    const c = clean(cfg); const W = WIDTH[c.width]; const nf = Number(c.floors);
+    const x0 = CX - W / 2; const x1 = CX + W / 2; const top = GROUND - nf * FLOOR;
     const rise = W * 2 / 7; // gable height: 32 on a 112 wide house
+    const R = roofOf(c.roofform, x0, x1, top, rise);
+    const chx = x1 - 24; const chy = Math.max(-32, Math.round(yAt(R.line, chx + 4.5) - 18)); // -32: the top edge of the header picture
     const annex = (kind, side) => (kind === 'none' ? null : { kind, side, x0: side < 0 ? x0 - 48 : x1, x1: side < 0 ? x0 : x1 + 48,
       top: { garage: 55, carport: 63, huette: 70, winter: 63, turm: 4, velo: 71, pergola: 66 }[kind] });
     return {
-      c, x0, x1, top, peak: top - rise,
-      roofLine: [[x0 - 8, top + 4], [CX, top - rise - 2], [x1 + 8, top + 4]],
-      chimney: { x: x1 - 24, y: 10, w: 9, h: 20 },
+      c, x0, x1, top, nf, W, peak: top - rise, roof: R,
+      roofLine: R.line,
+      chimney: c.chimney === 'ja' ? { x: chx, y: chy, w: 9, h: 20 } : null,
       annexes: [annex(c.left, -1), annex(c.right, 1)].filter(Boolean),
       garage: c.left === 'garage' ? { x0: x0 - 48, x1: x0, top: 68, roof: 66, rail: 55 } : null,
       pool: { x1: 872, x2: 1040, y1: 102, y2: 113, tile: [864, 99, 1048, 117] },
@@ -116,11 +169,15 @@
     if (SHUT[c.shutters]) s += `<rect x="${x - 6}" y="${y}" width="4.5" height="16" fill="${SHUT[c.shutters]}"/><rect x="${x + 29.5}" y="${y}" width="4.5" height="16" fill="${SHUT[c.shutters]}"/>`;
     return s;
   };
-  const facade = (c, x0, x1, top, night) => {
+  const facade = (c, x0, x1, top, night, nf) => {
     const w = x1 - x0;
     if (c.facade === 'holz') return [...Array(Math.floor(w / 5))].map((_, i) => `<path d="M${x0 + 3 + i * 5} ${top} V${GROUND}" stroke="#000" stroke-opacity=".13" stroke-width="1"/>`).join('');
     if (c.facade === 'klinker') { let g = ''; for (let y = top + 3; y < GROUND; y += 4) { g += `<path d="M${x0} ${y} H${x1}" stroke="#7a2a1e" stroke-opacity=".28" stroke-width=".6"/>`; for (let x = x0 + (((y - top) / 4) % 2 ? 4 : 0); x < x1; x += 8) g += `<path d="M${x} ${y} v4" stroke="#7a2a1e" stroke-opacity=".28" stroke-width=".6"/>`; } return g; }
-    if (c.facade === 'fachwerk') { const b = night ? '#3a2618' : '#5a3a22'; let g = `<path d="M${x0} ${top + 1} H${x1} M${x0} 69 H${x1}" stroke="${b}" stroke-width="2.4"/>`; for (let i = 0; i <= 4; i++) { const x = x0 + w * i / 4; g += `<path d="M${x} ${top} V69" stroke="${b}" stroke-width="2.4"/>`; if (i < 4) g += `<path d="M${x} 69 L${x + w / 4} ${top}" stroke="${b}" stroke-width="1.8"/>`; } return g; }
+    if (c.facade === 'fachwerk') { // timber frame on every upper floor
+      const b = night ? '#3a2618' : '#5a3a22'; if ((nf || 2) < 2) return `<path d="M${x0} ${top + 1} H${x1}" stroke="${b}" stroke-width="2.4"/>`;
+      let g = `<path d="M${x0} ${top + 1} H${x1}${[...Array((nf || 2) - 1)].map((_, k) => ` M${x0} ${GROUND - (k + 1) * FLOOR} H${x1}`).join('')}" stroke="${b}" stroke-width="2.4"/>`;
+      for (let k = 1; k < (nf || 2); k++) { const yb = GROUND - k * FLOOR; const yt = yb - FLOOR; for (let i = 0; i <= 4; i++) { const x = x0 + w * i / 4; g += `<path d="M${x} ${yt} V${yb}" stroke="${b}" stroke-width="2.4"/>`; if (i < 4) g += `<path d="M${x} ${yb} L${x + w / 4} ${yt}" stroke="${b}" stroke-width="1.8"/>`; } }
+      return g; }
     if (c.facade === 'sockel') return `<rect x="${x0}" y="86" width="${w}" height="12" fill="${night ? '#5d6168' : '#9a9ea6'}"/><path d="M${x0} 92 H${x1}" stroke="#80858d" stroke-width=".8"/>`;
     return '';
   };
@@ -154,25 +211,46 @@
       if (cold) g += icicles(G.x0 - 2, G.x1 + 2, G.roof + 3);
     }
     S.annexes.forEach((A) => { if (!(A.side < 0 && G)) g += annexS(o, A, wall, roof); });
-    // house: tall body, gable to the front
-    const [rl, rp, rr] = S.roofLine;
+    // house: tall body, roof in the chosen form (today: gable to the front)
+    const Rf = S.roof; const today = todayBody(c); const ln = Rf.line; const rl = ln[0]; const rr = ln[ln.length - 1];
     g += `<rect x="${x0}" y="${top}" width="${w}" height="${GROUND - top}" fill="${wall}"/>`;
-    g += `<rect x="${S.chimney.x}" y="${S.chimney.y}" width="${S.chimney.w}" height="${S.chimney.h}" fill="#8a3b2b"/>` + smoke(o, S.chimney.x + 4, S.chimney.y - 2);
-    g += `<path d="M${x0} ${top} L${CX} ${S.peak} L${x1} ${top}Z" fill="${wall}"/>`;
-    g += facade(c, x0, x1, top, o.night);
-    g += `<path d="M${rl[0]} ${rl[1]} L${rp[0]} ${rp[1]} L${rr[0]} ${rr[1]}" fill="none" stroke="${roof}" stroke-width="7" stroke-linejoin="round"/>`;
-    if (o.snow) g += `<path d="M${rl[0] - 2} ${rl[1] - 3} L${rp[0]} ${rp[1] - 3} L${rr[0] + 2} ${rr[1] - 3}" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>`;
-    if (cold) {
-      g += '<g>' + Array.from({ length: 7 }, (_, i) => { const x = rl[0] + 4 + i * 9.5; const y = rl[1] - (x - rl[0]) * 0.59; const l = 3 + (i % 3) * 2; return `<path d="M${x - 1.4} ${y} L${x} ${y + l} L${x + 1.4} ${y}Z" fill="#e8f7ff"/>`; }).join('')
-        + Array.from({ length: 7 }, (_, i) => { const x = rp[0] + 4 + i * 9.5; const y = rp[1] + (x - rp[0]) * 0.59; const l = 3 + (i % 3) * 2; return `<path d="M${x - 1.4} ${y + 4} L${x} ${y + 4 + l} L${x + 1.4} ${y + 4}Z" fill="#e8f7ff"/>`; }).join('') + '</g>';
+    if (S.chimney) g += `<rect x="${S.chimney.x}" y="${S.chimney.y}" width="${S.chimney.w}" height="${S.chimney.h}" fill="#8a3b2b"/>` + smoke(o, S.chimney.x + 4, S.chimney.y - 2);
+    if (Rf.wall) g += `<path d="${Rf.wall}" fill="${wall}"/>`;
+    g += facade(c, x0, x1, top, o.night, S.nf);
+    const pts = (P, dx, dy) => P.map(([x, y], i) => `${i ? 'L' : 'M'}${x + (i === 0 ? -dx : i === P.length - 1 ? dx : 0)} ${y + dy}`).join(' ');
+    if (Rf.fill) {
+      g += `<path d="${Rf.fill}" fill="${roof}"/>`;
+      if (Rf.half) g += `<path d="${Rf.half}" fill="#000" opacity=".12"/>`;
+      if (Rf.upper) g += `<path d="${Rf.upper}" fill="#000" opacity=".14"/>`;
+      (Rf.hips || []).forEach(([a, b, cx2, d]) => { g += `<path d="M${a} ${b} L${cx2} ${d}" stroke="#000" stroke-opacity=".2" stroke-width="1.2"/>`; });
+      g += `<path d="${pts(ln, 0, 0)}" fill="none" stroke="${dark(ROOF[c.roof], o.night ? 0.45 : 0.75)}" stroke-width="2" stroke-linejoin="round"/>`;
+      (Rf.dormers || []).forEach((dx) => { g += `<path d="M${dx - 2} ${Rf.dy + 1} L${dx + 7} ${Rf.dy - 6} L${dx + 16} ${Rf.dy + 1}Z" fill="${roof}"/><rect x="${dx}" y="${Rf.dy}" width="14" height="10" fill="${wall}"/><rect x="${dx + 2.5}" y="${Rf.dy + 2}" width="9" height="7" fill="${o.night && !late ? '#FFD86B' : glass}" stroke="#fff" stroke-width="1"/>`; });
     }
-    // upper floor: smaller window left, wider window right; ground floor glass front
-    const wy = top + 6; const wa = x0 + 16; const wb = x1 - 44;
-    g += win(c, wa, wy, glass) + win(c, wb, wy, glass);
+    if (Rf.parapet) { const [px, py, pw, ph] = Rf.parapet; g += `<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="${roof}"/><rect x="${px}" y="${py + ph - 1.4}" width="${pw}" height="1.4" fill="#000" opacity=".18"/>`; }
+    if (Rf.stroke) g += Rf.arc ? `<path d="${Rf.arc}" fill="none" stroke="${roof}" stroke-width="7" stroke-linecap="round"/>`
+      : today ? `<path d="M${rl[0]} ${rl[1]} L${ln[1][0]} ${ln[1][1]} L${rr[0]} ${rr[1]}" fill="none" stroke="${roof}" stroke-width="7" stroke-linejoin="round"/>`
+        : `<path d="${pts(ln, 0, 0)}" fill="none" stroke="${roof}" stroke-width="7" stroke-linejoin="round"/>`;
+    if (o.snow) g += Rf.parapet ? `<rect x="${Rf.parapet[0] - 1}" y="${Rf.parapet[1] - 2.5}" width="${Rf.parapet[2] + 2}" height="3" rx="1.4" fill="#fff"/>`
+      : `<path d="${pts(ln, 2, -3)}" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>`;
+    if (cold) {
+      if (today) {
+        const rp = ln[1];
+        g += '<g>' + Array.from({ length: 7 }, (_, i) => { const x = rl[0] + 4 + i * 9.5; const y = rl[1] - (x - rl[0]) * 0.59; const l = 3 + (i % 3) * 2; return `<path d="M${x - 1.4} ${y} L${x} ${y + l} L${x + 1.4} ${y}Z" fill="#e8f7ff"/>`; }).join('')
+          + Array.from({ length: 7 }, (_, i) => { const x = rp[0] + 4 + i * 9.5; const y = rp[1] + (x - rp[0]) * 0.59; const l = 3 + (i % 3) * 2; return `<path d="M${x - 1.4} ${y + 4} L${x} ${y + 4 + l} L${x + 1.4} ${y + 4}Z" fill="#e8f7ff"/>`; }).join('') + '</g>';
+      } else {
+        let k = 0; g += '<g>';
+        for (let i = 0; i < ln.length - 1; i++) { const a = ln[i]; const b = ln[i + 1]; for (let x = a[0] + 4; x < b[0] - 2; x += 9.5) { const y = q(a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]) + 3); const l = 3 + (k++ % 3) * 2; g += `<path d="M${q(x - 1.4)} ${y} L${q(x)} ${q(y + l)} L${q(x + 1.4)} ${y}Z" fill="#e8f7ff"/>`; } }
+        g += '</g>';
+      }
+    }
+    // upper floors: smaller window left, wider window right on every floor; ground floor glass front
+    const wa = x0 + 16; const wb = x1 - 44;
+    for (let f = 1; f < S.nf; f++) { const wy = GROUND - (f + 1) * FLOOR + 6; g += win(c, wa, wy, glass) + win(c, wb, wy, glass); }
     // ground floor: either every pane is lit or none (lit in the evening, dark late at night)
     const low = o.night && !late ? '#FFD86B' : glass;
-    g += `<rect x="${x0 + 10}" y="76" width="38" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/><rect x="${x0 + 54}" y="76" width="22" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/><rect x="${x0 + 82}" y="76" width="${x1 - 6 - (x0 + 82)}" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/>`;
-    if (o.night) g += on(wa + 1, wy + 1, 26, 14, 19, 3) + on(wb + 1, wy + 1, 26, 14, 27, 14);
+    const kw = (w - 16) / 96; const p1 = q(38 * kw); const p2 = q(22 * kw); const s2 = q(x0 + 10 + p1 + 6); const s3 = q(s2 + p2 + 6);
+    g += `<rect x="${x0 + 10}" y="76" width="${p1}" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/><rect x="${s2}" y="76" width="${p2}" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/><rect x="${s3}" y="76" width="${q(x1 - 6 - s3)}" height="22" fill="${low}" stroke="#fff" stroke-width="1.5"/>`;
+    if (o.night) for (let f = 1; f < S.nf; f++) { const wy = GROUND - (f + 1) * FLOOR + 6; g += on(wa + 1, wy + 1, 26, 14, 19 + (f - 1) * 4, 3 + (f - 1) * 7) + on(wb + 1, wy + 1, 26, 14, 27 - (f - 1) * 5, 14 - (f - 1) * 4); }
     // pergola: roof bar and posts only, table silhouette
     g += `<rect x="${x0 + 2}" y="69" width="${w - 4}" height="5" fill="#4a5058"/><rect x="${x0 + 3}" y="69" width="3" height="29" fill="#4a5058"/><rect x="${x1 - 6}" y="69" width="3" height="29" fill="#4a5058"/><path d="M${CX - 12} 90 h22 M${CX - 8} 90 v8 M${CX + 6} 90 v8" stroke="#3a3f46" stroke-width="2"/>`;
     if (o.snow) g += `<rect x="${x0 + 1}" y="67" width="${w - 2}" height="2.5" rx="1.2" fill="#fff"/>`;
@@ -200,16 +278,18 @@
   const r1 = (n) => Math.round(n * 10) / 10;
   const geo = (cfg) => {
     const S = shape(cfg || CUR); const c = S.c; const H = toHeader;
-    const [hx0] = H(S.x0, 0); const [hx1] = H(S.x1, 0); const peak = H(CX, S.roofLine[1][1])[1];
+    const [hx0] = H(S.x0, 0); const [hx1] = H(S.x1, 0); const ln = S.roofLine;
+    // peak: the roof right above the door (the pets' roof perch); high: the highest point of the roof
+    const peak = H(CX, yAt(ln, CX))[1]; const high = H(CX, Math.min(...ln.map((p) => p[1])))[1];
     const g = {
       ground: 99,
       roofLine: S.roofLine.map(([x, y]) => H(x, y)),
       peak: [640, peak],
-      chimney: H(S.chimney.x + S.chimney.w / 2, S.chimney.y),
+      chimney: S.chimney ? H(S.chimney.x + S.chimney.w / 2, S.chimney.y) : null,
       door: [640, 99],
-      body: [H(S.roofLine[0][0], 0)[0], Math.round(peak + 2.75), H(S.roofLine[2][0], 0)[0], 99],
+      body: [H(ln[0][0], 0)[0], Math.round(high + 2.75), H(ln[ln.length - 1][0], 0)[0], 99],
       // pets: fliers above the roof, hopping onto the roof and the garage, swimming in the pool or the pond
-      roofAir: [Math.round((hx0 + hx1) / 2 - (hx1 - hx0) / 2 + 2), Math.max(0, Math.round(peak) - 23), Math.round((hx0 + hx1) / 2 + (hx1 - hx0) / 2 - 2), Math.round(peak + 2.75)],
+      roofAir: [Math.round((hx0 + hx1) / 2 - (hx1 - hx0) / 2 + 2), Math.max(0, Math.round(high) - 23), Math.round((hx0 + hx1) / 2 + (hx1 - hx0) / 2 - 2), Math.round(high + 2.75)],
       roofPerch: { x: 640, y: 99, z: Math.round(99 - peak) },
       walls: [],
     };
@@ -246,7 +326,7 @@
     return g;
   };
 
-  window.FPHOUSE = { DEFAULT, OPTIONS, WALL, ROOF, SHUT, clean, use, current, draw, drawPond, geo, features, toHeader, shape };
+  window.FPHOUSE = { DEFAULT, OPTIONS, PRESETS, WALL, ROOF, SHUT, clean, use, current, draw, drawPond, geo, features, toHeader, shape };
 })();
 
 // Ämtli-Tierchen v4: one shared pattern for all animals (front view like the avatars, big head, slim body).

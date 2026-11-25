@@ -196,9 +196,14 @@ HOUSE_OPTIONS = {
     "right": ("none", "garage", "carport", "huette", "winter", "turm", "velo", "pergola"),
     "water": ("pool", "rund", "jacuzzi", "plansch", "none"),
     "pond": ("auto",),
+    "width": ("normal", "schmal", "breit"),
+    "floors": ("2", "1", "3"),
+    "roofform": ("sattel", "krueppel", "walm", "zelt", "mansarde", "pult", "flach", "tonne"),
+    "chimney": ("ja", "nein"),
 }
 HOUSE_DEFAULT = {"wall": "creme", "roof": "ziegel", "windows": "steg", "shutters": "none", "facade": "glatt",
-                 "left": "garage", "right": "none", "water": "pool", "pond": "auto"}
+                 "left": "garage", "right": "none", "water": "pool", "pond": "auto",
+                 "width": "normal", "floors": "2", "roofform": "sattel", "chimney": "ja"}
 
 
 def clean_house(raw) -> dict:
