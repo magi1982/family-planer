@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.20.0 – 2026-11-25
+House builder, step 1 of 4 – nothing looks different yet.
+### Changed
+- **The house in the header is built from parts:** a new house module draws today's house (garage, pergola, pool) and knows where everything is – roof line, chimney, door, garage roof, pool. It draws exactly what was drawn before (checked for 864 situations and 3,456 complete header scenes).
+- **Pets follow the house:** their walking, swimming and perching places in the header (roof, garage roof, pool, house walls) are now computed from the house instead of fixed numbers – same places as before, ready for other houses.
+### Tests
+- New checks: the house markup must stay identical to today's, the pets' places must stay identical, and every house must keep the rules (no walking into walls or water, the roof perch sits on the roof, swimming only inside the pool).
+
 ## 0.19.13 – 2026-11-24
 ### Security
 - **Code scanning (CodeQL) findings fixed:** the avatar picker now escapes its button value and replaces every separator in the label key (not only the first); a leftover no-op string replacement in the pet drawing was removed. A test keeps both patterns out of the frontend.

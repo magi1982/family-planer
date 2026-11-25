@@ -969,7 +969,7 @@ Beispiel: 1 Ämtli erledigt = 30 → 18:47 zweites dazu → 15 (−15) → 18:48
 11. Tierchen: Entwicklungsbaum zeigt alle möglichen Enden als Silhouetten statt einer festen Endform.
 12. Tierchen: „Jetzt benutzen“-Leiste beim aktuellen Tierchen (= #73).
 
-## #75 Haus-Baukasten für die Kopfzeile (Entwurf 25.11., Galerie, Entscheid offen)
+## #75 Haus-Baukasten für die Kopfzeile (Entwurf 25.11.; „mach es“ 25.11.; Release 1 = 0.20.0 erledigt)
 Hausform (Giebel/Flachdach/Chalet/Bungalow/Stadthaus), Wand- und Dachfarbe, Anbau (Garage/Carport/Gartenhaus/keiner), Wasser (Pool/runder Pool/Jacuzzi/kein Pool), Teich in der Kopfzeile immer da (Tierchen schwimmen dort ohne Pool, nachts, im Winter gefroren); Animationen über Ankerpunkte je Haus (Dach, Kamin, Tür, Wasser, Teich); Bau in 4 Releases, Release 1 unsichtbar (nur Ankerpunkte). Runde 2 (25.11.): alles einzeln wählbar (Breite, Stöcke, 8 Dachformen, Fassade, Fenster, Läden, Balkon, Kamin, Gauben, Solar, Anbau links+rechts je 8, 9 Wasserformen + Extras, Teich-Extras, Garten); Pflicht: heutiges Haus exakt nachbaubar – Pixel-Test (0 Pixel Unterschied Tag/Abend/Nacht/Winter) als fester Test.
 - Pflicht Tierchen: Bereiche (Wiese, Dachlinie, Sperrzone Haus/Anbauten, Pool, Teich, Verstecke) aus denselben Bausteinen berechnen statt einzeichnen; Regeln: schwimmen nur in offenem Wasser, landen nur auf der Dachlinie, nie in Wand/Anbau/Stamm, Verstecke nie im Wasser.
 - Pflicht-Test: alle 629 856 Formen (Breite × Stöcke × Dachform × Anbau links/rechts × Wasser × Teich) rechnerisch prüfen + einige tausend Zufallshäuser mit Garten und allen Animationen im Browser; Release 1: berechnete Bereiche für das heutige Haus, Tierchen verhalten sich genau wie heute.

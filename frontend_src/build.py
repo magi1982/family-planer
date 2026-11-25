@@ -101,6 +101,7 @@ PETS_LOADER = (f"window.fpLoadPets = () => window.__fpPetsP || (window.__fpPetsP
 body = "\n".join([
     "// Family Planer cards – built by frontend_src/build.py, do not edit",
     PETS_LOADER,
+    (src / "house.js").read_text(),
     (src / "season.js").read_text(),
     (src / "taps.js").read_text(),
     (src / "coin.js").read_text(),
@@ -128,7 +129,7 @@ for old in out.parent.glob("*.js"):
         old.unlink()
 out.write_text(body)
 pets_body = "\n".join(["// Family Planer Tierchen graphics – built by frontend_src/build.py, do not edit"]
-                       + [(src / "pets" / f"{n}.js").read_text() for n in PET_LIBS]
+                       + [(src / "house.js").read_text()] + [(src / "pets" / f"{n}.js").read_text() for n in PET_LIBS]
                        + ["window.FPPETS = { P4: window.P4, M: window.FPMOTION, HEADER: window.FPHEADER, WORLD: window.FPWORLD,"
                           " TREE: window.FPTREE, ICO: window.FPICO, CARE: window.FPCARE, WHEEL: window.FPWHEEL, CSS: window.FPLIBCSS };"])
 pets_out.write_text(pets_body)

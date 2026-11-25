@@ -3,6 +3,7 @@
 const path = require('path');
 global.window = { matchMedia: () => ({ matches: false }) };
 global.localStorage = { getItem: () => null, setItem: () => {} };
+require(path.join(__dirname, '../../frontend_src/house.js'));
 require(path.join(__dirname, '../../frontend_src/season.js'));
 require(path.join(__dirname, '../../frontend_src/avatar.js'));
 require(path.join(__dirname, '../../frontend_src/avseason.js'));
