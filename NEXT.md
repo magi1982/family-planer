@@ -968,3 +968,6 @@ Beispiel: 1 Ämtli erledigt = 30 → 18:47 zweites dazu → 15 (−15) → 18:48
 10. Ämtliplan: Punkte-Vorschau pro Kind + Warnung, wenn ein Ämtli > 50 % des Tages ausmacht.
 11. Tierchen: Entwicklungsbaum zeigt alle möglichen Enden als Silhouetten statt einer festen Endform.
 12. Tierchen: „Jetzt benutzen“-Leiste beim aktuellen Tierchen (= #73).
+
+## #75 Haus-Baukasten für die Kopfzeile (Entwurf 25.11., Galerie, Entscheid offen)
+Hausform (Giebel/Flachdach/Chalet/Bungalow/Stadthaus), Wand- und Dachfarbe, Anbau (Garage/Carport/Gartenhaus/keiner), Wasser (Pool/runder Pool/Jacuzzi/kein Pool), Teich in der Kopfzeile immer da (Tierchen schwimmen dort ohne Pool, nachts, im Winter gefroren); Animationen über Ankerpunkte je Haus (Dach, Kamin, Tür, Wasser, Teich); Bau in 4 Releases, Release 1 unsichtbar (nur Ankerpunkte).
