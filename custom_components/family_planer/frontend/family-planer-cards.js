@@ -7994,7 +7994,9 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     return new Promise((resolve, reject) => {
       const el = document.createElement('div');
       const cs = ctx.host ? getComputedStyle(ctx.host) : null;
-      el.style.cssText = 'position:fixed;inset:0;z-index:9999;' + (cs ? VARS.map((v) => `${v}:${cs.getPropertyValue(v)}`).join(';') : '');
+      // colours of the calling card (inline theme or inherited); empty values are skipped so the defaults apply
+      const val = (v) => ((cs && cs.getPropertyValue(v).trim()) || (ctx.host && ctx.host.style ? ctx.host.style.getPropertyValue(v).trim() : ''));
+      el.style.cssText = 'position:fixed;inset:0;z-index:9999;' + VARS.map((v) => [v, val(v)]).filter(([, x]) => x).map(([v, x]) => `${v}:${x}`).join(';');
       const root = el.attachShadow({ mode: 'open' });
       const vals = []; let step = 0; let pin = ''; let msg = firstMsg || ''; let err = !!firstMsg;
       const close = () => { el.remove(); document.removeEventListener('keydown', onKey, true); };
@@ -9152,7 +9154,9 @@ customElements.whenDefined('fp-week-inner-en').then(() => {
     // changes need the parent PIN since 0.9.0 (asks once, then a 10-minute unlock)
     pws(type, data) {
       const lang = String((this.snap && this.snap.settings && this.snap.settings.language) || document.documentElement.lang || 'de').startsWith('en') ? 'en' : 'de';
-      return window.FPPIN ? window.FPPIN.call(this, type, data, { lang, host: document.querySelector('home-assistant') || document.body }) : this.ws(type, data);
+      // the keypad takes its colours from the host – a themed stand-in, so it looks the same as from inside a card
+      let host = document.body; if (this.snap) { host = document.createElement('div'); applyTheme(host, this.snap.theme, this.snap.style); }
+      return window.FPPIN ? window.FPPIN.call(this, type, data, { lang, host }) : this.ws(type, data);
     }
     person(id) { return ((this.snap && this.snap.persons) || []).find((p) => p.id === id); }
     personByName(n) { return ((this.snap && this.snap.persons) || []).find((p) => p.name === n); }

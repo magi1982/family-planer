@@ -47,7 +47,9 @@
     // changes need the parent PIN since 0.9.0 (asks once, then a 10-minute unlock)
     pws(type, data) {
       const lang = String((this.snap && this.snap.settings && this.snap.settings.language) || document.documentElement.lang || 'de').startsWith('en') ? 'en' : 'de';
-      return window.FPPIN ? window.FPPIN.call(this, type, data, { lang, host: document.querySelector('home-assistant') || document.body }) : this.ws(type, data);
+      // the keypad takes its colours from the host – a themed stand-in, so it looks the same as from inside a card
+      let host = document.body; if (this.snap) { host = document.createElement('div'); applyTheme(host, this.snap.theme, this.snap.style); }
+      return window.FPPIN ? window.FPPIN.call(this, type, data, { lang, host }) : this.ws(type, data);
     }
     person(id) { return ((this.snap && this.snap.persons) || []).find((p) => p.id === id); }
     personByName(n) { return ((this.snap && this.snap.persons) || []).find((p) => p.name === n); }

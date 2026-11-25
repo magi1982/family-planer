@@ -7,6 +7,10 @@
 ### Changed
 - **Pets follow the house:** their walking, swimming and perching places in the header are computed from the chosen house (roof line, garage roof, walls, pool or pond) instead of fixed numbers – with today's house they are exactly the same as before.
 - **Tap stories follow the house:** stories that need the pool (water slide, fountains, frog concert, kraken, zero gravity) only play when there is a pool; the light house (it decorates the garage) only with the garage. With today's house every tap plays exactly what it played before.
+### Fixed
+- The parent PIN keypad looked different when opened from lists, chores or the header (no theme colours); it now always uses the planner's theme.
+- Pets walk around the small garden pond instead of across it.
+
 ### Tests
 - Today's house: identical markup in 864 situations and 3,456 complete header scenes, identical pet places, identical tap choices in 25,920 situations.
 - All 320 house shapes (annex left × right × water): no walking into walls or water, the roof perch sits on the roof line, there is always water to swim in and the pets swim in the right one, free spots, hiding places and the race track never in water; every colour, window, shutter and facade renders cleanly. Settings: only known parts are stored.

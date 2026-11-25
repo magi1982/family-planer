@@ -23,7 +23,9 @@
     return new Promise((resolve, reject) => {
       const el = document.createElement('div');
       const cs = ctx.host ? getComputedStyle(ctx.host) : null;
-      el.style.cssText = 'position:fixed;inset:0;z-index:9999;' + (cs ? VARS.map((v) => `${v}:${cs.getPropertyValue(v)}`).join(';') : '');
+      // colours of the calling card (inline theme or inherited); empty values are skipped so the defaults apply
+      const val = (v) => ((cs && cs.getPropertyValue(v).trim()) || (ctx.host && ctx.host.style ? ctx.host.style.getPropertyValue(v).trim() : ''));
+      el.style.cssText = 'position:fixed;inset:0;z-index:9999;' + VARS.map((v) => [v, val(v)]).filter(([, x]) => x).map(([v, x]) => `${v}:${x}`).join(';');
       const root = el.attachShadow({ mode: 'open' });
       const vals = []; let step = 0; let pin = ''; let msg = firstMsg || ''; let err = !!firstMsg;
       const close = () => { el.remove(); document.removeEventListener('keydown', onKey, true); };
