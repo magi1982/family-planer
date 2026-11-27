@@ -597,8 +597,11 @@ async def ws_person_save(hass: HomeAssistant, connection: websocket_api.ActiveCo
         if pid not in planner.data["persons"]:
             connection.send_error(msg["id"], websocket_api.ERR_NOT_FOUND, "Unknown person")
             return
+        had_school = pid in planner.school_persons()
         reload = name != planner.data["persons"][pid]["name"]
         await planner.async_update_person(pid, patch)
+        # school entities exist only for persons with a timetable: added or removed -> reload the entry
+        reload = reload or had_school != (pid in planner.school_persons())
     else:
         pid = await planner.async_add_person(name)
         await planner.async_update_person(pid, patch)

@@ -39,6 +39,7 @@ from . import (
     pets,
     rewards,
     schedule,
+    school,
     seasons,
     settings_spec,
     sonder,
@@ -64,6 +65,7 @@ from .const import (
     MAX_IMAGE_BYTES,
     MODULE_LISTS,
     MODULE_WEEK,
+    SIGNAL_SCHOOL,
     SIGNAL_UPDATE,
     STORAGE_VERSION,
 )
@@ -149,6 +151,7 @@ class FamilyPlanner:
         self.busy: dict[str, list[list]] = {}  # today's timed events per person (suggestions)
         self._wx: dict[str, Any] = {}  # weather condition and today's maximum (special chores)
         self._ferien_day: str | None = None
+        self.school_upcoming: dict[str, list[dict]] = {}  # next days of school blocks per person (entities)
 
     # ------------------------------------------------------------------ lifecycle
     async def async_load(self) -> None:
@@ -566,6 +569,41 @@ class FamilyPlanner:
             self._changed()
         elif changed:
             self._changed(save=False)
+        await self.async_refresh_school()
+
+    # ------------------------------------------------------------------ school entities
+    def school_persons(self) -> list[str]:
+        """Persons with a timetable (school calendar or fixed times)."""
+        out = []
+        for pid, p in self.data["persons"].items():
+            sc = p.get("school") or {}
+            if sc.get("calendar") or sc.get("times"):
+                out.append(pid)
+        return out
+
+    def school_entities(self) -> dict[str, bool]:
+        st = self.settings
+        return {"calendar": bool(st.get("school_calendar", True)), "sensors": bool(st.get("school_sensors", True))}
+
+    async def async_school_blocks(self, person_id: str, start: datetime, end: datetime) -> list[dict]:
+        """School blocks of one person between start and end (lessons, leave, home)."""
+        p = self.data["persons"].get(person_id) or {}
+        sc = clean_school(p.get("school"))
+        tz = dt_util.get_default_time_zone()
+        end = min(end, start + timedelta(days=school.MAX_DAYS))
+        events = await self._events(sc["calendar"], start - timedelta(days=1), end + timedelta(days=1)) if sc["calendar"] else []
+        label = "Schule" if self.lang == "de" else "School"
+        return school.range_blocks(sc, events, start, end, tz, self.away.get(person_id),
+                                   validate.integer(self.settings.get("school_gap"), 0, 240, 0), label)
+
+    async def async_refresh_school(self, person_id: str | None = None) -> None:
+        """Next 8 days of school blocks for the entities (calendar state, leave / home sensors)."""
+        if not self.module_on(MODULE_WEEK) or self.closing:
+            return
+        start = dt_util.start_of_local_day()
+        for pid in [person_id] if person_id else self.school_persons():
+            self.school_upcoming[pid] = await self.async_school_blocks(pid, start, start + timedelta(days=8))
+        async_dispatcher_send(self.hass, SIGNAL_SCHOOL.format(self.entry.entry_id))
 
     async def async_vacation_decide(self, key: str, decision: str | None, family: bool = False,
                                     persons: list[str] | None = None, label: str | None = None) -> None:
@@ -966,6 +1004,8 @@ class FamilyPlanner:
             await self._delete_image(old_image)
         self._changed()
         await self._store.async_save(self.data)
+        if "school" in patch:
+            await self.async_refresh_school(person_id)
 
     async def async_remove_person(self, person_id: str) -> None:
         person = self.data["persons"].pop(person_id, None)
@@ -1517,6 +1557,7 @@ class FamilyPlanner:
                         "reliability_days": self.reliability_days(),
                         "school_gap": validate.integer(st.get("school_gap"), 0, 240, 0),
                         "school_window": validate.integer(st.get("school_window", 60), 0, 240, 60),
+                        "school_calendar": self.school_entities()["calendar"], "school_sensors": self.school_entities()["sensors"],
                         "hide_done": bool(st.get("hide_done", True)), "hide_past": validate.integer(st.get("hide_past", 30), 0, 240, 30),
                         "default_view": st.get("default_view") if st.get("default_view") in settings_spec.VIEWS else "today"},
             "seasons": self.season_settings(),

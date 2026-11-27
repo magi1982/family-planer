@@ -466,6 +466,11 @@
     }
   },
   "entity": {
+    "calendar": {
+      "school": {
+        "name": "Schule"
+      }
+    },
     "todo": {
       "chores": {
         "name": "Ämtli"
@@ -478,6 +483,12 @@
       "points": {
         "name": "Münzen",
         "unit_of_measurement": "Punkte"
+      },
+      "school_leave": {
+        "name": "Schule: los"
+      },
+      "school_home": {
+        "name": "Schule: zuhause"
       }
     }
   },

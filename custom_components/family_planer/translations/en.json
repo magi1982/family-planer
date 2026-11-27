@@ -466,6 +466,11 @@
     }
   },
   "entity": {
+    "calendar": {
+      "school": {
+        "name": "School"
+      }
+    },
     "todo": {
       "chores": {
         "name": "Chores"
@@ -478,6 +483,12 @@
       "points": {
         "name": "Coins",
         "unit_of_measurement": "points"
+      },
+      "school_leave": {
+        "name": "School: leave"
+      },
+      "school_home": {
+        "name": "School: home"
       }
     }
   },

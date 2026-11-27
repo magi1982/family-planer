@@ -322,10 +322,11 @@ class FamilyPlanerOptionsFlow(OptionsFlow):
                 if spans:
                     times[str(i)] = spans
             if not errors:
+                had_school = self._person_id in self._planner.school_persons()
                 await self._planner.async_update_person(self._person_id, {"school": {
                     "calendar": user_input.get("school_calendar"), "times": times,
                     "travel": int(user_input.get("travel_minutes") or 0) if user_input.get("travel") else 0}})
-                return self._done(reload=False)
+                return self._done(reload=had_school != (self._person_id in self._planner.school_persons()))
         fields: dict = {vol.Optional("school_calendar", description={"suggested_value": cur["calendar"]}): CALENDAR_SELECTOR}
         for i, d in enumerate(days, start=1):
             spans = cur["times"].get(str(i)) or []

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 DOMAIN = "family_planer"
 NAME = "Family Planer"
-VERSION = "0.21.0"
+VERSION = "0.22.0"
 STORAGE_VERSION = 1
 
 # modules (can be switched on/off; more will follow)
@@ -46,6 +46,7 @@ DEFAULT_SETTINGS = {
 LANGUAGES = ("auto", "de", "en")
 
 SIGNAL_UPDATE = f"{DOMAIN}_update_{{}}"
+SIGNAL_SCHOOL = f"{DOMAIN}_school_{{}}"  # school blocks re-read (calendar / leave-home entities)
 URL_BASE = "/family_planer_static"
 FILES_URL = "/family_planer_files"
 FILES_DIR = "family_planer"

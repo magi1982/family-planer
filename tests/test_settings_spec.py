@@ -34,6 +34,16 @@ def test_general_tidy_all_view():
     assert S.general({"hide_past": "x"}, cur)[0]["hide_past"] == 30  # bad input: the default
 
 
+def test_school_entities_default_on_and_reload_when_switched():
+    cur = {"modules": {"week": True, "lists": True}, "panel": {"enabled": True, "title": ""}, "rollover_time": "00:00"}
+    patch, flags = S.general({}, cur)
+    assert patch["school_calendar"] is True and patch["school_sensors"] is True and "reload" not in flags
+    patch, flags = S.general({"school_sensors": False}, cur)
+    assert patch["school_sensors"] is False and patch["school_calendar"] is True and "reload" in flags
+    _p, flags = S.general({"school_sensors": False}, {**cur, "school_sensors": False})
+    assert "reload" not in flags  # unchanged
+
+
 def test_general_needs_a_module():
     with pytest.raises(S.SettingsError):
         S.general({"modules": {"week": False, "lists": False}}, {"modules": {}})

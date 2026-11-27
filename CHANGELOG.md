@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.22.0 – 2026-11-27
+### Added
+- **School calendar per person:** every person with a timetable (school calendar or fixed times) gets a read-only calendar entity *School*. One event per school block (e.g. morning and afternoon with lunch at home), timed like the lessons; the description holds "leave / home" (with travel time) and every lesson with its room. No events on holidays – exactly like the planner. Works with calendar cards and calendar triggers (with offset) in automations.
+- **Sensors *School: leave* and *School: home*:** timestamp sensors with the next time a person leaves for school and is home again (attributes: start, end, number of lessons) – e.g. for a reminder 10 minutes before leaving.
+- **Settings** (*Settings → General*): switch the school calendar and the two sensors on or off (both on by default).
+### Tests
+- School blocks on the server: lunch split, own break setting, fixed times, travel time, all-day events ignored, holidays, broken calendar data, UTC events in local time, long calendar ranges capped; the new settings are stored and reload the integration only when switched.
+
 ## 0.21.0 – 2026-11-25
 ### Added
 - **House shapes in the house builder** (*Settings → House*): ten ready-made houses shown as pictures (today's gable house, bungalow, chalet, modern flat-roof house, town house, country house, shed-roof house, fairy-tale cottage, arched house, tall Swedish house) and every shape part on its own: roof shape (gable, half-hipped, hipped, pyramid, mansard with dormers, shed, flat, barrel), 1–3 floors, width (narrow, normal, wide) and chimney on or off. Snow, icicles, evening lights, timber frame and the pets follow every shape.

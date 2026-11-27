@@ -25,7 +25,7 @@ from .websocket import async_register_websocket
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[Platform] = [Platform.TODO, Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.CALENDAR, Platform.TODO, Platform.SENSOR]
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 CARDS_URL = f"{URL_BASE}/{CARDS_FILE}?v={VERSION}"
 

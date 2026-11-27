@@ -1,5 +1,10 @@
 {
   "entity": {
+    "calendar": {
+      "school": {
+        "default": "mdi:school-outline"
+      }
+    },
     "todo": {
       "chores": {
         "default": "mdi:broom"
@@ -11,6 +16,12 @@
       },
       "points": {
         "default": "mdi:star-circle-outline"
+      },
+      "school_leave": {
+        "default": "mdi:walk"
+      },
+      "school_home": {
+        "default": "mdi:home-import-outline"
       }
     }
   },

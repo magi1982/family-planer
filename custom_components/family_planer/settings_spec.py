@@ -73,6 +73,8 @@ def general(data: dict, cur: dict) -> tuple[dict, set[str]]:
         "reliability_days": validate.integer(data.get("reliability_days", cur.get("reliability_days")), 7, 90, 30),
         "school_gap": validate.integer(data.get("school_gap", cur.get("school_gap")), 0, 240, 0),
         "school_window": validate.integer(data.get("school_window", cur.get("school_window", 60)), 0, 240, 60),
+        "school_calendar": _bool(data, "school_calendar", cur.get("school_calendar", True)),
+        "school_sensors": _bool(data, "school_sensors", cur.get("school_sensors", True)),
         "hide_done": _bool(data, "hide_done", cur.get("hide_done", True)),
         "hide_past": validate.integer(data.get("hide_past", cur.get("hide_past", 30)), 0, 240, 30),
         "default_view": data.get("default_view") if data.get("default_view") in VIEWS else (cur.get("default_view") if cur.get("default_view") in VIEWS else "today"),
@@ -82,7 +84,9 @@ def general(data: dict, cur: dict) -> tuple[dict, set[str]]:
     flags = set()
     if (patch["modules"] != {m: (cur.get("modules") or {}).get(m, True) for m in MODULES}
             or patch["panel"] != {"enabled": panel.get("enabled", True), "title": panel.get("title", "")}
-            or patch["rollover_time"] != (cur.get("rollover_time") or "00:00")):
+            or patch["rollover_time"] != (cur.get("rollover_time") or "00:00")
+            or patch["school_calendar"] != bool(cur.get("school_calendar", True))
+            or patch["school_sensors"] != bool(cur.get("school_sensors", True))):
         flags.add("reload")
     if patch["rollover_time"] != (cur.get("rollover_time") or "00:00"):
         flags.add("rollover")
